@@ -1,0 +1,322 @@
+name: ci
+
+on: workflow_call
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 8.0.x
+  NODE_VERSION: 20
+  SOLUTION_PATH: ${{ github.workspace }}/Deeplex.Saverwalter.sln
+  WEBAPI_PROJECT_PATH: ${{ github.workspace }}/Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj
+  FRONTEND_DIR: Deeplex.Saverwalter.WebAPI/svelte
+
+jobs:
+  style-svelte:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: yarn install --immutable
+
+      - name: Check frontend formatting
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: yarn prettier --check .
+
+  style-dotnet:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Verify .NET formatting
+        run: dotnet format whitespace "${{ env.SOLUTION_PATH }}" --verify-no-changes --no-restore
+
+  typecheck-svelte:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Type-check frontend sources
+        run: yarn check
+
+  unit-svelte:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Run frontend unit tests
+        run: yarn vitest run --coverage
+
+      - name: Upload frontend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: Deeplex.Saverwalter.WebAPI/svelte/coverage
+          if-no-files-found: error
+
+  build-svelte:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Build frontend bundle
+        run: yarn build
+
+      - name: Upload frontend bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-bundle
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
+          if-no-files-found: error
+
+  test-dotnet:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Build solution with warnings as errors
+        run: dotnet build "${{ env.SOLUTION_PATH }}" --configuration Release --no-restore /warnaserror
+
+      - name: Run .NET test suite
+        run: >-
+          dotnet test "${{ env.SOLUTION_PATH }}"
+          --configuration Release
+          --no-build
+          --settings "${{ github.workspace }}/.runsettings"
+          --collect:"XPlat Code Coverage"
+          --logger trx
+          --results-directory artifacts/test-results/dotnet
+
+      - name: Upload .NET test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: artifacts/test-results/dotnet
+          if-no-files-found: error
+
+  publish-webapi:
+    needs: build-svelte
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Download frontend bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-bundle
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
+
+      - name: Restore WebAPI
+        run: dotnet restore "${{ env.WEBAPI_PROJECT_PATH }}"
+
+      - name: Publish WebAPI
+        run: >-
+          dotnet publish "${{ env.WEBAPI_PROJECT_PATH }}"
+          --configuration Release
+          --no-restore
+          --output artifacts/publish/webapi
+
+      - name: Upload published WebAPI
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapi-publish
+          path: artifacts/publish/webapi
+          if-no-files-found: error
+
+  e2e:
+    needs: publish-webapi
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: walter_dev_full_generic_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: yarn install --immutable
+
+      - name: Install Playwright browsers
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: yarn playwright install --with-deps chromium
+
+      - name: Download published WebAPI
+        uses: actions/download-artifact@v4
+        with:
+          name: webapi-publish
+          path: artifacts/publish/webapi
+
+      - name: Make WebAPI binary executable
+        run: chmod +x artifacts/publish/webapi/Deeplex.Saverwalter.WebAPI
+
+      - name: Run end-to-end suite
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USER: postgres
+          DATABASE_PASS: postgres
+          WALTER_E2E_PASSWORD: postgres
+          WALTER_LOG_DIR: ${{ runner.temp }}/walter-e2e
+          WALTER_PRESERVE_LOGS_ON_FAILURE: 1
+          WALTER_APP_BINARY: ${{ github.workspace }}/artifacts/publish/webapi/Deeplex.Saverwalter.WebAPI
+        run: bash ./scripts/test-full-stack.sh
+
+      - name: Upload Playwright artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            Deeplex.Saverwalter.WebAPI/svelte/playwright-report
+            Deeplex.Saverwalter.WebAPI/svelte/test-results
+          if-no-files-found: ignore
+
+      - name: Upload e2e startup logs
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-startup-logs
+          path: ${{ runner.temp }}/walter-e2e
+          if-no-files-found: ignore

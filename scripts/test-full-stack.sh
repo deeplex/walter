@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+# Run the end-to-end Playwright suite against a running backend.
+#
+# The caller is responsible for having built the frontend bundle, the backend
+# binaries (or a published binary), and installed Playwright browsers. This
+# script only:
+#   1. waits for Postgres,
+#   2. seeds the dev databases via bootstrap-dev.sh,
+#   3. starts the backend,
+#   4. runs `yarn test:e2e`.
+#
+# Backend startup mode:
+#   - if WALTER_APP_BINARY is set, that file is executed directly,
+#   - otherwise `dotnet run --no-build` is used (the WebAPI must already be built).
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -15,7 +28,7 @@ S3_BUCKET="${S3_BUCKET:-saverwalter}"
 S3_PROVIDER="${S3_PROVIDER:-http://${S3_HOST}:${S3_PORT}/${S3_BUCKET}}"
 APP_URL="${WALTER_APP_URL:-http://localhost:5254}"
 WALTER_E2E_PASSWORD="${WALTER_E2E_PASSWORD:-$DB_PASS}"
-PLAYWRIGHT_BROWSER="${PLAYWRIGHT_BROWSER:-chromium}"
+APP_BINARY="${WALTER_APP_BINARY:-}"
 STARTUP_TIMEOUT_SECONDS="${WALTER_STARTUP_TIMEOUT_SECONDS:-180}"
 LOGS_DIR="${WALTER_LOG_DIR:-}"
 PRESERVE_LOGS_ON_FAILURE="${WALTER_PRESERVE_LOGS_ON_FAILURE:-0}"
@@ -155,13 +168,13 @@ print_startup_diagnostics() {
   tail -n 80 "$BACKEND_LOG_PATH" 2>/dev/null || true
 }
 
-echo "[1/6] Waiting for Postgres at ${DB_HOST}:${DB_PORT}"
+echo "[1/4] Waiting for Postgres at ${DB_HOST}:${DB_PORT}"
 if ! wait_for_tcp "$DB_HOST" "$DB_PORT"; then
   echo "Postgres is not reachable at ${DB_HOST}:${DB_PORT}."
   exit 1
 fi
 
-echo "[2/6] Bootstrapping dev databases and frontend dependencies"
+echo "[2/4] Seeding dev databases"
 DATABASE_HOST="$DB_HOST" \
 DATABASE_PORT="$DB_PORT" \
 DATABASE_USER="$DB_USER" \
@@ -171,17 +184,6 @@ S3_PORT="$S3_PORT" \
 S3_BUCKET="$S3_BUCKET" \
 S3_PROVIDER="$S3_PROVIDER" \
   ./scripts/bootstrap-dev.sh
-
-echo "[3/6] Running .NET test suite"
-dotnet test
-
-echo "[4/6] Running frontend unit tests and building production assets"
-(
-  cd Deeplex.Saverwalter.WebAPI/svelte
-  yarn vitest run --coverage
-  yarn build
-  yarn playwright install "$PLAYWRIGHT_BROWSER"
-)
 
 APP_HOST="$(url_host "$APP_URL")"
 APP_PORT="$(url_port "$APP_URL")"
@@ -194,7 +196,7 @@ echo "Backend bind host: ${APP_BIND_HOST}"
 echo "Backend probe URL: ${APP_PROBE_URL}"
 echo "Startup logs directory: ${LOGS_DIR}"
 
-echo "[5/6] Starting backend (serves API and SPA)"
+echo "[3/4] Starting backend"
 (
   export DATABASE_HOST="$DB_HOST"
   export DATABASE_PORT="$DB_PORT"
@@ -205,8 +207,13 @@ echo "[5/6] Starting backend (serves API and SPA)"
   export S3_PROVIDER="$S3_PROVIDER"
   export ASPNETCORE_ENVIRONMENT="Development"
   export ASPNETCORE_URLS="http://${APP_BIND_HOST}:${APP_PORT}"
-  # dotnet test in step [3/6] already compiled the WebAPI project; skip rebuild.
-  dotnet run --no-build --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
+
+  if [[ -n "$APP_BINARY" ]]; then
+    cd "$(dirname "$APP_BINARY")"
+    exec "./$(basename "$APP_BINARY")"
+  else
+    exec dotnet run --no-build --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
+  fi
 ) >"$BACKEND_LOG_PATH" 2>&1 &
 backend_pid="$!"
 
@@ -230,7 +237,7 @@ if [[ "$backend_ready" != "true" ]]; then
   exit 1
 fi
 
-echo "[6/6] Running Playwright end-to-end suite"
+echo "[4/4] Running Playwright end-to-end suite"
 (
   cd Deeplex.Saverwalter.WebAPI/svelte
   PLAYWRIGHT_BASE_URL="$APP_URL" \

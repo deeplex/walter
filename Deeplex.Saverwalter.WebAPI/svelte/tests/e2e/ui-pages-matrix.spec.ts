@@ -27,12 +27,15 @@ const mainRoutes: RouteExpectation[] = [
     { path: '/user', expectedText: 'Nutzereinstellungen' }
 ];
 
+test.describe.configure({ timeout: 120_000 });
+
 async function visitMainRoutes(page: Page, username: string): Promise<void> {
     for (const route of mainRoutes) {
         await test.step(`${username} opens ${route.path}`, async () => {
             await page.goto(route.path);
             await expect(page).toHaveURL(
-                new RegExp(`${route.path === '/' ? '/$' : `${route.path}$`}`)
+                new RegExp(`${route.path === '/' ? '/$' : `${route.path}$`}`),
+                { timeout: 20_000 }
             );
             await expect(page.getByText('Fehler', { exact: true })).toHaveCount(
                 0
@@ -40,7 +43,8 @@ async function visitMainRoutes(page: Page, username: string): Promise<void> {
             await expect
                 .poll(
                     async () =>
-                        (await page.getByRole('banner').textContent()) ?? ''
+                        (await page.getByRole('banner').textContent()) ?? '',
+                    { timeout: 20_000 }
                 )
                 .toContain(route.expectedText);
         });

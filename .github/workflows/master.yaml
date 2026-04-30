@@ -15,12 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    uses: ./.github/workflows/reusable_test.yaml
-  build:
-    uses: ./.github/workflows/reusable_build.yaml
+  ci:
+    uses: ./.github/workflows/reusable_ci.yaml
   deploy_latest:
-    needs:
-      - test
-      - build
+    needs: ci
     uses: ./.github/workflows/reusable_deploy_latest.yaml
