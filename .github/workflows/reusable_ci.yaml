@@ -109,7 +109,7 @@ jobs:
         run: yarn vitest run --coverage
 
       - name: Upload frontend coverage
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
@@ -141,6 +141,7 @@ jobs:
         run: yarn build
 
       - name: Upload frontend bundle
+        if: ${{ env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: frontend-bundle
@@ -182,7 +183,7 @@ jobs:
           --results-directory artifacts/test-results/dotnet
 
       - name: Upload .NET test results
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-test-results
@@ -209,6 +210,7 @@ jobs:
             nuget-${{ runner.os }}-
 
       - name: Download frontend bundle
+        if: ${{ env.ACT != 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: frontend-bundle
@@ -225,6 +227,7 @@ jobs:
           --output artifacts/publish/webapi
 
       - name: Upload published WebAPI
+        if: ${{ env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: webapi-publish
@@ -248,6 +251,13 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+      s3:
+        image: minio/minio:RELEASE.2023-02-17T17-52-43Z
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
     steps:
       - uses: actions/checkout@v4
 
@@ -282,11 +292,37 @@ jobs:
         working-directory: ${{ env.FRONTEND_DIR }}
         run: yarn playwright install --with-deps chromium
 
+      - name: Initialize MinIO bucket for file tests
+        run: |
+          for _ in $(seq 1 60); do
+            if curl --silent --fail http://localhost:9000/minio/health/ready >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          curl --fail --silent --show-error --location \
+            https://dl.min.io/client/mc/release/linux-amd64/mc \
+            --output /tmp/mc
+          chmod +x /tmp/mc
+
+          /tmp/mc alias set local http://localhost:9000 minioadmin minioadmin
+          /tmp/mc mb --ignore-existing local/saverwalter
+          /tmp/mc anonymous set public local/saverwalter
+
       - name: Download published WebAPI
+        if: ${{ env.ACT != 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: webapi-publish
           path: artifacts/publish/webapi
+
+      - name: Publish WebAPI locally for act
+        if: ${{ env.ACT == 'true' }}
+        run: >-
+          dotnet publish "${{ env.WEBAPI_PROJECT_PATH }}"
+          --configuration Release
+          --output artifacts/publish/webapi
 
       - name: Make WebAPI binary executable
         run: chmod +x artifacts/publish/webapi/Deeplex.Saverwalter.WebAPI
@@ -297,6 +333,10 @@ jobs:
           DATABASE_PORT: 5432
           DATABASE_USER: postgres
           DATABASE_PASS: postgres
+          S3_HOST: localhost
+          S3_PORT: 9000
+          S3_BUCKET: saverwalter
+          S3_PROVIDER: http://localhost:9000/saverwalter
           WALTER_E2E_PASSWORD: postgres
           WALTER_LOG_DIR: ${{ runner.temp }}/walter-e2e
           WALTER_PRESERVE_LOGS_ON_FAILURE: 1
@@ -304,7 +344,7 @@ jobs:
         run: bash ./scripts/test-full-stack.sh
 
       - name: Upload Playwright artifacts
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-results
@@ -314,7 +354,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload e2e startup logs
-        if: ${{ failure() && !cancelled() }}
+        if: ${{ failure() && !cancelled() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: e2e-startup-logs
