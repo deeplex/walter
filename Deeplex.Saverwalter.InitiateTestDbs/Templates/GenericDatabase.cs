@@ -395,10 +395,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var flaeche = 28 + random.Next(115);
                     var bezeichnung = $"Wohnung {unit}";
 
+                    var wIdx = wohnungen.Count;
                     wohnungen.Add(new Wohnung(bezeichnung, flaeche, flaeche, flaeche, 1)
                     {
                         Adresse = adresse,
-                        Besitzer = owner
+                        Besitzer = owner,
+                        MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
+                        ErhaltungsaufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     });
                 }
 
@@ -495,12 +498,18 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var isLatest = i == vertragCount - 1;
                     var isActive = isLatest && random.NextDouble() < 0.65;
 
+                    var vIdx = vertraege.Count;
                     var vertrag = new Vertrag
                     {
                         Ansprechpartner = wohnung.Besitzer,
                         Ende = isActive ? null : contractEnd,
                         Wohnung = wohnung,
-                        Notiz = $"Laufzeit: {contractStart:yyyy-MM} bis {(isActive ? "offen" : contractEnd.ToString("yyyy-MM", CultureInfo.InvariantCulture))}"
+                        Notiz = $"Laufzeit: {contractStart:yyyy-MM} bis {(isActive ? "offen" : contractEnd.ToString("yyyy-MM", CultureInfo.InvariantCulture))}",
+                        MietBuchungskonto = new Buchungskonto($"V{vIdx:D5}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                        NkBuchungskonto = new Buchungskonto($"V{vIdx:D5}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                        KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Aktiv),
+                        BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                        ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                     };
 
                     vertraege.Add(vertrag);
@@ -767,34 +776,34 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             foreach (var adresse in adressen.Where(a => a.Wohnungen.Count > 0))
             {
-                umlagen.Add(AddUmlage(adresse, typen["Allgemeinstrom/Hausbeleuchtung"], Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(AddUmlage(adresse, typen["Dachrinnenreinigung"], Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(AddUmlage(adresse, typen["Grundsteuer"], Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(AddUmlage(adresse, typen["Müllbeseitigung"], Umlageschluessel.NachPersonenzahl));
-                umlagen.Add(AddUmlage(adresse, typen["Wasserversorgung"], Umlageschluessel.NachVerbrauch));
-                umlagen.Add(AddUmlage(adresse, typen["Entwässerung/Schmutzwasser"], Umlageschluessel.NachVerbrauch));
-                umlagen.Add(AddUmlage(adresse, typen["Strassenreinigung"], Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(AddUmlage(adresse, typen["Allgemeinstrom/Hausbeleuchtung"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Dachrinnenreinigung"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Grundsteuer"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Müllbeseitigung"], Umlageschluessel.NachPersonenzahl, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Wasserversorgung"], Umlageschluessel.NachVerbrauch, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Entwässerung/Schmutzwasser"], Umlageschluessel.NachVerbrauch, umlagen.Count));
+                umlagen.Add(AddUmlage(adresse, typen["Strassenreinigung"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (random.NextDouble() < 0.35)
                 {
-                    umlagen.Add(AddUmlage(adresse, typen["Breitbandkabelanschluss"], Umlageschluessel.NachNutzeinheit));
+                    umlagen.Add(AddUmlage(adresse, typen["Breitbandkabelanschluss"], Umlageschluessel.NachNutzeinheit, umlagen.Count));
                 }
                 if (random.NextDouble() < 0.7)
                 {
-                    umlagen.Add(AddUmlage(adresse, typen["Gartenpflege"], Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(AddUmlage(adresse, typen["Gartenpflege"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
                 if (random.NextDouble() < 0.85)
                 {
-                    umlagen.Add(AddUmlage(adresse, typen["Sachversicherung"], Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(AddUmlage(adresse, typen["Sachversicherung"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
                 if (random.NextDouble() < 0.45)
                 {
-                    umlagen.Add(AddUmlage(adresse, typen["Haftpflichtversicherung"], Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(AddUmlage(adresse, typen["Haftpflichtversicherung"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
                 if (adresse.Wohnungen.Count >= 3 || random.NextDouble() < 0.35)
                 {
-                    umlagen.Add(AddUmlage(adresse, typen["Heizkosten"], Umlageschluessel.NachVerbrauch));
-                    umlagen.Add(AddUmlage(adresse, typen["Wartung Therme/Speicher"], Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(AddUmlage(adresse, typen["Heizkosten"], Umlageschluessel.NachVerbrauch, umlagen.Count));
+                    umlagen.Add(AddUmlage(adresse, typen["Wartung Therme/Speicher"], Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
             }
 
@@ -930,13 +939,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return earliest ?? default;
         }
 
-        private static Umlage AddUmlage(Adresse adresse, Umlagetyp typ, Umlageschluessel schluessel)
+        private static Umlage AddUmlage(Adresse adresse, Umlagetyp typ, Umlageschluessel schluessel, int idx)
         {
             return new Umlage(schluessel)
             {
                 Typ = typ,
                 Beschreibung = $"{typ.Bezeichnung} für {adresse.Anschrift}",
-                Wohnungen = adresse.Wohnungen
+                Wohnungen = adresse.Wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto($"U{idx:D5}-NR", $"NK-Verrechnung {typ.Bezeichnung}", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto($"U{idx:D5}-ZK", $"NK-Zahlung {typ.Bezeichnung}", BuchungskontoTyp.Aktiv),
             };
         }
 

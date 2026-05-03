@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
+    [Obsolete("Miete ist durch das Buchungssatz/Sollstellung-Modell (Ansatz C) abgelöst. Nicht mehr für neue Einträge verwenden.")]
     public class Miete
     {
         public int MieteId { get; set; }

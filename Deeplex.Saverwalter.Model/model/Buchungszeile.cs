@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,29 +17,30 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Betriebskostenrechnung
+    public class Buchungszeile
     {
-        public int BetriebskostenrechnungId { get; set; }
+        public Guid BuchungszeileId { get; set; }
+        [Required]
+        public virtual Buchungssatz Buchungssatz { get; set; } = null!;
+        [Required]
+        public virtual Buchungskonto Buchungskonto { get; set; } = null!;
+        [Required]
+        public SollHaben SollHaben { get; set; }
         [Required]
         public decimal Betrag { get; set; }
-        [Required]
-        public DateOnly Datum { get; set; }
-        [Required]
-        public int BetreffendesJahr { get; set; }
-        [Required]
-        public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-        [Required]
-        public virtual Buchungssatz Buchungssatz { get; set; } = null!;;
-        public string? Notiz { get; set; }
-
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public Betriebskostenrechnung(decimal betrag, DateOnly datum, int betreffendesJahr)
+        public Buchungszeile(SollHaben sollHaben, decimal betrag)
         {
+            SollHaben = sollHaben;
             Betrag = betrag;
-            Datum = datum;
-            BetreffendesJahr = betreffendesJahr;
         }
+    }
+
+    public enum SollHaben
+    {
+        Soll,
+        Haben,
     }
 }

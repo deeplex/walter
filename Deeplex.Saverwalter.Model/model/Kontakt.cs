@@ -35,6 +35,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Fax { get; set; }
         public string? Email { get; set; }
         public virtual Adresse? Adresse { get; set; }
+        public virtual Buchungskonto? VerbindlichkeitsKonto { get; set; }
         public string? Notiz { get; set; }
 
         // Only valid if Rechtsform != natuerlich

@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-
+        public virtual List<Buchungssatz> Buchungssaetze { get; private set; } = [];
     }
 }
 

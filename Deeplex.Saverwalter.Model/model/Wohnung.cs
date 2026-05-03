@@ -30,6 +30,8 @@ namespace Deeplex.Saverwalter.Model
         public decimal Miteigentumsanteile { get; set; }
         [Required]
         public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
+        public virtual Buchungskonto MietErtragskonto { get; set; } = null!;
+        public virtual Buchungskonto ErhaltungsaufwandsKonto { get; set; } = null!;
         public virtual Kontakt? Besitzer { get; set; }
         public virtual Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }

@@ -28,6 +28,8 @@ namespace Deeplex.Saverwalter.Model
         public string? Beschreibung { get; set; }
         public string? Notiz { get; set; }
         public virtual HKVO? HKVO { get; set; }
+        public virtual Buchungskonto NkVerrechnungsKonto { get; set; } = null!;
+        public virtual Buchungskonto ZahlungsKonto { get; set; } = null!;
 
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();

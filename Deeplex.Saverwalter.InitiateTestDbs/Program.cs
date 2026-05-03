@@ -29,7 +29,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var printAccess = args.Contains("--print-access", StringComparer.OrdinalIgnoreCase);
             var ensureDevUsers = args.Contains("--ensure-dev-users", StringComparer.OrdinalIgnoreCase);
             var seedFiles = args.Contains("--seed-files", StringComparer.OrdinalIgnoreCase);
-            var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles;
+            var bucheHistorisch = args.Contains("--buche-historisch", StringComparer.OrdinalIgnoreCase);
+            var vergleicheAbrechnung = args.Contains("--vergleiche-abrechnung", StringComparer.OrdinalIgnoreCase);
+            var bucheAbrechnungArg = GetArgValue(args, "--buche-abrechnung");
+            var vergleicheAbrechnungArg = GetArgValue(args, "--vergleiche-abrechnung");
+            var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles && !bucheHistorisch
+                && bucheAbrechnungArg is null && !vergleicheAbrechnung;
 
             var targetDb = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "walter_dev_generic_db";
             var s3Provider = Environment.GetEnvironmentVariable("WALTER_DEV_S3_PROVIDER");
@@ -86,6 +91,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
                 await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, targetDb, databaseUser, databasePass, databasePass);
             }
 
+            if (bucheHistorisch)
+            {
+                await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
+                await BuchungssaetzeErstellen.BucheHistorischAsync(ctx);
+            }
+
             if (seedFiles)
             {
                 if (string.IsNullOrWhiteSpace(s3Provider))
@@ -97,6 +108,37 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 
                 var seed = GetIntEnv("WALTER_DEV_RANDOM_SEED", 1337);
                 await SeedFilesFor(databaseHost, databasePort, targetDb, databaseUser, databasePass, s3Provider, seed);
+            }
+
+            if (bucheAbrechnungArg is not null)
+            {
+                if (!int.TryParse(bucheAbrechnungArg, out var jahr) || jahr < 1900 || jahr > 2100)
+                {
+                    Console.WriteLine($"Ungültiges Jahr für --buche-abrechnung: '{bucheAbrechnungArg}'");
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
+                await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
+                await BkAbrechnungNeu.BucheJahresabrechnungAsync(ctx, jahr);
+            }
+
+            if (vergleicheAbrechnung)
+            {
+                string? ausgabePfad = null;
+                if (!string.IsNullOrWhiteSpace(vergleicheAbrechnungArg))
+                {
+                    ausgabePfad = vergleicheAbrechnungArg == "."
+                        ? Path.Combine(Directory.GetCurrentDirectory(), $"bk-vergleich-{DateTime.Now:yyyyMMdd-HHmmss}.txt")
+                        : vergleicheAbrechnungArg;
+                }
+
+                await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
+                await AbrechnungsVergleich.ErstelleVergleichsreportAsync(ctx, ausgabePfad);
+                if (!string.IsNullOrWhiteSpace(ausgabePfad))
+                {
+                    Console.WriteLine($"Report geschrieben: {ausgabePfad}");
+                }
             }
         }
 
@@ -123,6 +165,14 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             }
 
             return value;
+        }
+
+        private static string? GetArgValue(string[] args, string flag)
+        {
+            var idx = Array.FindIndex(args, a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
+            if (idx >= 0 && idx + 1 < args.Length && !args[idx + 1].StartsWith("--", StringComparison.Ordinal))
+                return args[idx + 1];
+            return null;
         }
 
         private static int GetIntEnv(string name, int defaultValue)

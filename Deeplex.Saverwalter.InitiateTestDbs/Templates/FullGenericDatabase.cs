@@ -180,13 +180,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     var bezeichnung = $"Wohnung Nr. {j}";
                     var flaeche = 35 + (j * 35);
+                    var wIdx = wohnungen.Count;
                     wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, i * 2, 1)
                     {
                         Adresse = adresse,
                         Besitzer = besitzer,
                         Wohnflaeche = flaeche,
                         Nutzflaeche = flaeche,
-                        Nutzeinheit = 1
+                        Nutzeinheit = 1,
+                        MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
+                        ErhaltungsaufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     });
                 }
             }
@@ -249,11 +252,17 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     ende = new DateOnly(jahr, monat, tag);
                 }
 
+                var vIdx = vertraege.Count;
                 var vertrag = new Vertrag()
                 {
                     Ansprechpartner = wohnung.Besitzer, // TODO add some variation. Maybe a chance to add a new person
                     Ende = ende,
-                    Wohnung = wohnung
+                    Wohnung = wohnung,
+                    MietBuchungskonto = new Buchungskonto($"V{vIdx:D5}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                    NkBuchungskonto = new Buchungskonto($"V{vIdx:D5}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                    KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Aktiv),
+                    BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                    ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                 };
 
                 vertraege.Add(vertrag);
@@ -427,13 +436,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         private static Umlage addUmlage(
             Adresse adresse,
             Umlagetyp typ,
-            Umlageschluessel schluessel)
+            Umlageschluessel schluessel,
+            int idx)
         {
             var umlage = new Umlage(schluessel)
             {
                 Typ = typ,
                 Beschreibung = $"{typ.Bezeichnung} wird über die Stadt {adresse.Stadt} abgerechnet.",
                 Wohnungen = adresse.Wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto($"U{idx:D5}-NR", $"NK-Verrechnung {typ.Bezeichnung}", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto($"U{idx:D5}-ZK", $"NK-Zahlung {typ.Bezeichnung}", BuchungskontoTyp.Aktiv),
             };
 
             return umlage;
@@ -454,49 +466,49 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 var adresse = adressen[i];
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Allgemeinstrom/Hausbeleuchtung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Allgemeinstrom/Hausbeleuchtung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 10 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Breitbandkabelanschluss"), Umlageschluessel.NachNutzeinheit));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Breitbandkabelanschluss"), Umlageschluessel.NachNutzeinheit, umlagen.Count));
                 }
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Dachrinnenreinigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Dachrinnenreinigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 // Can also use Personen
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachVerbrauch));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachVerbrauch, umlagen.Count));
 
                 if (i % 2 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
                 // Can also be made direct
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Gartenpflege"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Gartenpflege"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Grundsteuer"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Grundsteuer"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 3 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Haftpflichtversicherung"), Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Haftpflichtversicherung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
                 if (i % 3 == 0 || i % 7 == 0 || i % 11 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch));
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch, umlagen.Count));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachPersonenzahl));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachPersonenzahl, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Sachversicherung"), Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Schornsteinfegerarbeiten"), Umlageschluessel.NachNutzeinheit));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Sachversicherung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Schornsteinfegerarbeiten"), Umlageschluessel.NachNutzeinheit, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Strassenreinigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Strassenreinigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wasserversorgung"), Umlageschluessel.NachVerbrauch));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wasserversorgung"), Umlageschluessel.NachVerbrauch, umlagen.Count));
                 // umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungWarm, Umlageschluessel.NachVerbrauch))
             }
 

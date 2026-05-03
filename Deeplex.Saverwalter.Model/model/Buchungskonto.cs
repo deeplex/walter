@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,29 +17,33 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Betriebskostenrechnung
+    public class Buchungskonto
     {
-        public int BetriebskostenrechnungId { get; set; }
+        public int BuchungskontoId { get; set; }
         [Required]
-        public decimal Betrag { get; set; }
+        public string Kontonummer { get; set; }
         [Required]
-        public DateOnly Datum { get; set; }
+        public string Bezeichnung { get; set; }
         [Required]
-        public int BetreffendesJahr { get; set; }
-        [Required]
-        public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-        [Required]
-        public virtual Buchungssatz Buchungssatz { get; set; } = null!;;
+        public BuchungskontoTyp Kontotyp { get; set; }
         public string? Notiz { get; set; }
-
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
+        public virtual List<Buchungszeile> Buchungszeilen { get; private set; } = new();
 
-        public Betriebskostenrechnung(decimal betrag, DateOnly datum, int betreffendesJahr)
+        public Buchungskonto(string kontonummer, string bezeichnung, BuchungskontoTyp kontotyp)
         {
-            Betrag = betrag;
-            Datum = datum;
-            BetreffendesJahr = betreffendesJahr;
+            Kontonummer = kontonummer;
+            Bezeichnung = bezeichnung;
+            Kontotyp = kontotyp;
         }
+    }
+
+    public enum BuchungskontoTyp
+    {
+        Aktiv,
+        Passiv,
+        Aufwand,
+        Ertrag,
     }
 }
