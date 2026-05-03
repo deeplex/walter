@@ -26,12 +26,12 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public DateOnly Beginn { get; set; }
         [Required]
-        public double Minderung { get; set; }
+        public decimal Minderung { get; set; }
         public DateOnly? Ende { get; set; }
         public string? Notiz { get; set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Mietminderung(DateOnly beginn, double minderung)
+        public Mietminderung(DateOnly beginn, decimal minderung)
         {
             Beginn = beginn;
             Minderung = minderung;

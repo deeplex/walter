@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     {
         public Umlage Umlage { get; }
         public Dictionary<Zaehlereinheit, List<Verbrauch>> AlleZaehler { get; } = new();
-        public Dictionary<Zaehlereinheit, double> AlleVerbrauch { get; } = new();
+        public Dictionary<Zaehlereinheit, decimal> AlleVerbrauch { get; } = new();
         public Dictionary<Zaehlereinheit, List<Verbrauch>> DieseZaehler { get; } = new();
-        public Dictionary<Zaehlereinheit, double> DieseVerbrauch { get; } = new();
-        public Dictionary<Zaehlereinheit, double> Anteil { get; } = new();
+        public Dictionary<Zaehlereinheit, decimal> DieseVerbrauch { get; } = new();
+        public Dictionary<Zaehlereinheit, decimal> Anteil { get; } = new();
 
         public VerbrauchAnteil(Umlage umlage, Wohnung wohnung, Zeitraum zeitraum, List<Note> notes)
         {
@@ -92,12 +92,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             foreach (var zaehlerTyp in DieseVerbrauch)
             {
-                Anteil[zaehlerTyp.Key] = zaehlerTyp.Value / AlleVerbrauch[zaehlerTyp.Key];
-
-                if (double.IsNaN(Anteil[zaehlerTyp.Key]))
-                {
-                    Anteil[zaehlerTyp.Key] = 0;
-                }
+                var alleVerbrauch = AlleVerbrauch[zaehlerTyp.Key];
+                Anteil[zaehlerTyp.Key] = alleVerbrauch == 0 ? 0 : zaehlerTyp.Value / alleVerbrauch;
             }
         }
 

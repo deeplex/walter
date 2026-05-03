@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             int personenzahl,
             int gesamtPersonenzahl,
             int year,
-            double expectedAnteil)
+            decimal expectedAnteil)
         {
             var beginn = new DateOnly(bYear, bMonth, bDay);
             var ende = new DateOnly(eYear, eMonth, eDay);

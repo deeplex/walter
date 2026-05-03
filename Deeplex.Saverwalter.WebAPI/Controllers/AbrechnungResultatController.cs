@@ -19,12 +19,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public int Jahr { get; set; }
-            public double Kaltmiete { get; set; }
-            public double Vorauszahlung { get; set; }
-            public double Rechnungsbetrag { get; set; }
-            public double Minderung { get; set; }
+            public decimal Kaltmiete { get; set; }
+            public decimal Vorauszahlung { get; set; }
+            public decimal Rechnungsbetrag { get; set; }
+            public decimal Minderung { get; set; }
             public bool Abgesendet { get; set; }
-            public double Saldo { get; set; }
+            public decimal Saldo { get; set; }
             public string? Notiz { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();

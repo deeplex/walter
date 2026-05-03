@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.ModelTests
 
             return ctx;
         }
-        public static Vertrag FillVertragWithSomeData(SaverwalterContext ctx, double grundmiete)
+        public static Vertrag FillVertragWithSomeData(SaverwalterContext ctx, decimal grundmiete)
         {
             var vermieter = new Kontakt("TestKopf", Rechtsform.natuerlich)
             {
@@ -173,7 +173,7 @@ namespace Deeplex.Saverwalter.ModelTests
             muellbeseitigung.Betriebskostenrechnungen.Add(muellbeseitigung_rechnung);
             umlagen.Add(muellbeseitigung);
 
-            var hkvo = new HKVO(0.5, 0.5, HKVO_P9A2.Satz_2, 0.05) { Betriebsstrom = allgemeinstrom };
+            var hkvo = new HKVO(0.5m, 0.5m, HKVO_P9A2.Satz_2, 0.05m) { Betriebsstrom = allgemeinstrom };
             var heizkosten = new Umlage(Umlageschluessel.NachVerbrauch)
             {
                 Typ = new Umlagetyp("Heizkosten"),

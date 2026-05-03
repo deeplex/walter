@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.Model
         public Kontakt Aussteller => Entity.Aussteller;
         public string Bezeichnung => Entity.Bezeichnung;
         public DateOnly Datum => Entity.Datum;
-        public double Betrag => Entity.Betrag;
+        public decimal Betrag => Entity.Betrag;
         public bool active = true;
         //public string color => active ? "
 

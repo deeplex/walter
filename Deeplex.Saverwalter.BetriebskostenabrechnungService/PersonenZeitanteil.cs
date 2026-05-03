@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     {
         public DateOnly Beginn { get; }
         public DateOnly Ende { get; }
-        public double Tage { get; }
+        public decimal Tage { get; }
         public int Personenzahl { get; }
         public int GesamtPersonenzahl { get; }
-        public double Anteil { get; }
+        public decimal Anteil { get; }
 
         public PersonenZeitanteil(
             DateOnly beginn, DateOnly ende, int personenzahl, int gesamtPersonenzahl, Zeitraum zeitraum)
@@ -37,9 +37,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var personenAnteil = gesamtPersonenzahl == 0
                 ? 0
-                : (double)personenzahl / gesamtPersonenzahl;
+                : (decimal)personenzahl / gesamtPersonenzahl;
 
-            var zeitanteil = (double)Tage / zeitraum.Abrechnungszeitraum;
+            var zeitanteil = Tage / zeitraum.Abrechnungszeitraum;
 
             Anteil = personenAnteil * zeitanteil;
         }

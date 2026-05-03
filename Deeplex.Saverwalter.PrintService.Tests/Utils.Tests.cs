@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData(0.1, "10,00%")]
         [InlineData(2, "200,00%")]
         [InlineData(100, "10.000,00%")]
-        public void ProzentTest(double p, string s)
+        public void ProzentTest(decimal p, string s)
         {
             var stub = Utils.Prozent(p);
             stub.Should().Be(s);
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData(0.1, "0,10€")]
         [InlineData(2, "2,00€")]
         [InlineData(100, "100,00€")]
-        public void EuroTest(double p, string s)
+        public void EuroTest(decimal p, string s)
         {
             var stub = Utils.Euro(p);
             stub.Should().Be(s);
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData(0.1, "kWh", "0,10kWh")]
         [InlineData(2, "whatever", "2,00whatever")]
         [InlineData(100, "test", "100,00test")]
-        public void UnitTest(double p, string u, string s)
+        public void UnitTest(decimal p, string u, string s)
         {
             var stub = Utils.Unit(p, u);
             stub.Should().Be(s);
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData(0.1, "0,10m²")]
         [InlineData(2, "2,00m²")]
         [InlineData(100, "100,00m²")]
-        public void QuadratTest(double p, string s)
+        public void QuadratTest(decimal p, string s)
         {
             var stub = Utils.Quadrat(p);
             stub.Should().Be(s);
@@ -191,7 +191,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [Theory]
         [InlineData(123.45, resultTxtPositive)]
         [InlineData(-123.45, resultTxtNegative)]
-        public void ResultTxtTest(double input, string output)
+        public void ResultTxtTest(decimal input, string output)
         {
             var resultTxt = Utils.ResultTxt(input);
             resultTxt.Should().Be(output);
@@ -200,7 +200,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [Theory]
         [InlineData(20, Utils.RefundPositive)]
         [InlineData(-2, Utils.RefundNegative)]
-        public void RefundDemandTest(double input, string output)
+        public void RefundDemandTest(decimal input, string output)
         {
             var refundDemand = Utils.RefundDemand(input);
             refundDemand.Should().Be(output);

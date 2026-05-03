@@ -22,12 +22,12 @@ namespace Deeplex.Saverwalter.PrintService
     {
         public static string Anschrift(Adresse a) => a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
 
-        public static string Prozent(double d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}%", d * 100);
-        public static string Euro(double d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}€", d);
-        public static string Unit(double d, string unit) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}" + unit, d);
+        public static string Prozent(decimal d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}%", d * 100);
+        public static string Euro(decimal d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}€", d);
+        public static string Unit(decimal d, string unit) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}" + unit, d);
         public static string Celsius(double d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}°C", d);
         public static string Celsius(int d) => Celsius((double)d);
-        public static string Quadrat(double d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}m²", d);
+        public static string Quadrat(decimal d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}m²", d);
         public static string Datum(DateOnly d) => d.ToString("dd.MM.yyyy");
 
         public static string GetBriefAnrede(Kontakt person)
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.PrintService
             return gruss.Remove(1).ToUpper() + gruss[1..];
         }
 
-        public static string ResultTxt(double result)
+        public static string ResultTxt(decimal result)
            => $"wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit {(result > 0 ? "einem Guthaben" : "einer Nachforderung")} in Höhe von: ";
 
 
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.PrintService
             = "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet.";
         public const string RefundNegative
             = "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
-        public static string RefundDemand(double result)
+        public static string RefundDemand(decimal result)
             => result > 0 ? RefundPositive : RefundNegative;
 
         public const string GenerischerTextFirstPart

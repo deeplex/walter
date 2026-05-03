@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class BetriebskostenrechnungEntryBase
         {
             public int Id { get; set; }
-            public double Betrag { get; set; }
+            public decimal Betrag { get; set; }
             public int BetreffendesJahr { get; set; }
             public DateOnly Datum { get; set; }
             public SelectionEntry? Typ { get; set; }

@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public DateOnly Zahlungsdatum { get; set; }
         [Required]
-        public double Betrag { get; set; }
+        public decimal Betrag { get; set; }
         [Required]
         public string Verwendungszweck { get; set; } = string.Empty;
         public string? Notiz { get; set; }

@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public DateOnly Beginn { get; set; }
             public DateOnly? Ende { get; set; }
-            public double Minderung { get; set; }
+            public decimal Minderung { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 

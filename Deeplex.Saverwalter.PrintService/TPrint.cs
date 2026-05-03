@@ -470,7 +470,7 @@ namespace Deeplex.Saverwalter.PrintService
             var bold = new List<bool> { true };
             var underlined = new List<bool> { false };
 
-            void kostenPunkt(Umlage umlage, string zeitraum, int Jahr, double anteil, bool firstLine = true)
+            void kostenPunkt(Umlage umlage, string zeitraum, int Jahr, decimal anteil, bool firstLine = true)
             {
                 var rechnungen = abrechnungseinheit.Rechnungen[umlage];
                 var betrag = rechnungen.Sum(r => r.Betrag);
@@ -740,17 +740,17 @@ namespace Deeplex.Saverwalter.PrintService
 
         private class WarmAnteilEntry
         {
-            public double NFZeitanteil;
-            public double HeizkostenVerbrauchAnteil;
-            public double WarmwasserVerbrauchAnteil;
-            public double WaermeAnteilNF;
-            public double WaermeAnteilVerb;
-            public double WarmwasserAnteilNF;
-            public double WarmwasserAnteilVerb;
-            public double Para9_2;
-            public double Para7;
-            public double Para8;
-            public double PauschalBetrag;
+            public decimal NFZeitanteil;
+            public decimal HeizkostenVerbrauchAnteil;
+            public decimal WarmwasserVerbrauchAnteil;
+            public decimal WaermeAnteilNF;
+            public decimal WaermeAnteilVerb;
+            public decimal WarmwasserAnteilNF;
+            public decimal WarmwasserAnteilVerb;
+            public decimal Para9_2;
+            public decimal Para7;
+            public decimal Para8;
+            public decimal PauschalBetrag;
         }
 
         private static void ErmittlungWarmanteil(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)

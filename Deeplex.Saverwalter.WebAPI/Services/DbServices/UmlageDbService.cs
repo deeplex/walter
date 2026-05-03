@@ -183,10 +183,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 if (oldHKVO == null)
                 {
                     var newHKVO = new HKVO(
-                        ((double)hkvo.HKVO_P7) / 100,
-                        ((double)hkvo.HKVO_P8) / 100,
+                        (decimal)hkvo.HKVO_P7 / 100,
+                        (decimal)hkvo.HKVO_P8 / 100,
                         (HKVO_P9A2)hkvo.HKVO_P9.Id,
-                        ((double)hkvo.Strompauschale) / 100)
+                        (decimal)hkvo.Strompauschale / 100)
                     {
                         Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id)
                     };
@@ -195,10 +195,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 }
                 else
                 {
-                    oldHKVO.HKVO_P7 = ((double)hkvo.HKVO_P7) / 100;
-                    oldHKVO.HKVO_P8 = ((double)hkvo.HKVO_P8) / 100;
+                    oldHKVO.HKVO_P7 = (decimal)hkvo.HKVO_P7 / 100;
+                    oldHKVO.HKVO_P8 = (decimal)hkvo.HKVO_P8 / 100;
                     oldHKVO.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
-                    oldHKVO.Strompauschale = ((double)hkvo.Strompauschale) / 100;
+                    oldHKVO.Strompauschale = (decimal)hkvo.Strompauschale / 100;
                     oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
                     Ctx.HKVO.Update(oldHKVO);
                 }

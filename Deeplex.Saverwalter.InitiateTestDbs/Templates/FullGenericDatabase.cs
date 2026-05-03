@@ -310,7 +310,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     for (DateOnly date = version.Beginn; date <= ende; date = date.AddMonths(1))
                     {
-                        mieten.Add(new Miete(date, date, version.Grundmiete + 200 + (date.Day % 3) * 50)
+                        mieten.Add(new Miete(date, date, (double)(version.Grundmiete + 200 + (date.Day % 3) * 50))
                         {
                             Vertrag = vertrag
                         });
@@ -397,7 +397,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var beginn = getEarliestDate(umlage.Wohnungen.ToList());
                 for (var date = beginn; date < globalToday; date = date.AddYears(1))
                 {
-                    double betrag = 100 + beginn.DayOfYear;
+                    decimal betrag = 100 + beginn.DayOfYear;
                     if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
                     {
                         betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 12 + beginn.DayOfYear;
@@ -580,7 +580,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                             Zaehlertyp.Gas => 20000,
                             _ => 10000
                         };
-                        var lastStandStand = lastStand?.Stand ?? (double)0;
+                        var lastStandStand = lastStand?.Stand ?? 0m;
                         var stand = lastStandStand += date.DayNumber % max;
                         zaehlerstaende.Add(new Zaehlerstand(date, stand)
                         {

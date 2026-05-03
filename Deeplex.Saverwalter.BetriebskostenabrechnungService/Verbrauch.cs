@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Zaehler Zaehler;
         public DateOnly Anfangsdatum;
         public DateOnly Enddatum;
-        public double Delta;
+        public decimal Delta;
 
         public Verbrauch(Zaehler zaehler, DateOnly beginn, DateOnly ende, List<Note> notes)
         {

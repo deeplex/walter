@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int BetriebskostenrechnungId { get; set; }
         [Required]
-        public double Betrag { get; set; }
+        public decimal Betrag { get; set; }
         [Required]
         public DateOnly Datum { get; set; }
         [Required]
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public Betriebskostenrechnung(double betrag, DateOnly datum, int betreffendesJahr)
+        public Betriebskostenrechnung(decimal betrag, DateOnly datum, int betreffendesJahr)
         {
             Betrag = betrag;
             Datum = datum;

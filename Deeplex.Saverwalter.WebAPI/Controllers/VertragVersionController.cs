@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public int Personenzahl { get; set; }
             public DateOnly Beginn { get; set; }
-            public double Grundmiete { get; set; }
+            public decimal Grundmiete { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 

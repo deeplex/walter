@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Erhaltungsaufwendung? Entity { get; }
 
             public int Id { get; set; }
-            public double Betrag { get; set; }
+            public decimal Betrag { get; set; }
             public DateOnly Datum { get; set; }
             public string Bezeichnung { get; set; } = null!;
             public SelectionEntry Aussteller { get; set; } = null!;

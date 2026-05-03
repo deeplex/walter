@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public string Bezeichnung { get; set; }
         [Required]
-        public double Betrag { get; set; }
+        public decimal Betrag { get; set; }
         [Required]
         public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
 
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public Erhaltungsaufwendung(double betrag, string bezeichnung, DateOnly datum)
+        public Erhaltungsaufwendung(decimal betrag, string bezeichnung, DateOnly datum)
         {
             Betrag = betrag;
             Bezeichnung = bezeichnung;

@@ -20,29 +20,29 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public sealed class Heizkostenberechnung
     {
         public int UmlageId { get; }
-        public double GesamtBetrag { get; }
-        public double PauschalBetrag { get; }
+        public decimal GesamtBetrag { get; }
+        public decimal PauschalBetrag { get; }
 
-        public double tw { get; }
-        public double V { get; }
-        public double Q { get; }
+        public decimal tw { get; }
+        public decimal V { get; }
+        public decimal Q { get; }
 
-        public double Para7 { get; }
-        public double Para8 { get; }
+        public decimal Para7 { get; }
+        public decimal Para8 { get; }
 
-        public double GesamtNutzflaeche { get; }
-        public double NFZeitanteil { get; }
-        public double HeizkostenVerbrauchAnteil { get; }
-        public double WarmwasserVerbrauchAnteil { get; }
+        public decimal GesamtNutzflaeche { get; }
+        public decimal NFZeitanteil { get; }
+        public decimal HeizkostenVerbrauchAnteil { get; }
+        public decimal WarmwasserVerbrauchAnteil { get; }
 
-        public double Para9_2 { get; }
+        public decimal Para9_2 { get; }
 
-        public double WaermeAnteilNF { get; }
-        public double WaermeAnteilVerb { get; }
-        public double WarmwasserAnteilNF { get; }
-        public double WarmwasserAnteilVerb { get; }
+        public decimal WaermeAnteilNF { get; }
+        public decimal WaermeAnteilVerb { get; }
+        public decimal WarmwasserAnteilNF { get; }
+        public decimal WarmwasserAnteilVerb { get; }
 
-        public double Betrag { get; }
+        public decimal Betrag { get; }
 
         public Heizkostenberechnung(
             BetriebskostenrechnungEntry rechnung,
@@ -69,9 +69,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add("Warme Rechnung hat keine HKVO.", Severity.Error);
             }
 
-            tw = 60;
-            Para7 = lRechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
-            Para8 = lRechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
+            tw = 60m;
+            Para7 = lRechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5m; // HeizkostenV §7
+            Para8 = lRechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5m; // HeizkostenV §8
 
             var warmwasserZaehlerAbrechnungseinheit = lRechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Warmwasser).ToList();
             if (warmwasserZaehlerAbrechnungseinheit.Count == 0)
@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add("Gesamtzähler steht auf 0.", Severity.Error);
             }
 
-            Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+            Para9_2 = 2.5m * (V / Q) * (tw - 10m); // TODO HeizkostenV §9
 
             if (Para9_2 > 1)
             {
@@ -141,7 +141,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Betrag = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
         }
 
-        private static double Delta(IEnumerable<Zaehler> zaehlerList, DateOnly beginn, DateOnly ende)
+        private static decimal Delta(IEnumerable<Zaehler> zaehlerList, DateOnly beginn, DateOnly ende)
         {
             var beginnValue = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
                 .LastOrDefault(l => l.Datum <= beginn && (beginn.DayNumber - l.Datum.DayNumber) < 30))

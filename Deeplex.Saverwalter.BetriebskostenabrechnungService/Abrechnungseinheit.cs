@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public class BetriebskostenrechnungEntry
     {
         public Betriebskostenrechnung? Rechnung { get; }
-        public double Betrag { get; }
+        public decimal Betrag { get; }
         public BetriebskostenrechnungEntry(
             Betriebskostenrechnung? rechnung,
             Zeitraum zeitraum,
@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (rechnung != null)
             {
-                var abzug = 0.0;
+                var abzug = 0.0m;
                 foreach (var hkvo in rechnung.Umlage.HKVOs)
                 {
                     var rechnungen = hkvo.Heizkosten.Betriebskostenrechnungen.Where(r
@@ -57,19 +57,19 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public class Abrechnungseinheit
     {
         public Dictionary<Umlage, List<BetriebskostenrechnungEntry>> Rechnungen { get; } = [];
-        public double BetragKalt { get; }
-        public double BetragWarm { get; }
-        public double GesamtBetragKalt { get; }
-        public double GesamtBetragWarm { get; }
+        public decimal BetragKalt { get; }
+        public decimal BetragWarm { get; }
+        public decimal GesamtBetragKalt { get; }
+        public decimal GesamtBetragWarm { get; }
         public string Bezeichnung { get; }
-        public double GesamtWohnflaeche { get; }
-        public double GesamtNutzflaeche { get; }
-        public double GesamtMiteigentumsanteile { get; }
+        public decimal GesamtWohnflaeche { get; }
+        public decimal GesamtNutzflaeche { get; }
+        public decimal GesamtMiteigentumsanteile { get; }
         public int GesamtEinheiten { get; }
-        public double WFZeitanteil { get; }
-        public double NFZeitanteil { get; }
-        public double MEAZeitanteil { get; }
-        public double NEZeitanteil { get; }
+        public decimal WFZeitanteil { get; }
+        public decimal NFZeitanteil { get; }
+        public decimal MEAZeitanteil { get; }
+        public decimal NEZeitanteil { get; }
         public List<VerbrauchAnteil> VerbrauchAnteile { get; }
         public List<PersonenZeitanteil> PersonenZeitanteile { get; }
         public List<Heizkostenberechnung> Heizkostenberechnungen { get; }
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             NFZeitanteil = GesamtNutzflaeche > 0 ?
                 wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil : 0;
             NEZeitanteil = GesamtEinheiten > 0 ?
-                (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil : 0;
+                (decimal)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil : 0;
             MEAZeitanteil = GesamtMiteigentumsanteile > 0 ?
                 wohnung.Miteigentumsanteile / GesamtMiteigentumsanteile * zeitraum.Zeitanteil : 0;
 
@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtBetragKalt = rechnungenKalt.Sum(rechnung => rechnung.Betrag);
         }
 
-        public double GetAnteil(Umlage umlage)
+        public decimal GetAnteil(Umlage umlage)
         {
             return umlage.Schluessel switch
             {
@@ -141,7 +141,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             };
         }
 
-        private double GetSum(List<BetriebskostenrechnungEntry> rechnungen, List<Note> notes)
+        private decimal GetSum(List<BetriebskostenrechnungEntry> rechnungen, List<Note> notes)
         {
             var PersZeitanteil = PersonenZeitanteile.Sum(z => z.Anteil);
 
@@ -165,7 +165,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             });
         }
 
-        private double GetVerbrauchAnteil(BetriebskostenrechnungEntry rechnung, List<Note> notes)
+        private decimal GetVerbrauchAnteil(BetriebskostenrechnungEntry rechnung, List<Note> notes)
         {
             var lRechnung = rechnung.Rechnung;
             if (lRechnung == null)

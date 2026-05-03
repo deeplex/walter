@@ -23,13 +23,13 @@ namespace Deeplex.Saverwalter.Model
         public int HKVOId { get; set; }
 
         [Required]
-        public double HKVO_P7 { get; set; }
+        public decimal HKVO_P7 { get; set; }
         [Required]
-        public double HKVO_P8 { get; set; }
+        public decimal HKVO_P8 { get; set; }
         [Required]
         public HKVO_P9A2 HKVO_P9 { get; set; }
         [Required]
-        public double Strompauschale { get; set; }
+        public decimal Strompauschale { get; set; }
 
         public int HeizkostenId { get; set; }
         [Required]
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public HKVO(double hKVO_P7, double hKVO_P8, HKVO_P9A2 hKVO_P9, double strompauschale)
+        public HKVO(decimal hKVO_P7, decimal hKVO_P8, HKVO_P9A2 hKVO_P9, decimal strompauschale)
         {
             HKVO_P7 = hKVO_P7;
             HKVO_P8 = hKVO_P8;

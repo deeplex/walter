@@ -25,17 +25,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Kontakt Ansprechpartner { get; }
         public List<Kontakt> Mieter { get; }
         public Vertrag Vertrag { get; }
-        public double GezahlteMiete { get; }
-        public double KaltMiete { get; }
-        public double BetragNebenkosten { get; }
-        public double BezahltNebenkosten { get; }
-        public double Mietminderung { get; }
-        public double NebenkostenMietminderung { get; }
-        public double KaltMietminderung { get; }
+        public decimal GezahlteMiete { get; }
+        public decimal KaltMiete { get; }
+        public decimal BetragNebenkosten { get; }
+        public decimal BezahltNebenkosten { get; }
+        public decimal Mietminderung { get; }
+        public decimal NebenkostenMietminderung { get; }
+        public decimal KaltMietminderung { get; }
         public Zeitraum Zeitraum { get; }
         public List<Abrechnungseinheit> Abrechnungseinheiten { get; }
 
-        public double Result { get; }
+        public decimal Result { get; }
 
         public Betriebskostenabrechnung(
             Vertrag vertrag,

@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public class VerbrauchEntry
         {
             public SelectionEntry Zaehler { get; }
-            public double Delta { get; }
+            public decimal Delta { get; }
 
             public VerbrauchEntry(Verbrauch verbrauch)
             {
@@ -50,11 +50,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public class VerbrauchAnteilEntry
         {
             public SelectionEntry Umlage { get; }
-            public Dictionary<Zaehlereinheit, double> AlleVerbrauch { get; }
+            public Dictionary<Zaehlereinheit, decimal> AlleVerbrauch { get; }
             public Dictionary<Zaehlereinheit, List<VerbrauchEntry>> AlleZaehler { get; } = new();
-            public Dictionary<Zaehlereinheit, double> DieseVerbrauch { get; }
+            public Dictionary<Zaehlereinheit, decimal> DieseVerbrauch { get; }
             public Dictionary<Zaehlereinheit, List<VerbrauchEntry>> DieseZaehler { get; } = new();
-            public Dictionary<Zaehlereinheit, double> Anteil { get; }
+            public Dictionary<Zaehlereinheit, decimal> Anteil { get; }
 
             public VerbrauchAnteilEntry(VerbrauchAnteil anteil)
             {
@@ -93,10 +93,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public string Typ { get; }
             public int TypId { get; }
             public string Schluessel { get; }
-            public double GesamtBetrag { get; }
-            public double Anteil { get; }
-            public double Betrag { get; }
-            public double BetragLetztesJahr { get; }
+            public decimal GesamtBetrag { get; }
+            public decimal Anteil { get; }
+            public decimal Betrag { get; }
+            public decimal BetragLetztesJahr { get; }
             public string Beschreibung { get; }
 
             public RechnungEntry(Umlage umlage, BetriebskostenrechnungEntry rechnung, Abrechnungseinheit einheit, int year)
@@ -120,19 +120,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public class AbrechnungseinheitEntry
         {
             public List<RechnungEntry>? Rechnungen { get; }
-            public double BetragKalt { get; }
-            public double BetragWarm { get; }
-            public double GesamtBetragKalt { get; }
-            public double GesamtBetragWarm { get; }
+            public decimal BetragKalt { get; }
+            public decimal BetragWarm { get; }
+            public decimal GesamtBetragKalt { get; }
+            public decimal GesamtBetragWarm { get; }
             public string? Bezeichnung { get; }
-            public double GesamtWohnflaeche { get; }
-            public double GesamtNutzflaeche { get; }
-            public double GesamtMiteigentumsanteile { get; }
+            public decimal GesamtWohnflaeche { get; }
+            public decimal GesamtNutzflaeche { get; }
+            public decimal GesamtMiteigentumsanteile { get; }
             public int GesamtEinheiten { get; }
-            public double WFZeitanteil { get; }
-            public double NFZeitanteil { get; }
-            public double MEAZeitanteil { get; }
-            public double NEZeitanteil { get; }
+            public decimal WFZeitanteil { get; }
+            public decimal NFZeitanteil { get; }
+            public decimal MEAZeitanteil { get; }
+            public decimal NEZeitanteil { get; }
             public List<VerbrauchAnteilEntry>? VerbrauchAnteil { get; }
             public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
             public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
@@ -170,15 +170,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public SelectionEntry? Ansprechpartner { get; }
             public List<SelectionEntry>? Mieter { get; }
             public SelectionEntry? Vertrag { get; }
-            public double GezahltMiete { get; }
-            public double KaltMiete { get; }
-            public double BetragNebenkosten { get; }
-            public double BezahltNebenkosten { get; }
-            public double NebenkostenMietminderung { get; }
-            public double KaltMietminderung { get; }
-            public double Mietminderung { get; }
+            public decimal GezahltMiete { get; }
+            public decimal KaltMiete { get; }
+            public decimal BetragNebenkosten { get; }
+            public decimal BezahltNebenkosten { get; }
+            public decimal NebenkostenMietminderung { get; }
+            public decimal KaltMietminderung { get; }
+            public decimal Mietminderung { get; }
             public List<AbrechnungseinheitEntry>? Abrechnungseinheiten { get; }
-            public double Result { get; }
+            public decimal Result { get; }
             public Zeitraum? Zeitraum { get; set; }
             public List<WohnungEntryBase> Wohnungen { get; }
             public List<VertragEntryBase> Vertraege { get; }

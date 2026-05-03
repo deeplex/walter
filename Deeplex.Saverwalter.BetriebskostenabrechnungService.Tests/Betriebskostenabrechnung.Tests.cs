@@ -397,7 +397,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(-7227.33, 0.01);
+            testObject.Result.Should().BeApproximately(-7227.33m, 0.01m);
         }
 
         [Fact]
@@ -424,7 +424,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(272.67, 0.01);
+            testObject.Result.Should().BeApproximately(272.67m, 0.01m);
         }
 
         [Fact]
@@ -452,7 +452,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(872.67, 0.01);
+            testObject.Result.Should().BeApproximately(872.67m, 0.01m);
         }
 
         [Fact]
@@ -484,7 +484,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(-21084.018, 0.01);
+            testObject.Result.Should().BeApproximately(-21084.018m, 0.01m);
         }
 
         [Fact]
@@ -516,7 +516,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(-84.02, 0.01);
+            testObject.Result.Should().BeApproximately(-84.02m, 0.01m);
         }
 
         [Fact]
@@ -548,7 +548,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             );
 
             // Assert
-            testObject.Result.Should().BeApproximately(5915.98, 0.01);
+            testObject.Result.Should().BeApproximately(5915.98m, 0.01m);
         }
     }
 }

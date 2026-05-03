@@ -25,11 +25,11 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public DateOnly Datum { get; set; }
         [Required]
-        public double Stand { get; set; }
+        public decimal Stand { get; set; }
         public string? Notiz { get; set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Zaehlerstand(DateOnly datum, double stand)
+        public Zaehlerstand(DateOnly datum, decimal stand)
         {
             Datum = datum;
             Stand = stand;

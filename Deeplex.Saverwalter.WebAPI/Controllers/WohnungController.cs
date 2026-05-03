@@ -42,9 +42,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public AdresseEntryBase? Adresse { get; set; }
             public SelectionEntry? Besitzer { get; set; }
             public string? Bewohner { get; set; }
-            public double Wohnflaeche { get; set; }
-            public double Nutzflaeche { get; set; }
-            public double Miteigentumsanteile { get; set; }
+            public decimal Wohnflaeche { get; set; }
+            public decimal Nutzflaeche { get; set; }
+            public decimal Miteigentumsanteile { get; set; }
             public int Einheiten { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();

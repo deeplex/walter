@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public static T Min<T>(T l, T r, IComparer<T> c)
             => c.Compare(l, r) > 0 ? r : l;
 
-        public static double checkVerbrauch(Dictionary<Umlagetyp, double> verbrauchAnteil, Umlagetyp typ, List<Note> notes)
+        public static decimal checkVerbrauch(Dictionary<Umlagetyp, decimal> verbrauchAnteil, Umlagetyp typ, List<Note> notes)
         {
             if (verbrauchAnteil.ContainsKey(typ))
             {
@@ -47,16 +47,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
         }
 
-        public static double Mietzahlungen(Vertrag vertrag, Zeitraum zeitraum)
+        public static decimal Mietzahlungen(Vertrag vertrag, Zeitraum zeitraum)
         {
             return vertrag.Mieten
                 .Where(m => m.BetreffenderMonat >= zeitraum.Abrechnungsbeginn &&
                             m.BetreffenderMonat < zeitraum.Abrechnungsende)
                 .ToList()
-                .Sum(z => z.Betrag);
+                .Sum(z => (decimal)z.Betrag);
         }
 
-        public static double GetMietminderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        public static decimal GetMietminderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             var Minderungen = vertrag.Mietminderungen
                 .Where(m =>
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }) / (abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1);
         }
 
-        public static double GetKaltMiete(Vertrag vertrag, Zeitraum zeitraum)
+        public static decimal GetKaltMiete(Vertrag vertrag, Zeitraum zeitraum)
         {
             if (zeitraum.Jahr < vertrag.Beginn().Year ||
                (vertrag.Ende is DateOnly d && d.Year < zeitraum.Jahr))
@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 return 0;
             }
 
-            List<double> lasts = [];
+            List<decimal> lasts = [];
 
             return vertrag.Versionen
                 .OrderBy(v => v.Beginn)

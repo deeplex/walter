@@ -27,16 +27,16 @@ public class Abrechnungsresultat
     [Required]
     public int Jahr { get; set; }
     [Required]
-    public double Kaltmiete { get; set; }
+    public decimal Kaltmiete { get; set; }
     [Required]
-    public double Vorauszahlung { get; set; }
+    public decimal Vorauszahlung { get; set; }
     [Required]
-    public double Minderung { get; set; }
+    public decimal Minderung { get; set; }
     [Required]
-    public double Rechnungsbetrag { get; set; }
+    public decimal Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
     // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
-    public double Saldo { get; set; }
+    public decimal Saldo { get; set; }
     public string? Notiz { get; set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime LastModified { get; set; }

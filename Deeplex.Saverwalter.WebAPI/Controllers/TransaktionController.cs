@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry Zahler { get; set; } = null!;
             public SelectionEntry Zahlungsempfaenger { get; set; } = null!;
             public DateOnly Zahlungsdatum { get; set; }
-            public double Betrag { get; set; }
+            public decimal Betrag { get; set; }
             public string Verwendungszweck { get; set; } = string.Empty;
             public string? Notiz { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();

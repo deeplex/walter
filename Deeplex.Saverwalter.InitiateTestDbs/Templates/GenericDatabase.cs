@@ -532,11 +532,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 };
 
                 var starts = BuildVersionStarts(beginn, ende, versions, random);
-                var baseRentPerSqm = 8.5 + random.NextDouble() * 7.0;
+                var baseRentPerSqm = (decimal)(8.5 + random.NextDouble() * 7.0);
 
                 for (var i = 0; i < starts.Count; i++)
                 {
-                    var raiseFactor = 1.0 + (i * (0.02 + random.NextDouble() * 0.03));
+                    var raiseFactor = (decimal)(1.0 + (i * (0.02 + random.NextDouble() * 0.03)));
                     var grundmiete = Math.Round(vertrag.Wohnung.Wohnflaeche * baseRentPerSqm * raiseFactor, 2);
                     var personenzahl = 1 + random.Next(4);
 
@@ -598,7 +598,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     {
                         var nebenkosten = 130 + (version.Personenzahl * 25) + random.Next(90);
                         var gesamt = Math.Round(version.Grundmiete + nebenkosten, 2);
-                        mieten.Add(new Miete(date, date, gesamt) { Vertrag = vertrag });
+                        mieten.Add(new Miete(date, date, (double)gesamt) { Vertrag = vertrag });
                     }
                 }
             }
@@ -855,10 +855,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     start = wohnungStart;
                 }
 
-                var stand = 0d;
+                var stand = 0m;
                 for (var date = new DateOnly(start.Year, 1, 1); date <= GlobalToday; date = date.AddYears(1))
                 {
-                    stand += AnnualConsumption(zaehler.Typ, random, zaehler.Wohnung?.Wohnflaeche ?? 65);
+                    stand += AnnualConsumption(zaehler.Typ, random, zaehler.Wohnung?.Wohnflaeche ?? 65m);
                     zaehlerstaende.Add(new Zaehlerstand(date, Math.Round(stand, 2)) { Zaehler = zaehler });
                 }
             }
@@ -887,16 +887,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 for (var year = beginn.Year; year < GlobalToday.Year; year++)
                 {
-                    var wohnflaeche = Math.Max(umlage.Wohnungen.Sum(w => w.Wohnflaeche), 40);
+                    var wohnflaeche = Math.Max(umlage.Wohnungen.Sum(w => w.Wohnflaeche), 40m);
                     var basisbetrag = umlage.Typ.Bezeichnung switch
                     {
-                        "Heizkosten" => wohnflaeche * (9 + random.NextDouble() * 4),
-                        "Grundsteuer" => wohnflaeche * (1.2 + random.NextDouble() * 0.4),
-                        "Wasserversorgung" => wohnflaeche * (1.8 + random.NextDouble() * 0.8),
-                        _ => wohnflaeche * (0.8 + random.NextDouble() * 1.5)
+                        "Heizkosten" => wohnflaeche * (decimal)(9 + random.NextDouble() * 4),
+                        "Grundsteuer" => wohnflaeche * (decimal)(1.2 + random.NextDouble() * 0.4),
+                        "Wasserversorgung" => wohnflaeche * (decimal)(1.8 + random.NextDouble() * 0.8),
+                        _ => wohnflaeche * (decimal)(0.8 + random.NextDouble() * 1.5)
                     };
 
-                    var annualFactor = 1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015));
+                    var annualFactor = (decimal)(1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015)));
                     var betrag = Math.Round(basisbetrag * annualFactor, 2);
                     betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, new DateOnly(year, 12, 31), year)
                     {
@@ -1037,20 +1037,20 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return min.AddDays(random.Next(delta + 1));
         }
 
-        private static double CreateMaintenanceAmount(Random random)
+        private static decimal CreateMaintenanceAmount(Random random)
         {
             var r = random.NextDouble();
             if (r < 0.7)
             {
-                return Math.Round(120 + (random.NextDouble() * 900), 2);
+                return Math.Round((decimal)(120 + (random.NextDouble() * 900)), 2);
             }
 
             if (r < 0.95)
             {
-                return Math.Round(1000 + (random.NextDouble() * 4000), 2);
+                return Math.Round((decimal)(1000 + (random.NextDouble() * 4000)), 2);
             }
 
-            return Math.Round(5000 + (random.NextDouble() * 20000), 2);
+            return Math.Round((decimal)(5000 + (random.NextDouble() * 20000)), 2);
         }
 
         private static string CreateGermanIban(Random random)
@@ -1064,15 +1064,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return sb.ToString();
         }
 
-        private static double AnnualConsumption(Zaehlertyp zaehlertyp, Random random, double wohnflaeche)
+        private static decimal AnnualConsumption(Zaehlertyp zaehlertyp, Random random, decimal wohnflaeche)
         {
             return zaehlertyp switch
             {
-                Zaehlertyp.Warmwasser => 20 + random.NextDouble() * 80,
-                Zaehlertyp.Kaltwasser => 45 + random.NextDouble() * 120,
-                Zaehlertyp.Strom => 1000 + random.NextDouble() * 2800,
-                Zaehlertyp.Gas => Math.Max(40, wohnflaeche) * (45 + random.NextDouble() * 35),
-                _ => 100 + random.NextDouble() * 400
+                Zaehlertyp.Warmwasser => (decimal)(20 + random.NextDouble() * 80),
+                Zaehlertyp.Kaltwasser => (decimal)(45 + random.NextDouble() * 120),
+                Zaehlertyp.Strom => (decimal)(1000 + random.NextDouble() * 2800),
+                Zaehlertyp.Gas => Math.Max(40m, wohnflaeche) * (decimal)(45 + random.NextDouble() * 35),
+                _ => (decimal)(100 + random.NextDouble() * 400)
             };
         }
 

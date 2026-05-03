@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -105,7 +105,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -160,7 +160,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new MietminderungDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
+            var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1m)
             {
                 Vertrag = vertrag
             };
