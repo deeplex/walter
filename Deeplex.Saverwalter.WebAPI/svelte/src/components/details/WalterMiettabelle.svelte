@@ -15,7 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { type WalterVertragEntry, WalterMieteEntry } from '$walter/lib';
+    import {
+        type WalterVertragEntry,
+        WalterMieteEntry,
+        WalterMietzahlungApiURL,
+        type WalterMietzahlungInput
+    } from '$walter/lib';
     import {
         months,
         walter_data_miettabelle,
@@ -26,7 +31,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { WalterMiete } from '..';
-    import { openModal } from '$walter/store';
 
     export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
@@ -48,7 +52,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 id: vertragId,
                 text: wohnung
             },
-            betrag: betrag
+            kaltmieteZahlung: betrag,
+            nkZahlung: 0
         };
 
         title = `${wohnung}`;
@@ -91,99 +96,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
-    let addEntry: Partial<WalterMieteEntry> = {};
+    let addEntry: Partial<WalterMietzahlungInput> = {};
     let addModalOpen = false;
     let title = 'Unbekannter Vertrag';
 
     function onSubmit(new_value: unknown) {
-        const value = new_value as WalterMieteEntry;
-        const vertrag = vertraege.find((e) => e.id === +value.vertrag?.id);
-        if (!vertrag) {
-            console.warn('Vertrag not found: ', value.vertrag?.id);
-            return;
-        }
-        mieten.push(value);
-        vertrag!.mieten.push(value);
+        const ergebnis = new_value as { betreffenderMonat: string; kaltmieteZahlung: number };
+        const vertrag = vertraege.find((e) => e.id === +(addEntry.vertrag?.id || 0));
+        if (!vertrag) return;
+
+        const synthetic = {
+            id: -Date.now(),
+            betreffenderMonat: ergebnis.betreffenderMonat || addEntry.betreffenderMonat || '',
+            zahlungsdatum: addEntry.zahlungsdatum || '',
+            betrag: (addEntry.kaltmieteZahlung || 0) + (addEntry.nkZahlung || 0),
+            notiz: '',
+            repeat: 0,
+            createdAt: new Date(),
+            lastModified: new Date(),
+            vertrag: addEntry.vertrag!,
+            permissions: vertrag.permissions
+        } as WalterMieteEntry;
+        mieten.push(synthetic);
+        vertrag.mieten.push(synthetic);
         config = walter_data_miettabelle(vertraege, year);
-    }
-
-    function onDeleteMonthMiete(value: WalterMieteEntry) {
-        const vertrag = vertraege.find(
-            (entry) => entry.id === +value.vertrag?.id
-        );
-        if (vertrag) {
-            vertrag.mieten = (vertrag.mieten || []).filter(
-                (miete) => miete.id !== value.id
-            );
-        }
-
-        mieten = mieten.filter((miete) => miete.id !== value.id);
-        config = walter_data_miettabelle(vertraege, year);
-    }
-
-    function dateToMonthKey(value: string | undefined) {
-        if (!value) {
-            return undefined;
-        }
-
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-            return undefined;
-        }
-
-        return `${parsed.getFullYear()}-${`${parsed.getMonth() + 1}`.padStart(2, '0')}`;
-    }
-
-    function confirmDuplicateRentMonth(entryToCheck: unknown) {
-        const miete = entryToCheck as Partial<WalterMieteEntry>;
-        const vertragId = +(miete.vertrag?.id || 0);
-        const monthKey = dateToMonthKey(miete.betreffenderMonat);
-
-        const hasDuplicate =
-            !miete.id &&
-            vertragId > 0 &&
-            !!monthKey &&
-            mieten.some(
-                (row) =>
-                    +row.vertrag?.id === vertragId &&
-                    dateToMonthKey(row.betreffenderMonat) === monthKey
-            );
-
-        if (!hasDuplicate) {
-            return Promise.resolve(true);
-        }
-
-        return new Promise<boolean>((resolve) => {
-            openModal({
-                modalHeading: 'Miete bereits vorhanden',
-                content:
-                    'Für diesen Vertrag gibt es im ausgewählten Monat bereits mindestens eine Miete. Möchtest du trotzdem speichern?',
-                primaryButtonText: 'Trotzdem speichern',
-                submit: async () => {
-                    resolve(true);
-                    return true;
-                },
-                cancel: () => resolve(false),
-                danger: false
-            });
-        });
     }
 </script>
 
 <WalterDataWrapperQuickAdd
     {onSubmit}
     bind:addEntry
-    addUrl={WalterMieteEntry.ApiURL}
+    addUrl={WalterMietzahlungApiURL}
     bind:addModalOpen
-    beforeSubmit={confirmDuplicateRentMonth}
     {title}
 >
     <WalterMiete
         entry={addEntry}
-        {mieten}
-        {vertraege}
-        {onDeleteMonthMiete}
-        onRequestCloseModal={() => (addModalOpen = false)}
+        vertrag={vertraege.find((v) => v.id === +(addEntry.vertrag?.id || 0))}
     />
 </WalterDataWrapperQuickAdd>
 

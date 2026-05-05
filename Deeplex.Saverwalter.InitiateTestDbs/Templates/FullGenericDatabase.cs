@@ -420,9 +420,19 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     {
                         betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5 + beginn.DayOfYear;
                     }
+                    var satz = new Buchungssatz(
+                        date,
+                        $"BK-Eingang {umlage.Typ.Bezeichnung} {date.Year}");
+                    satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                    {
+                        Buchungssatz = satz,
+                        Buchungskonto = umlage.NkVerrechnungsKonto
+                    });
+
                     betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
                     {
                         Umlage = umlage,
+                        Buchungssatz = satz
                     });
                 }
             }

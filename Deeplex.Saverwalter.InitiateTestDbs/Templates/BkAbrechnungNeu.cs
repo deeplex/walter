@@ -21,12 +21,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 {
     /// <summary>
     /// Erstellt Buchungssätze für die Jahres-BK-Abrechnung nach dem neuen Buchungsmodell.
-    /// Zwei Schritte pro Vertrag/Jahr:
-    ///   1. Dem BK-Eingang-Buchungssatz jeder Betriebskostenrechnung das anteilige Soll auf NkBuchungskonto hinzufügen
-    ///   2. NkBuchungskonto-Saldo gegen BkAbrechnungsKonto ausgleichen
+    /// Verträge werden in zusammenhängende Komponenten gruppiert (transitiv über gemeinsame
+    /// Abrechnungseinheiten). Pro Komponente wird erst vollständig validiert, dann gebucht.
     /// </summary>
     internal static class BkAbrechnungNeu
     {
+        private record VertragPlan(
+            Vertrag Vertrag,
+            List<Abrechnungseinheit> Einheiten,
+            List<Note> Notes);
+
         public static async Task BucheJahresabrechnungAsync(SaverwalterContext ctx, int jahr)
         {
             var abrechnungsTag = new DateOnly(jahr, 12, 31);
@@ -47,82 +51,154 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(v => v.Mieter)
                 .ToListAsync();
 
-            Console.WriteLine($"Buche BK-Jahresabrechnung {jahr} für {vertraege.Count} Verträge...");
+            var aktive = vertraege.Where(v => VertragAktivInJahr(v, jahr)).ToList();
+            Console.WriteLine($"Buche BK-Jahresabrechnung {jahr}: {aktive.Count} aktive Verträge...");
 
-            foreach (var vertrag in vertraege)
+            // Phase 1: Abrechnungseinheiten für alle Verträge berechnen
+            var plaene = aktive.Select(v =>
             {
-                if (!VertragAktivInJahr(vertrag, jahr)) continue;
-
                 var notes = new List<Note>();
-                var zeitraum = new Zeitraum(jahr, vertrag);
-                var einheiten = Abrechnungseinheit.GetAbrechnungseinheiten(vertrag, zeitraum, notes);
+                var zeitraum = new Zeitraum(jahr, v);
+                var einheiten = Abrechnungseinheit.GetAbrechnungseinheiten(v, zeitraum, notes);
+                return new VertragPlan(v, einheiten, notes);
+            }).ToList();
 
-                // Step 1: Add the proportional Soll to the existing BK-Eingang Buchungssatz.
-                // Each Betriebskostenrechnung already has its half-open Buchungssatz (Haben side only).
-                // We complete it by adding a Soll zeile on the Vertrag's NkBuchungskonto.
-                foreach (var einheit in einheiten)
+            // Phase 2: Zusammenhängende Komponenten bilden
+            // Zwei Verträge sind verbunden wenn sie eine Abrechnungseinheit teilen (gleicher WohnungId-Set).
+            var komponenten = FindeKomponenten(plaene);
+            Console.WriteLine($"  → {komponenten.Count} zusammenhängende Komponenten gefunden.");
+
+            int gebuchte = 0, übersprungene = 0;
+
+            foreach (var komponente in komponenten)
+            {
+                var fehler = komponente
+                    .SelectMany(p => p.Notes.Where(n => n.Severity == Severity.Error)
+                        .Select(n => (p.Vertrag, n)))
+                    .ToList();
+
+                if (fehler.Count > 0)
                 {
-                    foreach (var umlage in einheit.Rechnungen.Keys)
-                    {
-                        var anteil = einheit.GetAnteil(umlage);
-                        if (anteil <= 0) continue;
-
-                        foreach (var entry in einheit.Rechnungen[umlage])
-                        {
-                            if (entry.Rechnung is null || entry.Betrag <= 0) continue;
-
-                            var betrag = Math.Round(entry.Betrag * anteil, 2);
-                            if (betrag <= 0) continue;
-
-                            var satz = entry.Rechnung.Buchungssatz;
-                            AddZeile(satz, SollHaben.Soll, betrag, vertrag.NkBuchungskonto);
-                        }
-                    }
+                    var bezeichnung = komponente.First().Vertrag.Wohnung.Adresse?.Strasse ?? $"Vertrag {komponente.First().Vertrag.VertragId}";
+                    Console.WriteLine($"  [ÜBERSPRUNGEN] Komponente '{bezeichnung}' ({komponente.Count} Verträge):");
+                    foreach (var (vertrag, note) in fehler)
+                        Console.WriteLine($"    Vertrag {vertrag.VertragId}: {note.Message}");
+                    übersprungene += komponente.Count;
+                    continue;
                 }
 
-                // Step 2: Settle NkBuchungskonto balance against BkAbrechnungsKonto.
-                // NkBuchungskonto.Buchungszeilen already includes the step 1 entries added
-                // above (via EF Core relationship fix-up), so the saldo is up to date.
-                var nkSaldo = NkBuchungskontoSaldoImJahr(vertrag.NkBuchungskonto, jahr);
+                foreach (var plan in komponente)
+                    BucheVertrag(ctx, plan, jahr, abrechnungsTag);
 
-                if (nkSaldo == 0) continue;
-
-                var ausgleichSatz = new Buchungssatz(
-                    abrechnungsTag,
-                    $"BK-Abrechnung {jahr} Ausgleich – {vertrag.VertragId}");
-
-                if (nkSaldo > 0)
-                {
-                    // NkBuchungskonto hat Soll-Überschuss: Mieter hat Nachzahlung
-                    AddZeile(ausgleichSatz, SollHaben.Haben, nkSaldo, vertrag.NkBuchungskonto);
-                    AddZeile(ausgleichSatz, SollHaben.Soll, nkSaldo, vertrag.BkAbrechnungsKonto);
-                }
-                else
-                {
-                    // NkBuchungskonto hat Haben-Überschuss: Mieter bekommt Erstattung
-                    var betrag = -nkSaldo;
-                    AddZeile(ausgleichSatz, SollHaben.Soll, betrag, vertrag.NkBuchungskonto);
-                    AddZeile(ausgleichSatz, SollHaben.Haben, betrag, vertrag.BkAbrechnungsKonto);
-                }
-
-                ctx.Buchungssaetze.Add(ausgleichSatz);
+                gebuchte += komponente.Count;
             }
 
             await ctx.SaveChangesAsync();
-            Console.WriteLine($"BK-Jahresabrechnung {jahr} abgeschlossen.");
+            Console.WriteLine($"BK-Jahresabrechnung {jahr}: {gebuchte} Verträge gebucht, {übersprungene} übersprungen.");
+        }
+
+        private static List<List<VertragPlan>> FindeKomponenten(List<VertragPlan> plaene)
+        {
+            // Union-Find über Index in plaene
+            var parent = Enumerable.Range(0, plaene.Count).ToArray();
+
+            int Find(int i)
+            {
+                while (parent[i] != i) { parent[i] = parent[parent[i]]; i = parent[i]; }
+                return i;
+            }
+
+            void Union(int a, int b)
+            {
+                a = Find(a); b = Find(b);
+                if (a != b) parent[a] = b;
+            }
+
+            // Für jeden eindeutigen WohnungId-Set: alle Verträge die diesen Set haben, zusammenführen
+            var gruppeZuIndizes = new Dictionary<string, List<int>>();
+            for (int i = 0; i < plaene.Count; i++)
+            {
+                foreach (var einheit in plaene[i].Einheiten)
+                {
+                    // Schlüssel = sortierte WohnungIds der Einheit (erste Umlage reicht, alle haben denselben Set)
+                    var wohnungIds = einheit.Rechnungen.Keys
+                        .FirstOrDefault()?.Wohnungen
+                        .Select(w => w.WohnungId)
+                        .OrderBy(id => id);
+                    if (wohnungIds == null) continue;
+                    var key = string.Join(",", wohnungIds);
+                    if (!gruppeZuIndizes.TryGetValue(key, out var liste))
+                        gruppeZuIndizes[key] = liste = [];
+                    liste.Add(i);
+                }
+            }
+
+            foreach (var liste in gruppeZuIndizes.Values)
+                for (int j = 1; j < liste.Count; j++)
+                    Union(liste[0], liste[j]);
+
+            return plaene
+                .Select((plan, i) => (plan, root: Find(i)))
+                .GroupBy(x => x.root, x => x.plan)
+                .Select(g => g.ToList())
+                .ToList();
+        }
+
+        private static void BucheVertrag(SaverwalterContext ctx, VertragPlan plan, int jahr, DateOnly abrechnungsTag)
+        {
+            var vertrag = plan.Vertrag;
+
+            // Step 1: Anteiliges Soll auf NkBuchungskonto je Betriebskostenrechnung
+            foreach (var einheit in plan.Einheiten)
+            {
+                foreach (var umlage in einheit.Rechnungen.Keys)
+                {
+                    var anteil = einheit.GetAnteil(umlage);
+                    if (anteil <= 0) continue;
+
+                    foreach (var entry in einheit.Rechnungen[umlage])
+                    {
+                        if (entry.Rechnung is null || entry.Betrag <= 0) continue;
+
+                        var betrag = Math.Round(entry.Betrag * anteil, 2);
+                        if (betrag <= 0) continue;
+
+                        AddZeile(entry.Rechnung.Buchungssatz, SollHaben.Soll, betrag, vertrag.NkBuchungskonto);
+                    }
+                }
+            }
+
+            // Step 2: NkBuchungskonto-Saldo gegen BkAbrechnungsKonto ausgleichen
+            var nkSaldo = NkBuchungskontoSaldoImJahr(vertrag.NkBuchungskonto, jahr);
+            if (nkSaldo == 0) return;
+
+            var ausgleichSatz = new Buchungssatz(
+                abrechnungsTag,
+                $"BK-Abrechnung {jahr} Ausgleich – {vertrag.VertragId}");
+
+            if (nkSaldo > 0)
+            {
+                AddZeile(ausgleichSatz, SollHaben.Haben, nkSaldo, vertrag.NkBuchungskonto);
+                AddZeile(ausgleichSatz, SollHaben.Soll, nkSaldo, vertrag.BkAbrechnungsKonto);
+            }
+            else
+            {
+                var betrag = -nkSaldo;
+                AddZeile(ausgleichSatz, SollHaben.Soll, betrag, vertrag.NkBuchungskonto);
+                AddZeile(ausgleichSatz, SollHaben.Haben, betrag, vertrag.BkAbrechnungsKonto);
+            }
+
+            ctx.Buchungssaetze.Add(ausgleichSatz);
         }
 
         private static decimal NkBuchungskontoSaldoImJahr(Buchungskonto konto, int jahr)
         {
-            // Soll-Buchungen = Belastungen (Kosten auf Mieter verteilt)
-            // Haben-Buchungen = Gutschriften (Vorauszahlungen des Mieters)
             var soll = konto.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsdatum.Year == jahr)
                 .Sum(z => z.Betrag);
             var haben = konto.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsdatum.Year == jahr)
                 .Sum(z => z.Betrag);
-            // Positive saldo = Nachzahlung; negative = Erstattung
             return soll - haben;
         }
 

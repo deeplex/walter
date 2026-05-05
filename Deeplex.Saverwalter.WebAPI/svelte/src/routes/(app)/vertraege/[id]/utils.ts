@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { WalterVertragEntry } from '$walter/lib';
+import type { WalterVertragEntry, WalterMietzahlungInput } from '$walter/lib';
 import { convertDateCanadian } from '$walter/services/utils';
 
 export function getMietminderungEntry(vertrag: WalterVertragEntry) {
@@ -39,12 +39,13 @@ export function getVertragversionEntry(vertrag: WalterVertragEntry) {
     };
 }
 
-export function getMieteEntry(vertrag: WalterVertragEntry) {
+export function getMietzahlungEntry(vertrag: WalterVertragEntry): Partial<WalterMietzahlungInput> {
+    const lastVersion = vertrag.versionen[vertrag.versionen.length - 1];
     return {
         vertrag: { id: vertrag.id, text: '' },
         zahlungsdatum: convertDateCanadian(new Date()),
-        betrag:
-            vertrag.versionen[vertrag.versionen.length - 1]?.grundmiete || 0,
+        kaltmieteZahlung: lastVersion?.grundmiete || 0,
+        nkZahlung: 0,
         permissions: vertrag.permissions
     };
 }

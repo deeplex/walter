@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -18,168 +18,151 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterDatePicker,
         WalterLinks,
-        WalterMieten,
+        WalterLinkTile,
         WalterMonthPicker,
-        WalterNumberInput,
-        WalterTextArea
+        WalterNumberInput
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
-    import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
-    import { fileURL } from '$walter/services/files';
+    import type {
+        WalterMietzahlungInput,
+        WalterMietzahlungListEntry,
+        WalterVertragEntry
+    } from '$walter/lib';
 
-    export let entry: Partial<WalterMieteEntry> = {};
-    export let mieten: WalterMieteEntry[] = [];
+    export let entry: Partial<WalterMietzahlungInput> = {};
     export let vertrag: WalterVertragEntry | undefined = undefined;
-    export let vertraege: WalterVertragEntry[] = [];
-    export let onDeleteMonthMiete:
-        | ((deleted: WalterMieteEntry) => void)
-        | undefined = undefined;
-    export let onRequestCloseModal: (() => void) | undefined = undefined;
-    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
-    export let readonly = false;
-    $: {
-        // Keep compatibility props in use while callers still pass them.
-        onDeleteMonthMiete;
-        onRequestCloseModal;
-    }
+    export let mietzahlungen: WalterMietzahlungListEntry[] = [];
 
-    function dateToMonthKey(
-        value: string | Date | undefined
-    ): string | undefined {
-        if (!value) {
-            return undefined;
-        }
+    // Local input state — only reset when the vertrag+month context changes.
+    let kaltmiete = 0;
+    let nk = 0;
+    let gesamtbetrag = 0;
 
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-            return undefined;
-        }
+    // Reactive display values — always current, independent of user edits.
+    $: forderungsbetrag = getGrundmiete(vertrag, entry.betreffenderMonat)
+        || +(entry.kaltmieteZahlung ?? 0);
+    $: schonGezahlt = getSchonGezahlt(mietzahlungen, entry.betreffenderMonat);
+    $: verbleibendeVorZahlung = +Math.max(0, forderungsbetrag - schonGezahlt).toFixed(2);
+    $: nachZahlungVerbleibend = +Math.max(0, verbleibendeVorZahlung - kaltmiete).toFixed(2);
 
-        const month = `${parsed.getMonth() + 1}`.padStart(2, '0');
-        return `${parsed.getFullYear()}-${month}`;
-    }
+    // Reinit input fields only when the context (vertrag + month) changes.
+    // Changes to mietzahlungen or kaltmiete do not retrigger this.
+    let _lastKey = '';
+    $: reinitIfNewContext(entry.vertrag?.id, entry.betreffenderMonat);
 
-    function getGrundmieteForDate(
-        vertragEntry: WalterVertragEntry,
-        date: Date
+    function reinitIfNewContext(
+        vertragId: string | number | undefined,
+        monat: string | undefined
     ) {
-        const version = [...(vertragEntry.versionen || [])]
-            .sort(
-                (a, b) =>
-                    new Date(a.beginn).getTime() - new Date(b.beginn).getTime()
-            )
-            .filter((versionEntry) => {
-                const versionStart = new Date(versionEntry.beginn).getTime();
-                return (
-                    !Number.isNaN(versionStart) &&
-                    versionStart <= date.getTime()
-                );
-            })
-            .at(-1);
+        const key = `${vertragId}|${monat}`;
+        if (key === _lastKey) return;
+        _lastKey = key;
 
-        return version?.grundmiete || 0;
+        const grundmiete = getGrundmiete(vertrag, monat) || +(entry.kaltmieteZahlung ?? 0);
+        const schon = getSchonGezahlt(mietzahlungen, monat);
+        kaltmiete = +Math.max(0, grundmiete - schon).toFixed(2);
+        nk = +(entry.nkZahlung ?? 0).toFixed(2);
+        gesamtbetrag = +(kaltmiete + nk).toFixed(2);
+        push();
     }
 
-    $: monthKey = dateToMonthKey(entry.betreffenderMonat);
-    $: entryVertragId = +(entry.vertrag?.id || 0);
-    $: activeVertrag =
-        vertrag ||
-        vertraege.find((vertragEntry) => vertragEntry.id === entryVertragId);
-    $: sameMonthMieten =
-        monthKey && entryVertragId
-            ? mieten
-                  .filter((miete) => {
-                      return (
-                          +miete.vertrag?.id === entryVertragId &&
-                          dateToMonthKey(miete.betreffenderMonat) === monthKey
-                      );
-                  })
-                  .sort(
-                      (a, b) =>
-                          new Date(a.zahlungsdatum).getTime() -
-                          new Date(b.zahlungsdatum).getTime()
-                  )
-            : [];
-    $: otherMonthMieten = sameMonthMieten.filter(
-        (miete) => miete.id !== +(entry.id || 0)
-    );
-    $: hasExistingMieteForSelectedMonth =
-        (entry.id === undefined || entry.id === null) &&
-        entryVertragId > 0 &&
-        sameMonthMieten.length > 0;
-    $: currentMonthDate = entry.betreffenderMonat
-        ? new Date(entry.betreffenderMonat)
-        : undefined;
-    $: currentGrundmiete =
-        activeVertrag &&
-        currentMonthDate &&
-        !Number.isNaN(currentMonthDate.getTime())
-            ? getGrundmieteForDate(activeVertrag, currentMonthDate)
-            : undefined;
-    $: nebenkostenVorauszahlung =
-        entry.betrag !== undefined && currentGrundmiete !== undefined
-            ? +(entry.betrag - currentGrundmiete).toFixed(2)
-            : undefined;
-    $: sameMonthMietenKey = `${entryVertragId}-${monthKey || 'none'}-${otherMonthMieten
-        .map((miete) => `${miete.id || 'new'}-${miete.betreffenderMonat || ''}`)
-        .join(',')}`;
+    function getGrundmiete(
+        v: WalterVertragEntry | undefined,
+        monat: string | undefined
+    ): number {
+        if (!v || !monat) return 0;
+        const monatDate = new Date(monat);
+        const version = [...(v.versionen || [])]
+            .filter((ver) => new Date(ver.beginn) <= monatDate)
+            .sort((a, b) => new Date(b.beginn).getTime() - new Date(a.beginn).getTime())[0];
+        return version?.grundmiete ?? 0;
+    }
+
+    function getSchonGezahlt(
+        list: WalterMietzahlungListEntry[],
+        monat: string | undefined
+    ): number {
+        if (!monat) return 0;
+        const key = monat.slice(0, 7);
+        return list
+            .filter((m) => m.betreffenderMonat.slice(0, 7) === key)
+            .reduce((sum, m) => sum + m.kaltmieteZahlung, 0);
+    }
+
+    function push() {
+        entry.kaltmieteZahlung = kaltmiete;
+        entry.nkZahlung = nk;
+    }
+
+    function onGesamtbetragChange(e: CustomEvent<number | null>) {
+        gesamtbetrag = +(e.detail ?? 0).toFixed(2);
+        kaltmiete = +Math.min(gesamtbetrag, verbleibendeVorZahlung).toFixed(2);
+        nk = +(gesamtbetrag - kaltmiete).toFixed(2);
+        push();
+    }
+
+    function onKaltmieteChange(e: CustomEvent<number | null>) {
+        kaltmiete = +(e.detail ?? 0).toFixed(2);
+        nk = +(gesamtbetrag - kaltmiete).toFixed(2);
+        push();
+    }
+
+    function onNkChange(e: CustomEvent<number | null>) {
+        nk = +(e.detail ?? 0).toFixed(2);
+        kaltmiete = +(gesamtbetrag - nk).toFixed(2);
+        push();
+    }
 </script>
 
 <Row>
-    <WalterNumberInput
-        required
-        {readonly}
-        bind:value={entry.betrag}
-        label="Betrag (Warmmiete)"
-    />
     <WalterMonthPicker
         required
-        disabled={readonly}
         bind:value={entry.betreffenderMonat}
         labelText="Betreffender Monat"
     />
     <WalterDatePicker
         required
-        disabled={readonly}
         bind:value={entry.zahlungsdatum}
         labelText="Zahlungsdatum"
     />
 </Row>
 <Row>
-    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
+    <WalterNumberInput
+        required
+        label="Gesamtbetrag"
+        value={gesamtbetrag}
+        change={onGesamtbetragChange}
+    />
 </Row>
 <Row>
     <WalterNumberInput
-        readonly
-        label="Aktuelle Kaltmiete (Vertrag)"
-        value={currentGrundmiete}
+        label="Kaltmiete"
+        value={kaltmiete}
+        change={onKaltmieteChange}
     />
     <WalterNumberInput
-        readonly
-        label="Nebenkostenvorauszahlung (Warmmiete - Kaltmiete)"
-        value={nebenkostenVorauszahlung}
+        label="Nebenkostenvorauszahlung"
+        value={nk}
+        change={onNkChange}
     />
 </Row>
+{#if forderungsbetrag > 0}
+    <Row>
+        <WalterNumberInput readonly label="Forderung Kaltmiete" value={forderungsbetrag} />
+        {#if schonGezahlt > 0}
+            <WalterNumberInput readonly label="Davon bereits gezahlt" value={schonGezahlt} />
+            <WalterNumberInput readonly label="Noch offen" value={verbleibendeVorZahlung} />
+        {/if}
+        <WalterNumberInput readonly label="Nach Zahlung noch offen" value={nachZahlungVerbleibend} />
+    </Row>
+{/if}
 
-<WalterLinks>
-    <WalterLinkTile
-        fileref={fileURL.vertrag(`${entry.vertrag?.id}`)}
-        name={`Vertrag: ${mieten[0]?.vertrag?.text || 'ansehen'}`}
-        href={`/vertraege/${entry.vertrag?.id}`}
-    />
-    {#if entry.vertrag?.id}
-        {#key sameMonthMietenKey}
-            <WalterMieten
-                title={`Andere Mieten im ausgewählten Monat`}
-                rows={otherMonthMieten}
-            />
-        {/key}
-        <WalterMieten
-            title="Mieten"
-            rows={mieten.filter(
-                (e) => +e.vertrag.id === +(entry.vertrag?.id || 0)
-            )}
+{#if entry.vertrag?.id}
+    <WalterLinks>
+        <WalterLinkTile
+            fileref=""
+            name={`Vertrag: ${entry.vertrag.text || entry.vertrag.id}`}
+            href={`/vertraege/${entry.vertrag.id}`}
         />
-    {/if}
-</WalterLinks>
+    </WalterLinks>
+{/if}

@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
     /// </summary>
     internal static class AbrechnungsVergleich
     {
-        public static async Task ErstelleVergleichsreportAsync(SaverwalterContext ctx, int jahr)
+        public static async Task ErstelleVergleichsreportAsync(SaverwalterContext ctx)
         {
             var vertraege = await ctx.Vertraege
                 .AsSplitQuery()
@@ -46,6 +46,24 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(v => v.Mieter)
                 .ToListAsync();
 
+            var jahre = vertraege
+                .SelectMany(v => v.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen.Select(r => r.BetreffendesJahr)))
+                .Distinct()
+                .OrderBy(j => j)
+                .ToList();
+
+            if (jahre.Count == 0)
+            {
+                Console.WriteLine("Keine Betriebskostenrechnungen gefunden.");
+                return;
+            }
+
+            foreach (var jahr in jahre)
+                ErstelleJahresbericht(vertraege, jahr);
+        }
+
+        private static void ErstelleJahresbericht(List<Vertrag> vertraege, int jahr)
+        {
             var abrechnungsbeginn = new DateOnly(jahr, 1, 1);
             var abrechnungsende = new DateOnly(jahr, 12, 31);
 
@@ -78,10 +96,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     continue;
                 }
 
-                // Neu: BkAbrechnungsKonto-Saldo für das Jahr
-                // Positiver Saldo auf BkAbrechnungsKonto (Soll) = Nachzahlung für Mieter
-                // Negativer Saldo = Erstattung an Mieter
-                // Damit Vorzeichen wie alt: Result > 0 = Erstattung, Result < 0 = Nachzahlung
                 var bkSoll = vertrag.BkAbrechnungsKonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsdatum.Year == jahr)
                     .Sum(z => z.Betrag);
@@ -89,9 +103,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsdatum.Year == jahr)
                     .Sum(z => z.Betrag);
 
-                // Neu-Saldo: positiv = Nachzahlung (Soll > Haben), negativ = Erstattung
-                // Alt-Result: positiv = Erstattung (BezahltNK > BetragNK), negativ = Nachzahlung
-                // → Vorzeichen umkehren für direkten Vergleich
                 neuSaldo = -(bkSoll - bkHaben);
 
                 var differenz = altResult.Value - neuSaldo.Value;

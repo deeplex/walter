@@ -21,6 +21,12 @@ export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 export { WalterHKVOEntry } from './WalterHKVO';
 export { WalterMieteEntry } from './WalterMiete';
+export {
+    WalterMietzahlungListEntry,
+    WalterMietzahlungApiURL,
+    type WalterMietzahlungInput,
+    type WalterForderungsstatusEntry
+} from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterMiettabelleEntry } from './WalterMiettabelle';
 export { WalterKontaktEntry } from './WalterKontakt';

@@ -907,10 +907,19 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     var annualFactor = (decimal)(1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015)));
                     var betrag = Math.Round(basisbetrag * annualFactor, 2);
-                    betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, new DateOnly(year, 12, 31), year)
+                    var rechnung = new Betriebskostenrechnung(betrag, new DateOnly(year, 12, 31), year)
                     {
-                        Umlage = umlage
+                        Umlage = umlage,
+                        Buchungssatz = new Buchungssatz(
+                            new DateOnly(year, 12, 31),
+                            $"BK-Eingang {umlage.Typ.Bezeichnung} {year}")
+                    };
+                    rechnung.Buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                    {
+                        Buchungssatz = rechnung.Buchungssatz,
+                        Buchungskonto = umlage.NkVerrechnungsKonto
                     });
+                    betriebskostenrechnungen.Add(rechnung);
                 }
             }
 

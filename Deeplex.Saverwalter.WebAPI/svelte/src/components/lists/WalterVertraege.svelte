@@ -23,7 +23,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterMiete,
         WalterVertrag
     } from '$walter/components';
-    import { WalterVertragEntry, type WalterMieteEntry } from '$walter/lib';
+    import {
+        WalterVertragEntry,
+        WalterMietzahlungApiURL,
+        type WalterMietzahlungInput
+    } from '$walter/lib';
     import { convertDateCanadian } from '$walter/services/utils';
     import { navigation } from '$walter/services/navigation';
 
@@ -46,13 +50,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let entry: Partial<WalterVertragEntry> | undefined = undefined;
 
     let earliest: Date = new Date();
-    let quickAddEntry: Partial<WalterMieteEntry> = {};
-    let quickAddMieten: WalterMieteEntry[] = [];
+    let quickAddEntry: Partial<WalterMietzahlungInput> = {};
     let quickAddVertrag: WalterVertragEntry | undefined = undefined;
 
-    function add(e: CustomEvent, vertrag: WalterVertragEntry) {
-        e.stopPropagation();
-
+    function getNextMieteMonth(vertrag: WalterVertragEntry): Date {
         const mieten = vertrag.mieten
             .map((miete) => new Date(miete.betreffenderMonat))
             .sort((a, b) => b.getTime() - a.getTime());
@@ -65,19 +66,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     0
                 ).getDate()
         );
-        if (dateMiete < earliest) {
-            dateMiete.setDate(earliest.getDate());
-        }
+        return dateMiete < earliest ? earliest : dateMiete;
+    }
+
+    function add(e: CustomEvent, vertrag: WalterVertragEntry) {
+        e.stopPropagation();
+
+        const lastVersion = vertrag.versionen[vertrag.versionen.length - 1];
         quickAddEntry = {
-            vertrag: vertrag.mieten[0]?.vertrag || {
-                id: `${vertrag.id}`,
-                text: vertrag.wohnung.text
-            },
+            vertrag: { id: vertrag.id, text: vertrag.wohnung.text },
             zahlungsdatum: convertDateCanadian(new Date()),
-            betrag: vertrag.mieten[0]?.betrag,
-            betreffenderMonat: convertDateCanadian(dateMiete)
+            kaltmieteZahlung: lastVersion?.grundmiete || 0,
+            nkZahlung: 0,
+            betreffenderMonat: convertDateCanadian(getNextMieteMonth(vertrag))
         };
-        quickAddMieten = [...vertrag.mieten];
         quickAddVertrag = vertrag;
 
         open = true;
@@ -93,14 +95,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataWrapperQuickAdd
     title={quickAddEntry.vertrag?.text || 'Vertrag'}
     addEntry={quickAddEntry}
-    addUrl={WalterVertragEntry.ApiURL}
+    addUrl={WalterMietzahlungApiURL}
     bind:addModalOpen={open}
 >
-    <WalterMiete
-        entry={quickAddEntry}
-        mieten={quickAddMieten}
-        vertrag={quickAddVertrag}
-    />
+    <WalterMiete entry={quickAddEntry} vertrag={quickAddVertrag} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

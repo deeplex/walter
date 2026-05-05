@@ -34,22 +34,22 @@ wait_for_tcp() {
   return 1
 }
 
-echo "[1/5] Waiting for Postgres at ${DB_HOST}:${DB_PORT}"
+echo "[1/6] Waiting for Postgres at ${DB_HOST}:${DB_PORT}"
 if ! wait_for_tcp "$DB_HOST" "$DB_PORT" "Postgres"; then
   echo "Make sure the devcontainer services are running."
   exit 1
 fi
 
-echo "[2/5] Restoring .NET dependencies"
+echo "[2/6] Restoring .NET dependencies"
 dotnet restore
 
-echo "[3/5] Installing frontend dependencies"
+echo "[3/6] Installing frontend dependencies"
 (
   cd Deeplex.Saverwalter.WebAPI/svelte
   yarn install --immutable || yarn install
 )
 
-echo "[4/5] Seeding realistic development databases"
+echo "[4/6] Seeding realistic development databases"
 echo "Using DB connection: ${DB_HOST}:${DB_PORT} (user: ${DB_USER})"
 
 # Probe MinIO; if it's reachable, hand the URL to the seeder so it can also
@@ -78,7 +78,19 @@ WALTER_DEV_RANDOM_SEED="$WALTER_DEV_RANDOM_SEED" \
 WALTER_DEV_S3_PROVIDER="$seed_s3_provider" \
   dotnet run --project Deeplex.Saverwalter.InitiateTestDbs/Deeplex.Saverwalter.InitiateTestDbs.csproj --no-launch-profile
 
-echo "[5/5] Development environment ready"
+echo "[5/6] Creating historical booking entries"
+for database_name in walter_dev_generic_db walter_dev_full_generic_db; do
+  echo "Transferring rents and invoices into booking model for ${database_name}..."
+  DATABASE_HOST="$DB_HOST" \
+  DATABASE_PORT="$DB_PORT" \
+  DATABASE_USER="$DB_USER" \
+  DATABASE_PASS="$DB_PASS" \
+  DATABASE_NAME="$database_name" \
+  WALTER_DEV_RANDOM_SEED="$WALTER_DEV_RANDOM_SEED" \
+    dotnet run --project Deeplex.Saverwalter.InitiateTestDbs/Deeplex.Saverwalter.InitiateTestDbs.csproj --no-launch-profile -- --buche-historisch
+done
+
+echo "[6/6] Development environment ready"
 echo ""
 echo "============================================================"
 echo "DEV LOGIN CREDENTIALS (for UI + API tests)"

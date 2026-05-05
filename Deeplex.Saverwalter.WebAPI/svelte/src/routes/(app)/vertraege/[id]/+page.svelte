@@ -29,22 +29,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks
     } from '$walter/components';
     import {
-        getMieteEntry,
+        getMietzahlungEntry,
         getMietminderungEntry,
         getVertragversionEntry
     } from './utils';
     import {
         WalterFileWrapper,
-        type WalterMieteEntry,
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
-        WalterKontaktEntry
+        WalterKontaktEntry,
+        type WalterMietzahlungInput
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
-    import { ClickableTile, Row } from 'carbon-components-svelte';
-    import { walter_data_mieten } from '$walter/components/data/WalterData';
-    import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { ClickableTile } from 'carbon-components-svelte';
     import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
@@ -54,7 +52,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const vertragversionEntry: Partial<WalterVertragVersionEntry> =
         getVertragversionEntry(data.entry);
 
-    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(data.entry);
+    const mietzahlungEntry: Partial<WalterMietzahlungInput> =
+        getMietzahlungEntry(data.entry);
 
     const mieterEntry: Partial<WalterKontaktEntry> = {};
 
@@ -102,9 +101,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.versionen}
         />
         <WalterMieten
-            entry={mieteEntry}
-            title="Mieten"
-            rows={data.entry.mieten}
+            entry={mietzahlungEntry}
+            vertrag={data.entry}
+            title="Mietzahlungen"
+            rows={data.mietzahlungen}
         />
         <WalterMietminderungen
             entry={mietminderungEntry}
@@ -137,11 +137,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     </WalterLinks>
 
-    {#if data.entry.mieten.length > 1}
-        <Row>
-            <WalterDataScatterChart
-                config={walter_data_mieten('Mieten', data.entry.mieten)}
-            />
-        </Row>
-    {/if}
 </WalterGrid>

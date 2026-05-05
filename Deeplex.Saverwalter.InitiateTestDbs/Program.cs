@@ -32,7 +32,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var bucheHistorisch = args.Contains("--buche-historisch", StringComparer.OrdinalIgnoreCase);
             var vergleicheAbrechnung = args.Contains("--vergleiche-abrechnung", StringComparer.OrdinalIgnoreCase);
             var bucheAbrechnungArg = GetArgValue(args, "--buche-abrechnung");
-            var vergleicheAbrechnungArg = GetArgValue(args, "--vergleiche-abrechnung");
             var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles && !bucheHistorisch
                 && bucheAbrechnungArg is null && !vergleicheAbrechnung;
 
@@ -125,20 +124,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 
             if (vergleicheAbrechnung)
             {
-                string? ausgabePfad = null;
-                if (!string.IsNullOrWhiteSpace(vergleicheAbrechnungArg))
-                {
-                    ausgabePfad = vergleicheAbrechnungArg == "."
-                        ? Path.Combine(Directory.GetCurrentDirectory(), $"bk-vergleich-{DateTime.Now:yyyyMMdd-HHmmss}.txt")
-                        : vergleicheAbrechnungArg;
-                }
-
                 await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
-                await AbrechnungsVergleich.ErstelleVergleichsreportAsync(ctx, ausgabePfad);
-                if (!string.IsNullOrWhiteSpace(ausgabePfad))
-                {
-                    Console.WriteLine($"Report geschrieben: {ausgabePfad}");
-                }
+                await AbrechnungsVergleich.ErstelleVergleichsreportAsync(ctx);
             }
         }
 

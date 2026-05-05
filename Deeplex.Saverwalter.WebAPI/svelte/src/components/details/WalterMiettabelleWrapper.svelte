@@ -18,7 +18,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterBetriebskostenrechnungEntry,
         WalterMieteEntry,
+        WalterMietzahlungApiURL,
         WalterZaehlerstandEntry,
+        type WalterForderungsstatusEntry,
+        type WalterMietzahlungInput,
         type WalterUmlageEntry,
         type WalterVertragEntry,
         type WalterZaehlerEntry
@@ -354,7 +357,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let addZaehlerstandOpen = false;
     let addRechnungOpen = false;
 
-    let addMieteEntry: Partial<WalterMieteEntry> = {};
+    let addMieteEntry: Partial<WalterMietzahlungInput> = {};
     let addZaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {};
     let addRechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
@@ -371,10 +374,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             zahlungsdatum: convertDateCanadian(new Date()),
             betreffenderMonat: convertDateCanadian(task.monthDate),
             vertrag: {
-                id: `${task.vertrag.id}`,
+                id: task.vertrag.id,
                 text: task.vertrag.wohnung?.text || `Vertrag ${task.vertrag.id}`
             },
-            betrag: task.amount
+            kaltmieteZahlung: task.amount,
+            nkZahlung: 0
         };
 
         addMieteOpen = true;
@@ -417,20 +421,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onSubmitMiete(newValue: unknown) {
-        const value = {
-            ...(newValue as WalterMieteEntry),
-            vertrag:
-                (newValue as WalterMieteEntry).vertrag || addMieteEntry.vertrag
-        } as WalterMieteEntry;
+        const ergebnis = newValue as WalterForderungsstatusEntry & {
+            betreffenderMonat: string;
+            kaltmieteZahlung: number;
+        };
         const vertrag = vertraege.find(
-            (entry) => entry.id === +value.vertrag?.id
+            (entry) => entry.id === +(addMieteEntry.vertrag?.id || 0)
         );
         if (!vertrag) {
             return;
         }
 
-        vertrag.mieten.push(value);
-        mieten = [...mieten, value].sort(
+        // Add a synthetic entry to keep buildRentTasks' month-tracking in sync.
+        const syntheticMiete = {
+            id: -Date.now(),
+            betreffenderMonat: ergebnis.betreffenderMonat || addMieteEntry.betreffenderMonat || '',
+            zahlungsdatum: addMieteEntry.zahlungsdatum || '',
+            betrag: (addMieteEntry.kaltmieteZahlung || 0) + (addMieteEntry.nkZahlung || 0),
+            notiz: addMieteEntry.notiz || '',
+            repeat: 0,
+            createdAt: new Date(),
+            lastModified: new Date(),
+            vertrag: addMieteEntry.vertrag!,
+            permissions: vertrag.permissions
+        } as WalterMieteEntry;
+        vertrag.mieten.push(syntheticMiete);
+        mieten = [...mieten, syntheticMiete].sort(
             (a, b) =>
                 new Date(a.betreffenderMonat).getTime() -
                 new Date(b.betreffenderMonat).getTime()
@@ -551,17 +567,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterDataWrapperQuickAdd
         title={addMieteEntry.vertrag?.text || 'Miete'}
         bind:addEntry={addMieteEntry}
-        addUrl={WalterMieteEntry.ApiURL}
+        addUrl={WalterMietzahlungApiURL}
         bind:addModalOpen={addMieteOpen}
-        beforeSubmit={confirmDuplicateRentMonth}
         onSubmit={onSubmitMiete}
     >
         <WalterMiete
             entry={addMieteEntry}
-            {mieten}
-            {vertraege}
-            {onDeleteMonthMiete}
-            onRequestCloseModal={() => (addMieteOpen = false)}
+            vertrag={vertraege.find((v) => v.id === +(addMieteEntry.vertrag?.id || 0))}
         />
     </WalterDataWrapperQuickAdd>
 

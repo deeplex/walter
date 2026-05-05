@@ -42,7 +42,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         TextInput,
         Tile
     } from 'carbon-components-svelte';
-    import { WalterKontaktEntry, type WalterMieteEntry } from '$walter/lib';
+    import {
+        WalterKontaktEntry,
+        type WalterMietzahlungInput
+    } from '$walter/lib';
     import WalterData from '../data/WalterData.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
@@ -64,10 +67,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     if (dateMiete < abrechnung.zeitraum.abrechnungsbeginn) {
         dateMiete.setDate(abrechnung.zeitraum.abrechnungsbeginn.getDate());
     }
-    const mietEntry: Partial<WalterMieteEntry> = {
+    const mietEntry: Partial<WalterMietzahlungInput> = {
         vertrag: abrechnung.vertrag,
         zahlungsdatum: convertDateCanadian(new Date()),
-        betrag: lastMiete?.betrag,
+        kaltmieteZahlung: lastMiete?.betrag || 0,
+        nkZahlung: 0,
         betreffenderMonat: convertDateCanadian(dateMiete),
         permissions: {
             read: true,
@@ -84,15 +88,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         )
     );
 
-    const mietenRows = canReadMiete
-        ? abrechnung.mieten.map((miete) => ({
-              ...miete,
-              permissions: {
-                  ...miete.permissions,
-                  read: true
-              }
-          }))
-        : abrechnung.mieten;
+    const mietenRows = abrechnung.mieten.map((miete) => ({
+        id: `${miete.id}`,
+        buchungsdatum: miete.zahlungsdatum,
+        betreffenderMonat: miete.betreffenderMonat,
+        kaltmieteZahlung: miete.betrag,
+        permissions: canReadMiete
+            ? { ...miete.permissions, read: true }
+            : miete.permissions
+    }));
 </script>
 
 <Tile style="margin-top: 2rem">
