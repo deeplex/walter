@@ -28,6 +28,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/betriebskostenrechnungen")]
     public class BetriebskostenrechnungController : FileControllerBase<BetriebskostenrechnungEntry, int, Betriebskostenrechnung>
     {
+        public class BuchungszeileInfo
+        {
+            public string Konto { get; set; } = "";
+            public string SollHaben { get; set; } = "";
+            public decimal Betrag { get; set; }
+        }
+
         public class BetriebskostenrechnungEntryBase
         {
             public int Id { get; set; }
@@ -36,6 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateOnly Datum { get; set; }
             public SelectionEntry? Typ { get; set; }
             public SelectionEntry? Umlage { get; set; }
+            public bool IsBalanced { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -55,6 +63,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     entity.Umlage.Typ.UmlagetypId.ToString());
 
                 Permissions = permissions;
+
+                if (entity.Buchungssatz is { } satz)
+                {
+                    var soll = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
+                    var haben = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
+                    IsBalanced = Math.Abs(soll - haben) <= 0.005m;
+                }
             }
         }
 
@@ -63,6 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
+            public List<BuchungszeileInfo> Buchungszeilen { get; set; } = [];
 
             private Betriebskostenrechnung? Entity { get; }
 
@@ -78,15 +94,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 LastModified = entity.LastModified;
 
                 Entity = entity;
+
+                if (entity.Buchungssatz is { } satz)
+                {
+                    Buchungszeilen = satz.Buchungszeilen.Select(z => new BuchungszeileInfo
+                    {
+                        Konto = z.Buchungskonto.Bezeichnung,
+                        SollHaben = z.SollHaben == SollHaben.Soll ? "Soll" : "Haben",
+                        Betrag = z.Betrag
+                    }).ToList();
+                }
             }
         }
 
-        private readonly ILogger<BetriebskostenrechnungController> _logger;
         protected override BetriebskostenrechnungDbService DbService { get; }
 
-        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, BetriebskostenrechnungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+        public BetriebskostenrechnungController(
+            ILogger<BetriebskostenrechnungController> logger,
+            BetriebskostenrechnungDbService dbService,
+            HttpClient httpClient) : base(logger, httpClient)
         {
-            _logger = logger;
             DbService = dbService;
         }
 

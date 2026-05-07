@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
-        public virtual Buchungssatz Buchungssatz { get; set; } = null!;;
+        public virtual Buchungssatz Buchungssatz { get; set; } = null!;
         public string? Notiz { get; set; }
 
         public DateTime CreatedAt { get; private set; }

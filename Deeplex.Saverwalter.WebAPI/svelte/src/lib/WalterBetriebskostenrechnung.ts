@@ -18,6 +18,12 @@ import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterWohnungEntry } from './WalterWohnung';
 
+export type WalterBuchungszeileInfo = {
+    konto: string;
+    sollHaben: 'Soll' | 'Haben';
+    betrag: number;
+};
+
 export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
     public static ApiURL = `/api/betriebskostenrechnungen`;
 
@@ -33,7 +39,9 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         public umlage: WalterSelectionEntry,
         public wohnungen: WalterWohnungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public isBalanced: boolean = false,
+        public buchungszeilen: WalterBuchungszeileInfo[] = []
     ) {
         super();
     }
@@ -63,7 +71,9 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
             umlage,
             wohnungen,
             betriebskostenrechnungen,
-            permissions
+            permissions,
+            json.isBalanced ?? false,
+            json.buchungszeilen ?? []
         );
     }
 }

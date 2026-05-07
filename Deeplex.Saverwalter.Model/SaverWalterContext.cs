@@ -139,9 +139,9 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey("MietErtragskontoId")
                 .IsRequired();
             modelBuilder.Entity<Wohnung>()
-                .HasOne(w => w.ErhaltungsaufwandsKonto)
+                .HasOne(w => w.AufwandsKonto)
                 .WithMany()
-                .HasForeignKey("ErhaltungsaufwandsKontoId")
+                .HasForeignKey("AufwandsKontoId")
                 .IsRequired();
 
             modelBuilder.Entity<Kontakt>()

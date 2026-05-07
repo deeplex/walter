@@ -189,7 +189,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Nutzflaeche = flaeche,
                         Nutzeinheit = 1,
                         MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
-                        ErhaltungsaufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
+                        AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     });
                 }
             }

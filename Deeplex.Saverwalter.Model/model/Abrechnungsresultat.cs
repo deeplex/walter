@@ -38,6 +38,12 @@ public class Abrechnungsresultat
     // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
     public decimal Saldo { get; set; }
     public string? Notiz { get; set; }
+    /// <summary>
+    /// Buchungssatz für die NK-Abrechnung. Wird beim erstmaligen Generieren angelegt.
+    /// Soll NkBuchungskonto / Haben BkAbrechnungsKonto + ZahlungsKonto (Saldo).
+    /// </summary>
+    [Required]
+    public virtual Buchungssatz Buchungssatz { get; set; } = null!;
     public DateTime CreatedAt { get; private set; }
     public DateTime LastModified { get; set; }
 }

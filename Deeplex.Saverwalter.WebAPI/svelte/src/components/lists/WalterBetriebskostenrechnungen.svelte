@@ -34,7 +34,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'umlage.text', value: 'Wohnungen' },
         { key: 'betreffendesJahr', value: 'Betreffendes Jahr' },
         { key: 'betrag', value: 'Betrag' },
-        { key: 'datum', value: 'Datum' }
+        { key: 'datum', value: 'Datum' },
+        { key: 'ausgeglichen', value: '⚖' }
     ];
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
@@ -42,23 +43,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const rowHref = (row: DataTableRow) =>
         `/betriebskostenrechnungen/${row.id}`;
 
-    $: sortedRows = [...(rows || [])].sort((a, b) => {
-        const yearA = a.betreffendesJahr || 0;
-        const yearB = b.betreffendesJahr || 0;
+    $: sortedRows = [...(rows || [])]
+        .map((r) => ({ ...r, ausgeglichen: r.isBalanced ? '✓' : '✗' }))
+        .sort((a, b) => {
+            const yearA = a.betreffendesJahr || 0;
+            const yearB = b.betreffendesJahr || 0;
 
-        if (yearA !== yearB) {
-            return yearB - yearA;
-        }
+            if (yearA !== yearB) {
+                return yearB - yearA;
+            }
 
-        const dateA = new Date(a.datum).getTime();
-        const dateB = new Date(b.datum).getTime();
+            const dateA = new Date(a.datum).getTime();
+            const dateB = new Date(b.datum).getTime();
 
-        if (!Number.isNaN(dateA) && !Number.isNaN(dateB)) {
-            return dateB - dateA;
-        }
+            if (!Number.isNaN(dateA) && !Number.isNaN(dateB)) {
+                return dateB - dateA;
+            }
 
-        return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
-    });
+            return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
+        });
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
         undefined;

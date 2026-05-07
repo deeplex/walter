@@ -401,7 +401,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Adresse = adresse,
                         Besitzer = owner,
                         MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
-                        ErhaltungsaufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
+                        AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     });
                 }
 
@@ -907,18 +907,24 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     var annualFactor = (decimal)(1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015)));
                     var betrag = Math.Round(basisbetrag * annualFactor, 2);
+                    var buchungssatz = new Buchungssatz(
+                        new DateOnly(year, 12, 31),
+                        $"BK-Eingang {umlage.Typ.Bezeichnung} {year}");
+                    buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                    {
+                        Buchungssatz = buchungssatz,
+                        Buchungskonto = umlage.NkVerrechnungsKonto
+                    });
+                    buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                    {
+                        Buchungssatz = buchungssatz,
+                        Buchungskonto = umlage.ZahlungsKonto
+                    });
                     var rechnung = new Betriebskostenrechnung(betrag, new DateOnly(year, 12, 31), year)
                     {
                         Umlage = umlage,
-                        Buchungssatz = new Buchungssatz(
-                            new DateOnly(year, 12, 31),
-                            $"BK-Eingang {umlage.Typ.Bezeichnung} {year}")
+                        Buchungssatz = buchungssatz
                     };
-                    rechnung.Buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
-                    {
-                        Buchungssatz = rechnung.Buchungssatz,
-                        Buchungskonto = umlage.NkVerrechnungsKonto
-                    });
                     betriebskostenrechnungen.Add(rechnung);
                 }
             }

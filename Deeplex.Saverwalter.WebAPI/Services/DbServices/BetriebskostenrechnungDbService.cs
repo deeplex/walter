@@ -27,8 +27,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class BetriebskostenrechnungDbService : WalterDbServiceBase<BetriebskostenrechnungEntry, int, Betriebskostenrechnung>
     {
-        public BetriebskostenrechnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
+        private readonly BetriebskostenrechnungBuchungsService _buchungsService;
+
+        public BetriebskostenrechnungDbService(
+            SaverwalterContext ctx,
+            IAuthorizationService authorizationService,
+            BetriebskostenrechnungBuchungsService buchungsService)
+            : base(ctx, authorizationService)
         {
+            _buchungsService = buchungsService;
         }
 
         public async Task<ActionResult<IEnumerable<BetriebskostenrechnungEntryBase>>> GetList(ClaimsPrincipal user)
@@ -39,6 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .AsSplitQuery()
                     .Include(e => e.Umlage).ThenInclude(u => u.Typ)
                     .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                    .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
                     .ToListAsync();
                 var adminPerms = new Utils.Permissions { Read = true, Update = true, Remove = true };
                 return allItems.Select(e => new BetriebskostenrechnungEntryBase(e, adminPerms)).ToArray();
@@ -71,6 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .AsSplitQuery()
                 .Include(e => e.Umlage).ThenInclude(u => u.Typ)
                 .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
                 .Where(e => e.Umlage.Wohnungen.Any(w => readableWohnungIds.Contains(w.WohnungId)))
                 .ToListAsync();
 
@@ -142,18 +151,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private async Task<BetriebskostenrechnungEntry> Add(BetriebskostenrechnungEntry entry)
         {
             if (entry.Umlage == null)
-            {
                 throw new ArgumentException("entry.Umlage can't be null.");
-            }
-            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id) ?? throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
-            var entity = new Betriebskostenrechnung(entry.Betrag, entry.Datum, entry.BetreffendesJahr)
-            {
-                Umlage = umlage!
-            };
 
-            SetOptionalValues(entity, entry);
-            Ctx.Betriebskostenrechnungen.Add(entity);
-            Ctx.SaveChanges();
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id)
+                ?? throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
+
+            var entity = await _buchungsService.BucheRechnungAsync(
+                umlage,
+                entry.Betrag,
+                entry.Datum,
+                entry.BetreffendesJahr,
+                entry.Notiz);
 
             return new BetriebskostenrechnungEntry(entity, entry.Permissions);
         }
@@ -162,31 +170,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                if (entry.Umlage == null)
+                    throw new ArgumentException("entry has no Umlage");
+
+                var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id)
+                    ?? throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
+
                 entity.Betrag = entry.Betrag;
                 entity.Datum = entry.Datum;
                 entity.BetreffendesJahr = entry.BetreffendesJahr;
-                if (entry.Umlage == null)
-                {
-                    throw new ArgumentException("entry has no Umlage");
-                }
-                entity.Umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id) ?? throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
+                entity.Umlage = umlage;
+                entity.Notiz = entry.Notiz;
 
-                SetOptionalValues(entity, entry);
+                await _buchungsService.AktualisiereBuchungssatzAsync(
+                    entity, umlage, entry.Betrag, entry.Datum, entry.BetreffendesJahr, entry.Notiz);
+
                 Ctx.Betriebskostenrechnungen.Update(entity);
-                Ctx.SaveChanges();
 
                 return new BetriebskostenrechnungEntry(entity, entry.Permissions);
             });
         }
 
-        private static void SetOptionalValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)
-        {
-            if (entity.BetriebskostenrechnungId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Notiz = entry.Notiz;
-        }
     }
 }
