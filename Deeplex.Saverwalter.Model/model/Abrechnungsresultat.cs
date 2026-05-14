@@ -24,24 +24,8 @@ public class Abrechnungsresultat
 
     [Required]
     public virtual Vertrag Vertrag { get; set; } = null!;
-    [Required]
-    public int Jahr { get; set; }
-    [Required]
-    public decimal Kaltmiete { get; set; }
-    [Required]
-    public decimal Vorauszahlung { get; set; }
-    [Required]
-    public decimal Minderung { get; set; }
-    [Required]
-    public decimal Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
-    // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
-    public decimal Saldo { get; set; }
     public string? Notiz { get; set; }
-    /// <summary>
-    /// Buchungssatz für die NK-Abrechnung. Wird beim erstmaligen Generieren angelegt.
-    /// Soll NkBuchungskonto / Haben BkAbrechnungsKonto + ZahlungsKonto (Saldo).
-    /// </summary>
     [Required]
     public virtual Buchungssatz Buchungssatz { get; set; } = null!;
     public DateTime CreatedAt { get; private set; }

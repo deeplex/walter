@@ -1,6 +1,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -27,7 +28,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<Abrechnungsresultat>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {
-            var entity = await Ctx.Abrechnungsresultate.FindAsync(id);
+            var entity = await Ctx.Abrechnungsresultate
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.ZahlungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.NkBuchungskonto)
+                        .ThenInclude(k => k.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.Wohnung)
+                        .ThenInclude(w => w.Adresse)
+                .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == id);
             return await GetEntity(user, entity, op);
         }
 
@@ -48,8 +62,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new ForbidResult();
             }
 
-            var entity = vertrag.Abrechnungsresultate
-                .SingleOrDefault(e => e.Jahr == jahr);
+            var entity = await Ctx.Abrechnungsresultate
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.ZahlungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.NkBuchungskonto)
+                        .ThenInclude(k => k.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.Wohnung)
+                        .ThenInclude(w => w.Adresse)
+                .Where(r => r.Vertrag.VertragId == VertragId &&
+                            r.Buchungssatz != null &&
+                            r.Buchungssatz.Buchungsdatum.Year == jahr)
+                .SingleOrDefaultAsync();
 
             if (entity == null)
             {
@@ -114,13 +143,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 Remove = true
             };
 
-            resultat.Jahr = entry.Jahr;
-            resultat.Kaltmiete = entry.Kaltmiete;
-            resultat.Vorauszahlung = entry.Vorauszahlung;
-            resultat.Rechnungsbetrag = entry.Rechnungsbetrag;
-            resultat.Minderung = entry.Minderung;
             resultat.Abgesendet = entry.Abgesendet;
-            resultat.Saldo = entry.Saldo;
             resultat.Notiz = entry.Notiz;
             Ctx.Abrechnungsresultate.Update(resultat);
             await Ctx.SaveChangesAsync();

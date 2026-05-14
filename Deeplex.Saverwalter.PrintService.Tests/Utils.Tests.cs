@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using FluentAssertions;
 using Xunit;
@@ -170,18 +169,6 @@ namespace Deeplex.Saverwalter.PrintService.Tests
             var mietobjekt = Utils.Mietobjekt(wohnung);
 
             mietobjekt.Should().Be(result);
-        }
-
-        [Theory]
-        [InlineData(2023, "01.01.2023 - 31.12.2023")]
-        public void Abrechnungszeitraum(int jahr, string result)
-        {
-            var vertrag = new Vertrag();
-            var zeitraum = new Zeitraum(jahr, vertrag);
-
-            var abrechnungszeitraum = Utils.Abrechnungszeitraum(zeitraum);
-
-            abrechnungszeitraum.Should().Be(result);
         }
 
         private const string resultTxtPositive

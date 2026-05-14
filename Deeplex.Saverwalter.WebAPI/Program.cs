@@ -18,6 +18,8 @@ using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -197,7 +199,11 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
             container.Register<MietzahlungBuchungsService>(Lifestyle.Scoped);
-            container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
+            container.Register<AbrechnungsresultatBuchungsService>(Lifestyle.Scoped);
+            container.Register<NkAnteilBuchungsService>(Lifestyle.Scoped);
+            container.Register<AbrechnungsgruppenService>(Lifestyle.Scoped);
+            container.Register<AbrechnungslaufService>(Lifestyle.Scoped);
+            container.Register<AbrechnungslaufPrintService>(Lifestyle.Scoped);
 
             container.Register<TokenService>(Lifestyle.Singleton);
             container.Register<AccountDbService>(Lifestyle.Scoped);

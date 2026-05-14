@@ -21,7 +21,6 @@ import type {
     WalterVertragEntry,
     WalterWohnungEntry
 } from '$walter/lib';
-import type { WalterRechnungEntry } from '$walter/types';
 
 const baseOptions = {
     legend: { enabled: false },
@@ -32,65 +31,6 @@ const baseOptions = {
         }
     }
 } as WalterDataOptionsType;
-
-const lineAxes = {
-    axes: {
-        bottom: { mapsTo: 'value', includeZero: false },
-        left: { mapsTo: 'group', scaleType: 'labels', includeZero: false }
-    }
-};
-
-export function walter_data_rechnungen(
-    title: string,
-    rechnungen: WalterRechnungEntry[]
-): WalterDataConfigType {
-    const options = {
-        ...baseOptions,
-        title
-    };
-    const data = rechnungen.map((e) => ({
-        group: e.typ,
-        value: e.gesamtBetrag
-    }));
-
-    return { data, options };
-}
-
-export function walter_data_rechnungen_pairs(
-    title: string,
-    rechnungen: WalterRechnungEntry[]
-): WalterDataConfigType {
-    const options = {
-        ...baseOptions,
-        ...lineAxes,
-        title
-    };
-
-    const data = rechnungen.map((rechnung) => ({
-        group: rechnung.typ,
-        value: [rechnung.betragLetztesJahr, rechnung.gesamtBetrag]
-    }));
-
-    return { data, options };
-}
-
-export function walter_data_rechnungen_diff(
-    title: string,
-    rechnungen: WalterRechnungEntry[]
-): WalterDataConfigType {
-    const options = {
-        ...baseOptions,
-        ...lineAxes,
-        title
-    };
-
-    const data = rechnungen.map((rechnung) => ({
-        group: rechnung.typ,
-        value: rechnung.gesamtBetrag - rechnung.betragLetztesJahr
-    }));
-
-    return { data, options };
-}
 
 export function walter_data_rechnungen_year(
     title: string,

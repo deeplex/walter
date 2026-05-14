@@ -85,10 +85,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
-        <ClickableTile href="/abrechnung?vertrag={data.id}"
-            >Betriebskostenabrechnung erstellen</ClickableTile
-        >
-
         <WalterKontakte
             fetchImpl={data.fetchImpl}
             entry={mieterEntry}
@@ -136,5 +132,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
-
 </WalterGrid>

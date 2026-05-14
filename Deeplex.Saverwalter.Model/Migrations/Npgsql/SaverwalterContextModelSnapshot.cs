@@ -43,49 +43,32 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int>("Jahr")
-                        .HasColumnType("integer")
-                        .HasColumnName("jahr");
-
-                    b.Property<decimal>("Kaltmiete")
-                        .HasColumnType("numeric")
-                        .HasColumnName("kaltmiete");
-
                     b.Property<DateTime>("LastModified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_modified")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<decimal>("Minderung")
-                        .HasColumnType("numeric")
-                        .HasColumnName("minderung");
-
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
                         .HasColumnName("notiz");
-
-                    b.Property<decimal>("Rechnungsbetrag")
-                        .HasColumnType("numeric")
-                        .HasColumnName("rechnungsbetrag");
-
-                    b.Property<decimal>("Saldo")
-                        .HasColumnType("numeric")
-                        .HasColumnName("saldo");
 
                     b.Property<int>("VertragId")
                         .HasColumnType("integer")
                         .HasColumnName("vertrag_id");
 
-                    b.Property<decimal>("Vorauszahlung")
-                        .HasColumnType("numeric")
-                        .HasColumnName("vorauszahlung");
+                    b.Property<Guid>("BuchungssatzId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("buchungssatz_id");
 
                     b.HasKey("AbrechnungsresultatId")
                         .HasName("pk_abrechnungsresultate");
 
                     b.HasIndex("VertragId")
                         .HasDatabaseName("ix_abrechnungsresultate_vertrag_id");
+
+                    b.HasIndex("BuchungssatzId")
+                        .HasDatabaseName("ix_abrechnungsresultate_buchungssatz_id");
 
                     b.ToTable("abrechnungsresultate", (string)null);
                 });
@@ -611,6 +594,10 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HKVOId"));
 
+                    b.Property<int?>("AllgemeinWaermeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("allgemein_waerme_id");
+
                     b.Property<int>("BetriebsstromUmlageId")
                         .HasColumnType("integer")
                         .HasColumnName("betriebsstrom_umlage_id");
@@ -653,6 +640,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.HasKey("HKVOId")
                         .HasName("pk_hkvo");
+
+                    b.HasIndex("AllgemeinWaermeId")
+                        .HasDatabaseName("ix_hkvo_allgemein_waerme_id");
 
                     b.HasIndex("BetriebsstromUmlageId")
                         .HasDatabaseName("ix_hkvo_betriebsstrom_umlage_id");
@@ -1079,6 +1069,10 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("last_modified")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<int>("MietminderungsKontoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mietminderungs_konto_id");
+
                     b.Property<int>("MietBuchungskontoId")
                         .HasColumnType("integer")
                         .HasColumnName("miet_buchungskonto_id");
@@ -1110,6 +1104,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.HasIndex("KautionsKontoId")
                         .HasDatabaseName("ix_vertraege_kautions_konto_id");
+
+                    b.HasIndex("MietminderungsKontoId")
+                        .HasDatabaseName("ix_vertraege_mietminderungs_konto_id");
 
                     b.HasIndex("MietBuchungskontoId")
                         .HasDatabaseName("ix_vertraege_miet_buchungskonto_id");
@@ -1294,9 +1291,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int>("ErhaltungsaufwandsKontoId")
+                    b.Property<int>("AufwandsKontoId")
                         .HasColumnType("integer")
-                        .HasColumnName("erhaltungsaufwands_konto_id");
+                        .HasColumnName("aufwands_konto_id");
 
                     b.Property<DateTime>("LastModified")
                         .ValueGeneratedOnAdd()
@@ -1337,8 +1334,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                     b.HasIndex("BesitzerKontaktId")
                         .HasDatabaseName("ix_wohnungen_besitzer_kontakt_id");
 
-                    b.HasIndex("ErhaltungsaufwandsKontoId")
-                        .HasDatabaseName("ix_wohnungen_erhaltungsaufwands_konto_id");
+                    b.HasIndex("AufwandsKontoId")
+                        .HasDatabaseName("ix_wohnungen_aufwands_konto_id");
 
                     b.HasIndex("MietErtragskontoId")
                         .HasDatabaseName("ix_wohnungen_miet_ertragskonto_id");
@@ -1554,7 +1551,15 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .IsRequired()
                         .HasConstraintName("fk_abrechnungsresultate_vertraege_vertrag_id");
 
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungssatz", "Buchungssatz")
+                        .WithMany()
+                        .HasForeignKey("BuchungssatzId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_abrechnungsresultate_buchungssaetze_buchungssatz_id");
+
                     b.Navigation("Vertrag");
+                    b.Navigation("Buchungssatz");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Auth.Pbkdf2PasswordCredential", b =>
@@ -1690,6 +1695,12 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.HKVO", b =>
                 {
+                    b.HasOne("Deeplex.Saverwalter.Model.Zaehler", "AllgemeinWaerme")
+                        .WithMany()
+                        .HasForeignKey("AllgemeinWaermeId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_hkvo_zaehler_set_allgemein_waerme_id");
+
                     b.HasOne("Deeplex.Saverwalter.Model.Umlage", "Betriebsstrom")
                         .WithMany("HKVOs")
                         .HasForeignKey("BetriebsstromUmlageId")
@@ -1703,6 +1714,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_hkvo_umlagen_heizkosten_id");
+
+                    b.Navigation("AllgemeinWaerme");
 
                     b.Navigation("Betriebsstrom");
 
@@ -1834,6 +1847,13 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .IsRequired()
                         .HasConstraintName("fk_vertraege_buchungskonten_kautions_konto_id");
 
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "MietminderungsKonto")
+                        .WithMany()
+                        .HasForeignKey("MietminderungsKontoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_vertraege_buchungskonten_mietminderungs_konto_id");
+
                     b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "MietBuchungskonto")
                         .WithMany()
                         .HasForeignKey("MietBuchungskontoId")
@@ -1943,12 +1963,12 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasForeignKey("BesitzerKontaktId")
                         .HasConstraintName("fk_wohnungen_kontakte_besitzer_kontakt_id");
 
-                    b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "ErhaltungsaufwandsKonto")
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "AufwandsKonto")
                         .WithMany()
-                        .HasForeignKey("ErhaltungsaufwandsKontoId")
+                        .HasForeignKey("AufwandsKontoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_wohnungen_buchungskonten_erhaltungsaufwands_konto_id");
+                        .HasConstraintName("fk_wohnungen_buchungskonten_aufwands_konto_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "MietErtragskonto")
                         .WithMany()
@@ -1961,7 +1981,7 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.Navigation("Besitzer");
 
-                    b.Navigation("ErhaltungsaufwandsKonto");
+                    b.Navigation("AufwandsKonto");
 
                     b.Navigation("MietErtragskonto");
                 });

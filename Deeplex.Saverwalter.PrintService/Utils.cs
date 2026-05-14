@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.PrintService
@@ -53,12 +52,6 @@ namespace Deeplex.Saverwalter.PrintService
         public static string Mietobjekt(Wohnung wohnung)
             => "Mietobjekt: " + wohnung.Adresse!.Strasse + " " + wohnung.Adresse.Hausnummer + ", " + wohnung.Bezeichnung;
 
-        public static string Abrechnungszeitraum(Zeitraum zeitraum)
-            => zeitraum.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + zeitraum.Abrechnungsende.ToString("dd.MM.yyyy");
-
-        public static string Nutzungszeitraum(Zeitraum zeitraum)
-            => zeitraum.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + zeitraum.Nutzungsende.ToString("dd.MM.yyyy");
-
         public static string Gruss(List<Kontakt> mieter)
         {
             var gruss = mieter.Aggregate("", (text, mieter) =>
@@ -81,7 +74,6 @@ namespace Deeplex.Saverwalter.PrintService
         public static string ResultTxt(decimal result)
            => $"wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit {(result > 0 ? "einem Guthaben" : "einer Nachforderung")} in Höhe von: ";
 
-
         public const string RefundPositive
             = "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet.";
         public const string RefundNegative
@@ -96,47 +88,7 @@ namespace Deeplex.Saverwalter.PrintService
         public const string GenerischerTextFinalPart
             = "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
 
-        public static string GenerischerText(List<Abrechnungseinheit> einheiten)
-        {
-            // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
-
-            var text = GenerischerTextFirstPart; ;
-
-            if (einheiten.Any(abrechnungseinheit =>
-                abrechnungseinheit.GesamtBetragWarm != 0 &&
-                abrechnungseinheit.BetragWarm != 0))
-            {
-                text += GenerischerTextHeizungPart;
-            }
-
-            text += GenerischerTextFinalPart;
-
-            return text;
-        }
-
-        public static bool DirekteZuordnung(List<Abrechnungseinheit> einheiten)
-            => einheiten.Any(einheit => einheit.Rechnungen.Any(rechnung => rechnung.Key.Wohnungen.Count == 1));
-
-        private static bool UmlageSchluesselExistsInabrechnung(List<Abrechnungseinheit> einheiten, Umlageschluessel umlageSchluessel) =>
-            einheiten.Any(einheit => einheit.Rechnungen
-                .Where(rechnung => rechnung.Key.Wohnungen.Count > 1)
-                .Any(rechnung => rechnung.Key.Schluessel == umlageSchluessel));
-
-        public static bool NachWohnflaeche(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachWohnflaeche);
-        public static bool NachNutzflaeche(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachNutzflaeche);
-        public static bool NachNutzeinheiten(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachNutzeinheit);
-        public static bool NachPersonenzahl(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachPersonenzahl);
-        public static bool NachVerbrauch(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachVerbrauch);
-        public static bool NachMiteigentumsanteil(List<Abrechnungseinheit> einheiten)
-            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachMiteigentumsanteil);
-
         public const string Anmerkung
            = "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
-
     }
 }

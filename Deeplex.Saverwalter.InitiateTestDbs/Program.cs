@@ -30,10 +30,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var ensureDevUsers = args.Contains("--ensure-dev-users", StringComparer.OrdinalIgnoreCase);
             var seedFiles = args.Contains("--seed-files", StringComparer.OrdinalIgnoreCase);
             var bucheHistorisch = args.Contains("--buche-historisch", StringComparer.OrdinalIgnoreCase);
-            var vergleicheAbrechnung = args.Contains("--vergleiche-abrechnung", StringComparer.OrdinalIgnoreCase);
             var bucheAbrechnungArg = GetArgValue(args, "--buche-abrechnung");
             var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles && !bucheHistorisch
-                && bucheAbrechnungArg is null && !vergleicheAbrechnung;
+                && bucheAbrechnungArg is null;
 
             var targetDb = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "walter_dev_generic_db";
             var s3Provider = Environment.GetEnvironmentVariable("WALTER_DEV_S3_PROVIDER");
@@ -122,11 +121,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
                 await BkAbrechnungNeu.BucheJahresabrechnungAsync(ctx, jahr);
             }
 
-            if (vergleicheAbrechnung)
-            {
-                await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
-                await AbrechnungsVergleich.ErstelleVergleichsreportAsync(ctx);
-            }
         }
 
         private static async Task SeedFilesFor(

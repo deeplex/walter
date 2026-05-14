@@ -50,6 +50,8 @@ namespace Deeplex.Saverwalter.Model
         Strom,
         [Unit(Zaehlereinheit.Kilowattstunden)]
         Gas,
+        [Unit(Zaehlereinheit.Kilowattstunden)]
+        Wärme,
     }
 
     public enum Zaehlereinheit

@@ -96,7 +96,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Wohnung");
             }
             var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
-            var entity = new Vertrag() { Wohnung = wohnung! };
+            var idx = $"V{entry.Id:D5}";
+            var entity = new Vertrag()
+            {
+                Wohnung = wohnung!,
+                MietBuchungskonto = new Buchungskonto($"{idx}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                NkBuchungskonto = new Buchungskonto($"{idx}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                KautionsKonto = new Buchungskonto($"{idx}-KA", "Kaution", BuchungskontoTyp.Aktiv),
+                BkAbrechnungsKonto = new Buchungskonto($"{idx}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto($"{idx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto($"{idx}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
+            };
 
             await SetOptionalValues(entity, entry);
             Ctx.Vertraege.Add(entity);

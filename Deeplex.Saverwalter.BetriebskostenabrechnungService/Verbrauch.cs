@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (anfangsstand == null)
             {
                 notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
-                    $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
+                    $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
                     Severity.Error);
             }
             else
@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (endstand == null)
             {
                 notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
-                    $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
+                    $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
                     Severity.Error);
             }
             else
@@ -54,12 +54,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (anfangsstand != null && endstand != null)
             {
                 Delta = endstand.Stand - anfangsstand.Stand;
-            }
-
-
-            else if (anfangsstand == null && endstand?.Stand == 0)
-            {
-                Delta = 0;
             }
             else
             {
@@ -81,7 +75,5 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .OrderBy(zaehlerstand => zaehlerstand.Datum)
                 .FirstOrDefault(zaehlerstand => earliest <= zaehlerstand.Datum.DayNumber);
         }
-
-
     }
 }

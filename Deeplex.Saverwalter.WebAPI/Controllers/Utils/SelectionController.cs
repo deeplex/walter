@@ -16,6 +16,7 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,11 +42,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         private readonly ILogger<SelectionListController> _logger;
         private SaverwalterContext Ctx { get; }
+        private readonly AbrechnungsgruppenService _gruppenService;
 
-        public SelectionListController(ILogger<SelectionListController> logger, SaverwalterContext ctx)
+        public SelectionListController(ILogger<SelectionListController> logger, SaverwalterContext ctx, AbrechnungsgruppenService gruppenService)
         {
             Ctx = ctx;
             _logger = logger;
+            _gruppenService = gruppenService;
+        }
+
+        [HttpGet]
+        [Route("api/selection/abrechnungsgruppen")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetAbrechnungsgruppen()
+        {
+            var gruppen = await _gruppenService.GetGruppenAsync();
+            return Ok(gruppen.Select(g => new SelectionEntry(g.WohnungIds[0], g.Bezeichnung)));
         }
 
         [HttpGet]

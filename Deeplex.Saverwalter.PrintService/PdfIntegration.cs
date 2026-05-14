@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Text;
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using PdfSharp.Fonts;
@@ -135,17 +134,20 @@ namespace Deeplex.Saverwalter.PrintService
 
     public static class PdfIntegration
     {
-        public static void SaveAsPdf(this Betriebskostenabrechnung abrechnung, Stream stream)
+        public static void SaveAsPdf(this NkDruckdaten druckdaten, Stream stream,
+            bool istEntwurf = false, string entwurfGrund = "")
         {
             GlobalFontSettings.FontResolver = new CustomFontResolver();
-            var document = TPrint<Document>.Print(abrechnung, new PdfPrint());
+            var printImpl = new PdfPrint();
+            if (istEntwurf)
+                printImpl.EntwurfHinweis(entwurfGrund);
+            var document = TPrint<Document>.Print(druckdaten, printImpl);
 
             var renderer = new PdfDocumentRenderer();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             renderer.Document = document;
             renderer.DocumentRenderer = new DocumentRenderer(document);
             renderer.RenderDocument();
-            // Second argument states that the stream shouldn't be closed yet.
             renderer.PdfDocument.Save(stream, false);
         }
     }

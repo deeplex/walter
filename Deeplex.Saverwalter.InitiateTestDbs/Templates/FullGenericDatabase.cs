@@ -46,8 +46,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             // TODO
             var umlagen = FillUmlagen(ctx, adressen);
-            var zaehlerSet = FillZaehlerSet(ctx, umlagen);
-            var zaehlerstaende = FillZaehlerstaende(ctx, vertraege);
+            var (zaehlerSet, hauszaehlerHeizung) = FillZaehlerSet(ctx, umlagen);
+            var zaehlerstaende = FillZaehlerstaende(ctx, zaehlerSet, vertraege);
+            FillHKVO(ctx, umlagen, hauszaehlerHeizung);
             var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx, umlagen);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
@@ -147,19 +148,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             };
 
             return person;
-        }
-
-        private static bool isPrime(int number)
-        {
-            if (number == 1) return false;
-            if (number == 2) return true;
-
-            var limit = Math.Ceiling(Math.Sqrt(number));
-
-            for (int i = 2; i <= limit; ++i)
-                if (number % i == 0)
-                    return false;
-            return true;
         }
 
         private static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen)
@@ -263,6 +251,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Aktiv),
                     BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                     ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+                    MietminderungsKonto = new Buchungskonto($"V{vIdx:D5}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
                 };
 
                 vertraege.Add(vertrag);
@@ -487,12 +476,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                // Can also use Personen
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachVerbrauch, umlagen.Count));
+                // Niederschlagswasser wird nach Fläche abgerechnet (kein Zähler)
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 2 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                    // Schmutzwasser nach Verbrauch (teilt sich Kaltwasserzähler mit Wasserversorgung)
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachVerbrauch, umlagen.Count));
                 }
 
                 // Can also be made direct
@@ -508,6 +498,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 if (i % 3 == 0 || i % 7 == 0 || i % 11 == 0)
                 {
                     umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch, umlagen.Count));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Betriebsstrom (Heizung)"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                     umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
@@ -528,93 +519,180 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return umlagen;
         }
 
-        static List<Zaehler> FillZaehlerSet(SaverwalterContext ctx, List<Umlage> umlagen)
+        static (List<Zaehler>, Dictionary<Adresse, Zaehler>) FillZaehlerSet(SaverwalterContext ctx, List<Umlage> umlagen)
         {
             Console.Write("Füge Zähler hinzu: ");
 
-            var zaehler = new List<Zaehler> { };
+            var zaehlerListe = new List<Zaehler>();
+            var wohnungszaehler = new Dictionary<(Wohnung, Zaehlertyp), Zaehler>();
+            var hauszaehlerHeizung = new Dictionary<Adresse, Zaehler>();
+
+            Zaehler GetOrAddWohnungszaehler(Wohnung wohnung, Zaehlertyp typ, string kennung)
+            {
+                var key = (wohnung, typ);
+                if (!wohnungszaehler.TryGetValue(key, out var existing))
+                {
+                    existing = new Zaehler(kennung, typ) { Wohnung = wohnung };
+                    zaehlerListe.Add(existing);
+                    wohnungszaehler[key] = existing;
+                }
+                return existing;
+            }
 
             foreach (var umlage in umlagen)
             {
-                if (umlage.Typ == GetTyp(ctx, "Wasserversorgung"))
+                var bezeichnung = umlage.Typ.Bezeichnung;
+
+                if (bezeichnung == "Wasserversorgung" || bezeichnung == "Entwässerung/Schmutzwasser")
                 {
                     foreach (var wohnung in umlage.Wohnungen)
                     {
-                        var kaltKennung = "Kaltwasserzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(kaltKennung, Zaehlertyp.Kaltwasser)
-                        {
-                            Wohnung = wohnung
-                        });
-                        var warmKennung = "Warmwasserzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(warmKennung, Zaehlertyp.Warmwasser)
-                        {
-                            Wohnung = wohnung
-                        });
+                        var prefix = $"{wohnung.Adresse?.Strasse ?? "?"} – {wohnung.Bezeichnung}";
+                        var kw = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Kaltwasser, $"KW {prefix}");
+                        var ww = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Warmwasser, $"WW {prefix}");
+                        if (!umlage.Zaehler.Contains(kw)) umlage.Zaehler.Add(kw);
+                        if (!umlage.Zaehler.Contains(ww)) umlage.Zaehler.Add(ww);
                     }
                 }
-                // Vielleicht brauchen die Zähler?
-                if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
+
+                if (bezeichnung == "Heizkosten")
                 {
-                    var kennung = "Allgemein Heizung" + umlage.GetWohnungenBezeichnung();
-                    zaehler.Add(new Zaehler(kennung, Zaehlertyp.Gas)
+                    var adresse = umlage.Wohnungen.FirstOrDefault()?.Adresse;
+                    if (adresse != null && !hauszaehlerHeizung.ContainsKey(adresse))
                     {
-                    });
+                        var hauszaehler = new Zaehler($"Heizung Haus {adresse.Strasse}", Zaehlertyp.Gas) { Adresse = adresse };
+                        zaehlerListe.Add(hauszaehler);
+                        hauszaehlerHeizung[adresse] = hauszaehler;
+                    }
 
                     foreach (var wohnung in umlage.Wohnungen)
                     {
-                        var kennungEinzeln = "Heizzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(kennungEinzeln, Zaehlertyp.Gas)
-                        {
-                            Wohnung = wohnung
-                        });
+                        var prefix = $"{wohnung.Adresse?.Strasse ?? "?"} – {wohnung.Bezeichnung}";
+                        var hz = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Gas, $"HZ {prefix}");
+                        var ww = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Warmwasser, $"WW {prefix}");
+                        if (!umlage.Zaehler.Contains(hz)) umlage.Zaehler.Add(hz);
+                        if (!umlage.Zaehler.Contains(ww)) umlage.Zaehler.Add(ww);
                     }
                 }
             }
 
-            ctx.ZaehlerSet.AddRange(zaehler);
-            Console.WriteLine($"{zaehler.Count} Zähler hinzugefügt");
-
-            return zaehler;
+            ctx.ZaehlerSet.AddRange(zaehlerListe);
+            Console.WriteLine($"{zaehlerListe.Count} Zähler hinzugefügt");
+            return (zaehlerListe, hauszaehlerHeizung);
         }
 
-        static List<Zaehlerstand> FillZaehlerstaende(SaverwalterContext ctx, List<Vertrag> vertraege)
+        static void FillHKVO(
+            SaverwalterContext ctx,
+            List<Umlage> umlagen,
+            Dictionary<Adresse, Zaehler> hauszaehlerHeizung)
+        {
+            var hkvoList = new List<HKVO>();
+            var betriebsstromByAdresse = umlagen
+                .Where(u => u.Typ.Bezeichnung == "Betriebsstrom (Heizung)")
+                .ToDictionary(u => u.Wohnungen.First().Adresse!);
+
+            foreach (var heizUmlage in umlagen.Where(u => u.Typ.Bezeichnung == "Heizkosten"))
+            {
+                var adresse = heizUmlage.Wohnungen.FirstOrDefault()?.Adresse;
+                if (adresse == null
+                    || !hauszaehlerHeizung.TryGetValue(adresse, out var hauszaehler)
+                    || !betriebsstromByAdresse.TryGetValue(adresse, out var betriebsstrom))
+                    continue;
+
+                hkvoList.Add(new HKVO(0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
+                {
+                    Heizkosten = heizUmlage,
+                    Betriebsstrom = betriebsstrom,
+                    AllgemeinWaerme = hauszaehler,
+                });
+            }
+
+            ctx.HKVO.AddRange(hkvoList);
+            Console.WriteLine($"{hkvoList.Count} HKVO-Einträge hinzugefügt");
+        }
+
+        static List<Zaehlerstand> FillZaehlerstaende(
+            SaverwalterContext ctx,
+            List<Zaehler> zaehlerSet,
+            List<Vertrag> vertraege)
         {
             Console.Write("Füge Zählerstände hinzu: ");
 
-            var zaehlerstaende = new List<Zaehlerstand> { };
+            var zaehlerstaende = new List<Zaehlerstand>();
 
-            foreach (var vertrag in vertraege)
+            // Build lookup: Wohnung → earliest contract start, so we know when to begin readings
+            var fruehesterBeginnByWohnung = vertraege
+                .Where(v => v.Wohnung != null)
+                .GroupBy(v => v.Wohnung)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(v => v.Beginn())
+                          .Where(b => b != default)
+                          .DefaultIfEmpty(globalToday.AddYears(-3))
+                          .Min());
+
+            foreach (var zaehler in zaehlerSet)
             {
-                var beginn = vertrag.Beginn();
-                var ende = vertrag.Ende ?? globalToday;
-
-                // TODO wenn der Vertrag früher endet muss entsprechend noch ein Zählerstand dazwischen.
-                for (var date = beginn; date <= ende; date = date.AddYears(1))
+                DateOnly rangeStart;
+                if (zaehler.Wohnung != null)
                 {
-                    foreach (var zaehler in vertrag.Wohnung.Zaehler)
+                    if (!fruehesterBeginnByWohnung.TryGetValue(zaehler.Wohnung, out rangeStart)
+                        || rangeStart == default)
                     {
-                        var lastStand = zaehler.Staende.ToList().OrderBy(e => e.Datum).LastOrDefault();
-                        var max = zaehler.Typ switch
-                        {
-                            Zaehlertyp.Warmwasser => 50,
-                            Zaehlertyp.Kaltwasser => 100,
-                            Zaehlertyp.Strom => 1000,
-                            Zaehlertyp.Gas => 20000,
-                            _ => 10000
-                        };
-                        var lastStandStand = lastStand?.Stand ?? 0m;
-                        var stand = lastStandStand += date.DayNumber % max;
-                        zaehlerstaende.Add(new Zaehlerstand(date, stand)
-                        {
-                            Zaehler = zaehler
-                        });
+                        continue; // Wohnung hat keine Verträge – kein Zählerstand nötig
                     }
+                }
+                else
+                {
+                    // Hauszähler (z.B. Gas-Gesamtzähler Heizung) – gesamten Zeitraum abdecken
+                    rangeStart = globalToday.AddYears(-6);
+                }
+
+                var wohnungsAnzahl = zaehler.Adresse?.Wohnungen.Count ?? 1;
+                var tagesVerbrauch = zaehler.Typ switch
+                {
+                    Zaehlertyp.Warmwasser => 0.05m,                      // ~18 m³/Jahr pro Wohnung
+                    Zaehlertyp.Kaltwasser => 0.18m,                      // ~65 m³/Jahr pro Wohnung
+                    Zaehlertyp.Gas when zaehler.Wohnung == null => 25m * wohnungsAnzahl, // Hauszähler: Summe aller Wohnungen
+                    Zaehlertyp.Gas => 25m,                               // ~9000 kWh/Jahr pro Wohnung
+                    Zaehlertyp.Strom => 1.2m,                            // ~440 kWh/Jahr
+                    _ => 0.5m
+                };
+
+                var stand = zaehler.Typ switch
+                {
+                    Zaehlertyp.Warmwasser => 100m + (rangeStart.DayOfYear % 200),
+                    Zaehlertyp.Kaltwasser => 200m + (rangeStart.DayOfYear % 500),
+                    Zaehlertyp.Gas => 5000m + (rangeStart.DayOfYear % 10000),
+                    Zaehlertyp.Strom => 1000m + (rangeStart.DayOfYear % 3000),
+                    _ => 100m
+                };
+
+                // One reading per Dec 31 plus one at contract start
+                var stichtage = new SortedSet<DateOnly> { rangeStart };
+                for (var jahr = rangeStart.Year; jahr <= globalToday.Year; jahr++)
+                {
+                    var jahresende = new DateOnly(jahr, 12, 31);
+                    if (jahresende >= rangeStart && jahresende <= globalToday)
+                    {
+                        stichtage.Add(jahresende);
+                    }
+                }
+
+                DateOnly? letzterTag = null;
+                foreach (var stichtag in stichtage)
+                {
+                    var tage = letzterTag.HasValue
+                        ? Math.Max(1, stichtag.DayNumber - letzterTag.Value.DayNumber)
+                        : 1;
+                    stand = Math.Round(stand + tagesVerbrauch * tage, 2);
+                    zaehlerstaende.Add(new Zaehlerstand(stichtag, stand) { Zaehler = zaehler });
+                    letzterTag = stichtag;
                 }
             }
 
             ctx.Zaehlerstaende.AddRange(zaehlerstaende);
             Console.WriteLine($"{zaehlerstaende.Count} Zählerstände hinzugefügt");
-
             return zaehlerstaende;
         }
     }

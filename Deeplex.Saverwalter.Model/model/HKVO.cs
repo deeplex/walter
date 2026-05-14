@@ -37,6 +37,10 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public virtual Umlage Betriebsstrom { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
 
+        public int? AllgemeinWaermeId { get; set; }
+        /// <summary>Haus-Wärmezähler (Gas, Wärme, …) für Q in §9(2). Null → §9(2) = 0.</summary>
+        public virtual Zaehler? AllgemeinWaerme { get; set; }
+
         public string? Notiz { get; set; }
 
         public DateTime CreatedAt { get; private set; }

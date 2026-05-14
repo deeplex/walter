@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -33,8 +33,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Jahr = jahr;
             Abrechnungsbeginn = new DateOnly(jahr, 1, 1);
             Abrechnungsende = new DateOnly(jahr, 12, 31);
-            Nutzungsbeginn = Utils.Max(vertrag.Beginn(), Abrechnungsbeginn);
-            Nutzungsende = Utils.Min(vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
+            Nutzungsbeginn = CompareExtensions.Max(vertrag.Beginn(), Abrechnungsbeginn);
+            Nutzungsende = CompareExtensions.Min(vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
 
             Nutzungszeitraum = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
             Abrechnungszeitraum = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber + 1;

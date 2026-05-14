@@ -33,7 +33,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             return {
                 id: row.id,
                 jahr: row.jahr,
-                saldo: row.vorauszahlung - row.kaltmiete - row.rechnungsbetrag,
+                saldo: row.saldo,
                 istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
                 istBeglichen: row.saldo === 0 ? 'Ja' : 'Nein'
             };

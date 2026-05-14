@@ -19,8 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         Checkbox,
         ClickableTile,
+        DataTable,
         Row,
-        Tile
+        Tile,
+        Toolbar,
+        ToolbarContent
     } from 'carbon-components-svelte';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
     import { fileURL } from '$walter/services/files';
@@ -38,20 +41,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const abgesendet = (e: Event) => {
         entry.abgesendet = (e.target as HTMLInputElement).checked;
     };
-
-    let editResult = false;
-    const edit = (e: Event) => {
-        editResult = (e.target as HTMLInputElement).checked;
-    };
 </script>
 
 <Row>
     <WalterNumberInput required readonly value={entry.jahr} label="Jahr" />
     <WalterNumberInput
         required
-        {readonly}
-        bind:value={entry.saldo}
-        label="Verbleibender Saldo (Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen)"
+        readonly
+        value={entry.saldo}
+        label="Saldo (Positiv = Mieter muss nachzahlen, Negativ = Vermieter erstattet)"
     />
 
     <Tile light style="margin: 1.5em">
@@ -63,55 +61,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Tile>
 </Row>
 
-<Row>
-    <div>
-        <Checkbox bind:checked={editResult} on:change={edit} />
-    </div>
-    <p style="margin-top: 0.25em; margin-left: -0.5em">
-        Ergebnisse der Abrechnung bearbeiten
-    </p>
-</Row>
-
-<Row>
-    <WalterNumberInput
-        required
-        readonly={!editResult}
-        bind:value={entry.vorauszahlung}
-        label="Vorauszahlung Gesamt"
-    />
-
-    <WalterNumberInput
-        required
-        readonly={!editResult}
-        bind:value={entry.kaltmiete}
-        label="Kaltmiete"
-    />
-
-    <WalterNumberInput
-        required
-        readonly={!editResult}
-        bind:value={entry.rechnungsbetrag}
-        label="Rechnungsbetrag"
-    />
-
-    <WalterNumberInput
-        required
-        readonly={!editResult}
-        bind:value={entry.minderung}
-        label="Mietminderungen"
-    />
-</Row>
-
-<Row>
-    <Tile light>
-        Resultat der Abrechnung: {convertEuro(
-            entry.vorauszahlung - entry.kaltmiete - entry.rechnungsbetrag
-        )}
-        {entry.vorauszahlung - entry.kaltmiete - entry.rechnungsbetrag < 0
-            ? ' (Schulden des Mieters)'
-            : ' (Guthaben des Mieters)'}
-    </Tile>
-</Row>
+{#if entry.nkKontoZeilen?.length > 0}
+    {@const sollSumme = entry.nkKontoZeilen.filter(z => z.istSoll).reduce((s, z) => s + z.betrag, 0)}
+    {@const habenSumme = entry.nkKontoZeilen.filter(z => !z.istSoll).reduce((s, z) => s + z.betrag, 0)}
+    <Row>
+        <DataTable
+            title="Nebenkostenkonto {entry.jahr}"
+            size="short"
+            headers={[
+                { key: 'datum', value: 'Datum' },
+                { key: 'beschreibung', value: 'Buchung' },
+                { key: 'soll', value: 'Soll' },
+                { key: 'haben', value: 'Haben' }
+            ]}
+            rows={[
+                ...entry.nkKontoZeilen.map((z, i) => ({
+                    id: String(i),
+                    datum: z.datum,
+                    beschreibung: z.beschreibung,
+                    soll: z.istSoll ? convertEuro(z.betrag) : '',
+                    haben: !z.istSoll ? convertEuro(z.betrag) : ''
+                })),
+                {
+                    id: 'summe',
+                    datum: '',
+                    beschreibung: 'Summe',
+                    soll: convertEuro(sollSumme),
+                    haben: convertEuro(habenSumme)
+                }
+            ]}
+            style="margin-bottom: 1rem;"
+        >
+            <Toolbar><ToolbarContent /></Toolbar>
+        </DataTable>
+    </Row>
+{/if}
 
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
@@ -124,9 +108,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         href={`/vertraege/${entry.vertrag?.id}`}
     />
 
-    <ClickableTile
-        href={`/abrechnung/?jahr=${entry.jahr}&vertrag=${entry.vertrag?.id}`}
-    >
-        Abrechnung ansehen
+    <ClickableTile href={`/abrechnungslauf?jahr=${entry.jahr}`}>
+        Zum Abrechnungslauf
     </ClickableTile>
 </WalterLinks>

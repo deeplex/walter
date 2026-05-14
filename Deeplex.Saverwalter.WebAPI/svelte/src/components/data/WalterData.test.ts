@@ -22,37 +22,12 @@ import {
     walter_data_miettabelle,
     walter_data_ne,
     walter_data_nf,
-    walter_data_rechnungen,
-    walter_data_rechnungen_diff,
-    walter_data_rechnungen_pairs,
     walter_data_rechnungen_year,
     walter_data_rechnungentabelle,
     walter_data_wf
 } from './WalterData';
 
 describe('WalterData helpers', () => {
-    it('builds rechnungen chart variants', () => {
-        const rechnungen = [
-            { typ: 'Wasser', gesamtBetrag: 120, betragLetztesJahr: 100 },
-            { typ: 'Heizung', gesamtBetrag: 80, betragLetztesJahr: 90 }
-        ] as never;
-
-        const simple = walter_data_rechnungen('Kosten', rechnungen);
-        const pairs = walter_data_rechnungen_pairs('Paare', rechnungen);
-        const diff = walter_data_rechnungen_diff('Diff', rechnungen);
-
-        expect(simple.options.title).toBe('Kosten');
-        expect(simple.data).toEqual([
-            { group: 'Wasser', value: 120 },
-            { group: 'Heizung', value: 80 }
-        ]);
-        expect(pairs.data[0].value).toEqual([100, 120]);
-        expect(diff.data).toEqual([
-            { group: 'Wasser', value: 20 },
-            { group: 'Heizung', value: -10 }
-        ]);
-    });
-
     it('builds yearly rechnungen and aufwendungen datasets', () => {
         const yearly = walter_data_rechnungen_year('Jahre', 'Wasser', [
             { betreffendesJahr: 2024, betrag: 120 },

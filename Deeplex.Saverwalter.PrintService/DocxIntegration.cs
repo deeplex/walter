@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -42,9 +41,13 @@ namespace Deeplex.Saverwalter.PrintService
             }
         }
 
-        public static void SaveAsDocx(this Betriebskostenabrechnung abrechnung, Stream stream)
+        public static void SaveAsDocx(this NkDruckdaten druckdaten, Stream stream,
+            bool istEntwurf = false, string entwurfGrund = "")
         {
-            var body = TPrint<Body>.Print(abrechnung, new DocxPrint());
+            var printImpl = new DocxPrint();
+            if (istEntwurf)
+                printImpl.EntwurfHinweis(entwurfGrund);
+            var body = TPrint<Body>.Print(druckdaten, printImpl);
 
             CreateWordDocument(stream, body);
         }

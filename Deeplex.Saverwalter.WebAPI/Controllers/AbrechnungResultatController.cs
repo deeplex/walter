@@ -19,13 +19,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public int Jahr { get; set; }
-            public decimal Kaltmiete { get; set; }
-            public decimal Vorauszahlung { get; set; }
-            public decimal Rechnungsbetrag { get; set; }
-            public decimal Minderung { get; set; }
             public bool Abgesendet { get; set; }
             public decimal Saldo { get; set; }
             public string? Notiz { get; set; }
+            public Guid BuchungssatzId { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -35,23 +32,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = entity.AbrechnungsresultatId;
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
-                Jahr = entity.Jahr;
-                Kaltmiete = entity.Kaltmiete;
-                Vorauszahlung = entity.Vorauszahlung;
-                Rechnungsbetrag = entity.Rechnungsbetrag;
-                Minderung = entity.Minderung;
+                Jahr = entity.Buchungssatz.Buchungsdatum.Year;
                 Abgesendet = entity.Abgesendet;
-                Saldo = entity.Saldo;
                 Notiz = entity.Notiz;
+                BuchungssatzId = entity.Buchungssatz.BuchungssatzId;
+
+                var zahlungsKontoId = entity.Vertrag.ZahlungsKonto.BuchungskontoId;
+                Saldo = entity.Buchungssatz.Buchungszeilen
+                    .Where(z => z.Buchungskonto.BuchungskontoId == zahlungsKontoId)
+                    .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
 
                 Permissions = permissions;
             }
+        }
+
+        public class NkKontoZeileInfo
+        {
+            public DateOnly Datum { get; set; }
+            public string Beschreibung { get; set; } = "";
+            public bool IstSoll { get; set; }
+            public decimal Betrag { get; set; }
         }
 
         public class AbrechnungsresultatEntry : AbrechnungsresultatEntryBase
         {
             private Abrechnungsresultat Entity { get; } = null!;
             public SelectionEntry? Vertrag { get; set; } = null!;
+            public List<NkKontoZeileInfo> NkKontoZeilen { get; set; } = [];
 
             public AbrechnungsresultatEntry() : base() { }
             public AbrechnungsresultatEntry(Abrechnungsresultat entity, Permissions permissions)
@@ -61,6 +68,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 var v = entity.Vertrag;
                 var a = v.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
                 Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung);
+
+                NkKontoZeilen = v.NkBuchungskonto.Buchungszeilen
+                    .Where(z => z.Buchungssatz.Buchungsdatum.Year == Jahr)
+                    .OrderBy(z => z.Buchungssatz.Buchungsdatum)
+                    .Select(z => new NkKontoZeileInfo
+                    {
+                        Datum = z.Buchungssatz.Buchungsdatum,
+                        Beschreibung = z.Buchungssatz.Beschreibung,
+                        IstSoll = z.SollHaben == SollHaben.Soll,
+                        Betrag = z.Betrag
+                    })
+                    .ToList();
             }
         }
 

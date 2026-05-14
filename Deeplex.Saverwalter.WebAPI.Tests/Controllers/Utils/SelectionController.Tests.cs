@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -135,7 +135,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -152,7 +152,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -186,7 +186,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -203,7 +203,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -220,7 +220,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -238,7 +238,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -255,7 +255,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -272,7 +272,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -289,7 +289,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -306,7 +306,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -323,7 +323,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -340,7 +340,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
+            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();

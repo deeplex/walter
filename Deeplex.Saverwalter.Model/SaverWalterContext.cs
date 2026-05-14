@@ -92,6 +92,7 @@ namespace Deeplex.Saverwalter.Model
 
             modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithOne(u => u.HKVO);
             modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.HKVOs);
+            modelBuilder.Entity<HKVO>().HasOne(u => u.AllgemeinWaerme).WithMany().HasForeignKey(u => u.AllgemeinWaermeId);
 
             modelBuilder.Entity<Vertrag>().HasOne(u => u.Ansprechpartner).WithMany(u => u.VerwaltetVertraege);
             modelBuilder.Entity<Vertrag>().HasMany(u => u.Mieter).WithMany(u => u.Mietvertraege);

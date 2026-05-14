@@ -26,13 +26,11 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
         public id: string,
         public vertrag: WalterSelectionEntry,
         public jahr: number,
-        public kaltmiete: number,
-        public vorauszahlung: number,
-        public rechnungsbetrag: number,
-        public minderung: number,
         public abgesendet: boolean,
         public saldo: number,
         public notiz: string,
+        public buchungssatzId: string,
+        public nkKontoZeilen: NkKontoZeileInfo[],
         public createdAt: Date,
         public lastModified: Date,
         public permissions: WalterPermissions
@@ -50,16 +48,21 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
             json.id,
             vertrag,
             json.jahr,
-            json.kaltmiete,
-            json.vorauszahlung,
-            json.rechnungsbetrag,
-            json.minderung,
             json.abgesendet,
             json.saldo,
             json.notiz,
+            json.buchungssatzId,
+            json.nkKontoZeilen ?? [],
             json.createdAt,
             json.lastModified,
             permissions
         );
     }
+}
+
+export type NkKontoZeileInfo = {
+    datum: string;
+    beschreibung: string;
+    istSoll: boolean;
+    betrag: number;
 }

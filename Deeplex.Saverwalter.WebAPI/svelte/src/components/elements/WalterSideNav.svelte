@@ -71,8 +71,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterSideNavLink icon={Home} text="Startseite" href="/" />
         <WalterSideNavLink
             icon={Document}
-            text="Abrechnung"
-            href="/abrechnung"
+            text="Abrechnungslauf"
+            href="/abrechnungslauf"
         />
         <SideNavDivider />
         <WalterSideNavLink

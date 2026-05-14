@@ -19,6 +19,11 @@ import { getAccessToken } from './auth';
 import { walter_goto } from './utils';
 
 export const walter_selection = {
+    abrechnungsgruppen(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/abrechnungsgruppen', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
+    },
     adressen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/adressen', fetchImpl) as Promise<
             WalterSelectionEntry[]
