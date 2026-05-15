@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterAccount, WalterDataWrapper } from '$walter/components';
+    import { WalterAccount, WalterDataTable } from '$walter/components';
     import { WalterAccountEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
@@ -34,17 +34,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let rows: WalterAccountEntry[];
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterAccountEntry> | undefined = undefined;
+    export let entry: Partial<WalterAccountEntry> | undefined = {};
     export let fetchImpl: typeof fetch;
 
     $: wrapperRows = rows as unknown as DataTableRow[];
     $: wrapperEntry = entry as unknown;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterAccountEntry.ApiURL}
     addEntry={wrapperEntry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     rows={wrapperRows}
@@ -54,4 +56,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterAccount {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

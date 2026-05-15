@@ -15,9 +15,11 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -33,7 +35,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var list = await UmlagePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
+            var userId = user.GetUserId();
+            var baseQuery = Ctx.Umlagen
+                .AsSplitQuery()
+                .Include(u => u.Typ)
+                .Include(u => u.Betriebskostenrechnungen)
+                    .ThenInclude(b => b.Buchungssatz)
+                        .ThenInclude(s => s.Buchungszeilen)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Adresse)
+                        .ThenInclude(a => a.Wohnungen)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Verwalter);
+
+            var list = await (user.IsInRole("Admin")
+                ? baseQuery.ToListAsync()
+                : baseQuery
+                    .Where(e => e.Wohnungen.Any(w =>
+                        w.Verwalter.Count != 0 &&
+                        w.Verwalter.AsQueryable()
+                            .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, userId))))
+                    .ToListAsync());
 
             return await Task.WhenAll(list
                 .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));

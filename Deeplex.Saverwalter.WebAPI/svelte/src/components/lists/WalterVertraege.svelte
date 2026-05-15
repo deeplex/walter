@@ -17,10 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import {
-        WalterDataWrapper,
-        WalterVertrag
-    } from '$walter/components';
+    import { WalterDataTable, WalterVertrag } from '$walter/components';
     import { WalterVertragEntry, type TransaktionsInput } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
@@ -44,7 +41,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterVertragEntry> | undefined = undefined;
+    export let entry: Partial<WalterVertragEntry> | undefined = {};
 
     let modalOpen = false;
     let modalTitle = 'Mietzahlung';
@@ -55,7 +52,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         modalTitle = vertrag.wohnung?.text || `Vertrag ${vertrag.id}`;
         buchungsInput = {
             ...emptyTransaktionsInput(),
-            mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag.id as number }]
+            mieten: [
+                {
+                    kaltmiete: 0,
+                    nkVorauszahlung: 0,
+                    vertragId: vertrag.id as number
+                }
+            ]
         };
         modalOpen = true;
     }
@@ -75,15 +78,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addUrl="/api/transaktionen/buchen"
     bind:addEntry={buchungsInput}
     bind:addModalOpen={modalOpen}
-    onSubmit={onSubmit}
+    {onSubmit}
 >
     <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterVertragEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     rows={rowsAdd}
@@ -93,4 +98,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterVertrag {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

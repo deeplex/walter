@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterWohnung } from '$walter/components';
+    import { WalterDataTable, WalterWohnung } from '$walter/components';
     import { WalterWohnungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import { get } from 'svelte/store';
@@ -38,17 +38,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterWohnungEntry> | undefined = undefined;
+    export let entry: Partial<WalterWohnungEntry> | undefined = {};
 
     const userRole = authState && get(authState)?.role;
     const readonly = userRole !== UserRole.Owner && userRole !== UserRole.Admin;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     {readonly}
     addUrl={WalterWohnungEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     {rows}
@@ -58,4 +60,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterWohnung {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

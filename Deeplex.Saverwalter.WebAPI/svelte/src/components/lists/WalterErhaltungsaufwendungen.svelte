@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import {
-        WalterDataWrapper,
+        WalterDataTable,
         WalterErhaltungsaufwendung
     } from '$walter/components';
     import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
@@ -41,14 +41,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
-    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined =
-        undefined;
+    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = {};
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterErhaltungsaufwendungEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     {rows}
@@ -58,4 +59,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterErhaltungsaufwendung {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper } from '$walter/components';
+    import { WalterDataTable } from '$walter/components';
     import { WalterKontaktEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterKontakt from '../details/WalterKontakt.svelte';
@@ -48,10 +48,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterKontaktEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     {rows}
@@ -59,4 +61,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     <WalterKontakt {fetchImpl} {entry} />
-</WalterDataWrapper>
+</WalterDataTable>

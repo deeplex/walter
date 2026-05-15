@@ -82,27 +82,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
-    const result = resultat.vorauszahlung - resultat.rechnungsbetrag;
+    $: result = resultat.vorauszahlung - resultat.rechnungsbetrag;
 
-    const vertragsEinheiten = gruppe.abrechnungseinheiten.filter((e) =>
+    $: vertragsEinheiten = gruppe.abrechnungseinheiten.filter((e) =>
         e.nkZeilen.some((z) =>
             z.anteile.some((a) => a.vertragId === resultat.vertragId)
         )
     );
 
-    const einheitenNk = vertragsEinheiten.map((einheit) => ({
-        bezeichnung: einheit.wohnungNamen,
-        betragKalt: einheit.nkZeilen
-            .filter((z) =>
-                z.anteile.some((a) => a.vertragId === resultat.vertragId)
-            )
-            .reduce((s, z) => {
-                const a = z.anteile.find(
-                    (a) => a.vertragId === resultat.vertragId
-                );
-                return s + z.betrag * (a?.anteilFaktor ?? 0);
-            }, 0)
-    }));
+    $: kalteNk = vertragsEinheiten
+        .map((einheit) => ({
+            bezeichnung: einheit.wohnungNamen,
+            betrag: einheit.nkZeilen
+                .filter((z) => z.para9_2 == null)
+                .filter((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
+                .reduce((s, z) => {
+                    const a = z.anteile.find((a) => a.vertragId === resultat.vertragId)!;
+                    return s + z.betrag * a.anteilFaktor;
+                }, 0)
+        }))
+        .filter((e) => e.betrag > 0);
+
+    $: warmeNk = vertragsEinheiten
+        .map((einheit) => ({
+            bezeichnung: einheit.wohnungNamen,
+            betrag: einheit.nkZeilen
+                .filter((z) => z.para9_2 != null)
+                .filter((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
+                .reduce((s, z) => {
+                    const a = z.anteile.find((a) => a.vertragId === resultat.vertragId)!;
+                    const wfZA = a.anteilFaktor;
+                    const heizBetrag = z.betrag * (1 - z.para9_2!);
+                    const wwBetrag = z.betrag * z.para9_2!;
+                    const vbHeiz = a.heizVerbrauchAnteil != null ? z.p7! * a.heizVerbrauchAnteil : 0;
+                    const wfHeiz = (1 - z.p7!) * wfZA;
+                    const vbWW = a.wwVerbrauchAnteil != null ? z.p8! * a.wwVerbrauchAnteil : 0;
+                    const wfWW = (1 - z.p8!) * wfZA;
+                    return s + heizBetrag * (vbHeiz + wfHeiz) + wwBetrag * (vbWW + wfWW);
+                }, 0)
+        }))
+        .filter((e) => e.betrag > 0);
 </script>
 
 <!-- Buchungsstatus + Download -->
@@ -209,4 +228,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/each}
 
 <Tile><h4>Gesamtergebnis der Abrechnung:</h4></Tile>
-<WalterAbrechnungslaufResultat {resultat} {einheitenNk} />
+<WalterAbrechnungslaufResultat {resultat} {kalteNk} {warmeNk} />

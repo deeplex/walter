@@ -77,7 +77,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Dedupliziert nach umlageId: eine HKVO-Zeile pro Rechnung, aber §9(2) einmal pro Umlage zeigen
     const gezeigteUmlageIds = new Set<number>();
 
-    const betragWarm = hkvoZeilen.reduce((s, z) => s + z.meinBetrag, 0);
+    const betragWarm = hkvoZeilen.reduce((s, hz) => {
+        const heizBetrag = hz.gesamtbetrag * (1 - hz.para9_2);
+        const wwBetrag = hz.gesamtbetrag * hz.para9_2;
+        const vbHeizAnteil = hz.heizVerbrauchAnteil != null ? hz.p7 * hz.heizVerbrauchAnteil : 0;
+        const wfHeizAnteil = (1 - hz.p7) * hz.wfZeitanteil;
+        const vbWWAnteil = hz.wwVerbrauchAnteil != null ? hz.p8 * hz.wwVerbrauchAnteil : 0;
+        const wfWWAnteil = (1 - hz.p8) * hz.wfZeitanteil;
+        return s + heizBetrag * (vbHeizAnteil + wfHeizAnteil) + wwBetrag * (vbWWAnteil + wfWWAnteil);
+    }, 0);
 </script>
 
 <Tile><h4>Warme Betriebskosten (HKVO)</h4></Tile>

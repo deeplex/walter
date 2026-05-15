@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterZaehler } from '$walter/components';
+    import { WalterDataTable, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
@@ -39,7 +39,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let rows: WalterZaehlerEntry[];
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterZaehlerEntry> | undefined = undefined;
+    export let entry: Partial<WalterZaehlerEntry> | undefined = {};
     export let fetchImpl: typeof fetch;
 
     export let ablesedatum: Date = new Date();
@@ -80,10 +80,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterZaehlerstand {fetchImpl} entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterZaehlerEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     rows={rowsAdd}
@@ -93,4 +95,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterZaehler {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

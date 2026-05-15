@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import type { WalterAbrechnungsresultatEntry } from '$walter/lib';
-    import { WalterDataWrapper } from '$walter/components';
+    import { WalterDataTable } from '$walter/components';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -49,12 +49,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const fullHeight = false;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     {on_click_row}
     {rowHref}
     {readonly}
     {fullHeight}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     rows={actualRows}
     {headers}
-></WalterDataWrapper>
+></WalterDataTable>

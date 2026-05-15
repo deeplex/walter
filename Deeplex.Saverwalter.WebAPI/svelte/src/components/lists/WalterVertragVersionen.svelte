@@ -15,10 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import {
-        WalterDataWrapper,
-        WalterVertragVersion
-    } from '$walter/components';
+    import { WalterDataTable, WalterVertragVersion } from '$walter/components';
     import { WalterVertragVersionEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
@@ -38,16 +35,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         navigation.vertragversion(e.detail.id);
     const rowHref = (row: DataTableRow) => `/vertragversionen/${row.id}`;
 
-    export let entry: Partial<WalterVertragVersionEntry> | undefined =
-        undefined;
+    export let entry: Partial<WalterVertragVersionEntry> | undefined = {};
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterVertragVersionEntry.ApiURL}
     {on_click_row}
     {rowHref}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {rows}
     {headers}
     {fullHeight}
@@ -55,4 +53,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterVertragVersion {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
+    import { WalterDataTable, WalterZaehlerstand } from '$walter/components';
 
     import { WalterZaehlerstandEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
@@ -32,19 +32,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let rows: WalterZaehlerstandEntry[];
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
+    export let entry: Partial<WalterZaehlerstandEntry> | undefined = {};
 
     const on_click_row = (e: CustomEvent) =>
         navigation.zaehlerstand(e.detail.id);
     const rowHref = (row: DataTableRow) => `/zaehlerstaende/${row.id}`;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterZaehlerstandEntry.ApiURL}
     {on_click_row}
     {rowHref}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {rows}
     {headers}
     {fullHeight}
@@ -52,4 +54,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterZaehlerstand {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

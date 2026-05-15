@@ -20,8 +20,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Button,
         Content,
         DataTable,
-        DataTableSkeleton,
-        SkeletonPlaceholder,
         Toolbar,
         ToolbarContent,
         ToolbarSearch
@@ -33,16 +31,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertPercent,
         convertTime
     } from '$walter/services/utils';
-    import { walter_goto } from '$walter/services/utils';
     import { dates, euro, formatToTableDate, time } from './WalterDataTable';
     import { Add } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
+    import WalterDataTableContainer from './WalterDataTableContainer.svelte';
 
     type WalterDataTableRow = DataTableRow & {
         id: string | number;
         permissions?: {
             read?: boolean;
+            update?: boolean;
         };
     };
 
@@ -55,15 +55,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }[];
     export let readonly = false;
     export let rows: WalterDataTableRow[];
-    export let add: (() => void) | undefined = undefined;
     export let rowHref:
         | ((row: WalterDataTableRow) => string | undefined)
         | undefined = undefined;
+    export let layout: 'inline' | 'accordion' = 'inline';
+    export let accordionTitle: string | undefined = undefined;
+    export let quickAddTitle: string | undefined = undefined;
+    export let addUrl: string | undefined = undefined;
+    export let addEntry: unknown = undefined;
+    export let onAdd: (() => void) | undefined = undefined;
+    export let beforeSubmit:
+        | undefined
+        | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
+    export let on_click_row: (
+        e: CustomEvent<DataTableRow>
+    ) => Promise<void> | void = () => {};
+
+    let addModalOpen = false;
 
     const searchParams: URLSearchParams | null = $page
         ? new URL($page.url).searchParams
         : null;
     let searchQuery = searchParams?.get('search') || '';
+
+    $: resolvedAccordionTitle = accordionTitle || '';
+    $: resolvedQuickAddTitle = quickAddTitle ?? accordionTitle;
+
+    function quick_add() {
+        addModalOpen = true;
+    }
+
+    function handleAddClick() {
+        quick_add();
+    }
+
+    function onSubmit(new_value: unknown) {
+        rows = [...rows, new_value as WalterDataTableRow];
+    }
 
     function toolbarSearchInput() {
         if (searchParams) {
@@ -84,10 +112,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             }
         }
     }
-
-    export let on_click_row: (
-        e: CustomEvent<DataTableRow>
-    ) => Promise<void> | void = () => {};
 
     $: hasButtonColumn = headers.some((header) => header.key === 'button');
     $: hasCompactButtonColumn = headers.some(
@@ -173,22 +197,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return rowHref?.(typedRow);
     }
 
-    function onRowLinkClick(event: MouseEvent, href: string) {
-        // Keep browser-native link behavior for new-tab/window gestures.
-        if (
-            event.defaultPrevented ||
-            event.button !== 0 ||
-            event.metaKey ||
-            event.ctrlKey ||
-            event.shiftKey ||
-            event.altKey
-        ) {
-            return;
-        }
-
-        event.preventDefault();
+    function onRowLinkClick(event: MouseEvent) {
+        // Prevent DataTable row click handlers from firing when the user
+        // explicitly clicked the anchor, while preserving native link behavior.
         event.stopPropagation();
-        walter_goto(href);
     }
 
     function getCellDisplayValue(cell: {
@@ -291,80 +303,98 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <Content>
-    <div class:has-compact-button-column={hasCompactButtonColumn}>
-        <DataTable
-            {size}
-            on:click:row={on_click_row}
-            sortable
-            zebra
-            stickyHeader
-            {headers}
-            {rows}
-            class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
-            style="cursor-events: none !important; max-height: none !important;"
+    {#if addUrl}
+        <WalterDataWrapperQuickAdd
+            bind:addEntry
+            {addUrl}
+            bind:addModalOpen
+            {onSubmit}
+            {beforeSubmit}
+            title={resolvedQuickAddTitle}
         >
-            <Toolbar>
-                <ToolbarContent>
-                    <ToolbarSearch
-                        placeholder="Suche mit ; separierter Liste..."
-                        persistent
-                        on:input={toolbarSearchInput}
-                        bind:value={searchQuery}
-                        {shouldFilterRows}
-                    />
-                    {#if !!add && !readonly}
-                        <Button
-                            style="right: -1em; position: sticky;"
-                            on:click={add}
-                            iconDescription="Eintrag hinzufügen"
-                            icon={Add}
-                        >
-                            Eintrag hinzufügen
-                        </Button>
-                    {/if}
-                </ToolbarContent>
-            </Toolbar>
-            <span
-                style="display: block; text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
-                slot="cell"
-                let:cell
-                let:row
+            <slot />
+        </WalterDataWrapperQuickAdd>
+    {/if}
+
+    <WalterDataTableContainer
+        {layout}
+        accordionTitle={resolvedAccordionTitle}
+        count={rows.length}
+    >
+        <div class:has-compact-button-column={hasCompactButtonColumn}>
+            <DataTable
+                {size}
+                on:click:row={on_click_row}
+                sortable
+                zebra
+                stickyHeader
+                {headers}
+                {rows}
+                class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
+                style="cursor-events: none !important; max-height: none !important;"
             >
-                {#if cell.key === 'button'}
-                    {@const buttonConfig = resolveActionButton(cell.value)}
-                    <span class="button-cell">
-                        <Button
-                            disabled={buttonConfig.disabled}
-                            on:click={buttonConfig.onClick}
-                            tooltipPosition="left"
-                            size="small"
-                            style="margin: 0;"
-                            kind={buttonConfig.kind}
-                            icon={buttonConfig.icon}
-                            iconDescription={buttonConfig.iconDescription}
+                <Toolbar>
+                    <ToolbarContent>
+                        <ToolbarSearch
+                            placeholder="Suche mit ; separierter Liste..."
+                            persistent
+                            on:input={toolbarSearchInput}
+                            bind:value={searchQuery}
+                            {shouldFilterRows}
                         />
-                    </span>
-                {:else}
-                    {@const displayValue = getCellDisplayValue(cell)}
-                    {@const tooltip =
-                        displayValue === '---' ? undefined : displayValue}
-                    {@const href = resolveRowHref(row)}
-                    {#if href}
-                        <a
-                            class="walter-table-link"
-                            {href}
-                            title={tooltip}
-                            on:click={(event) => onRowLinkClick(event, href)}
-                        >
-                            {displayValue}
-                        </a>
+                        {#if (addUrl || onAdd) && !readonly}
+                            <Button
+                                style="right: -1em; position: sticky;"
+                                on:click={onAdd ?? handleAddClick}
+                                iconDescription="Eintrag hinzufügen"
+                                icon={Add}
+                            >
+                                Eintrag hinzufügen
+                            </Button>
+                        {/if}
+                    </ToolbarContent>
+                </Toolbar>
+                <span class="walter-table-cell" slot="cell" let:cell let:row>
+                    {#if cell.key === 'button'}
+                        {@const buttonConfig = resolveActionButton(cell.value)}
+                        <span class="button-cell">
+                            <Button
+                                disabled={buttonConfig.disabled}
+                                on:click={buttonConfig.onClick}
+                                tooltipPosition="left"
+                                size="small"
+                                style="margin: 0;"
+                                kind={buttonConfig.kind}
+                                icon={buttonConfig.icon}
+                                iconDescription={buttonConfig.iconDescription}
+                            />
+                        </span>
                     {:else}
-                        <span title={tooltip}>{displayValue}</span>
+                        {@const displayValue = getCellDisplayValue(cell)}
+                        {@const tooltip =
+                            displayValue === '---' ? undefined : displayValue}
+                        {@const href = resolveRowHref(row)}
+                        {#if href}
+                            <a
+                                class="walter-table-link"
+                                {href}
+                                title={tooltip}
+                                on:click={onRowLinkClick}
+                            >
+                                <span class="walter-table-link__label"
+                                    >{displayValue}</span
+                                >
+                            </a>
+                        {:else}
+                            <span class="walter-table-text" title={tooltip}
+                                >{displayValue}</span
+                            >
+                        {/if}
                     {/if}
-                {/if}
-            </span>
-        </DataTable>
-    </div>
+                </span>
+            </DataTable>
+        </div>
+    </WalterDataTableContainer>
 
     <style>
         .proper-list
@@ -373,12 +403,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             max-height: none !important;
         }
 
+        .walter-table-cell {
+            display: block;
+            width: 100%;
+        }
+
         .walter-table-link {
             color: inherit;
             text-decoration: none;
             display: block;
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
+            width: calc(100% + 2rem);
+            margin: -0.5rem -1rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .walter-table-link__label,
+        .walter-table-text {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .button-cell {

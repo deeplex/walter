@@ -17,11 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
     import { WalterDataTable } from '$walter/components';
-    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterBuchung from '../details/WalterBuchung.svelte';
     import type { WalterMietzahlungListEntry, WalterVertragEntry, TransaktionsInput } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
-    import { invalidateAll } from '$app/navigation';
 
     const headers = [
         { key: 'betreffenderMonat', value: 'Betreffender Monat' },
@@ -42,48 +40,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let vertrag: WalterVertragEntry | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
-    let modalOpen = false;
-    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
-
-    $: if (modalOpen) {
-        buchungsInput = {
-            ...emptyTransaktionsInput(),
-            mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag?.id as number | undefined }]
-        };
-    }
-
-    async function onSubmit() {
-        await invalidateAll();
-    }
+    $: buchungsInput = {
+        ...emptyTransaktionsInput(),
+        mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag?.id as number | undefined }]
+    } as TransaktionsInput;
 </script>
-
-<WalterDataWrapperQuickAdd
-    title="Mietzahlung"
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={buchungsInput}
-    bind:addModalOpen={modalOpen}
-    onSubmit={onSubmit}
->
-    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
-</WalterDataWrapperQuickAdd>
 
 {#if title !== undefined}
     <Accordion>
         <AccordionItem title={`${title} (${(rows || []).length})`}>
             <Tile style="overflow: auto">
                 <WalterDataTable
-                    add={() => (modalOpen = true)}
+                    addUrl="/api/transaktionen/buchen"
+                    bind:addEntry={buchungsInput}
                     rows={sortedRows}
                     {headers}
-                />
+                >
+                    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+                </WalterDataTable>
             </Tile>
         </AccordionItem>
     </Accordion>
 {:else}
     <WalterDataTable
-        add={() => (modalOpen = true)}
+        addUrl="/api/transaktionen/buchen"
+        bind:addEntry={buchungsInput}
         {fullHeight}
         rows={sortedRows}
         {headers}
-    />
+    >
+        <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+    </WalterDataTable>
 {/if}

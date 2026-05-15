@@ -56,7 +56,6 @@ export { default as WalterComboBoxKontakt } from './elements/WalterComboBoxKonta
 export { default as WalterComboBoxWohnung } from './elements/WalterComboBoxWohnung.svelte';
 export { default as WalterComboBoxUmlagetyp } from './elements/WalterComboBoxUmlagetyp.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
-export { default as WalterDataWrapper } from './elements/WalterDataWrapper.svelte';
 export { default as WalterDataPieChart } from './data/WalterDataPieChart.svelte';
 export { default as WalterDataDonutChart } from './data/WalterDataDonutChart.svelte';
 export { default as WalterDataBarChartSimple } from './data/WalterDataBarChartSimple.svelte';

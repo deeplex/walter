@@ -55,17 +55,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     const isLeapYear = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-    const abrechnungstage = isLeapYear(jahr) ? 366 : 365;
+    $: abrechnungstage = isLeapYear(jahr) ? 366 : 365;
 
-    const jahrStart = `${jahr}-01-01`;
-    const jahrEnde  = `${jahr}-12-31`;
-    const vonInJahr = nutzungVon < jahrStart ? jahrStart : nutzungVon;
-    const bisRaw    = nutzungBis ?? jahrEnde;
-    const bisInJahr = bisRaw > jahrEnde ? jahrEnde : bisRaw;
-    const nutzungstage = Math.round(
+    $: jahrStart = `${jahr}-01-01`;
+    $: jahrEnde  = `${jahr}-12-31`;
+    $: vonInJahr = nutzungVon < jahrStart ? jahrStart : nutzungVon;
+    $: bisRaw    = nutzungBis ?? jahrEnde;
+    $: bisInJahr = bisRaw > jahrEnde ? jahrEnde : bisRaw;
+    $: nutzungstage = Math.round(
         (new Date(bisInJahr).getTime() - new Date(vonInJahr).getTime()) / 86400000
     ) + 1;
-    const zeitanteil = nutzungstage / abrechnungstage;
+    $: zeitanteil = nutzungstage / abrechnungstage;
 
     const formatDate = (d: string | null) => {
         if (!d) return 'heute';
@@ -73,23 +73,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
-    const anteilFaktorFuerSchluessel = (schluessel: string): number => {
+    $: anteilFaktorFuerSchluessel = (schluessel: string): number => {
         const zeile = einheit.nkZeilen.find((z) => z.schluessel === schluessel);
         return zeile?.anteile.find((a) => a.vertragId === vertragId)?.anteilFaktor ?? 0;
     };
 
-    const wfZeitanteil  = anteilFaktorFuerSchluessel('n. WF');
-    const nfZeitanteil  = anteilFaktorFuerSchluessel('n. NF');
-    const meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
-    const neZeitanteil  = anteilFaktorFuerSchluessel('n. NE');
+    $: wfZeitanteil  = anteilFaktorFuerSchluessel('n. WF');
+    $: nfZeitanteil  = anteilFaktorFuerSchluessel('n. NF');
+    $: meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
+    $: neZeitanteil  = anteilFaktorFuerSchluessel('n. NE');
 
-    const alleZeilen = einheit.nkZeilen.filter((z) =>
+    $: alleZeilen = einheit.nkZeilen.filter((z) =>
         z.anteile.some((a) => a.vertragId === vertragId)
     );
-    const kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
-    const hkvoZeilen  = alleZeilen.filter((z) => z.para9_2 != null);
+    $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
+    $: hkvoZeilen  = alleZeilen.filter((z) => z.para9_2 != null);
 
-    const meineZeilen = kalteZeilen.map((z) => {
+    $: meineZeilen = kalteZeilen.map((z) => {
         const anteil = z.anteile.find((a) => a.vertragId === vertragId);
         const faktor = anteil?.anteilFaktor ?? 0;
         return {
@@ -106,17 +106,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         };
     });
 
-    const betragKalt = meineZeilen.reduce((s, r) => s + r.betrag, 0);
-    const betragWarm = hkvoZeilen.reduce((s, z) => {
-        const a = z.anteile.find((a) => a.vertragId === vertragId);
-        return s + z.betrag * (a?.anteilFaktor ?? 0);
-    }, 0);
+    $: betragKalt = meineZeilen.reduce((s, r) => s + r.betrag, 0);
 
-    const hasWF  = meineZeilen.some((r) => r.schluessel === 'n. WF');
-    const hasNF  = meineZeilen.some((r) => r.schluessel === 'n. NF');
-    const hasNE  = meineZeilen.some((r) => r.schluessel === 'n. NE');
-    const hasMEA = meineZeilen.some((r) => r.schluessel === 'n. MEA');
-    const hasPs  = meineZeilen.some((r) => r.schluessel === 'n. Pers.');
+    $: hasWF  = meineZeilen.some((r) => r.schluessel === 'n. WF');
+    $: hasNF  = meineZeilen.some((r) => r.schluessel === 'n. NF');
+    $: hasNE  = meineZeilen.some((r) => r.schluessel === 'n. NE');
+    $: hasMEA = meineZeilen.some((r) => r.schluessel === 'n. MEA');
+    $: hasPs  = meineZeilen.some((r) => r.schluessel === 'n. Pers.');
 
     const schluesselLabel: Record<string, string> = {
         'n. WF':    'Wohnfläche',

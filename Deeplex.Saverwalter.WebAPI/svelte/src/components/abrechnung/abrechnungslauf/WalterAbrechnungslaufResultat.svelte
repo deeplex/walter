@@ -27,12 +27,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
 
     export let resultat: AbrechnungsresultatInfo;
-    export let einheitenNk: { bezeichnung: string; betragKalt: number }[];
+    export let kalteNk: { bezeichnung: string; betrag: number }[];
+    export let warmeNk: { bezeichnung: string; betrag: number }[];
 
-    const gezahltMiete = resultat.mieten
-        .filter((m) => !m.istSoll)
-        .reduce((s, m) => s + m.betrag, 0);
-    const result = resultat.vorauszahlung - resultat.rechnungsbetrag;
+    $: result = resultat.vorauszahlung - resultat.rechnungsbetrag;
 </script>
 
 <Row>
@@ -44,28 +42,42 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </StructuredListRow>
         </StructuredListHead>
         <StructuredListBody>
-            {#each einheitenNk as e}
-                {#if e.betragKalt}
+            {#if kalteNk.length > 0}
+                <StructuredListRow>
+                    <StructuredListCell head>Kalte Betriebskosten</StructuredListCell>
+                    <StructuredListCell head style="text-align:right"></StructuredListCell>
+                </StructuredListRow>
+                {#each kalteNk as e}
                     <StructuredListRow>
-                        <StructuredListCell>
-                            Abrechnungseinheit: {e.bezeichnung} (kalte Nebenkosten):
-                        </StructuredListCell>
+                        <StructuredListCell style="padding-left: 1.5rem">{e.bezeichnung}:</StructuredListCell>
+                        <StructuredListCell style="text-align:right">{convertEuro(e.betrag)}</StructuredListCell>
+                    </StructuredListRow>
+                {/each}
+            {/if}
+            {#if warmeNk.length > 0}
+                <StructuredListRow>
+                    <StructuredListCell head>Warme Betriebskosten (HKVO)</StructuredListCell>
+                    <StructuredListCell head style="text-align:right"></StructuredListCell>
+                </StructuredListRow>
+                {#each warmeNk as e}
+                    <StructuredListRow>
+                        <StructuredListCell style="padding-left: 1.5rem">{e.bezeichnung}:</StructuredListCell>
                         <StructuredListCell style="text-align:right">
-                            {convertEuro(e.betragKalt)}
+                            {convertEuro(e.betrag)}
                         </StructuredListCell>
                     </StructuredListRow>
-                {/if}
-            {/each}
+                {/each}
+            {/if}
             <StructuredListRow>
-                <StructuredListCell>Kaltmiete:</StructuredListCell>
-                <StructuredListCell style="text-align:right">
-                    {convertEuro(resultat.kaltmieteSoll)}
+                <StructuredListCell head>Nebenkosten gesamt:</StructuredListCell>
+                <StructuredListCell head style="text-align:right">
+                    {convertEuro(resultat.rechnungsbetrag)}
                 </StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>
-                <StructuredListCell>Gezahlt:</StructuredListCell>
+                <StructuredListCell>Vorauszahlungen:</StructuredListCell>
                 <StructuredListCell style="text-align:right">
-                    {convertEuro(gezahltMiete)}
+                    {convertEuro(resultat.vorauszahlung)}
                 </StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>

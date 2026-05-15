@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     import {
         WalterBetriebskostenrechnung,
-        WalterDataWrapper
+        WalterDataTable
     } from '$walter/components';
     import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
@@ -64,13 +64,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         });
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
-        undefined;
+        {};
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
     {rowHref}
     rows={sortedRows}
@@ -80,4 +82,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterBetriebskostenrechnung {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

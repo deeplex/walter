@@ -86,8 +86,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/if}
 
 <style>
-    :global(.bx--tabs--container .bx--tabs__nav-link) {
+    :global(.bx--tabs--container .bx--tab) {
+        flex-shrink: 0;
         max-width: none;
-        width: auto;
+    }
+    :global(.bx--tabs--container .bx--tabs__nav-link) {
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        height: auto !important;
+        max-width: none !important;
+        min-height: 3rem;
+        overflow: visible !important;
+        white-space: nowrap !important;
+        width: auto !important;
     }
 </style>

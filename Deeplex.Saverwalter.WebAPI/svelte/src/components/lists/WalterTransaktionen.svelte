@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterTransaktion } from '$walter/components';
+    import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import { WalterTransaktionEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     export let fetchImpl: typeof fetch;
@@ -36,19 +36,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let rows: WalterTransaktionEntry[];
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterTransaktionEntry> | undefined = undefined;
+    export let entry: Partial<WalterTransaktionEntry> | undefined = {};
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.transaktion(e.detail.id);
     const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterTransaktionEntry.ApiURL}
     {on_click_row}
     {rowHref}
     addEntry={entry}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {rows}
     {headers}
     {fullHeight}
@@ -56,4 +58,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterTransaktion {fetchImpl} {entry} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>
