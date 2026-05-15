@@ -15,16 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type {
-        AbrechnungsresultatInfo,
-        AbrechnungslaufGruppeResult
-    } from './AbrechnungslaufTypes';
+    import type { AbrechnungsresultatInfo, AbrechnungslaufGruppeResult, NkZeileInfo } from './AbrechnungslaufTypes';
+    import { hkvoKosten } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufEinheit from './WalterAbrechnungslaufEinheit.svelte';
-    import WalterAbrechnungslaufNebenkosten from './WalterAbrechnungslaufNebenkosten.svelte';
     import WalterAbrechnungslaufResultat from './WalterAbrechnungslaufResultat.svelte';
     import { convertEuro } from '$walter/services/utils';
     import {
-        Button,
         ClickableTile,
         Column,
         OverflowMenu,
@@ -49,27 +45,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         downloadLoading = true;
         downloadError = '';
         try {
-            const response = await walter_post(
-                `/api/abrechnungslauf/print/${format}`,
-                {
-                    wohnungIds: gruppe.wohnungIds,
-                    jahr,
-                    vertragId: resultat.vertragId
-                }
-            );
+            const response = await walter_post(`/api/abrechnungslauf/print/${format}`, {
+                wohnungIds: gruppe.wohnungIds,
+                jahr,
+                vertragId: resultat.vertragId
+            });
             if (!response.ok) {
                 downloadError = await response.text();
                 return;
             }
-            const disposition =
-                response.headers.get('content-disposition') ?? '';
-            const match = disposition.match(
-                /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-            );
-            const ext = format === 'docx' ? 'docx' : 'pdf';
+            const disposition = response.headers.get('content-disposition') ?? '';
+            const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
             const fileName = match
                 ? match[1].replace(/['"]/g, '')
-                : `NK_${jahr}_Abrechnung.${ext}`;
+                : `NK_${jahr}_Abrechnung.${format}`;
             download_file_blob(await response.blob(), fileName);
         } finally {
             downloadLoading = false;
@@ -82,46 +71,36 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
+    $: wohnungName = resultat.wohnungBezeichnung.split(' – ').slice(1).join(' – ');
     $: result = resultat.vorauszahlung - resultat.rechnungsbetrag;
+    $: resultLabel = result > 0 ? 'bekommt der Mieter' : 'bekommt der Vermieter';
+    $: nutzungVonDisplay =
+        resultat.nutzungVon === `${jahr}-01-01` ? 'Jahresbeginn' : formatDate(resultat.nutzungVon);
 
     $: vertragsEinheiten = gruppe.abrechnungseinheiten.filter((e) =>
-        e.nkZeilen.some((z) =>
-            z.anteile.some((a) => a.vertragId === resultat.vertragId)
-        )
+        e.nkZeilen.some((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
     );
 
-    $: kalteNk = vertragsEinheiten
-        .map((einheit) => ({
-            bezeichnung: einheit.wohnungNamen,
-            betrag: einheit.nkZeilen
-                .filter((z) => z.para9_2 == null)
-                .filter((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
-                .reduce((s, z) => {
-                    const a = z.anteile.find((a) => a.vertragId === resultat.vertragId)!;
-                    return s + z.betrag * a.anteilFaktor;
-                }, 0)
-        }))
-        .filter((e) => e.betrag > 0);
+    $: nkNachEinheit = vertragsEinheiten.map((einheit) => {
+        const vid = resultat.vertragId;
+        const zeilen = einheit.nkZeilen.filter((z) => z.anteile.some((a) => a.vertragId === vid));
+        const anteil = (z: NkZeileInfo) => z.anteile.find((a) => a.vertragId === vid)!;
+        const kalt = zeilen
+            .filter((z) => z.para9_2 == null)
+            .reduce((s, z) => s + z.betrag * anteil(z).anteilFaktor, 0);
+        const warm = zeilen
+            .filter((z) => z.para9_2 != null)
+            .reduce((s, z) => s + hkvoKosten(z, anteil(z)), 0);
+        return { bezeichnung: einheit.wohnungNamen, kalt, warm };
+    });
 
-    $: warmeNk = vertragsEinheiten
-        .map((einheit) => ({
-            bezeichnung: einheit.wohnungNamen,
-            betrag: einheit.nkZeilen
-                .filter((z) => z.para9_2 != null)
-                .filter((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
-                .reduce((s, z) => {
-                    const a = z.anteile.find((a) => a.vertragId === resultat.vertragId)!;
-                    const wfZA = a.anteilFaktor;
-                    const heizBetrag = z.betrag * (1 - z.para9_2!);
-                    const wwBetrag = z.betrag * z.para9_2!;
-                    const vbHeiz = a.heizVerbrauchAnteil != null ? z.p7! * a.heizVerbrauchAnteil : 0;
-                    const wfHeiz = (1 - z.p7!) * wfZA;
-                    const vbWW = a.wwVerbrauchAnteil != null ? z.p8! * a.wwVerbrauchAnteil : 0;
-                    const wfWW = (1 - z.p8!) * wfZA;
-                    return s + heizBetrag * (vbHeiz + wfHeiz) + wwBetrag * (vbWW + wfWW);
-                }, 0)
-        }))
-        .filter((e) => e.betrag > 0);
+    $: kalteNk = nkNachEinheit
+        .filter((e) => e.kalt > 0)
+        .map(({ bezeichnung, kalt }) => ({ bezeichnung, betrag: kalt }));
+
+    $: warmeNk = nkNachEinheit
+        .filter((e) => e.warm > 0)
+        .map(({ bezeichnung, warm }) => ({ bezeichnung, betrag: warm }));
 </script>
 
 <!-- Buchungsstatus + Download -->
@@ -178,12 +157,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <Tile>
             <div style="display: flex; align-items: baseline; gap: 0.5ch;">
                 <a href="/vertraege/{resultat.vertragId}">
-                    <h4>
-                        {resultat.wohnungBezeichnung
-                            .split(' – ')
-                            .slice(1)
-                            .join(' – ')} – {resultat.mieterBezeichnung}
-                    </h4>
+                    <h4>{wohnungName} – {resultat.mieterBezeichnung}</h4>
                 </a>
                 <h4>- {jahr}</h4>
             </div>
@@ -192,7 +166,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <Column sm={1}>
         <Tile>
             <h4>Resultat: {convertEuro(Math.abs(result))}</h4>
-            <p>{result > 0 ? 'bekommt der Mieter' : 'bekommt der Vermieter'}</p>
+            <p>{resultLabel}</p>
         </Tile>
     </Column>
 </Row>
@@ -202,7 +176,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         labelText="Nutzungsbeginn"
         placeholder="Nutzungsbeginn"
         readonly
-        value={formatDate(resultat.nutzungVon)}
+        value={nutzungVonDisplay}
     />
     <TextInput
         labelText="Nutzungsende"
@@ -212,20 +186,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 
-<Tile><h4>Kalte Nebenkosten</h4></Tile>
-
 {#each vertragsEinheiten as einheit}
-    <hr />
-    <WalterAbrechnungslaufEinheit
-        {einheit}
-        vertragId={resultat.vertragId ?? 0}
-        personenZeitanteile={resultat.personenZeitanteile}
-        nutzungVon={resultat.nutzungVon}
-        nutzungBis={resultat.nutzungBis}
-        {jahr}
-        {fetchImpl}
-    />
+    <Tile style="margin-bottom: 1rem; padding: 0;">
+        <WalterAbrechnungslaufEinheit
+            {einheit}
+            vertragId={resultat.vertragId ?? 0}
+            personenZeitanteile={resultat.personenZeitanteile}
+            nutzungVon={resultat.nutzungVon}
+            nutzungBis={resultat.nutzungBis}
+            {jahr}
+            {fetchImpl}
+        />
+    </Tile>
 {/each}
 
-<Tile><h4>Gesamtergebnis der Abrechnung:</h4></Tile>
-<WalterAbrechnungslaufResultat {resultat} {kalteNk} {warmeNk} />
+<Tile>
+    <h4>Gesamtergebnis der Abrechnung:</h4>
+    <WalterAbrechnungslaufResultat {resultat} {kalteNk} {warmeNk} />
+</Tile>

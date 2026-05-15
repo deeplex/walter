@@ -16,14 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import type { NkZeileInfo, ZaehlerVerbrauchInfo } from './AbrechnungslaufTypes';
+    import { hkvoKosten } from './AbrechnungslaufTypes';
     import { convertEuro, convertPercent } from '$walter/services/utils';
     import {
         StructuredList,
         StructuredListBody,
         StructuredListCell,
         StructuredListHead,
-        StructuredListRow,
-        Tile
+        StructuredListRow
     } from 'carbon-components-svelte';
 
     export let zeilen: NkZeileInfo[];
@@ -77,30 +77,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Dedupliziert nach umlageId: eine HKVO-Zeile pro Rechnung, aber §9(2) einmal pro Umlage zeigen
     const gezeigteUmlageIds = new Set<number>();
 
-    const betragWarm = hkvoZeilen.reduce((s, hz) => {
-        const heizBetrag = hz.gesamtbetrag * (1 - hz.para9_2);
-        const wwBetrag = hz.gesamtbetrag * hz.para9_2;
-        const vbHeizAnteil = hz.heizVerbrauchAnteil != null ? hz.p7 * hz.heizVerbrauchAnteil : 0;
-        const wfHeizAnteil = (1 - hz.p7) * hz.wfZeitanteil;
-        const vbWWAnteil = hz.wwVerbrauchAnteil != null ? hz.p8 * hz.wwVerbrauchAnteil : 0;
-        const wfWWAnteil = (1 - hz.p8) * hz.wfZeitanteil;
-        return s + heizBetrag * (vbHeizAnteil + wfHeizAnteil) + wwBetrag * (vbWWAnteil + wfWWAnteil);
-    }, 0);
+    const betragWarm = hkvoZeilen.reduce(
+        (s, hz) => s + hkvoKosten(hz.zeile, hz.zeile.anteile.find((a) => a.vertragId === vertragId)!),
+        0
+    );
 </script>
 
-<Tile><h4>Warme Betriebskosten (HKVO)</h4></Tile>
+<div style="padding: 1rem 1rem 0;">
+    <h4>Warme Betriebskosten (HKVO)</h4>
+</div>
 
 {#each hkvoZeilen as hz}
     {@const showP9 = !gezeigteUmlageIds.has(hz.zeile.umlageId)}
     {#if showP9}
         {@const _add = gezeigteUmlageIds.add(hz.zeile.umlageId)}
-        <!-- §9(2) Formel-Anzeige -->
-        <Tile>
-            <p>
-                <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil:
-                2,5 × V/Q × (t<sub>w</sub> − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
-            </p>
-        </Tile>
+        <p style="padding: 0.5rem 1rem;">
+            <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil:
+            2,5 × V/Q × (t<sub>w</sub> − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
+        </p>
     {/if}
 
     <!-- §7 Heizkosten -->
@@ -223,14 +217,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </StructuredListBody>
     </StructuredList>
 
-    <Tile>
+    <p style="padding: 0.5rem 1rem;">
         <strong>{hz.zeile.bezeichnung}:</strong>
         {convertEuro(hz.gesamtbetrag)} gesamt · Ihr Anteil: {convertEuro(hz.meinBetrag)}
-    </Tile>
+    </p>
 {/each}
 
-<Tile>
-    <h5 style="display: flex; justify-content: center;">
-        Warme Betriebskosten: {convertEuro(betragWarm)}
-    </h5>
-</Tile>
+<p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">
+    Warme Betriebskosten: {convertEuro(betragWarm)}
+</p>

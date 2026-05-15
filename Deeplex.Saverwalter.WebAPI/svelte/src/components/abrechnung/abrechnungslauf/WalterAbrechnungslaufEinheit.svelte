@@ -30,7 +30,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         StructuredListCell,
         StructuredListHead,
         StructuredListRow,
-        Tile,
         Toolbar,
         ToolbarContent
     } from 'carbon-components-svelte';
@@ -124,9 +123,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 </script>
 
-<Tile>
+<div style="padding: 1rem 1rem 0;">
     <h4>Abrechnungseinheit: {einheit.wohnungNamen}</h4>
-</Tile>
+</div>
 
 <!-- Personenzeitanteil / Einheit-Dimensionen -->
 <Row>
@@ -289,11 +288,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </svelte:fragment>
 </DataTable>
 
-<Tile>
-    <h5 style="display: flex; justify-content: center;">
-        Kalte Nebenkosten: {convertEuro(betragKalt)}
-    </h5>
-</Tile>
+<p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">
+    Kalte Nebenkosten: {convertEuro(betragKalt)}
+</p>
 
 <WalterDataWrapperQuickAdd
     title="Betriebskostenrechnung"
