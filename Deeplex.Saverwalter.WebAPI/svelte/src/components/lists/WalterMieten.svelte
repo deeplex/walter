@@ -15,13 +15,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterDataWrapper, WalterMiete } from '$walter/components';
-    import {
-        WalterMietzahlungApiURL,
-        WalterMietzahlungListEntry,
-        type WalterMietzahlungInput,
-        type WalterVertragEntry
-    } from '$walter/lib';
+    import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
+    import { WalterDataTable } from '$walter/components';
+    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
+    import WalterBuchung from '../details/WalterBuchung.svelte';
+    import type { WalterMietzahlungListEntry, WalterVertragEntry, TransaktionsInput } from '$walter/lib';
+    import { emptyTransaktionsInput } from '$walter/lib';
+    import { invalidateAll } from '$app/navigation';
 
     const headers = [
         { key: 'betreffenderMonat', value: 'Betreffender Monat' },
@@ -33,30 +33,57 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: sortedRows = [...(rows || [])].sort((a, b) => {
         const monthA = new Date(a.betreffenderMonat).getTime();
         const monthB = new Date(b.betreffenderMonat).getTime();
-
-        if (!Number.isNaN(monthA) && !Number.isNaN(monthB)) {
-            return monthB - monthA;
-        }
-
-        return `${b.betreffenderMonat || ''}`.localeCompare(
-            `${a.betreffenderMonat || ''}`
-        );
+        if (!Number.isNaN(monthA) && !Number.isNaN(monthB)) return monthB - monthA;
+        return `${b.betreffenderMonat || ''}`.localeCompare(`${a.betreffenderMonat || ''}`);
     });
+
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterMietzahlungInput> | undefined = undefined;
     export let vertrag: WalterVertragEntry | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+
+    let modalOpen = false;
+    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
+
+    $: if (modalOpen) {
+        buchungsInput = {
+            ...emptyTransaktionsInput(),
+            mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag?.id as number | undefined }]
+        };
+    }
+
+    async function onSubmit() {
+        await invalidateAll();
+    }
 </script>
 
-<WalterDataWrapper
-    addUrl={WalterMietzahlungApiURL}
-    addEntry={entry}
-    {title}
-    rows={sortedRows}
-    {headers}
-    {fullHeight}
+<WalterDataWrapperQuickAdd
+    title="Mietzahlung"
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={buchungsInput}
+    bind:addModalOpen={modalOpen}
+    onSubmit={onSubmit}
 >
-    {#if entry}
-        <WalterMiete {entry} {vertrag} mietzahlungen={sortedRows} />
-    {/if}
-</WalterDataWrapper>
+    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+</WalterDataWrapperQuickAdd>
+
+{#if title !== undefined}
+    <Accordion>
+        <AccordionItem title={`${title} (${(rows || []).length})`}>
+            <Tile style="overflow: auto">
+                <WalterDataTable
+                    add={() => (modalOpen = true)}
+                    rows={sortedRows}
+                    {headers}
+                />
+            </Tile>
+        </AccordionItem>
+    </Accordion>
+{:else}
+    <WalterDataTable
+        add={() => (modalOpen = true)}
+        {fullHeight}
+        rows={sortedRows}
+        {headers}
+    />
+{/if}

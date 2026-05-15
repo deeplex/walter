@@ -29,7 +29,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks
     } from '$walter/components';
     import {
-        getMietzahlungEntry,
         getMietminderungEntry,
         getVertragversionEntry
     } from './utils';
@@ -38,8 +37,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
-        WalterKontaktEntry,
-        type WalterMietzahlungInput
+        WalterKontaktEntry
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import { ClickableTile } from 'carbon-components-svelte';
@@ -51,9 +49,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const vertragversionEntry: Partial<WalterVertragVersionEntry> =
         getVertragversionEntry(data.entry);
-
-    const mietzahlungEntry: Partial<WalterMietzahlungInput> =
-        getMietzahlungEntry(data.entry);
 
     const mieterEntry: Partial<WalterKontaktEntry> = {};
 
@@ -97,7 +92,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.versionen}
         />
         <WalterMieten
-            entry={mietzahlungEntry}
+            fetchImpl={data.fetchImpl}
             vertrag={data.entry}
             title="Mietzahlungen"
             rows={data.mietzahlungen}

@@ -86,9 +86,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> Get() => DbService.GetList(User!);
 
-        [HttpPost]
-        public Task<ActionResult<ErhaltungsaufwendungEntry>> Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(User!, entry);
-
         [HttpGet("{id}")]
         public Task<ActionResult<ErhaltungsaufwendungEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]

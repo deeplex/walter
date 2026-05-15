@@ -337,5 +337,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
             return list;
         }
+
+        [HttpGet]
+        [Route("api/selection/buchungskonten")]
+        public ActionResult<IEnumerable<SelectionEntry>> GetBuchungskonten()
+        {
+            var konten = Ctx.Buchungskonten
+                .OrderBy(k => k.Kontonummer)
+                .Select(k => new { k.BuchungskontoId, k.Kontonummer, k.Bezeichnung })
+                .ToList();
+            return Ok(konten.Select(k => new SelectionEntry(k.BuchungskontoId, $"{k.Kontonummer} – {k.Bezeichnung}")));
+        }
     }
 }

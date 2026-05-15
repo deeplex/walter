@@ -63,29 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             });
         }
 
-        public override async Task<ActionResult<MieteEntry>> Post(ClaimsPrincipal user, MieteEntry entry)
-        {
-            if (entry.Id != 0)
-            {
-                return new BadRequestResult();
-            }
 
-            try
-            {
-                var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
-                var authRx = await Auth.AuthorizeAsync(user, vertrag, [Operations.SubCreate]);
-                if (!authRx.Succeeded)
-                {
-                    return new ForbidResult();
-                }
-
-                return await Add(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
 
         private async Task<MieteEntry> Add(MieteEntry entry)
         {

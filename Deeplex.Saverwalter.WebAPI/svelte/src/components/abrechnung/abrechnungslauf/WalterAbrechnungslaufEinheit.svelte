@@ -17,6 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { AbrechnungseinheitInfo, NkZeileInfo, PersonenZeitanteilInfo } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufHeizkosten from './WalterAbrechnungslaufHeizkosten.svelte';
+    import WalterDataWrapperQuickAdd from '../../elements/WalterDataWrapperQuickAdd.svelte';
+    import WalterBuchung from '../../details/WalterBuchung.svelte';
+    import type { TransaktionsInput } from '$walter/lib';
+    import { emptyTransaktionsInput } from '$walter/lib';
     import { convertEuro, convertM2, convertPercent } from '$walter/services/utils';
     import {
         DataTable,
@@ -37,6 +41,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let nutzungVon: string;
     export let nutzungBis: string | null;
     export let jahr: number;
+    export let fetchImpl: typeof fetch;
+
+    let bkModalOpen = false;
+    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
+
+    function openBKModal(umlageId: number) {
+        buchungsInput = {
+            ...emptyTransaktionsInput(),
+            betriebskostenEingaenge: [{ betrag: 0, umlageId, betreffendesJahr: jahr }]
+        };
+        bkModalOpen = true;
+    }
 
     const isLeapYear = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
     const abrechnungstage = isLeapYear(jahr) ? 366 : 365;
@@ -264,10 +280,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if row.rechnungId}
                 <a href="/betriebskostenrechnungen/{row.rechnungId}">{cell.value}</a>
             {:else}
-                <a
-                    href="/betriebskostenrechnungen/new/?umlage={row.umlageId}&jahr={jahr}&typ={row.typId}"
-                    style="color: var(--cds-support-error); font-weight: 600;"
-                >{cell.value}</a>
+                <button
+                    style="color: var(--cds-support-error); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    on:click={() => openBKModal(row.umlageId)}
+                >{cell.value}</button>
             {/if}
         {:else if cell.key === 'schluessel'}
             <span title={schluesselLabel[cell.value] ?? cell.value}>{cell.value}</span>
@@ -282,6 +298,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Kalte Nebenkosten: {convertEuro(betragKalt)}
     </h5>
 </Tile>
+
+<WalterDataWrapperQuickAdd
+    title="Betriebskostenrechnung"
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={buchungsInput}
+    bind:addModalOpen={bkModalOpen}
+>
+    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+</WalterDataWrapperQuickAdd>
 
 {#if hkvoZeilen.length > 0}
     <WalterAbrechnungslaufHeizkosten

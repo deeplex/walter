@@ -383,7 +383,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </p>
 
         {#each result.gruppen as gruppe}
-            <WalterAbrechnungslaufGruppe {gruppe} {jahr} />
+            <WalterAbrechnungslaufGruppe {gruppe} {jahr} fetchImpl={data.fetchImpl} />
         {/each}
 
         <WalterAbrechnungslaufHinweiseAktionen

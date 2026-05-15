@@ -64,33 +64,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task Post()
-        {
-            var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var dbService = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
-
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
-            ctx.Umlagen.Add(umlage);
-            ctx.SaveChanges();
-            var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
-            {
-                Umlage = umlage
-            };
-            var entry = new BetriebskostenrechnungEntry(entity, new());
-
-            var result = await controller.Post(entry);
-
-            result.Value.Should().NotBeNull();
-        }
-
-        [Fact]
         public async Task GetId()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);

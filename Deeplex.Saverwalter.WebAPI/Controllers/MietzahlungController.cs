@@ -16,46 +16,17 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services;
-using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mietzahlungen")]
-    public class MietzahlungController : ControllerBase
+    public class MietzahlungController(SaverwalterContext ctx, IAuthorizationService auth) : ControllerBase
     {
-        /// <summary>Eingabe für eine neue Mietzahlung.</summary>
-        public class MietzahlungEntry
-        {
-            public SelectionEntry Vertrag { get; set; } = null!;
-            public DateOnly BetreffenderMonat { get; set; }
-            public DateOnly Zahlungsdatum { get; set; }
-            public decimal KaltmieteZahlung { get; set; }
-            public decimal NkZahlung { get; set; }
-            public string? Notiz { get; set; }
-        }
-
-        /// <summary>
-        /// Ergebnis nach erfolgreicher Buchung.
-        /// Id = KaltmieteBuchungssatzId — dient als Tabellenzeilen-Key im Frontend.
-        /// </summary>
-        public class MietzahlungErgebnisEntry
-        {
-            public Guid Id { get; set; }
-            public DateOnly Buchungsdatum { get; set; }
-            public string BetreffenderMonat { get; set; } = string.Empty;
-            public decimal KaltmieteZahlung { get; set; }
-            public Guid SollstellungBuchungssatzId { get; set; }
-            public decimal SollstellungBetrag { get; set; }
-            public decimal VerbleibendeForderung { get; set; }
-            public Guid? NkBuchungssatzId { get; set; }
-            public decimal NkZahlung { get; set; }
-        }
-
         /// <summary>Eintrag in der Zahlungsliste eines Vertrags.</summary>
         public class MietzahlungListEntry
         {
@@ -66,11 +37,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public Permissions Permissions { get; set; } = new Permissions();
 
             public MietzahlungListEntry() { }
-            public MietzahlungListEntry(Buchungssatz satz, decimal betrag, DateOnly betreffenderMonat, Permissions permissions)
+            public MietzahlungListEntry(Buchungssatz satz, decimal betrag, Permissions permissions)
             {
                 Id = satz.BuchungssatzId;
                 Buchungsdatum = satz.Buchungsdatum;
-                BetreffenderMonat = betreffenderMonat.ToString("yyyy-MM-01");
+                BetreffenderMonat = new DateOnly(satz.Buchungsdatum.Year, satz.Buchungsdatum.Month, 1).ToString("yyyy-MM-01");
                 KaltmieteZahlung = betrag;
                 Permissions = permissions;
             }
@@ -89,96 +60,34 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public bool SollstellungVorhanden { get; set; }
         }
 
-        private readonly ILogger<MietzahlungController> _logger;
-        private readonly MietzahlungBuchungsService _buchungsService;
-        private readonly SaverwalterContext _ctx;
-        private readonly IAuthorizationService _auth;
-
-        public MietzahlungController(
-            ILogger<MietzahlungController> logger,
-            MietzahlungBuchungsService buchungsService,
-            SaverwalterContext ctx,
-            IAuthorizationService auth)
-        {
-            _logger = logger;
-            _buchungsService = buchungsService;
-            _ctx = ctx;
-            _auth = auth;
-        }
-
-        /// <summary>
-        /// Erstellt eine Mietzahlung (Kaltmiete + optional NK-VZ) für einen Vertrag.
-        /// Die Sollstellung wird automatisch angelegt wenn sie für den Monat fehlt.
-        /// </summary>
-        [HttpPost]
-        public async Task<ActionResult<MietzahlungErgebnisEntry>> Post([FromBody] MietzahlungEntry entry)
-        {
-            var vertrag = await _ctx.Vertraege.FindAsync(entry.Vertrag.Id);
-            if (vertrag is null) return NotFound();
-
-            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
-            if (!authRx.Succeeded) return Forbid();
-
-            if (entry.KaltmieteZahlung <= 0 && entry.NkZahlung <= 0)
-                return BadRequest("Mindestens ein Betrag (Kaltmiete oder NK) muss größer als 0 sein.");
-
-            if (entry.KaltmieteZahlung < 0 || entry.NkZahlung < 0)
-                return BadRequest("Zahlungsbeträge dürfen nicht negativ sein.");
-
-            try
-            {
-                var input = new MietzahlungBuchungsService.MietzahlungInput(
-                    vertrag,
-                    entry.BetreffenderMonat,
-                    entry.Zahlungsdatum,
-                    entry.KaltmieteZahlung,
-                    entry.NkZahlung,
-                    entry.Notiz);
-
-                var ergebnis = await _buchungsService.BucheMietzahlungAsync(input);
-
-                var monat = new DateOnly(entry.BetreffenderMonat.Year, entry.BetreffenderMonat.Month, 1);
-                return Ok(new MietzahlungErgebnisEntry
-                {
-                    Id = ergebnis.KaltmieteBuchungssatz.BuchungssatzId,
-                    Buchungsdatum = entry.Zahlungsdatum,
-                    BetreffenderMonat = monat.ToString("yyyy-MM-dd"),
-                    KaltmieteZahlung = entry.KaltmieteZahlung,
-                    SollstellungBuchungssatzId = ergebnis.SollstellungBuchungssatz.BuchungssatzId,
-                    SollstellungBetrag = ergebnis.SollstellungBetrag,
-                    VerbleibendeForderung = ergebnis.VerbleibendeForderung,
-                    NkBuchungssatzId = ergebnis.NkBuchungssatz?.BuchungssatzId,
-                    NkZahlung = entry.NkZahlung
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         /// <summary>
         /// Listet alle Kaltmiete-Zahlungs-Buchungssätze eines Vertrags.
         /// </summary>
         [HttpGet("{vertragId}")]
         public async Task<ActionResult<IEnumerable<MietzahlungListEntry>>> GetByVertrag(int vertragId)
         {
-            var vertrag = await _ctx.Vertraege.FindAsync(vertragId);
+            var vertrag = await ctx.Vertraege.FindAsync(vertragId);
             if (vertrag is null) return NotFound();
 
-            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var permissions = await GetPermissions(User!, vertrag, _auth);
-            var saetze = await _buchungsService.GetKaltmieteZahlungenAsync(vertrag);
+            var permissions = await GetPermissions(User, vertrag, auth);
             var kontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+
+            var saetze = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Where(s => s.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Haben
+                    && z.Buchungskonto.BuchungskontoId == kontoId))
+                .ToListAsync();
 
             var result = saetze.Select(s =>
             {
                 var betrag = s.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == kontoId)
                     .Sum(z => z.Betrag);
-                return new MietzahlungListEntry(s, betrag, s.Buchungsdatum, permissions);
+                return new MietzahlungListEntry(s, betrag, permissions);
             });
 
             return Ok(result);
@@ -191,14 +100,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet("{vertragId}/forderung/{monat}")]
         public async Task<ActionResult<ForderungsstatusEntry>> GetForderungsstatus(int vertragId, DateOnly monat)
         {
-            var vertrag = await _ctx.Vertraege.FindAsync(vertragId);
+            var vertrag = await ctx.Vertraege.FindAsync(vertragId);
             if (vertrag is null) return NotFound();
 
-            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
             var ersterDesMonats = new DateOnly(monat.Year, monat.Month, 1);
-            var kontoId = vertrag.MietBuchungskonto.BuchungskontoId;
 
             var sollSumme = vertrag.MietBuchungskonto.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Soll

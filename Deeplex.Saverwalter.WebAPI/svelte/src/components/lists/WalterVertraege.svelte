@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -17,19 +17,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import {
         WalterDataWrapper,
-        WalterMiete,
         WalterVertrag
     } from '$walter/components';
-    import {
-        WalterVertragEntry,
-        WalterMietzahlungApiURL,
-        type WalterMietzahlungInput
-    } from '$walter/lib';
-    import { convertDateCanadian } from '$walter/services/utils';
+    import { WalterVertragEntry, type TransaktionsInput } from '$walter/lib';
+    import { emptyTransaktionsInput } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
+    import WalterBuchung from '../details/WalterBuchung.svelte';
+    import { invalidateAll } from '$app/navigation';
 
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
@@ -49,56 +46,38 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fetchImpl: typeof fetch;
     export let entry: Partial<WalterVertragEntry> | undefined = undefined;
 
-    let earliest: Date = new Date();
-    let quickAddEntry: Partial<WalterMietzahlungInput> = {};
-    let quickAddVertrag: WalterVertragEntry | undefined = undefined;
-
-    function getNextMieteMonth(vertrag: WalterVertragEntry): Date {
-        const mieten = vertrag.mieten
-            .map((miete) => new Date(miete.betreffenderMonat))
-            .sort((a, b) => b.getTime() - a.getTime());
-        const dateMiete = mieten[0] || new Date();
-        dateMiete.setDate(
-            dateMiete.getDate() +
-                new Date(
-                    dateMiete.getFullYear(),
-                    dateMiete.getMonth(),
-                    0
-                ).getDate()
-        );
-        return dateMiete < earliest ? earliest : dateMiete;
-    }
+    let modalOpen = false;
+    let modalTitle = 'Mietzahlung';
+    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
 
     function add(e: CustomEvent, vertrag: WalterVertragEntry) {
         e.stopPropagation();
-
-        const lastVersion = vertrag.versionen[vertrag.versionen.length - 1];
-        quickAddEntry = {
-            vertrag: { id: vertrag.id, text: vertrag.wohnung.text },
-            zahlungsdatum: convertDateCanadian(new Date()),
-            kaltmieteZahlung: lastVersion?.grundmiete || 0,
-            nkZahlung: 0,
-            betreffenderMonat: convertDateCanadian(getNextMieteMonth(vertrag))
+        modalTitle = vertrag.wohnung?.text || `Vertrag ${vertrag.id}`;
+        buchungsInput = {
+            ...emptyTransaktionsInput(),
+            mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag.id as number }]
         };
-        quickAddVertrag = vertrag;
-
-        open = true;
+        modalOpen = true;
     }
+
     const rowsAdd = rows.map((row) => ({
         ...row,
         button: (e: CustomEvent) => add(e, row)
     }));
 
-    let open = false;
+    async function onSubmit() {
+        await invalidateAll();
+    }
 </script>
 
 <WalterDataWrapperQuickAdd
-    title={quickAddEntry.vertrag?.text || 'Vertrag'}
-    addEntry={quickAddEntry}
-    addUrl={WalterMietzahlungApiURL}
-    bind:addModalOpen={open}
+    title={modalTitle}
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={buchungsInput}
+    bind:addModalOpen={modalOpen}
+    onSubmit={onSubmit}
 >
-    <WalterMiete entry={quickAddEntry} vertrag={quickAddVertrag} />
+    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

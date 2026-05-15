@@ -16,12 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
-        WalterBetriebskostenrechnungEntry,
         WalterMieteEntry,
-        WalterMietzahlungApiURL,
         WalterZaehlerstandEntry,
-        type WalterForderungsstatusEntry,
-        type WalterMietzahlungInput,
         type WalterUmlageEntry,
         type WalterVertragEntry,
         type WalterZaehlerEntry
@@ -36,16 +32,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterDataWrapper } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import WalterMiettabelle from './WalterMiettabelle.svelte';
-    import WalterMiete from './WalterMiete.svelte';
     import WalterZaehlerstand from './WalterZaehlerstand.svelte';
-    import WalterBetriebskostenrechnung from './WalterBetriebskostenrechnung.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterRechnungenTabelle from './WalterRechnungenTabelle.svelte';
+    import WalterBuchung from './WalterBuchung.svelte';
     import {
         walter_data_miettabelle,
         walter_data_rechnungentabelle
     } from '../data/WalterData';
-    import { openModal } from '$walter/store';
+    import { invalidateAll } from '$app/navigation';
+    import type { TransaktionsInput } from '$walter/lib';
+    import { emptyTransaktionsInput } from '$walter/lib';
 
     export let vertraege: WalterVertragEntry[];
     export let umlagen: WalterUmlageEntry[];
@@ -357,30 +354,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let addZaehlerstandOpen = false;
     let addRechnungOpen = false;
 
-    let addMieteEntry: Partial<WalterMietzahlungInput> = {};
+    let addMieteTitle = 'Mietzahlung';
     let addZaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {};
-    let addRechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
+    let addRechnungTitle = 'Betriebskostenrechnung';
+
+    let buchungsMieteInput: TransaktionsInput = emptyTransaktionsInput();
+    let buchungsRechnungInput: TransaktionsInput = emptyTransaktionsInput();
 
     function toTaskDate(year: number) {
         if (year === currentYear) {
             return convertDateCanadian(new Date());
         }
-
         return convertDateCanadian(new Date(year, 11, 31));
     }
 
     function openRentQuickAdd(task: RentTask) {
-        addMieteEntry = {
-            zahlungsdatum: convertDateCanadian(new Date()),
-            betreffenderMonat: convertDateCanadian(task.monthDate),
-            vertrag: {
-                id: task.vertrag.id,
-                text: task.vertrag.wohnung?.text || `Vertrag ${task.vertrag.id}`
-            },
-            kaltmieteZahlung: task.amount,
-            nkZahlung: 0
+        addMieteTitle =
+            task.vertrag.wohnung?.text || `Vertrag ${task.vertrag.id}`;
+        buchungsMieteInput = {
+            ...emptyTransaktionsInput(),
+            mieten: [
+                {
+                    kaltmiete: 0,
+                    nkVorauszahlung: 0,
+                    vertragId: task.vertrag.id as number
+                }
+            ]
         };
-
         addMieteOpen = true;
     }
 
@@ -394,129 +394,34 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 text: task.zaehler.kennnummer
             }
         };
-
         addZaehlerstandOpen = true;
     }
 
     function openInvoiceQuickAdd(task: InvoiceTask) {
-        addRechnungEntry = {
-            datum: convertDateCanadian(new Date()),
-            betreffendesJahr: selectedYear,
-            typ: task.umlage.typ
-                ? {
-                      id: task.umlage.typ.id,
-                      text: task.umlage.typ.text
-                  }
-                : undefined,
-            umlage: {
-                id: task.umlage.id,
-                text:
-                    task.umlage.typ?.text ||
-                    task.umlage.beschreibung ||
-                    'Umlage'
-            }
+        addRechnungTitle =
+            task.umlage.typ?.text ||
+            task.umlage.beschreibung ||
+            'Betriebskostenrechnung';
+        buchungsRechnungInput = {
+            ...emptyTransaktionsInput(),
+            betriebskostenEingaenge: [
+                {
+                    betrag: 0,
+                    umlageId: task.umlage.id as number,
+                    betreffendesJahr: selectedYear
+                }
+            ]
         };
-
         addRechnungOpen = true;
     }
 
-    function onSubmitMiete(newValue: unknown) {
-        const ergebnis = newValue as WalterForderungsstatusEntry & {
-            betreffenderMonat: string;
-            kaltmieteZahlung: number;
-        };
-        const vertrag = vertraege.find(
-            (entry) => entry.id === +(addMieteEntry.vertrag?.id || 0)
-        );
-        if (!vertrag) {
-            return;
-        }
-
-        // Add a synthetic entry to keep buildRentTasks' month-tracking in sync.
-        const syntheticMiete = {
-            id: -Date.now(),
-            betreffenderMonat: ergebnis.betreffenderMonat || addMieteEntry.betreffenderMonat || '',
-            zahlungsdatum: addMieteEntry.zahlungsdatum || '',
-            betrag: (addMieteEntry.kaltmieteZahlung || 0) + (addMieteEntry.nkZahlung || 0),
-            notiz: addMieteEntry.notiz || '',
-            repeat: 0,
-            createdAt: new Date(),
-            lastModified: new Date(),
-            vertrag: addMieteEntry.vertrag!,
-            permissions: vertrag.permissions
-        } as WalterMieteEntry;
-        vertrag.mieten.push(syntheticMiete);
-        mieten = [...mieten, syntheticMiete].sort(
-            (a, b) =>
-                new Date(a.betreffenderMonat).getTime() -
-                new Date(b.betreffenderMonat).getTime()
-        );
-        vertraege = [...vertraege];
+    async function onSubmitMiete() {
+        await invalidateAll();
         refreshTaskLists(selectedYear);
-        addMieteOpen = false;
-        addMieteEntry = {};
     }
 
-    function dateToMonthKey(value: string | undefined) {
-        if (!value) {
-            return undefined;
-        }
-
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-            return undefined;
-        }
-
-        return `${parsed.getFullYear()}-${`${parsed.getMonth() + 1}`.padStart(2, '0')}`;
-    }
-
-    function confirmDuplicateRentMonth(entryToCheck: unknown) {
-        const miete = entryToCheck as Partial<WalterMieteEntry>;
-        const vertragId = +(miete.vertrag?.id || 0);
-        const monthKey = dateToMonthKey(miete.betreffenderMonat);
-
-        const hasDuplicate =
-            !miete.id &&
-            vertragId > 0 &&
-            !!monthKey &&
-            mieten.some(
-                (row) =>
-                    +row.vertrag?.id === vertragId &&
-                    dateToMonthKey(row.betreffenderMonat) === monthKey
-            );
-
-        if (!hasDuplicate) {
-            return Promise.resolve(true);
-        }
-
-        return new Promise<boolean>((resolve) => {
-            openModal({
-                modalHeading: 'Miete bereits vorhanden',
-                content:
-                    'Für diesen Vertrag gibt es im ausgewählten Monat bereits mindestens eine Miete. Möchtest du trotzdem speichern?',
-                primaryButtonText: 'Trotzdem speichern',
-                submit: async () => {
-                    resolve(true);
-                    return true;
-                },
-                cancel: () => resolve(false),
-                danger: false
-            });
-        });
-    }
-
-    function onDeleteMonthMiete(value: WalterMieteEntry) {
-        const vertrag = vertraege.find(
-            (entry) => entry.id === +value.vertrag?.id
-        );
-        if (vertrag) {
-            vertrag.mieten = (vertrag.mieten || []).filter(
-                (miete) => miete.id !== value.id
-            );
-        }
-
-        mieten = mieten.filter((miete) => miete.id !== value.id);
-        vertraege = [...vertraege];
+    async function onSubmitRechnung() {
+        await invalidateAll();
         refreshTaskLists(selectedYear);
     }
 
@@ -542,39 +447,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         addZaehlerstandOpen = false;
         addZaehlerstandEntry = {};
     }
-
-    function onSubmitRechnung(newValue: unknown) {
-        const value = {
-            ...(newValue as WalterBetriebskostenrechnungEntry),
-            umlage:
-                (newValue as WalterBetriebskostenrechnungEntry).umlage ||
-                addRechnungEntry.umlage
-        } as WalterBetriebskostenrechnungEntry;
-        const umlage = umlagen.find((entry) => entry.id === +value.umlage?.id);
-        if (!umlage) {
-            return;
-        }
-
-        umlage.betriebskostenrechnungen.push(value);
-        umlagen = [...umlagen];
-        refreshTaskLists(selectedYear);
-        addRechnungOpen = false;
-        addRechnungEntry = {};
-    }
 </script>
 
 <div class="homepage-heatmap-layout">
     <WalterDataWrapperQuickAdd
-        title={addMieteEntry.vertrag?.text || 'Miete'}
-        bind:addEntry={addMieteEntry}
-        addUrl={WalterMietzahlungApiURL}
+        title={addMieteTitle}
+        addUrl="/api/transaktionen/buchen"
+        bind:addEntry={buchungsMieteInput}
         bind:addModalOpen={addMieteOpen}
         onSubmit={onSubmitMiete}
     >
-        <WalterMiete
-            entry={addMieteEntry}
-            vertrag={vertraege.find((v) => v.id === +(addMieteEntry.vertrag?.id || 0))}
-        />
+        <WalterBuchung {fetchImpl} bind:buchung={buchungsMieteInput} />
     </WalterDataWrapperQuickAdd>
 
     <WalterDataWrapperQuickAdd
@@ -588,19 +471,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </WalterDataWrapperQuickAdd>
 
     <WalterDataWrapperQuickAdd
-        title={addRechnungEntry.umlage?.text || 'Rechnung'}
-        bind:addEntry={addRechnungEntry}
-        addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
+        title={addRechnungTitle}
+        addUrl="/api/transaktionen/buchen"
+        bind:addEntry={buchungsRechnungInput}
         bind:addModalOpen={addRechnungOpen}
         onSubmit={onSubmitRechnung}
     >
-        <WalterBetriebskostenrechnung
-            {fetchImpl}
-            entry={addRechnungEntry}
-            rechnungen={umlagen.flatMap(
-                (entry) => entry.betriebskostenrechnungen
-            )}
-        />
+        <WalterBuchung {fetchImpl} bind:buchung={buchungsRechnungInput} />
     </WalterDataWrapperQuickAdd>
 
     <!-- svelte-ignore missing-declaration -->
@@ -640,6 +517,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             year={selectedYear}
                             {mieten}
                             {vertraege}
+                            {fetchImpl}
                         />
                     </StructuredListRow>
                     <StructuredListRow>

@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let gruppe: AbrechnungslaufGruppeResult;
     export let jahr: number;
+    export let fetchImpl: typeof fetch;
 
     let selectedTab = 0;
 
@@ -80,7 +81,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {:else}
     {@const resultat = vertragResultate[selectedTab - 1]}
     {#if resultat}
-        <WalterAbrechnungslaufVertrag {resultat} {gruppe} {jahr} />
+        <WalterAbrechnungslaufVertrag {resultat} {gruppe} {jahr} {fetchImpl} />
     {/if}
 {/if}
 

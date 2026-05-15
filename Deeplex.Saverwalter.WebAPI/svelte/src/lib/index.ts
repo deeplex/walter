@@ -42,3 +42,11 @@ export { WalterVerwalterEntry } from './WalterVerwalter';
 export { WalterWohnungEntry } from './WalterWohnung';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
+export {
+    type MietzahlungsInput,
+    type BetriebskostenEingangInput,
+    type ErhaltungsaufwendungsInput,
+    type SonstigerBuchungssatzInput,
+    type TransaktionsInput,
+    emptyTransaktionsInput
+} from './WalterBuchung';

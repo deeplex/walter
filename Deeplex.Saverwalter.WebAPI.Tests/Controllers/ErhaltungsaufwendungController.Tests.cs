@@ -52,34 +52,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task Post()
-        {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
-
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(1000, "Test", new DateOnly(2021, 1, 1))
-            {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
-            };
-            var entry = new ErhaltungsaufwendungEntry(entity, new());
-
-            var result = await controller.Post(entry);
-
-            result.Value.Should().NotBeNull();
-        }
-
-        [Fact]
         public async Task GetId()
         {
             var ctx = TestUtils.GetContext();

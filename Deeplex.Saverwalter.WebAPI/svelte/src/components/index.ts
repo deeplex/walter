@@ -36,6 +36,10 @@ export { default as WalterMietminderung } from './details/WalterMietminderung.sv
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
 export { default as WalterTransaktion } from './details/WalterTransaktion.svelte';
+export { default as WalterBuchung } from './details/WalterBuchung.svelte';
+export { default as WalterBuchungPositionMiete } from './details/WalterBuchungPositionMiete.svelte';
+export { default as WalterBuchungPositionBK } from './details/WalterBuchungPositionBK.svelte';
+export { default as WalterBuchungPositionEA } from './details/WalterBuchungPositionEA.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
 export { default as WalterUmlagetyp } from './details/WalterUmlagetyp.svelte';
 export { default as WalterVertrag } from './details/WalterVertrag.svelte';

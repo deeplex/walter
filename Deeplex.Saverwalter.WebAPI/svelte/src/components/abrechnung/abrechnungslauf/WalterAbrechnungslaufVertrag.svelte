@@ -40,6 +40,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let resultat: AbrechnungsresultatInfo;
     export let gruppe: AbrechnungslaufGruppeResult;
     export let jahr: number;
+    export let fetchImpl: typeof fetch;
 
     let downloadLoading = false;
     let downloadError = '';
@@ -203,6 +204,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         nutzungVon={resultat.nutzungVon}
         nutzungBis={resultat.nutzungBis}
         {jahr}
+        {fetchImpl}
     />
 {/each}
 

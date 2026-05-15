@@ -15,7 +15,10 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
@@ -30,8 +33,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class TransaktionEntryBase
         {
             public Guid Id { get; set; }
-            public SelectionEntry Zahler { get; set; } = null!;
-            public SelectionEntry Zahlungsempfaenger { get; set; } = null!;
+            public SelectionEntry? Zahler { get; set; }
+            public SelectionEntry? Zahlungsempfaenger { get; set; }
             public DateOnly Zahlungsdatum { get; set; }
             public decimal Betrag { get; set; }
             public string Verwendungszweck { get; set; } = string.Empty;
@@ -42,8 +45,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public TransaktionEntryBase(Transaktion entity, Permissions permissions)
             {
                 Id = entity.TransaktionId;
-                Zahler = new SelectionEntry(entity.Zahler.KontaktId, entity.Zahler.Bezeichnung);
-                Zahlungsempfaenger = new SelectionEntry(entity.Zahlungsempfaenger.KontaktId, entity.Zahlungsempfaenger.Bezeichnung);
+                if (entity.Zahler is { } zahler)
+                    Zahler = new SelectionEntry(zahler.KontaktId, zahler.Bezeichnung);
+                if (entity.Zahlungsempfaenger is { } empfaenger)
+                    Zahlungsempfaenger = new SelectionEntry(empfaenger.KontaktId, empfaenger.Bezeichnung);
                 Zahlungsdatum = entity.Zahlungsdatum;
                 Betrag = entity.Betrag;
                 Verwendungszweck = entity.Verwendungszweck;
@@ -67,13 +72,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<TransaktionController> _logger;
+        private readonly TransaktionBuchungsService _buchungsService;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
         protected override TransaktionDbService DbService { get; }
 
         public TransaktionController(
             ILogger<TransaktionController> logger,
-            TransaktionDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+            TransaktionDbService dbService,
+            TransaktionBuchungsService buchungsService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth,
+            HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
+            _buchungsService = buchungsService;
+            _ctx = ctx;
+            _auth = auth;
             _logger = logger;
         }
 
@@ -89,6 +104,41 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<TransaktionEntry>> Put(Guid id, [FromBody] TransaktionEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(Guid id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Erstellt eine Transaktion mit Buchungssätzen aus typisierten Positionen.
+        /// Die Konten werden anhand des Positionstyps und der referenzierten Entitäten
+        /// (z.B. Vertrag) automatisch aufgelöst.
+        /// </summary>
+        [HttpPost("buchen")]
+        public async Task<ActionResult<TransaktionEntry>> Buchen(
+            [FromBody] TransaktionBuchungsService.TransaktionsInput input)
+        {
+            foreach (var miete in input.Mieten)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(miete.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {miete.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var bk in input.BetriebskostenEingaenge)
+            {
+                var umlage = await _ctx.Umlagen.FindAsync(bk.UmlageId);
+                if (umlage is null) return NotFound($"Umlage {bk.UmlageId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, umlage, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            try
+            {
+                var transaktion = await _buchungsService.BucheAsync(input);
+                var permissions = await GetPermissions(User!, transaktion, _auth);
+                return Ok(new TransaktionEntry(transaktion, permissions));
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
     }
 }
 

@@ -30,6 +30,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let entries: Promise<WalterSelectionEntry[]>;
     export let readonly = false;
     export let required = false;
+    /** Pre-select an item by id when entries load, without requiring a full entry object */
+    export let initialId: number | string | undefined = undefined;
 
     let lastSavedValue: string | number | undefined;
     function updateLastSavedValue() {
@@ -62,20 +64,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {#await entries}
     <TextInputSkeleton />
 {:then resolvedEntries}
-    {#await value}
-        <TextInputSkeleton />
-    {:then x}
-        <ComboBox
-            invalid={required && !value}
-            invalidText={`${titleText} ist ein notwendiges Feld.`}
-            disabled={readonly}
-            selectedId={x?.id}
-            on:select={select}
-            style="padding-right: 1rem"
-            items={sanitizeEntries(resolvedEntries, x)}
-            value={x?.text}
-            {titleText}
-            {shouldFilterItem}
-        />
-    {/await}
+    {@const selected = value ?? (initialId != null ? resolvedEntries?.find((e) => +e.id === +initialId) : undefined)}
+    <ComboBox
+        invalid={required && !selected}
+        invalidText={`${titleText} ist ein notwendiges Feld.`}
+        disabled={readonly}
+        selectedId={selected?.id}
+        on:select={select}
+        style="padding-right: 1rem"
+        items={sanitizeEntries(resolvedEntries, selected)}
+        value={selected?.text}
+        {titleText}
+        {shouldFilterItem}
+    />
 {/await}

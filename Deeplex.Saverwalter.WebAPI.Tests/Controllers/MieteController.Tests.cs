@@ -52,29 +52,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task Post()
-        {
-            var ctx = TestUtils.GetContext();
-            var logger = A.Fake<ILogger<MieteController>>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-
-            var entity = new Miete(new DateOnly(2021, 1, 1), new DateOnly(2021, 1, 1), 1000)
-            {
-                Vertrag = vertrag
-            };
-            var entry = new MieteEntry(entity, new());
-
-            var result = await controller.Post(entry);
-
-            result.Value.Should().NotBeNull();
-        }
-
-        [Fact]
         public async Task GetId()
         {
             var ctx = TestUtils.GetContext();

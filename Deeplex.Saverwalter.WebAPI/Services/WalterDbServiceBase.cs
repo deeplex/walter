@@ -99,7 +99,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         public abstract Task<ActionResult<T>> Get(ClaimsPrincipal user, TId id);
         public abstract Task<ActionResult<T>> Put(ClaimsPrincipal user, TId id, T entry);
-        public abstract Task<ActionResult<T>> Post(ClaimsPrincipal user, T entry);
+        public virtual Task<ActionResult<T>> Post(ClaimsPrincipal user, T entry) =>
+            Task.FromResult<ActionResult<T>>(new StatusCodeResult(405));
         public abstract Task<ActionResult> Delete(ClaimsPrincipal user, TId id);
     }
 }

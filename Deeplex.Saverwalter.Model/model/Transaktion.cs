@@ -21,10 +21,8 @@ namespace Deeplex.Saverwalter.Model
     {
         public Guid TransaktionId { get; set; }
 
-        [Required]
-        public virtual Kontakt Zahler { get; set; } = null!;
-        [Required]
-        public virtual Kontakt Zahlungsempfaenger { get; set; } = null!;
+        public virtual Kontakt? Zahler { get; set; }
+        public virtual Kontakt? Zahlungsempfaenger { get; set; }
         [Required]
         public DateOnly Zahlungsdatum { get; set; }
         [Required]
