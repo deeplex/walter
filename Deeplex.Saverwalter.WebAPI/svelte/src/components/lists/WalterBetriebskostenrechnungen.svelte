@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -25,9 +25,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
-    export let rows: WalterBetriebskostenrechnungEntry[];
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
+    export let rows: WalterBetriebskostenrechnungEntry[] | undefined = undefined;
+    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined = {};
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -43,28 +44,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const rowHref = (row: DataTableRow) =>
         `/betriebskostenrechnungen/${row.id}`;
 
-    $: sortedRows = [...(rows || [])]
-        .map((r) => ({ ...r, ausgeglichen: r.isBalanced ? '✓' : '✗' }))
-        .sort((a, b) => {
-            const yearA = a.betreffendesJahr || 0;
-            const yearB = b.betreffendesJahr || 0;
+    function enrich(r: WalterBetriebskostenrechnungEntry) {
+        return { ...r, ausgeglichen: r.isBalanced ? '✓' : '✗' };
+    }
 
-            if (yearA !== yearB) {
-                return yearB - yearA;
-            }
+    const transformRow = (row: DataTableRow) =>
+        enrich(row as WalterBetriebskostenrechnungEntry);
 
-            const dateA = new Date(a.datum).getTime();
-            const dateB = new Date(b.datum).getTime();
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterBetriebskostenrechnungEntry.GetPaged>[1]) =>
+              WalterBetriebskostenrechnungEntry.GetPaged<WalterBetriebskostenrechnungEntry>(fetchImpl, p)
+        : undefined;
 
-            if (!Number.isNaN(dateA) && !Number.isNaN(dateB)) {
-                return dateB - dateA;
-            }
-
-            return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
-        });
-
-    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
-        {};
+    $: enrichedRows = rows
+        ? [...rows]
+              .map(enrich)
+              .sort((a, b) => {
+                  const yearA = a.betreffendesJahr || 0;
+                  const yearB = b.betreffendesJahr || 0;
+                  if (yearA !== yearB) return yearB - yearA;
+                  const dateA = new Date(a.datum).getTime();
+                  const dateB = new Date(b.datum).getTime();
+                  if (!Number.isNaN(dateA) && !Number.isNaN(dateB))
+                      return dateB - dateA;
+                  return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
+              })
+        : undefined;
 </script>
 
 <WalterDataTable
@@ -75,7 +80,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     quickAddTitle={title}
     {on_click_row}
     {rowHref}
-    rows={sortedRows}
+    rows={enrichedRows}
+    {fetchData}
+    {transformRow}
     {headers}
     {fullHeight}
 >

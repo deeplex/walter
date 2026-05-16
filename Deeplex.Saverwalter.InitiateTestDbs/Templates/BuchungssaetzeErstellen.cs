@@ -55,7 +55,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var vertraege = await ctx.Vertraege
                 .Include(v => v.Versionen)
                 .Include(v => v.MietBuchungskonto)
+                .Include(v => v.Mieter)
                 .Include(v => v.Wohnung)
+                    .ThenInclude(w => w.Besitzer)
                 .ToListAsync();
 
             foreach (var vertrag in vertraege)
@@ -75,6 +77,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     if (version is null) continue;
 
                     var satz = new Buchungssatz(monat, $"Mietsoll {monat:MM/yyyy}");
+                    var transaktion = new Transaktion
+                    {
+                        Zahlungsdatum = monat,
+                        Betrag = version.Grundmiete,
+                        Verwendungszweck = satz.Beschreibung,
+                        Zahler = vertrag.Mieter.FirstOrDefault(),
+                        Zahlungsempfaenger = vertrag.Wohnung.Besitzer,
+                    };
+                    satz.Transaktion = transaktion;
 
                     var soll = new Buchungszeile(SollHaben.Soll, version.Grundmiete);
                     soll.Buchungskonto = vertrag.MietBuchungskonto;
@@ -86,6 +97,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     satz.Buchungszeilen.Add(soll);
                     satz.Buchungszeilen.Add(haben);
+                    ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
                 }
             }
@@ -106,6 +118,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(v => v.NkBuchungskonto)
                 .Include(v => v.ZahlungsKonto)
                 .Include(v => v.Mieten)
+                .Include(v => v.Mieter)
+                .Include(v => v.Wohnung)
+                    .ThenInclude(w => w.Besitzer)
                 .ToListAsync();
 #pragma warning restore CS0618
 
@@ -125,6 +140,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var nkAnteil = Math.Max(0, betrag - grundmiete);
 
                     var satz = new Buchungssatz(miete.Zahlungsdatum, $"Mietzahlung {miete.BetreffenderMonat:MM/yyyy}");
+                    var transaktion = new Transaktion
+                    {
+                        Zahlungsdatum = miete.Zahlungsdatum,
+                        Betrag = betrag,
+                        Verwendungszweck = satz.Beschreibung,
+                        Zahler = vertrag.Mieter.FirstOrDefault(),
+                        Zahlungsempfaenger = vertrag.Wohnung.Besitzer,
+                    };
+                    satz.Transaktion = transaktion;
 
                     var habenMiet = new Buchungszeile(SollHaben.Haben, mieteAnteil);
                     habenMiet.Buchungskonto = vertrag.MietBuchungskonto;
@@ -149,6 +173,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         satz.Buchungszeilen.Add(sollNk);
                     }
 
+                    ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
                 }
             }
@@ -173,6 +198,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var satz = new Buchungssatz(
                         rechnung.Datum,
                         $"BK-Eingang {umlage.Typ.Bezeichnung} {rechnung.BetreffendesJahr}");
+                    var transaktion = new Transaktion
+                    {
+                        Zahlungsdatum = rechnung.Datum,
+                        Betrag = rechnung.Betrag,
+                        Verwendungszweck = satz.Beschreibung,
+                    };
+                    satz.Transaktion = transaktion;
 
                     var haben = new Buchungszeile(SollHaben.Haben, rechnung.Betrag);
                     haben.Buchungskonto = umlage.NkVerrechnungsKonto;
@@ -180,6 +212,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     satz.Buchungszeilen.Add(haben);
 
                     rechnung.Buchungssatz = satz;
+                    ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
                 }
             }
@@ -206,6 +239,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var satz = new Buchungssatz(
                         rechnung.Datum,
                         $"BK-Zahlung {umlage.Typ.Bezeichnung} {rechnung.BetreffendesJahr}");
+                    var transaktion = new Transaktion
+                    {
+                        Zahlungsdatum = rechnung.Datum,
+                        Betrag = rechnung.Betrag,
+                        Verwendungszweck = satz.Beschreibung,
+                    };
+                    satz.Transaktion = transaktion;
 
                     var soll = new Buchungszeile(SollHaben.Soll, rechnung.Betrag);
                     soll.Buchungskonto = umlage.NkVerrechnungsKonto;
@@ -217,6 +257,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     haben.Buchungssatz = satz;
                     satz.Buchungszeilen.Add(haben);
 
+                    ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
                 }
             }

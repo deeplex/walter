@@ -128,7 +128,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<VertragEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<VertragEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpPost]
         public Task<ActionResult<VertragEntry>> Post([FromBody] VertragEntry entry) => DbService.Post(User!, entry);

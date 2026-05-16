@@ -17,58 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import { Content } from 'carbon-components-svelte';
     import { WalterHeader, WalterMiettabelleWrapper } from '$walter/components';
-    import {
-        WalterUmlageEntry,
-        WalterVertragEntry,
-        type WalterUmlageEntry as WalterUmlageEntryType,
-        type WalterVertragEntry as WalterVertragEntryType
-    } from '$walter/lib';
     import type { PageData } from './$types';
-    import { onMount } from 'svelte';
 
     export let title = 'Walter';
     export let data: PageData;
-
-    let vertraege: WalterVertragEntryType[] = [];
-    let umlagen: WalterUmlageEntryType[] = [];
-
-    let vertraegeReady = false;
-    let umlagenReady = false;
-
-    onMount(() => {
-        const fetchImpl = data.fetchImpl;
-
-        WalterVertragEntry.GetAll<WalterVertragEntryType>(fetchImpl)
-            .then((value) => {
-                vertraege = value;
-            })
-            .catch((error: unknown) => {
-                console.error('Konnte Vertraege nicht laden:', error);
-            })
-            .finally(() => {
-                vertraegeReady = true;
-            });
-
-        WalterUmlageEntry.GetAll<WalterUmlageEntryType>(fetchImpl)
-            .then((value) => {
-                umlagen = value;
-            })
-            .catch((error: unknown) => {
-                console.error('Konnte Umlagen nicht laden:', error);
-            })
-            .finally(() => {
-                umlagenReady = true;
-            });
-    });
 </script>
 
 <WalterHeader {title} />
 <Content>
-    <WalterMiettabelleWrapper
-        fetchImpl={data.fetchImpl}
-        {umlagen}
-        {vertraege}
-        {vertraegeReady}
-        {umlagenReady}
-    />
+    <WalterMiettabelleWrapper fetchImpl={data.fetchImpl} />
 </Content>

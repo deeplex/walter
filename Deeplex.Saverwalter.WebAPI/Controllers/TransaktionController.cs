@@ -93,7 +93,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<TransaktionEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<TransaktionEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpPost]
         public Task<ActionResult<TransaktionEntry>> Post([FromBody] TransaktionEntry entry) => DbService.Post(User!, entry);

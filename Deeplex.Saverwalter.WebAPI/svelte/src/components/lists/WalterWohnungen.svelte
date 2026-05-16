@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { get } from 'svelte/store';
     import { UserRole, authState } from '$walter/services/auth';
 
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let entry: Partial<WalterWohnungEntry> | undefined = {};
+    export let rows: WalterWohnungEntry[] | undefined = undefined;
+
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
         { key: 'bezeichnung', value: 'Bezeichnung' },
@@ -34,14 +40,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         navigation.wohnung(e.detail.id);
     const rowHref = (row: DataTableRow) => `/wohnungen/${row.id}`;
 
-    export let rows: WalterWohnungEntry[];
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterWohnungEntry> | undefined = {};
-
     const userRole = authState && get(authState)?.role;
     const readonly = userRole !== UserRole.Owner && userRole !== UserRole.Admin;
+
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterWohnungEntry.GetPaged>[1]) =>
+              WalterWohnungEntry.GetPaged<WalterWohnungEntry>(fetchImpl, p)
+        : undefined;
 </script>
 
 <WalterDataTable
@@ -54,6 +59,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     {rows}
+    {fetchData}
+    initialSortDir="asc"
     {headers}
     {fullHeight}
 >

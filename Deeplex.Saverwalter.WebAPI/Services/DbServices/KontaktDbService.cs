@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -36,11 +37,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<KontaktEntryBase>>> GetList()
-        {
-            var list = await Ctx.Kontakte.ToListAsync();
-            return list.Select(e => new KontaktEntryBase(e, new(true))).ToList();
-        }
+        public Task<PagedResult<KontaktEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            KontaktPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Name.ToLower().Contains(t) ||
+                    (e.Vorname != null && e.Vorname.ToLower().Contains(t)) ||
+                    (e.Email != null && e.Email.ToLower().Contains(t)) ||
+                    (e.Telefon != null && e.Telefon.ToLower().Contains(t)) ||
+                    (e.Mobil != null && e.Mobil.ToLower().Contains(t)) ||
+                    (e.Adresse != null && (
+                        e.Adresse.Strasse.ToLower().Contains(t) ||
+                        e.Adresse.Stadt.ToLower().Contains(t))),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "email" => q.SortBy(e => e.Email, dir),
+                    _ => q.SortBy(e => e.Name, dir).ThenSortBy(e => e.Vorname, dir)
+                },
+                toEntry: async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Kontakt>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {

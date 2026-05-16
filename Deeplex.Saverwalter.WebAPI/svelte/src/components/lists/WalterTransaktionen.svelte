@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2025  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -20,27 +20,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import { WalterTransaktionEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+
     export let fetchImpl: typeof fetch;
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let entry: Partial<WalterTransaktionEntry> | undefined = {};
+    export let rows: WalterTransaktionEntry[] | undefined = undefined;
 
     const headers = [
         { key: 'zahler.text', value: 'Zahler' },
         { key: 'betrag', value: 'Betrag' },
-        {
-            key: 'zahlungsempfaenger.text',
-            value: 'Zahlungsempfänger'
-        },
+        { key: 'zahlungsempfaenger.text', value: 'Zahlungsempfänger' },
         { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
         { key: 'verwendungszweck', value: 'Memo' }
     ];
 
-    export let rows: WalterTransaktionEntry[];
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let entry: Partial<WalterTransaktionEntry> | undefined = {};
-
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.transaktion(e.detail.id);
     const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
+
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterTransaktionEntry.GetPaged>[1]) =>
+              WalterTransaktionEntry.GetPaged<WalterTransaktionEntry>(fetchImpl, p)
+        : undefined;
 </script>
 
 <WalterDataTable
@@ -52,6 +54,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     accordionTitle={title}
     quickAddTitle={title}
     {rows}
+    {fetchData}
+    initialSortBy="zahlungsdatum"
+    initialSortDir="desc"
     {headers}
     {fullHeight}
 >

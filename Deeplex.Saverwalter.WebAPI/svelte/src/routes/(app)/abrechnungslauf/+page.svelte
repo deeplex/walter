@@ -337,7 +337,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </div>
 
-        <div style="width: 8rem;">
+        <div style="width: 10rem;">
             <NumberInput
                 label="Jahr"
                 bind:value={jahr}
@@ -383,7 +383,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </p>
 
         {#each result.gruppen as gruppe}
-            <WalterAbrechnungslaufGruppe {gruppe} {jahr} fetchImpl={data.fetchImpl} />
+            <WalterAbrechnungslaufGruppe
+                {gruppe}
+                {jahr}
+                fetchImpl={data.fetchImpl}
+            />
         {/each}
 
         <WalterAbrechnungslaufHinweiseAktionen

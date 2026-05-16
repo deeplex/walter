@@ -1014,9 +1014,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     var annualFactor = (decimal)(1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015)));
                     var betrag = Math.Round(basisbetrag * annualFactor, 2);
-                    var buchungssatz = new Buchungssatz(
-                        new DateOnly(year, 12, 31),
-                        $"BK-Eingang {umlage.Typ.Bezeichnung} {year}");
+                    var datum = new DateOnly(year, 12, 31);
+                    var buchungssatz = new Buchungssatz(datum, $"BK-Zahlung {umlage.Typ.Bezeichnung} {year}");
+                    var transaktion = new Transaktion
+                    {
+                        Zahlungsdatum = datum,
+                        Betrag = betrag,
+                        Verwendungszweck = buchungssatz.Beschreibung,
+                    };
+                    buchungssatz.Transaktion = transaktion;
                     buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
                     {
                         Buchungssatz = buchungssatz,
@@ -1027,7 +1033,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Buchungssatz = buchungssatz,
                         Buchungskonto = umlage.ZahlungsKonto
                     });
-                    var rechnung = new Betriebskostenrechnung(betrag, new DateOnly(year, 12, 31), year)
+                    var rechnung = new Betriebskostenrechnung(betrag, datum, year)
                     {
                         Umlage = umlage,
                         Buchungssatz = buchungssatz

@@ -20,6 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Button,
         Content,
         DataTable,
+        DataTableSkeleton,
+        Pagination,
         Toolbar,
         ToolbarContent,
         ToolbarSearch
@@ -46,6 +48,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         };
     };
 
+    type FetchParams = {
+        search?: string;
+        sortBy?: string;
+        sortDir: 'asc' | 'desc';
+        skip: number;
+        take: number;
+    };
+
     export let fullHeight = false;
     export let size: 'compact' | 'short' | 'medium' | 'tall' | undefined =
         undefined;
@@ -54,7 +64,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         value: string;
     }[];
     export let readonly = false;
-    export let rows: WalterDataTableRow[];
+    export let rows: WalterDataTableRow[] | undefined = undefined;
     export let rowHref:
         | ((row: WalterDataTableRow) => string | undefined)
         | undefined = undefined;
@@ -71,6 +81,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
 
+    // When provided, WalterDataTable manages server-side pagination internally.
+    export let fetchData:
+        | ((
+              params: FetchParams
+          ) => Promise<{ items: WalterDataTableRow[]; totalCount: number }>)
+        | undefined = undefined;
+    export let initialSortBy = '';
+    export let initialSortDir: 'asc' | 'desc' = 'desc';
+    export let initialPageSize = 50;
+    // Optional row transform applied to server-fetched rows before rendering.
+    export let transformRow:
+        | ((row: WalterDataTableRow) => WalterDataTableRow)
+        | undefined = undefined;
+
     let addModalOpen = false;
 
     const searchParams: URLSearchParams | null = $page
@@ -81,6 +105,52 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: resolvedAccordionTitle = accordionTitle || '';
     $: resolvedQuickAddTitle = quickAddTitle ?? accordionTitle;
 
+    // ── Internal server-pagination state ──────────────────────────────────────
+    let _pagedRows: WalterDataTableRow[] = [];
+    let _totalCount = 0;
+    let _page = 1;
+    let _pageSize = initialPageSize;
+    let _sortBy = initialSortBy;
+    let _sortDir: 'asc' | 'desc' = initialSortDir;
+    // Initialise from URL so that a page reload preserves the search term.
+    let _appliedSearch = searchParams?.get('search') || '';
+    let _loading = false;
+
+    async function _fetchData() {
+        if (!fetchData) return;
+        _loading = true;
+        try {
+            const result = await fetchData({
+                search: _appliedSearch || undefined,
+                sortBy: _sortBy || undefined,
+                sortDir: _sortDir,
+                skip: (_page - 1) * _pageSize,
+                take: _pageSize
+            });
+            _pagedRows = result.items;
+            _totalCount = result.totalCount;
+        } finally {
+            _loading = false;
+        }
+    }
+
+    $: if (fetchData)
+        void (_page,
+        _pageSize,
+        _sortBy,
+        _sortDir,
+        _appliedSearch,
+        _fetchData());
+
+    $: showSkeleton =
+        fetchData !== undefined && _loading && _pagedRows.length === 0;
+
+    $: displayRows = fetchData
+        ? transformRow
+            ? _pagedRows.map(transformRow)
+            : _pagedRows
+        : (rows ?? []);
+
     function quick_add() {
         addModalOpen = true;
     }
@@ -90,27 +160,59 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onSubmit(new_value: unknown) {
-        rows = [...rows, new_value as WalterDataTableRow];
+        if (fetchData) {
+            void _fetchData();
+        } else {
+            rows = [...(rows ?? []), new_value as WalterDataTableRow];
+        }
     }
 
-    function toolbarSearchInput() {
-        if (searchParams) {
-            if (searchQuery) {
-                searchParams.set('search', searchQuery);
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
-            } else {
-                searchParams.delete('search');
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
-            }
+    $: useServerSearch = !!fetchData;
+
+    function handleHeaderClick(e: CustomEvent) {
+        if (!fetchData) return;
+        const { header, sortDirection } = e.detail as {
+            header: { key: string };
+            sortDirection?: 'ascending' | 'descending' | 'none';
+        };
+        if (!sortDirection || sortDirection === 'none') return;
+        _sortBy = header.key;
+        _sortDir = sortDirection === 'ascending' ? 'asc' : 'desc';
+        _page = 1;
+    }
+
+    let searchMounted = false;
+    onMount(() => {
+        searchMounted = true;
+    });
+
+    let _searchTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function updateSearchUrl(query: string) {
+        if (!searchParams) return;
+        if (query) {
+            searchParams.set('search', query);
+        } else {
+            searchParams.delete('search');
         }
+        window.history.replaceState({}, '', `?${searchParams.toString()}`);
+    }
+
+    function dispatchServerSearch(query: string) {
+        if (!fetchData) return;
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => {
+            _appliedSearch = query;
+            _page = 1;
+            updateSearchUrl(query);
+        }, 300);
+    }
+
+    $: if (searchMounted) dispatchServerSearch(searchQuery);
+
+    function toolbarSearchInput() {
+        if (fetchData) return;
+        updateSearchUrl(searchQuery);
     }
 
     $: hasButtonColumn = headers.some((header) => header.key === 'button');
@@ -259,10 +361,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         );
     }
 
-    const disabledRows = rows
+    const disabledRows = (rows ?? [])
         .filter((row) => row.permissions && !row.permissions?.read)
         .map((row) => row.id);
-    const enabledRows = rows
+    const enabledRows = (rows ?? [])
         .filter((row) => row.permissions?.read)
         .map((row) => row.id);
 
@@ -319,84 +421,124 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterDataTableContainer
         {layout}
         accordionTitle={resolvedAccordionTitle}
-        count={rows.length}
+        count={fetchData ? _totalCount : displayRows.length}
     >
-        <div class:has-compact-button-column={hasCompactButtonColumn}>
-            <DataTable
-                {size}
-                on:click:row={on_click_row}
-                sortable
-                zebra
-                stickyHeader
-                {headers}
-                {rows}
-                class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
-                style="cursor-events: none !important; max-height: none !important;"
+        {#if showSkeleton}
+            <DataTableSkeleton showHeader={false} showToolbar={false} />
+        {:else}
+            <div
+                class:has-compact-button-column={hasCompactButtonColumn}
+                class:sticky-chrome={!!fetchData}
             >
-                <Toolbar>
-                    <ToolbarContent>
-                        <ToolbarSearch
-                            placeholder="Suche mit ; separierter Liste..."
-                            persistent
-                            on:input={toolbarSearchInput}
-                            bind:value={searchQuery}
-                            {shouldFilterRows}
-                        />
-                        {#if (addUrl || onAdd) && !readonly}
-                            <Button
-                                style="right: -1em; position: sticky;"
-                                on:click={onAdd ?? handleAddClick}
-                                iconDescription="Eintrag hinzufügen"
-                                icon={Add}
-                            >
-                                Eintrag hinzufügen
-                            </Button>
-                        {/if}
-                    </ToolbarContent>
-                </Toolbar>
-                <span class="walter-table-cell" slot="cell" let:cell let:row>
-                    {#if cell.key === 'button'}
-                        {@const buttonConfig = resolveActionButton(cell.value)}
-                        <span class="button-cell">
-                            <Button
-                                disabled={buttonConfig.disabled}
-                                on:click={buttonConfig.onClick}
-                                tooltipPosition="left"
-                                size="small"
-                                style="margin: 0;"
-                                kind={buttonConfig.kind}
-                                icon={buttonConfig.icon}
-                                iconDescription={buttonConfig.iconDescription}
+                <DataTable
+                    {size}
+                    on:click:row={on_click_row}
+                    on:click:header={handleHeaderClick}
+                    sortable
+                    zebra
+                    stickyHeader={!fetchData}
+                    {headers}
+                    rows={displayRows}
+                    class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
+                    style="cursor-events: none !important; max-height: none !important;"
+                >
+                    <Toolbar>
+                        <ToolbarContent>
+                            <ToolbarSearch
+                                placeholder={useServerSearch
+                                    ? 'Suche...'
+                                    : 'Suche mit ; separierter Liste...'}
+                                persistent
+                                on:input={toolbarSearchInput}
+                                bind:value={searchQuery}
+                                shouldFilterRows={useServerSearch
+                                    ? () => true
+                                    : shouldFilterRows}
                             />
-                        </span>
-                    {:else}
-                        {@const displayValue = getCellDisplayValue(cell)}
-                        {@const tooltip =
-                            displayValue === '---' ? undefined : displayValue}
-                        {@const href = resolveRowHref(row)}
-                        {#if href}
-                            <a
-                                class="walter-table-link"
-                                {href}
-                                title={tooltip}
-                                on:click={onRowLinkClick}
-                            >
-                                <span class="walter-table-link__label"
+                            {#if (addUrl || onAdd) && !readonly}
+                                <Button
+                                    style="right: -1em; position: sticky;"
+                                    on:click={onAdd ?? handleAddClick}
+                                    iconDescription="Eintrag hinzufügen"
+                                    icon={Add}
+                                >
+                                    Eintrag hinzufügen
+                                </Button>
+                            {/if}
+                        </ToolbarContent>
+                    </Toolbar>
+                    <span
+                        class="walter-table-cell"
+                        slot="cell"
+                        let:cell
+                        let:row
+                    >
+                        {#if cell.key === 'button'}
+                            {@const buttonConfig = resolveActionButton(
+                                cell.value
+                            )}
+                            <span class="button-cell">
+                                <Button
+                                    disabled={buttonConfig.disabled}
+                                    on:click={buttonConfig.onClick}
+                                    tooltipPosition="left"
+                                    size="small"
+                                    style="margin: 0;"
+                                    kind={buttonConfig.kind}
+                                    icon={buttonConfig.icon}
+                                    iconDescription={buttonConfig.iconDescription}
+                                />
+                            </span>
+                        {:else}
+                            {@const displayValue = getCellDisplayValue(cell)}
+                            {@const tooltip =
+                                displayValue === '---'
+                                    ? undefined
+                                    : displayValue}
+                            {@const href = resolveRowHref(row)}
+                            {#if href}
+                                <a
+                                    class="walter-table-link"
+                                    {href}
+                                    title={tooltip}
+                                    on:click={onRowLinkClick}
+                                >
+                                    <span class="walter-table-link__label"
+                                        >{displayValue}</span
+                                    >
+                                </a>
+                            {:else}
+                                <span class="walter-table-text" title={tooltip}
                                     >{displayValue}</span
                                 >
-                            </a>
-                        {:else}
-                            <span class="walter-table-text" title={tooltip}
-                                >{displayValue}</span
-                            >
+                            {/if}
                         {/if}
-                    {/if}
-                </span>
-            </DataTable>
-        </div>
+                    </span>
+                </DataTable>
+            </div>
+            {#if fetchData && _totalCount > _pageSize}
+                <div class="pagination-sticky">
+                    <Pagination
+                        totalItems={_totalCount}
+                        pageSize={_pageSize}
+                        page={_page}
+                        pageSizes={[25, 50, 100, 250]}
+                        on:update={(e) => {
+                            _page = e.detail.page;
+                            _pageSize = e.detail.pageSize;
+                        }}
+                    />
+                </div>
+            {/if}
+        {/if}
     </WalterDataTableContainer>
 
     <style>
+        .pagination-sticky {
+            position: sticky;
+            bottom: 0;
+        }
+
         .proper-list
             > .bx--data-table_inner-container
             > .bx--data-table--sticky-header {

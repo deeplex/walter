@@ -184,21 +184,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class TransaktionPermissionHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaktion>
     {
-        public static async Task<List<Transaktion>> GetList(SaverwalterContext ctx, ClaimsPrincipal user)
+        public static IQueryable<Transaktion> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
-            return await (user.IsInRole("Admin")
-                ? ctx.Transaktionen.ToListAsync()
-                : GetEntriesForUser(user.GetUserId()));
-
-            async Task<List<Transaktion>> GetEntriesForUser(Guid _) =>
             // TODO: Limit access to transactions where the user is either the payer or the recipient.
-                await ctx.Transaktionen
-                    // .Include(e => e.Zahler.Accounts)
-                    // .Include(e => e.Zahlungsempfaenger.Accounts)
-                    // .Where(e =>
-                    //     e.Zahler.Accounts.Any(a => a.Id == guid) ||
-                    //     e.Zahlungsempfaenger.Accounts.Any(a => a.Id == guid))
-                    .ToListAsync();
+            return ctx.Transaktionen;
         }
 
         protected override Task HandleRequirementAsync(
@@ -235,6 +224,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ErhaltungsaufwendungPermissionHandler : WohnungPermissionHandlerBase<Erhaltungsaufwendung>
     {
+        public static IQueryable<Erhaltungsaufwendung> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.Erhaltungsaufwendungen;
+            var guid = user.GetUserId();
+            return ctx.Erhaltungsaufwendungen
+                .Where(e =>
+                    e.Wohnung.Verwalter.Count != 0 &&
+                    e.Wohnung.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)));
+        }
+
         public static async Task<List<Erhaltungsaufwendung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
             return await (user.IsInRole("Admin")
@@ -260,6 +261,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class KontaktPermissionHandler : WohnungPermissionHandlerBase<Kontakt>
     {
+        public static IQueryable<Kontakt> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            return ctx.Kontakte;
+        }
+
         public static async Task<List<Kontakt>> GetList(
             SaverwalterContext ctx,
             ClaimsPrincipal user,
@@ -405,6 +411,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class VertragPermissionHandler : WohnungPermissionHandlerBase<Vertrag>
     {
+        public static IQueryable<Vertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.Vertraege;
+            var guid = user.GetUserId();
+            return ctx.Vertraege
+                .Where(e =>
+                    e.Wohnung.Verwalter.Count > 0 &&
+                    e.Wohnung.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)));
+        }
+
         public static async Task<List<Vertrag>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
             return await (user.IsInRole("Admin")
@@ -452,6 +470,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class WohnungPermissionHandler : WohnungPermissionHandlerBase<Wohnung>
     {
+        public static IQueryable<Wohnung> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.Wohnungen;
+            var guid = user.GetUserId();
+            return ctx.Wohnungen
+                .Where(e =>
+                    e.Verwalter.Count > 0 &&
+                    e.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)));
+        }
+
         public static async Task<List<Wohnung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
             return await (user.IsInRole("Admin")

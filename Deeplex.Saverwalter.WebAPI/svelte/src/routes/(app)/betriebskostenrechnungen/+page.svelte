@@ -25,8 +25,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Betriebskostenrechnung" />
-<WalterBetriebskostenrechnungen
-    fetchImpl={data.fetchImpl}
-    rows={data.rows}
-    fullHeight
-/>
+<WalterBetriebskostenrechnungen fetchImpl={data.fetchImpl} fullHeight />

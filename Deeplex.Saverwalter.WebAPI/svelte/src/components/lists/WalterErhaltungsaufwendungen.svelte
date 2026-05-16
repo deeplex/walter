@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -24,6 +24,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let rows: WalterErhaltungsaufwendungEntry[] | undefined = undefined;
+    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = {};
+
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },
         { key: 'aussteller.text', value: 'Aussteller' },
@@ -36,12 +42,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         navigation.erhaltungsaufwendung(e.detail.id);
     const rowHref = (row: DataTableRow) => `/erhaltungsaufwendungen/${row.id}`;
 
-    export let fullHeight = false;
-    export let rows: WalterErhaltungsaufwendungEntry[];
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-
-    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = {};
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterErhaltungsaufwendungEntry.GetPaged>[1]) =>
+              WalterErhaltungsaufwendungEntry.GetPaged<WalterErhaltungsaufwendungEntry>(fetchImpl, p)
+        : undefined;
 </script>
 
 <WalterDataTable
@@ -53,6 +57,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     {rows}
+    {fetchData}
     {headers}
     {fullHeight}
 >

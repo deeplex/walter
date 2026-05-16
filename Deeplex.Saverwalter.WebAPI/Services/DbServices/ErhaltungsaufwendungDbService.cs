@@ -15,10 +15,13 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -28,13 +31,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new ErhaltungsaufwendungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<ErhaltungsaufwendungEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            ErhaltungsaufwendungPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Bezeichnung.ToLower().Contains(t) ||
+                    e.Aussteller.Name.ToLower().Contains(t) ||
+                    (e.Aussteller.Vorname != null && e.Aussteller.Vorname.ToLower().Contains(t)) ||
+                    e.Wohnung.Bezeichnung.ToLower().Contains(t) ||
+                    (e.Wohnung.Adresse != null && e.Wohnung.Adresse.Stadt.ToLower().Contains(t)),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "betrag" => q.SortBy(e => e.Betrag, dir),
+                    "bezeichnung" => q.SortBy(e => e.Bezeichnung, dir),
+                    _ => q.SortBy(e => e.Datum, dir)
+                },
+                toEntry: async e => new ErhaltungsaufwendungEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Erhaltungsaufwendung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {

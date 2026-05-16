@@ -25,8 +25,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Erhaltungsaufwendungen" />
-<WalterErhaltungsaufwendungen
-    fetchImpl={data.fetch}
-    rows={data.rows}
-    fullHeight
-/>
+<WalterErhaltungsaufwendungen fetchImpl={data.fetchImpl} fullHeight />

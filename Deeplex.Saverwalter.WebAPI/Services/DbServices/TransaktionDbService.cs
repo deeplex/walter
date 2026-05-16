@@ -15,10 +15,13 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -28,13 +31,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<TransaktionEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await TransaktionPermissionHandler.GetList(Ctx, user);
-
-            return await Task.WhenAll(list
-                .Select(async e => new TransaktionEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Verwendungszweck.ToLower().Contains(t) ||
+                    (e.Zahler != null && (
+                        e.Zahler.Name.ToLower().Contains(t) ||
+                        (e.Zahler.Vorname != null && e.Zahler.Vorname.ToLower().Contains(t)))) ||
+                    (e.Zahlungsempfaenger != null && (
+                        e.Zahlungsempfaenger.Name.ToLower().Contains(t) ||
+                        (e.Zahlungsempfaenger.Vorname != null && e.Zahlungsempfaenger.Vorname.ToLower().Contains(t)))) ||
+                    (e.Notiz != null && e.Notiz.ToLower().Contains(t)),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "betrag" => q.SortBy(e => e.Betrag, dir),
+                    "zahlungsdatum" => q.SortBy(e => e.Zahlungsdatum, dir),
+                    "verwendungszweck" => q.SortBy(e => e.Verwendungszweck, dir),
+                    _ => q.SortBy(e => e.Zahlungsdatum, "desc")
+                },
+                toEntry: async e => new TransaktionEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Transaktion>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {

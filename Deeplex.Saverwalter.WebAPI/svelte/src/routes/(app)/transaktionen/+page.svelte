@@ -22,4 +22,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Transaktionen" />
-<WalterTransaktionen fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />
+<WalterTransaktionen fetchImpl={data.fetchImpl} fullHeight />

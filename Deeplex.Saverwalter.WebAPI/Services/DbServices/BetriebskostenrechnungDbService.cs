@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
@@ -39,56 +40,66 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             _buchungsService = buchungsService;
         }
 
-        public async Task<ActionResult<IEnumerable<BetriebskostenrechnungEntryBase>>> GetList(ClaimsPrincipal user)
+        public async Task<PagedResult<BetriebskostenrechnungEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query)
         {
-            if (user.IsInRole("Admin"))
+            var userId = user.IsInRole("Admin") ? (Guid?)null : user.GetUserId();
+
+            // Resolve write-access up front so the closure in toEntry is cheap.
+            var adminPerms = new Utils.Permissions { Read = true, Update = true, Remove = true };
+            HashSet<int>? writableIds = null;
+            if (userId.HasValue)
             {
-                var allItems = await Ctx.Betriebskostenrechnungen
-                    .AsSplitQuery()
-                    .Include(e => e.Umlage).ThenInclude(u => u.Typ)
-                    .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                    .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
-                    .ToListAsync();
-                var adminPerms = new Utils.Permissions { Read = true, Update = true, Remove = true };
-                return allItems.Select(e => new BetriebskostenrechnungEntryBase(e, adminPerms)).ToArray();
+                var uid = userId.Value;
+                writableIds = (await Ctx.Wohnungen
+                    .Where(w => w.Verwalter.Any(v =>
+                        v.UserAccount.Id == uid &&
+                        (v.Rolle == VerwalterRolle.Eigentuemer || v.Rolle == VerwalterRolle.Vollmacht)))
+                    .Select(w => w.WohnungId)
+                    .ToListAsync())
+                    .ToHashSet();
             }
 
-            var userId = user.GetUserId();
-            var wohnungAccess = await Ctx.Wohnungen
-                .Where(w => w.Verwalter.Any(v => v.UserAccount.Id == userId))
-                .Select(w => new
-                {
-                    w.WohnungId,
-                    CanWrite = w.Verwalter.Any(v =>
-                        v.UserAccount.Id == userId &&
-                        (v.Rolle == VerwalterRolle.Eigentuemer || v.Rolle == VerwalterRolle.Vollmacht))
-                })
-                .ToListAsync();
-
-            if (wohnungAccess.Count == 0)
+            var source = Ctx.Betriebskostenrechnungen.AsQueryable();
+            if (userId.HasValue)
             {
-                return Array.Empty<BetriebskostenrechnungEntryBase>();
+                var uid = userId.Value;
+                source = source.Where(e =>
+                    e.Umlage.Wohnungen.Any(w =>
+                        w.Verwalter.Any(v => v.UserAccount.Id == uid)));
             }
 
-            var readableWohnungIds = wohnungAccess.Select(w => w.WohnungId).ToHashSet();
-            var writableWohnungIds = wohnungAccess
-                .Where(w => w.CanWrite)
-                .Select(w => w.WohnungId)
-                .ToHashSet();
-
-            var list = await Ctx.Betriebskostenrechnungen
+            // Includes must be part of the queryable so EF loads navigation
+            // properties when materialising the page; CountAsync ignores them.
+            source = source
                 .AsSplitQuery()
                 .Include(e => e.Umlage).ThenInclude(u => u.Typ)
                 .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
-                .Where(e => e.Umlage.Wohnungen.Any(w => readableWohnungIds.Contains(w.WohnungId)))
-                .ToListAsync();
+                .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen);
 
-            return list.Select(e =>
-            {
-                var canWrite = e.Umlage.Wohnungen.Any(w => writableWohnungIds.Contains(w.WohnungId));
-                return new BetriebskostenrechnungEntryBase(e, new Utils.Permissions { Read = true, Update = canWrite, Remove = canWrite });
-            }).ToArray();
+            return await source.PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Umlage.Typ.Bezeichnung.ToLower().Contains(t) ||
+                    e.Umlage.Wohnungen.Any(w =>
+                        w.Bezeichnung.ToLower().Contains(t) ||
+                        (w.Adresse != null && w.Adresse.Stadt.ToLower().Contains(t))),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "betrag" => q.SortBy(e => e.Betrag, dir),
+                    "betreffendesJahr" => q.SortBy(e => e.BetreffendesJahr, dir),
+                    _ => q.SortBy(e => e.Datum, dir)
+                },
+                toEntry: e =>
+                {
+                    var perms = writableIds == null
+                        ? adminPerms
+                        : new Utils.Permissions
+                        {
+                            Read = true,
+                            Update = e.Umlage.Wohnungen.Any(w => writableIds.Contains(w.WohnungId)),
+                            Remove = e.Umlage.Wohnungen.Any(w => writableIds.Contains(w.WohnungId))
+                        };
+                    return new BetriebskostenrechnungEntryBase(e, perms);
+                });
         }
 
         public override async Task<ActionResult<Betriebskostenrechnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)

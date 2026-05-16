@@ -115,7 +115,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<WohnungEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<WohnungEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpPost]
         [Authorize(Policy = "RequireOwner")]

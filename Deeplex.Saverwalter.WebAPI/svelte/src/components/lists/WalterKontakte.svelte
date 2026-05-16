@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { navigation } from '$walter/services/navigation';
     import WalterKontakt from '../details/WalterKontakt.svelte';
 
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let rows: WalterKontaktEntry[] | undefined = undefined;
+    export let entry: Partial<WalterKontaktEntry> = {
+        permissions: { read: true, update: true, remove: true }
+    };
+
     const headers = [
         { key: 'bezeichnung', value: 'Name', default: '' },
         { key: 'adresse.anschrift', value: 'Anschrift' },
@@ -34,18 +42,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         navigation.kontakt(e.detail.id);
     const rowHref = (row: DataTableRow) => `/kontakte/${row.id}`;
 
-    export let rows: WalterKontaktEntry[];
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-
-    export let entry: Partial<WalterKontaktEntry> = {
-        permissions: {
-            read: true,
-            update: true,
-            remove: true
-        }
-    };
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterKontaktEntry.GetPaged>[1]) =>
+              WalterKontaktEntry.GetPaged<WalterKontaktEntry>(fetchImpl, p)
+        : undefined;
 </script>
 
 <WalterDataTable
@@ -57,6 +57,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     {rows}
+    {fetchData}
+    initialSortBy="bezeichnung"
+    initialSortDir="asc"
     {headers}
     {fullHeight}
 >

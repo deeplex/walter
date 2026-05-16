@@ -25,6 +25,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterBuchung from '../details/WalterBuchung.svelte';
     import { invalidateAll } from '$app/navigation';
 
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let entry: Partial<WalterVertragEntry> | undefined = {};
+    export let rows: WalterVertragEntry[] | undefined = undefined;
+
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
         { key: 'mieterAuflistung', value: 'Mieter' },
@@ -36,12 +42,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.vertrag(e.detail.id);
     const rowHref = (row: DataTableRow) => `/vertraege/${row.id}`;
-
-    export let rows: WalterVertragEntry[];
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterVertragEntry> | undefined = {};
 
     let modalOpen = false;
     let modalTitle = 'Mietzahlung';
@@ -63,14 +63,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         modalOpen = true;
     }
 
-    const rowsAdd = rows.map((row) => ({
-        ...row,
-        button: (e: CustomEvent) => add(e, row)
-    }));
-
     async function onSubmit() {
         await invalidateAll();
     }
+
+    const transformRow = (row: DataTableRow) => ({
+        ...(row as WalterVertragEntry),
+        button: (e: CustomEvent) => add(e, row as WalterVertragEntry)
+    });
+
+    const fetchData = rows === undefined
+        ? (p: Parameters<typeof WalterVertragEntry.GetPaged>[1]) =>
+              WalterVertragEntry.GetPaged<WalterVertragEntry>(fetchImpl, p)
+        : undefined;
+
+    $: embeddedRows = rows?.map((row) => ({
+        ...row,
+        button: (e: CustomEvent) => add(e, row)
+    }));
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -91,7 +101,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     quickAddTitle={title}
     {on_click_row}
     {rowHref}
-    rows={rowsAdd}
+    rows={embeddedRows}
+    {fetchData}
+    {transformRow}
+    initialSortBy="beginn"
+    initialSortDir="desc"
     {headers}
     {fullHeight}
 >

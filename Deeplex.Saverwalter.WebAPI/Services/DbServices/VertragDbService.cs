@@ -15,11 +15,14 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -29,13 +32,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<VertragEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await VertragPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new VertragEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<VertragEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            VertragPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Wohnung.Bezeichnung.ToLower().Contains(t) ||
+                    (e.Wohnung.Adresse != null && (
+                        e.Wohnung.Adresse.Strasse.ToLower().Contains(t) ||
+                        e.Wohnung.Adresse.Stadt.ToLower().Contains(t))) ||
+                    e.Mieter.Any(m =>
+                        m.Name.ToLower().Contains(t) ||
+                        (m.Vorname != null && m.Vorname.ToLower().Contains(t))),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "beginn" => q.SortBy(e => e.Versionen.Min(v => v.Beginn), dir),
+                    "ende" => q.SortBy(e => e.Ende, dir),
+                    _ => q.SortBy(e => e.Versionen.Min(v => v.Beginn), "desc")
+                },
+                toEntry: async e => new VertragEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Vertrag>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {

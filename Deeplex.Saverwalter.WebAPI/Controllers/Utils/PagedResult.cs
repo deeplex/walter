@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2025 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,8 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { PageLoad } from './$types';
+namespace Deeplex.Saverwalter.WebAPI.Controllers
+{
+    public class PagedQuery
+    {
+        public string? Search { get; set; }
+        public string? SortBy { get; set; }
+        public string SortDir { get; set; } = "desc";
+        public int Skip { get; set; } = 0;
+        public int Take { get; set; } = 50;
+    }
 
-export const load: PageLoad = async ({ fetch }) => {
-    return { fetchImpl: fetch };
-};
+    public record PagedResult<T>(IEnumerable<T> Items, int TotalCount);
+}

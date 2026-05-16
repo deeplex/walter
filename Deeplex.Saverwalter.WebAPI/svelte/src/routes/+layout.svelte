@@ -121,25 +121,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         padding: 0 !important;
     }
 
-    :global(#homepagetabs) {
-        position: sticky;
-        top: 0;
-        z-index: 3000;
-        width: 100%;
-        background: var(--cds-layer);
-    }
-
-    :global(#homepagetabs .bx--tabs--container) {
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-gutter: stable;
-    }
-
-    :global(#homepagetabs .bx--tabs--container .bx--tabs__nav) {
-        width: max-content;
-        min-width: 100%;
-    }
-
     :global(.cds--cc--heatmap g.axis.left .tick text) {
         text-anchor: end;
     }
@@ -196,5 +177,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     :global(.bx--number input[type='number']) {
         min-width: 6.375rem !important;
         padding-right: 4em !important;
+    }
+
+    /* Toolbar sticky for full-page tables — must live here (after Carbon CSS in cascade) */
+    :global(.sticky-chrome .bx--table-toolbar) {
+        position: sticky !important;
+        top: 3rem !important;
+        z-index: 10 !important;
+    }
+
+    :global(.sticky-chrome thead) {
+        position: sticky !important;
+        top: 6rem !important;
+        z-index: 9 !important;
+        background: var(--cds-layer, #f4f4f4) !important;
     }
 </style>

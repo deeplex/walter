@@ -15,13 +15,16 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -31,13 +34,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<WohnungEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await WohnungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<WohnungEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            WohnungPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Bezeichnung.ToLower().Contains(t) ||
+                    (e.Adresse != null && (
+                        e.Adresse.Strasse.ToLower().Contains(t) ||
+                        e.Adresse.Hausnummer.ToLower().Contains(t) ||
+                        e.Adresse.Stadt.ToLower().Contains(t))) ||
+                    (e.Besitzer != null && e.Besitzer.Name.ToLower().Contains(t)),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "bezeichnung" => q.SortBy(e => e.Bezeichnung, dir),
+                    _ => q.SortBy(e => e.Adresse!.Stadt, dir)
+                        .ThenSortBy(e => e.Adresse!.Strasse, dir)
+                        .ThenSortBy(e => e.Bezeichnung, dir)
+                },
+                toEntry: async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Wohnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {

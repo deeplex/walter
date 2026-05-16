@@ -84,7 +84,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<ErhaltungsaufwendungEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpGet("{id}")]
         public Task<ActionResult<ErhaltungsaufwendungEntry>> Get(int id) => DbService.Get(User!, id);
