@@ -15,7 +15,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { WalterVertragEntry, WalterMieteEntry, TransaktionsInput } from '$walter/lib';
+    import type {
+        WalterVertragEntry,
+        WalterMieteEntry,
+        TransaktionsInput
+    } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
     import {
         months,
@@ -25,8 +29,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterBuchung from './WalterBuchung.svelte';
     import { invalidateAll } from '$app/navigation';
+    import { WalterTransaktion } from '..';
 
     export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
@@ -58,7 +62,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             modalTitle = data.group!;
             buchungsInput = {
                 ...emptyTransaktionsInput(),
-                mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: +vertragId }]
+                mieten: [
+                    { kaltmiete: 0, nkVorauszahlung: 0, vertragId: +vertragId }
+                ]
             };
             addModalOpen = true;
         }
@@ -75,9 +81,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addUrl="/api/transaktionen/buchen"
     bind:addEntry={buchungsInput}
     bind:addModalOpen
-    onSubmit={onSubmit}
+    {onSubmit}
 >
-    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
 <div style="left: 0; min-height: 30em; display: block; width: 100%;">

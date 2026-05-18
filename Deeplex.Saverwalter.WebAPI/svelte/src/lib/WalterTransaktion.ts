@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2025 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -58,3 +58,58 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         );
     }
 }
+
+export interface MietzahlungsInput {
+    vertragId?: number;
+    betreffenderMonat?: string;
+    kaltmiete: number;
+    nkVorauszahlung: number;
+}
+
+export interface BetriebskostenEingangInput {
+    umlageId?: number;
+    betreffendesJahr?: number;
+    rechnungsDatum?: string;
+    betrag: number;
+    notiz?: string;
+}
+
+export interface ErhaltungsaufwendungsInput {
+    wohnungId?: number;
+    habenKontoId?: number;
+    betrag: number;
+    beschreibung?: string;
+}
+
+export interface SonstigerBuchungssatzInput {
+    sollKontoId?: number;
+    habenKontoId?: number;
+    betrag: number;
+    beschreibung?: string;
+}
+
+export interface TransaktionsInput {
+    betrag: number;
+    zahlungsdatum: string;
+    zahlerId?: number;
+    zahlungsempfaengerId?: number;
+    verwendungszweck: string;
+    notiz?: string;
+    mieten: MietzahlungsInput[];
+    betriebskostenEingaenge: BetriebskostenEingangInput[];
+    erhaltungsaufwendungen: ErhaltungsaufwendungsInput[];
+    sonstige: SonstigerBuchungssatzInput[];
+}
+
+export function emptyTransaktionsInput(): TransaktionsInput {
+    return {
+        betrag: 0,
+        zahlungsdatum: new Date().toISOString().slice(0, 10),
+        verwendungszweck: '',
+        mieten: [],
+        betriebskostenEingaenge: [],
+        erhaltungsaufwendungen: [],
+        sonstige: []
+    };
+}
+

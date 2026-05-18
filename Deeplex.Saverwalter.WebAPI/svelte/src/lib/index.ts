@@ -49,4 +49,4 @@ export {
     type SonstigerBuchungssatzInput,
     type TransaktionsInput,
     emptyTransaktionsInput
-} from './WalterBuchung';
+} from './WalterTransaktion';

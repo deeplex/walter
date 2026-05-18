@@ -73,6 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         public class TransaktionsInput
         {
+            public decimal Betrag { get; set; }
             public DateOnly Zahlungsdatum { get; set; }
             public int? ZahlerId { get; set; }
             public int? ZahlungsempfaengerId { get; set; }
@@ -96,6 +97,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (totalBetrag <= 0)
                 throw new ArgumentException("Mindestens eine Position mit Betrag > 0 erforderlich.");
+
+            if (Math.Abs(input.Betrag - totalBetrag) > 0.005m)
+                throw new ArgumentException(
+                    $"Transaktionsbetrag ({input.Betrag:C}) stimmt nicht mit der Summe der Positionen ({totalBetrag:C}) überein.");
 
             var transaktion = new Transaktion
             {
@@ -170,13 +175,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     throw new InvalidOperationException(
                         $"Kaltmiete ({miete.Kaltmiete:C}) übersteigt Grundmiete ({version.Grundmiete:C}).");
 
-                await FindeOderErstelleSollstellungAsync(vertrag, monat, version);
+                var sollZeile = FindeOderErstelleSollstellung(vertrag, monat, version);
 
                 var kaltmieteSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung Kaltmiete {monat:MM/yyyy}");
                 AddZeile(kaltmieteSatz, SollHaben.Soll, miete.Kaltmiete, vertrag.ZahlungsKonto);
                 AddZeile(kaltmieteSatz, SollHaben.Haben, miete.Kaltmiete, vertrag.MietBuchungskonto);
                 kaltmieteSatz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(kaltmieteSatz);
+
+                var habenZeile = kaltmieteSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
+                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                {
+                    SollZeile = sollZeile,
+                    HabenZeile = habenZeile
+                });
             }
 
             if (miete.NkVorauszahlung > 0)
@@ -266,22 +278,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         // ── Hilfsfunktionen ───────────────────────────────────────────────────────
 
-        private async Task FindeOderErstelleSollstellungAsync(Vertrag vertrag, DateOnly monat, VertragVersion version)
+        private Buchungszeile FindeOderErstelleSollstellung(Vertrag vertrag, DateOnly monat, VertragVersion version)
         {
-            var kontoId = vertrag.MietBuchungskonto.BuchungskontoId;
-            var exists = await _ctx.Buchungssaetze.AnyAsync(s =>
-                s.Buchungszeilen.Any(z =>
+            var vorhandene = vertrag.MietBuchungskonto.Buchungszeilen
+                .FirstOrDefault(z =>
                     z.SollHaben == SollHaben.Soll
-                    && z.Buchungskonto.BuchungskontoId == kontoId
                     && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month));
+                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
 
-            if (exists) return;
+            if (vorhandene != null) return vorhandene;
 
             var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");
             AddZeile(satz, SollHaben.Soll, version.Grundmiete, vertrag.MietBuchungskonto);
             AddZeile(satz, SollHaben.Haben, version.Grundmiete, vertrag.Wohnung.MietErtragskonto);
             _ctx.Buchungssaetze.Add(satz);
+            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
         }
 
         /// <summary>

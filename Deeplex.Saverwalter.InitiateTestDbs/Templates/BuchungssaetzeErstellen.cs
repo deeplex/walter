@@ -29,10 +29,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             Console.WriteLine("Buche Mietsollstellungen...");
-            await BuecheMietsollAsync(ctx, today);
+            var sollZeilen = await BuecheMietsollAsync(ctx, today);
 
             Console.WriteLine("Buche Mietzahlungen (aus legacy Miete-Tabelle)...");
-            await BuecheMietzahlungenAsync(ctx);
+            await BuecheMietzahlungenAsync(ctx, sollZeilen);
 
             Console.WriteLine("Buche BK-Rechnungseingänge...");
             await BuecheBkEingangAsync(ctx);
@@ -50,8 +50,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         ///   Soll:  Vertrag.MietBuchungskonto  (Mietforderung entsteht)
         ///   Haben: Wohnung.MietErtragskonto   (Ertrag wird realisiert)
         /// </summary>
-        private static async Task BuecheMietsollAsync(SaverwalterContext ctx, DateOnly today)
+        private static async Task<Dictionary<(Vertrag, int, int), Buchungszeile>> BuecheMietsollAsync(SaverwalterContext ctx, DateOnly today)
         {
+            var sollZeilen = new Dictionary<(Vertrag, int, int), Buchungszeile>();
+
             var vertraege = await ctx.Vertraege
                 .Include(v => v.Versionen)
                 .Include(v => v.MietBuchungskonto)
@@ -99,8 +101,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     satz.Buchungszeilen.Add(haben);
                     ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
+
+                    sollZeilen[(vertrag, monat.Year, monat.Month)] = soll;
                 }
             }
+
+            return sollZeilen;
         }
 
         /// <summary>
@@ -110,7 +116,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         ///   Soll:  Vertrag.ZahlungsKonto      (Geld kommt auf Zahlungskonto an)
         /// </summary>
 #pragma warning disable CS0618
-        private static async Task BuecheMietzahlungenAsync(SaverwalterContext ctx)
+        private static async Task BuecheMietzahlungenAsync(
+            SaverwalterContext ctx,
+            Dictionary<(Vertrag, int, int), Buchungszeile> sollZeilen)
         {
             var vertraege = await ctx.Vertraege
                 .Include(v => v.Versionen)
@@ -139,7 +147,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var mieteAnteil = Math.Min(betrag, grundmiete);
                     var nkAnteil = Math.Max(0, betrag - grundmiete);
 
-                    var satz = new Buchungssatz(miete.Zahlungsdatum, $"Mietzahlung {miete.BetreffenderMonat:MM/yyyy}");
+                    var satz = new Buchungssatz(miete.Zahlungsdatum, $"Mietzahlung Kaltmiete {miete.BetreffenderMonat:MM/yyyy}");
                     var transaktion = new Transaktion
                     {
                         Zahlungsdatum = miete.Zahlungsdatum,
@@ -175,6 +183,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     ctx.Transaktionen.Add(transaktion);
                     ctx.Buchungssaetze.Add(satz);
+
+                    var monat = miete.BetreffenderMonat;
+                    if (sollZeilen.TryGetValue((vertrag, monat.Year, monat.Month), out var sollZeile))
+                    {
+                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                        {
+                            SollZeile = sollZeile,
+                            HabenZeile = habenMiet
+                        });
+                    }
                 }
             }
         }

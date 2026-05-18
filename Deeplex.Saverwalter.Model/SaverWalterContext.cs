@@ -26,6 +26,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Buchungskonto> Buchungskonten { get; set; } = null!;
         public DbSet<Buchungssatz> Buchungssaetze { get; set; } = null!;
         public DbSet<Buchungszeile> Buchungszeilen { get; set; } = null!;
+        public DbSet<OffenerPostenAusgleich> OffenePostenAusgleiche { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<HKVO> HKVO { get; set; } = null!;
@@ -96,6 +97,19 @@ namespace Deeplex.Saverwalter.Model
 
             modelBuilder.Entity<Vertrag>().HasOne(u => u.Ansprechpartner).WithMany(u => u.VerwaltetVertraege);
             modelBuilder.Entity<Vertrag>().HasMany(u => u.Mieter).WithMany(u => u.Mietvertraege);
+
+            modelBuilder.Entity<OffenerPostenAusgleich>()
+                .HasOne(o => o.SollZeile)
+                .WithMany(z => z.AlsSollZeile)
+                .HasForeignKey("SollZeileId")
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+            modelBuilder.Entity<OffenerPostenAusgleich>()
+                .HasOne(o => o.HabenZeile)
+                .WithMany(z => z.AlsHabenZeile)
+                .HasForeignKey("HabenZeileId")
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
 
             modelBuilder.Entity<Buchungssatz>()
                 .HasOne(b => b.Transaktion)

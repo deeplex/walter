@@ -68,6 +68,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function onInput(event: Event) {
         updateValue((event.target as HTMLInputElement).value);
     }
+
+    function onClose(selectedDates: Date[]) {
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            const month = `${date.getMonth() + 1}`.padStart(2, '0');
+            updateValue(`${month}.${date.getFullYear()}`);
+        }
+    }
 </script>
 
 {#await value}
@@ -81,7 +89,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {maxDate}
         flatpickrProps={{
             static: true,
-            monthSelectorType: 'static',
+            onOpen: () => {},
+            onMonthChange: () => {},
+            onClose,
             plugins: [
                 monthSelectPlugin({
                     dateFormat: 'm.Y',

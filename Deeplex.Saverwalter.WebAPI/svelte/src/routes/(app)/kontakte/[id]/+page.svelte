@@ -28,7 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import { WalterFileWrapper, WalterTransaktionEntry } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
-    import WalterTransaktion from '$walter/components/details/WalterTransaktion.svelte';
+    import WalterTransaktion from '$walter/components/details/WalterTransaktionRaw.svelte';
     import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
 

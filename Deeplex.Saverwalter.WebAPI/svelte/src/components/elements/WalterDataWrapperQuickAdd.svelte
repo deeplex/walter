@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let beforeSubmit:
         | undefined
         | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
+    export let submitDisabled = false;
 
     async function submit() {
         if (!addUrl) return;
@@ -71,7 +72,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ? `Eintrag zu ${title} hinzufügen`
         : `Eintrag hinzufügen`}
     bind:open={addModalOpen}
-    primaryButtonDisabled={!addUrl}
+    primaryButtonDisabled={!addUrl || submitDisabled}
     hasScrollingContent
 >
     <slot />

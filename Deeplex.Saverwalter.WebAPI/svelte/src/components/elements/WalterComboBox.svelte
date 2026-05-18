@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_subscribe_reset_changeTracker,
         walter_update_value
     } from '$walter/services/utils';
-    import { onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
 
     export let value: WalterSelectionEntry | undefined;
     export let titleText: string;
@@ -43,9 +43,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         updateLastSavedValue();
     });
 
+    const dispatch = createEventDispatcher();
+
     function select(e: CustomEvent) {
         walter_update_value(lastSavedValue, value?.id, e.detail.selectedItem);
         value = e.detail.selectedItem;
+        dispatch('select', e.detail);
     }
 
     function sanitizeEntries(
@@ -64,7 +67,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {#await entries}
     <TextInputSkeleton />
 {:then resolvedEntries}
-    {@const selected = value ?? (initialId != null ? resolvedEntries?.find((e) => +e.id === +initialId) : undefined)}
+    {@const selected =
+        value ??
+        (initialId != null
+            ? resolvedEntries?.find((e) => +e.id === +initialId)
+            : undefined)}
     <ComboBox
         invalid={required && !selected}
         invalidText={`${titleText} ist ein notwendiges Feld.`}

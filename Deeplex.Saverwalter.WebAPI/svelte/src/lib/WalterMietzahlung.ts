@@ -57,4 +57,6 @@ export interface WalterForderungsstatusEntry {
     verbleibendeForderung: number;
     nkVorauszahlung: number;
     sollstellungVorhanden: boolean;
+    grundmiete: number;
+    grundmieteSeit?: string;
 }

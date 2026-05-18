@@ -31,6 +31,9 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
+        public virtual List<OffenerPostenAusgleich> AlsSollZeile { get; private set; } = [];
+        public virtual List<OffenerPostenAusgleich> AlsHabenZeile { get; private set; } = [];
+
         public Buchungszeile(SollHaben sollHaben, decimal betrag)
         {
             SollHaben = sollHaben;

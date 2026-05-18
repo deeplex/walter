@@ -15,14 +15,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterGrid, WalterHeader } from '$walter/components';
+    import {
+        WalterGrid,
+        WalterHeader,
+        WalterTransaktion
+    } from '$walter/components';
     import {
         HeaderGlobalAction,
         HeaderUtilities
     } from 'carbon-components-svelte';
     import { Save } from 'carbon-icons-svelte';
-    import WalterBuchung from '$walter/components/details/WalterBuchung.svelte';
-    import { emptyTransaktionsInput, type TransaktionsInput, WalterToastContent } from '$walter/lib';
+    import {
+        emptyTransaktionsInput,
+        type TransaktionsInput,
+        WalterToastContent
+    } from '$walter/lib';
     import { walter_post } from '$walter/services/requests';
     import { walter_goto } from '$walter/services/utils';
     import { addToast, changeTracker } from '$walter/store';
@@ -31,6 +38,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let data: PageData;
 
     let buchung: TransaktionsInput = emptyTransaktionsInput();
+    let buchungValid = false;
 
     const SaveToast = new WalterToastContent(
         'Buchung gespeichert',
@@ -44,8 +52,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             }`
     );
 
+    const InvalidToast = new WalterToastContent(
+        '',
+        'Betrag nicht vollständig verteilt',
+        () => '',
+        () =>
+            'Der Transaktionsbetrag muss vollständig auf Positionen verteilt sein.'
+    );
+
     async function save() {
-        const response = await walter_post('/api/transaktionen/buchen', buchung);
+        if (!buchungValid) {
+            addToast(InvalidToast, false, null);
+            return;
+        }
+        const response = await walter_post(
+            '/api/transaktionen/buchen',
+            buchung
+        );
         const parsed = await response.json();
         addToast(SaveToast, response.status === 200, parsed);
         if (parsed.id) {
@@ -57,10 +80,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterHeader title="Neue Buchung">
     <HeaderUtilities>
-        <HeaderGlobalAction on:click={save} icon={Save} />
+        <HeaderGlobalAction
+            on:click={save}
+            icon={Save}
+            disabled={!buchungValid}
+        />
     </HeaderUtilities>
 </WalterHeader>
 
 <WalterGrid>
-    <WalterBuchung fetchImpl={data.fetchImpl} bind:buchung />
+    <WalterTransaktion
+        fetchImpl={data.fetchImpl}
+        bind:buchung
+        bind:isValid={buchungValid}
+    />
 </WalterGrid>

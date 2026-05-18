@@ -58,6 +58,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public decimal VerbleibendeForderung { get; set; }
             public decimal NkVorauszahlung { get; set; }
             public bool SollstellungVorhanden { get; set; }
+            public decimal Grundmiete { get; set; }
+            public DateOnly? GrundmieteSeit { get; set; }
         }
 
         /// <summary>
@@ -131,7 +133,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 SchonGezahlt = habenSumme,
                 VerbleibendeForderung = sollSumme - habenSumme,
                 NkVorauszahlung = version?.Nebenkostenvorauszahlung ?? 0,
-                SollstellungVorhanden = sollSumme > 0
+                SollstellungVorhanden = sollSumme > 0,
+                Grundmiete = version?.Grundmiete ?? 0,
+                GrundmieteSeit = version?.Beginn
             });
         }
     }

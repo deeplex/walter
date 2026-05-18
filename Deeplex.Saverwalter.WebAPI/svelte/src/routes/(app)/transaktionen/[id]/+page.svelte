@@ -18,8 +18,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterHeaderDetail,
         WalterGrid,
-        WalterTransaktion,
-        WalterLinkTile
+        WalterLinkTile,
+        WalterTransaktionRaw
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterFileWrapper } from '$walter/lib';
@@ -42,7 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 />
 
 <WalterGrid>
-    <WalterTransaktion fetchImpl={data.fetchImpl} entry={data.entry} />
+    <WalterTransaktionRaw fetchImpl={data.fetchImpl} entry={data.entry} />
 
     {#if data.entry.zahler}
         <WalterLinkTile
@@ -53,7 +53,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     {/if}
 
-    {#if data.entry.zahler}
+    {#if data.entry.zahlungsempfaenger}
         <WalterLinkTile
             bind:fileWrapper
             fileref={fileURL.kontakt(`${data.entry.zahlungsempfaenger.id}`)}

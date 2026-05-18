@@ -23,12 +23,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type TransaktionsInput
     } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
-    import { NumberInput } from 'carbon-components-svelte';
-    import { WalterDataTable } from '$walter/components';
+    import { NumberInput, SkeletonText, Tile } from 'carbon-components-svelte';
+    import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import WalterZaehlerstand from './WalterZaehlerstand.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterBuchung from './WalterBuchung.svelte';
     import { invalidateAll } from '$app/navigation';
     import { onMount } from 'svelte';
 
@@ -161,6 +160,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let addBillingOpen = false;
     let billingModalTitle = 'Betriebskostenrechnung';
     let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
+    let buchungsInputValid = false;
 
     function openBillingQuickAdd(
         e: CustomEvent,
@@ -225,30 +225,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addEntry={buchungsInput}
     bind:addModalOpen={addBillingOpen}
     onSubmit={onSubmitBilling}
+    submitDisabled={!buchungsInputValid}
 >
-    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+    <WalterTransaktion
+        {fetchImpl}
+        bind:buchung={buchungsInput}
+        bind:isValid={buchungsInputValid}
+    />
 </WalterDataWrapperQuickAdd>
 
-<div class="year-selector">
-    <NumberInput
-        label="Jahr"
-        bind:value={selectedYear}
-        min={2000}
-        max={2099}
-        hideSteppers={false}
-    />
-</div>
+<Tile light>
+    <div class="year-selector">
+        <NumberInput
+            label="Jahr"
+            bind:value={selectedYear}
+            min={1970}
+            max={2099}
+            hideSteppers={false}
+        />
+    </div>
 
-{#if !umlagenReady}
-    <p style="color: var(--cds-text-02); margin-top: 1rem;">
-        Daten werden geladen…
-    </p>
-{:else if meterTableRows.length === 0 && billingTableRows.length === 0}
-    <p style="color: var(--cds-text-02); margin-top: 1rem;">
-        Alles erledigt für {selectedYear} ✓
-    </p>
-{:else}
-    <div style="margin-top: 1rem;">
+    {#if !umlagenReady}
+        <SkeletonText style="margin: 0; height: 42px;" />
+        <div style="height: 2px;" />
+        <SkeletonText style="margin: 0; height: 42px;" />
+    {:else if meterTableRows.length === 0 && billingTableRows.length === 0}
+        <p style="color: var(--cds-text-02); margin: 1rem;">
+            Alles erledigt für {selectedYear}
+        </p>
+    {:else}
         <WalterDataTable
             layout="accordion"
             accordionTitle="Zählerstände fällig"
@@ -261,8 +266,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={billingTableRows}
             headers={billingHeaders}
         />
-    </div>
-{/if}
+    {/if}
+</Tile>
 
 <style>
     .year-selector {

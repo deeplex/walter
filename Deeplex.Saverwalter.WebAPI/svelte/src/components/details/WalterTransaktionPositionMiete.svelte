@@ -15,7 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column, InlineNotification, Tag } from 'carbon-components-svelte';
+    import {
+        Row,
+        Column,
+        InlineNotification,
+        Tag
+    } from 'carbon-components-svelte';
     import {
         WalterComboBox,
         WalterMonthPicker,
@@ -28,19 +33,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let fetchImpl: typeof fetch;
     export let miete: MietzahlungsInput;
+    export let availableBetrag = 0;
+    export let isSinglePosition = false;
 
     let vertrag: WalterSelectionEntry | undefined = undefined;
-    let betreffenderMonat: string | undefined = undefined;
     let forderungsstatus: WalterForderungsstatusEntry | undefined = undefined;
-    let loadingForderung = false;
 
     const vertraege = walter_selection.vertraege(fetchImpl);
+
+    const now = new Date();
+    let betreffenderMonat: string = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    miete.betreffenderMonat = betreffenderMonat;
+
+    $: kaltmieteLabel = forderungsstatus?.grundmiete
+        ? `Kaltmiete (€) — Grundmiete: ${forderungsstatus.grundmiete.toFixed(2)} € seit ${forderungsstatus.grundmieteSeit ?? '?'}`
+        : 'Kaltmiete (€)';
+
+    $: verteile(availableBetrag);
+
+    // Distribute betrag across kaltmiete / NK using forderungsstatus (or grundmiete as fallback).
+    function verteile(betrag: number) {
+        if (!isSinglePosition) return;
+        const kaltmieteSoll = forderungsstatus
+            ? forderungsstatus.sollstellungVorhanden
+                ? forderungsstatus.verbleibendeForderung
+                : forderungsstatus.grundmiete
+            : betrag;
+        const kaltmiete = Math.min(betrag, Math.max(0, kaltmieteSoll));
+        miete.kaltmiete = kaltmiete;
+        miete.nkVorauszahlung = Math.max(0, betrag - kaltmiete);
+    }
 
     async function ladeForderungsstatus() {
         const vertragId = miete.vertragId;
         const monat = miete.betreffenderMonat;
         if (!vertragId || !monat) return;
-        loadingForderung = true;
         try {
             const resp = await walter_get(
                 `/api/mietzahlungen/${vertragId}/forderung/${monat}`,
@@ -48,17 +75,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
             if (resp && typeof resp === 'object' && 'monat' in resp) {
                 forderungsstatus = resp as WalterForderungsstatusEntry;
-                miete.kaltmiete = forderungsstatus.verbleibendeForderung;
-                miete.nkVorauszahlung = forderungsstatus.nkVorauszahlung;
             }
-        } finally {
-            loadingForderung = false;
+
+            if (isSinglePosition) verteile(availableBetrag);
+        } catch {
+            /* ignore */
         }
     }
 
     function onVertragSelect(e: CustomEvent) {
         vertrag = e.detail?.selectedItem;
         miete.vertragId = vertrag?.id as number | undefined;
+        forderungsstatus = undefined;
         ladeForderungsstatus();
     }
 
@@ -92,7 +120,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <Column>
         <WalterNumberInput
             required
-            label="Kaltmiete (€)"
+            label={kaltmieteLabel}
             bind:value={miete.kaltmiete}
         />
     </Column>
@@ -108,9 +136,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <Row>
         <Column>
             {#if forderungsstatus.sollstellungVorhanden}
+                {@const erwartet =
+                    forderungsstatus.verbleibendeForderung +
+                    forderungsstatus.nkVorauszahlung}
+                {@const aktuell =
+                    (miete.kaltmiete || 0) + (miete.nkVorauszahlung || 0)}
                 <Tag type="green">
-                    Forderung: {forderungsstatus.forderungsbetrag.toFixed(2)} € — noch offen: {forderungsstatus.verbleibendeForderung.toFixed(2)} €
+                    Forderung: {forderungsstatus.forderungsbetrag.toFixed(2)} € —
+                    noch offen: {forderungsstatus.verbleibendeForderung.toFixed(
+                        2
+                    )} €
                 </Tag>
+                {#if Math.abs(aktuell - erwartet) >= 0.005}
+                    <InlineNotification
+                        kind="warning"
+                        title="Betrag weicht von Forderung ab:"
+                        subtitle="Erwartet {erwartet.toFixed(
+                            2
+                        )} €, eingetragen {aktuell.toFixed(2)} €"
+                        hideCloseButton
+                    />
+                {/if}
             {:else}
                 <InlineNotification
                     kind="info"

@@ -15,8 +15,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { WalterUmlageEntry, TransaktionsInput } from '$walter/lib';
-    import { emptyTransaktionsInput } from '$walter/lib';
+    import {
+        emptyTransaktionsInput,
+        type WalterUmlageEntry,
+        type TransaktionsInput
+    } from '$walter/lib';
     import {
         walter_data_rechnungentabelle,
         type WalterDataConfigType,
@@ -24,8 +27,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterBuchung from './WalterBuchung.svelte';
     import { invalidateAll } from '$app/navigation';
+    import { WalterTransaktion } from '$walter/components';
 
     export let config: WalterDataConfigType;
     export let umlagen: WalterUmlageEntry[];
@@ -50,7 +53,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             modalTitle = thisEntry.key;
             buchungsInput = {
                 ...emptyTransaktionsInput(),
-                betriebskostenEingaenge: [{ betrag: 0, umlageId: +thisEntry.id, betreffendesJahr: year }]
+                betriebskostenEingaenge: [
+                    {
+                        betrag: 0,
+                        umlageId: +thisEntry.id,
+                        betreffendesJahr: year
+                    }
+                ]
             };
             addModalOpen = true;
         }
@@ -67,9 +76,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addUrl="/api/transaktionen/buchen"
     bind:addEntry={buchungsInput}
     bind:addModalOpen
-    onSubmit={onSubmit}
+    {onSubmit}
 >
-    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
 <div style="left: 0; min-height: 30em; display: block; width: 100%;">
