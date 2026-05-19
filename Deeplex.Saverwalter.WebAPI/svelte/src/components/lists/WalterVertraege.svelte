@@ -17,12 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataTable, WalterVertrag } from '$walter/components';
+    import {
+        WalterDataTable,
+        WalterTransaktion,
+        WalterVertrag
+    } from '$walter/components';
     import { WalterVertragEntry, type TransaktionsInput } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterBuchung from '../details/WalterBuchung.svelte';
     import { invalidateAll } from '$app/navigation';
 
     export let fullHeight = false;
@@ -72,10 +75,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         button: (e: CustomEvent) => add(e, row as WalterVertragEntry)
     });
 
-    const fetchData = rows === undefined
-        ? (p: Parameters<typeof WalterVertragEntry.GetPaged>[1]) =>
-              WalterVertragEntry.GetPaged<WalterVertragEntry>(fetchImpl, p)
-        : undefined;
+    const fetchData =
+        rows === undefined
+            ? (p: Parameters<typeof WalterVertragEntry.GetPaged>[1]) =>
+                  WalterVertragEntry.GetPaged<WalterVertragEntry>(fetchImpl, p)
+            : undefined;
 
     $: embeddedRows = rows?.map((row) => ({
         ...row,
@@ -90,7 +94,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addModalOpen={modalOpen}
     {onSubmit}
 >
-    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataTable

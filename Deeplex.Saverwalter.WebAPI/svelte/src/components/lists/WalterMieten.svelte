@@ -16,9 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
-    import { WalterDataTable } from '$walter/components';
-    import WalterBuchung from '../details/WalterBuchung.svelte';
-    import type { WalterMietzahlungListEntry, WalterVertragEntry, TransaktionsInput } from '$walter/lib';
+    import { WalterDataTable, WalterTransaktion } from '$walter/components';
+    import type {
+        WalterMietzahlungListEntry,
+        WalterVertragEntry,
+        TransaktionsInput
+    } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
 
     const headers = [
@@ -31,8 +34,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: sortedRows = [...(rows || [])].sort((a, b) => {
         const monthA = new Date(a.betreffenderMonat).getTime();
         const monthB = new Date(b.betreffenderMonat).getTime();
-        if (!Number.isNaN(monthA) && !Number.isNaN(monthB)) return monthB - monthA;
-        return `${b.betreffenderMonat || ''}`.localeCompare(`${a.betreffenderMonat || ''}`);
+        if (!Number.isNaN(monthA) && !Number.isNaN(monthB))
+            return monthB - monthA;
+        return `${b.betreffenderMonat || ''}`.localeCompare(
+            `${a.betreffenderMonat || ''}`
+        );
     });
 
     export let fullHeight = false;
@@ -42,7 +48,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: buchungsInput = {
         ...emptyTransaktionsInput(),
-        mieten: [{ kaltmiete: 0, nkVorauszahlung: 0, vertragId: vertrag?.id as number | undefined }]
+        mieten: [
+            {
+                kaltmiete: 0,
+                nkVorauszahlung: 0,
+                vertragId: vertrag?.id as number | undefined
+            }
+        ]
     } as TransaktionsInput;
 </script>
 
@@ -56,7 +68,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     rows={sortedRows}
                     {headers}
                 >
-                    <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+                    <WalterTransaktion
+                        {fetchImpl}
+                        bind:buchung={buchungsInput}
+                    />
                 </WalterDataTable>
             </Tile>
         </AccordionItem>
@@ -69,6 +84,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         rows={sortedRows}
         {headers}
     >
-        <WalterBuchung {fetchImpl} bind:buchung={buchungsInput} />
+        <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
     </WalterDataTable>
 {/if}

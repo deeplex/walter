@@ -15,69 +15,143 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column } from 'carbon-components-svelte';
+    import { Row, Column, Button, Tag } from 'carbon-components-svelte';
     import {
         WalterComboBox,
         WalterComboBoxWohnung,
         WalterNumberInput,
         WalterTextInput
     } from '$walter/components';
-    import { walter_selection } from '$walter/services/requests';
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import { walter_selection, walter_get } from '$walter/services/requests';
+    import type { WalterSelectionEntry, WalterOffenerPostenStatus } from '$walter/lib';
     import type { ErhaltungsaufwendungsInput } from '$walter/lib';
 
     export let fetchImpl: typeof fetch;
     export let ea: ErhaltungsaufwendungsInput;
+    export let availableBetrag = 0;
+    export let isSinglePosition = false;
 
+    let modeExisting = false;
     let wohnung: WalterSelectionEntry | undefined = undefined;
-    let habenKonto: WalterSelectionEntry | undefined = undefined;
+    let existingEa: WalterSelectionEntry | undefined = undefined;
+    let eaInfo: WalterOffenerPostenStatus | undefined = undefined;
 
-    const buchungskonten = walter_selection.buchungskonten(fetchImpl);
+    const erhaltungsaufwendungen =
+        walter_selection.erhaltungsaufwendungen(fetchImpl);
 
-    function onWohnungSelect(woh: WalterSelectionEntry | undefined) {
-        ea.wohnungId = woh?.id as number | undefined;
+    $: ea.wohnungId = wohnung?.id as number | undefined;
+    $: ea.existingErhaltungsaufwendungId = existingEa?.id as
+        | number
+        | undefined;
+    $: if (isSinglePosition && availableBetrag > 0) {
+        ea.betrag = availableBetrag;
+    }
+    $: ladeEaInfo(existingEa?.id as number | undefined);
+
+    async function ladeEaInfo(id: number | undefined) {
+        if (!id) {
+            eaInfo = undefined;
+            return;
+        }
+        try {
+            const resp = await walter_get(
+                `/api/mietzahlungen/ea/${id}/info`,
+                fetchImpl
+            );
+            if (resp && typeof resp === 'object' && 'rechnungsbetrag' in resp) {
+                eaInfo = resp as WalterOffenerPostenStatus;
+                if (isSinglePosition && eaInfo.rechnungsbetrag > 0) {
+                    ea.betrag = eaInfo.rechnungsbetrag;
+                }
+            }
+        } catch {
+            /* ignore */
+        }
     }
 
-    function onHabenKontoSelect(e: CustomEvent) {
-        habenKonto = e.detail?.selectedItem;
-        ea.habenKontoId = habenKonto?.id as number | undefined;
+    function switchToNew() {
+        modeExisting = false;
+        ea.existingErhaltungsaufwendungId = undefined;
+        existingEa = undefined;
+        eaInfo = undefined;
     }
 
-    $: onWohnungSelect(wohnung);
+    function switchToExisting() {
+        modeExisting = true;
+        ea.wohnungId = undefined;
+        wohnung = undefined;
+    }
 </script>
 
-<Row>
+<Row style="margin-bottom: 0.5rem">
     <Column>
-        <WalterComboBoxWohnung
-            required
-            {fetchImpl}
-            bind:value={wohnung}
-        />
-    </Column>
-    <Column>
-        <WalterComboBox
-            required
-            titleText="Haben-Konto (wer hat gezahlt)"
-            entries={buchungskonten}
-            bind:value={habenKonto}
-            initialId={ea.habenKontoId}
-            on:select={onHabenKontoSelect}
-        />
+        <div style="display: flex; gap: 0.5rem">
+            <Button
+                kind={!modeExisting ? 'primary' : 'ghost'}
+                size="small"
+                on:click={switchToNew}
+            >
+                Neu anlegen
+            </Button>
+            <Button
+                kind={modeExisting ? 'primary' : 'ghost'}
+                size="small"
+                on:click={switchToExisting}
+            >
+                Bestehend verknüpfen
+            </Button>
+        </div>
     </Column>
 </Row>
 
-<Row>
-    <Column>
-        <WalterNumberInput
-            required
-            label="Betrag (€)"
-            bind:value={ea.betrag}
-        />
-    </Column>
-    <Column>
-        <WalterTextInput
-            labelText="Beschreibung"
-            bind:value={ea.beschreibung}
-        />
-    </Column>
-</Row>
+{#if modeExisting}
+    <Row>
+        <Column>
+            <WalterComboBox
+                required
+                titleText="Erhaltungsaufwendung"
+                entries={erhaltungsaufwendungen}
+                bind:value={existingEa}
+            />
+        </Column>
+    </Row>
+    {#if eaInfo}
+        <Row>
+            <Column>
+                <Tag type="blue">
+                    Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} €
+                </Tag>
+            </Column>
+        </Row>
+    {/if}
+    <Row>
+        <Column>
+            <WalterNumberInput
+                required
+                label="Betrag (€)"
+                bind:value={ea.betrag}
+            />
+        </Column>
+    </Row>
+{:else}
+    <Row>
+        <Column>
+            <WalterComboBoxWohnung required {fetchImpl} bind:value={wohnung} />
+        </Column>
+    </Row>
+    <Row>
+        <Column>
+            <WalterNumberInput
+                required
+                label="Betrag (€)"
+                bind:value={ea.betrag}
+            />
+        </Column>
+        <Column>
+            <WalterTextInput
+                labelText="Beschreibung"
+                bind:value={ea.beschreibung}
+            />
+        </Column>
+    </Row>
+{/if}

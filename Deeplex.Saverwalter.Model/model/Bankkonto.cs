@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,26 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations;
-
 namespace Deeplex.Saverwalter.Model
 {
-    public class Konto
+    public class Bankkonto
     {
-        public int KontoId { get; set; }
-        [Required]
-        public string Bank { get; set; }
-        [Required]
-        public string Iban { get; set; }
-        [Required]
-        public virtual Kontakt Besitzer { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        public int BankkontoId { get; set; }
+        public string? Bank { get; set; }
+        public string? Iban { get; set; }
+        public virtual List<Kontakt> Besitzer { get; set; } = [];
+        public virtual Buchungskonto BuchungsKonto { get; set; } = null!;
         public string? Notiz { get; set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Konto(string bank, string iban)
-        {
-            Bank = bank;
-            Iban = iban;
-        }
     }
 }

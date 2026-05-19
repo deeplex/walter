@@ -25,10 +25,12 @@ export {
     WalterMietzahlungListEntry,
     WalterMietzahlungApiURL,
     type WalterMietzahlungInput,
-    type WalterForderungsstatusEntry
+    type WalterForderungsstatusEntry,
+    type WalterOffenerPostenStatus
 } from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterMiettabelleEntry } from './WalterMiettabelle';
+export { WalterBankkontoEntry } from './WalterBankkonto';
 export { WalterKontaktEntry } from './WalterKontakt';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';

@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BankkontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
@@ -87,10 +88,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(e => e.Wohnung)
                     .Distinct()
                     .Select(async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth))));
-                entry.Transaktionen = Ctx.Transaktionen
+                var myBankkontoIds = Ctx.Bankkontos
+                    .Where(b => b.Besitzer.Any(k => k.KontaktId == entity.KontaktId))
+                    .Select(b => b.BankkontoId)
+                    .ToList();
+
+                entry.Bankkontos = Ctx.Bankkontos
+                    .Where(b => myBankkontoIds.Contains(b.BankkontoId))
+                    .AsEnumerable()
+                    .Select(b => new BankkontoEntryBase(b, new Permissions { Read = true, Update = true, Remove = true }))
+                    .ToList();
+
+                entry.Transaktionen = myBankkontoIds.Count == 0 ? [] : Ctx.Transaktionen
                     .Where(t =>
-                        t.Zahler.KontaktId == entity.KontaktId ||
-                        t.Zahlungsempfaenger.KontaktId == entity.KontaktId)
+                        (t.Zahler != null && myBankkontoIds.Contains(t.Zahler.BankkontoId)) ||
+                        (t.Zahlungsempfaenger != null && myBankkontoIds.Contains(t.Zahlungsempfaenger.BankkontoId)))
+                    .Include(t => t.Zahler)
+                    .Include(t => t.Zahlungsempfaenger)
+                    .AsEnumerable()
                     .Select(e => new TransaktionEntryBase(e, new(true)))
                     .ToList();
 

@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterGrid,
+        WalterBankkontos,
         WalterKontakte,
         WalterWohnungen,
         WalterVertraege,
@@ -82,6 +83,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Verträge"
             rows={data.entry.vertraege}
+        />
+
+        <WalterBankkontos
+            fetchImpl={data.fetchImpl}
+            title="Bankkonten"
+            rows={data.entry.bankkontos}
         />
 
         <WalterTransaktionen

@@ -228,11 +228,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var vertraege = FillVertraege(ctx, wohnungen, random);
 
             FillVertragversionen(ctx, vertraege, random);
-            FillMieterSet(ctx, vertraege, random);
+            var mieter = FillMieterSet(ctx, vertraege, random);
             FillMieten(ctx, vertraege, random);
             FillErhaltungsaufwendungen(ctx, wohnungen, random);
             FillMietminderungen(ctx, vertraege, random);
-            FillKontos(ctx, random);
+            FillBankkontos(ctx, eigentuemer, mieter, random);
             FillGaragen(ctx, wohnungen, vertraege, random);
 
             var umlagen = FillUmlagen(ctx, adressen, random);
@@ -715,33 +715,31 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mietminderungen;
         }
 
-        private static List<Konto> FillKontos(SaverwalterContext ctx, Random random)
+        private static void FillBankkontos(
+            SaverwalterContext ctx,
+            List<Kontakt> eigentuemer,
+            List<Kontakt> mieter,
+            Random random)
         {
-            Console.Write("Füge Kontos hinzu: ");
+            Console.Write("Füge Bankkontos hinzu: ");
 
-            var kontos = new List<Konto>();
+            var bankkontos = new List<Bankkonto>();
             var banken = new[] { "Sparkasse", "Deutsche Bank", "Commerzbank", "Volksbank", "DKB", "ING" };
 
-            foreach (var kontakt in ctx.Kontakte)
+            foreach (var kontakt in eigentuemer.Concat(mieter))
             {
-                var createAccount = kontakt.Rechtsform != Rechtsform.natuerlich || random.NextDouble() < 0.6;
-                if (!createAccount)
+                var idx = bankkontos.Count;
+                bankkontos.Add(new Bankkonto
                 {
-                    continue;
-                }
-
-                kontos.Add(new Konto(
-                    banken[random.Next(banken.Length)],
-                    CreateGermanIban(random))
-                {
-                    Besitzer = kontakt,
-                    Notiz = "Dev-Testkonto"
+                    Bank = banken[random.Next(banken.Length)],
+                    Iban = CreateGermanIban(random),
+                    Besitzer = [kontakt],
+                    BuchungsKonto = new Buchungskonto($"BANK{idx:D5}", $"Bankkonto {kontakt.Bezeichnung}", BuchungskontoTyp.Aktiv),
                 });
             }
 
-            ctx.Kontos.AddRange(kontos);
-            Console.WriteLine($"{kontos.Count} Kontos hinzugefügt");
-            return kontos;
+            ctx.Bankkontos.AddRange(bankkontos);
+            Console.WriteLine($"{bankkontos.Count} Bankkontos hinzugefügt");
         }
 
         private static List<Garage> FillGaragen(

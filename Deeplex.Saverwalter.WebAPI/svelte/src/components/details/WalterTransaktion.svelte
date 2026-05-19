@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterTransaktionPositionMiete from './WalterTransaktionPositionMiete.svelte';
     import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
     import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
+    import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
@@ -84,11 +85,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function addBK() {
-        const currentYear = new Date().getFullYear();
         const available = Math.max(0, offenerBetrag);
         buchung.betriebskostenEingaenge = [
             ...buchung.betriebskostenEingaenge,
-            { betrag: available, betreffendesJahr: currentYear - 1 }
+            { betrag: available, betreffendesJahr: new Date().getFullYear() - 1 }
         ];
     }
 
@@ -113,6 +113,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         buchung.erhaltungsaufwendungen = buchung.erhaltungsaufwendungen.filter(
             (_, idx) => idx !== i
         );
+    }
+
+    function addSonstiges() {
+        const available = Math.max(0, offenerBetrag);
+        buchung.sonstige = [...buchung.sonstige, { betrag: available }];
+    }
+
+    function removeSonstiges(i: number) {
+        buchung.sonstige = buchung.sonstige.filter((_, idx) => idx !== i);
     }
 </script>
 
@@ -173,6 +182,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktionPositionBK
             {fetchImpl}
             bind:bk={buchung.betriebskostenEingaenge[i]}
+            availableBetrag={transaktionEntry.betrag ?? 0}
+            {isSinglePosition}
         />
     </Tile>
 {/each}
@@ -195,6 +206,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktionPositionEA
             {fetchImpl}
             bind:ea={buchung.erhaltungsaufwendungen[i]}
+            availableBetrag={transaktionEntry.betrag ?? 0}
+            {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- Sonstiges -->
+{#each buchung.sonstige as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Sonstiges</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeSonstiges(i)}
+            />
+        </div>
+        <WalterTransaktionPositionSonstiges
+            bind:sonstiger={buchung.sonstige[i]}
+            availableBetrag={transaktionEntry.betrag ?? 0}
+            {isSinglePosition}
         />
     </Tile>
 {/each}
@@ -211,6 +247,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </Button>
             <Button kind="tertiary" size="small" icon={Add} on:click={addEA}>
                 Erhaltungsaufwendung
+            </Button>
+            <Button kind="tertiary" size="small" icon={Add} on:click={addSonstiges}>
+                Sonstiges
             </Button>
         </div>
     </Column>

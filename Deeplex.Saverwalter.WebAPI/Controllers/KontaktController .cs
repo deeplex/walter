@@ -17,6 +17,7 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BankkontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
@@ -87,6 +88,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
             public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
+            public IEnumerable<BankkontoEntryBase> Bankkontos { get; set; } = [];
 
             public KontaktEntry() : base() { }
             public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)

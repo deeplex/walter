@@ -188,6 +188,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);
             container.Register<MieteDbService>(Lifestyle.Scoped);
             container.Register<MietminderungDbService>(Lifestyle.Scoped);
+            container.Register<BankkontoDbService>(Lifestyle.Scoped);
             container.Register<KontaktDbService>(Lifestyle.Scoped);
             container.Register<TransaktionDbService>(Lifestyle.Scoped);
             container.Register<UmlageDbService>(Lifestyle.Scoped);

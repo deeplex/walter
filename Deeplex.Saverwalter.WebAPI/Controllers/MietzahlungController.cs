@@ -27,6 +27,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/mietzahlungen")]
     public class MietzahlungController(SaverwalterContext ctx, IAuthorizationService auth) : ControllerBase
     {
+        public class OffenerPostenStatus
+        {
+            public decimal Rechnungsbetrag { get; set; }
+            public decimal SchonGezahlt { get; set; }
+            public decimal VerbleibenderBetrag { get; set; }
+        }
+
         /// <summary>Eintrag in der Zahlungsliste eines Vertrags.</summary>
         public class MietzahlungListEntry
         {
@@ -93,6 +100,60 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             });
 
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Offener Posten einer Betriebskostenrechnung — Rechnungsbetrag minus bereits gebuchte Zahlungen.
+        /// </summary>
+        [HttpGet("bk/{betriebskostenrechnungId}/offenerposten")]
+        public async Task<ActionResult<OffenerPostenStatus>> GetBkOffenerPosten(int betriebskostenrechnungId)
+        {
+            var rechnung = await ctx.Betriebskostenrechnungen
+                .Include(b => b.Umlage)
+                .Include(b => b.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .FirstOrDefaultAsync(b => b.BetriebskostenrechnungId == betriebskostenrechnungId);
+
+            if (rechnung is null) return NotFound();
+
+            var authRx = await auth.AuthorizeAsync(User, rechnung.Umlage, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var forderungsHabenZeile = rechnung.Buchungssatz?.Buchungszeilen
+                .FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+
+            var schonGezahlt = forderungsHabenZeile?.AlsHabenZeile
+                .Sum(a => a.SollZeile.Betrag) ?? 0m;
+
+            return Ok(new OffenerPostenStatus
+            {
+                Rechnungsbetrag = rechnung.Betrag,
+                SchonGezahlt = schonGezahlt,
+                VerbleibenderBetrag = rechnung.Betrag - schonGezahlt
+            });
+        }
+
+        /// <summary>
+        /// Info zu einer Erhaltungsaufwendung — Rechnungsbetrag für die UI-Vorauswahl.
+        /// </summary>
+        [HttpGet("ea/{erhaltungsaufwendungId}/info")]
+        public async Task<ActionResult<OffenerPostenStatus>> GetEaInfo(int erhaltungsaufwendungId)
+        {
+            var ea = await ctx.Erhaltungsaufwendungen
+                .Include(e => e.Wohnung)
+                .FirstOrDefaultAsync(e => e.ErhaltungsaufwendungId == erhaltungsaufwendungId);
+
+            if (ea is null) return NotFound();
+
+            var authRx = await auth.AuthorizeAsync(User, ea.Wohnung, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            return Ok(new OffenerPostenStatus
+            {
+                Rechnungsbetrag = ea.Betrag,
+                SchonGezahlt = 0,
+                VerbleibenderBetrag = ea.Betrag
+            });
         }
 
         /// <summary>

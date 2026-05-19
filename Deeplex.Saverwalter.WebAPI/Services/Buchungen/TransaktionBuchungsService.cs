@@ -48,6 +48,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         public class BetriebskostenEingangInput
         {
+            public int? ExistingBetriebskostenrechnungId { get; set; }
             public int UmlageId { get; set; }
             public int BetreffendesJahr { get; set; }
             public DateOnly RechnungsDatum { get; set; }
@@ -57,16 +58,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         public class ErhaltungsaufwendungsInput
         {
+            public int? ExistingErhaltungsaufwendungId { get; set; }
             public int WohnungId { get; set; }
-            public int HabenKontoId { get; set; }
             public decimal Betrag { get; set; }
             public string? Beschreibung { get; set; }
         }
 
         public class SonstigerBuchungssatzInput
         {
-            public int SollKontoId { get; set; }
-            public int HabenKontoId { get; set; }
             public decimal Betrag { get; set; }
             public string? Beschreibung { get; set; }
         }
@@ -111,12 +110,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             };
 
             if (input.ZahlerId.HasValue)
-                transaktion.Zahler = await _ctx.Kontakte.FindAsync(input.ZahlerId.Value)
+                transaktion.Zahler = await _ctx.Bankkontos
+                    .Include(b => b.BuchungsKonto)
+                    .FirstOrDefaultAsync(b => b.BankkontoId == input.ZahlerId.Value)
                     ?? throw new ArgumentException($"Zahler {input.ZahlerId} nicht gefunden.");
 
             if (input.ZahlungsempfaengerId.HasValue)
-                transaktion.Zahlungsempfaenger = await _ctx.Kontakte.FindAsync(input.ZahlungsempfaengerId.Value)
+                transaktion.Zahlungsempfaenger = await _ctx.Bankkontos
+                    .Include(b => b.BuchungsKonto)
+                    .FirstOrDefaultAsync(b => b.BankkontoId == input.ZahlungsempfaengerId.Value)
                     ?? throw new ArgumentException($"Zahlungsempfänger {input.ZahlungsempfaengerId} nicht gefunden.");
+
+            if (input.Erhaltungsaufwendungen.Count > 0 && transaktion.Zahler is null)
+                throw new ArgumentException("Erhaltungsaufwendungen erfordern ein Zahlerkonto.");
+
+            if (input.Sonstige.Count > 0 && (transaktion.Zahler is null || transaktion.Zahlungsempfaenger is null))
+                throw new ArgumentException("Sonstige Buchungssätze erfordern Zahler und Zahlungsempfänger.");
 
             _ctx.Transaktionen.Add(transaktion);
 
@@ -133,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             foreach (var ea in input.Erhaltungsaufwendungen)
             {
-                var satz = await ErstelleErhaltungsaufwendungAsync(ea, input.Zahlungsdatum);
+                var satz = await ErstelleErhaltungsaufwendungAsync(ea, input.Zahlungsdatum, transaktion);
                 satz.Notiz = input.Notiz;
                 satz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(satz);
@@ -141,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             foreach (var sonstiger in input.Sonstige)
             {
-                var satz = await ErstelleSonstigerBuchungssatzAsync(sonstiger, input.Zahlungsdatum);
+                var satz = ErstelleSonstigerBuchungssatz(sonstiger, input.Zahlungsdatum, transaktion);
                 satz.Notiz = input.Notiz;
                 satz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(satz);
@@ -211,6 +220,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private async Task<Buchungssatz> ErstelleBetriebskostenEingangAsync(
             BetriebskostenEingangInput bk, DateOnly zahlungsdatum)
         {
+            if (bk.ExistingBetriebskostenrechnungId.HasValue)
+            {
+                var rechnung = await _ctx.Betriebskostenrechnungen
+                    .Include(b => b.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .Include(b => b.Umlage).ThenInclude(u => u.NkVerrechnungsKonto)
+                    .Include(b => b.Umlage).ThenInclude(u => u.ZahlungsKonto)
+                    .Include(b => b.Umlage).ThenInclude(u => u.Typ)
+                    .FirstOrDefaultAsync(b => b.BetriebskostenrechnungId == bk.ExistingBetriebskostenrechnungId.Value)
+                    ?? throw new ArgumentException($"Betriebskostenrechnung {bk.ExistingBetriebskostenrechnungId} nicht gefunden.");
+
+                var zahlungsSatz = new Buchungssatz(
+                    zahlungsdatum,
+                    $"Zahlung Betriebskosten {rechnung.Umlage.Typ.Bezeichnung} {rechnung.BetreffendesJahr}");
+                AddZeile(zahlungsSatz, SollHaben.Soll, bk.Betrag, rechnung.Umlage.NkVerrechnungsKonto);
+                AddZeile(zahlungsSatz, SollHaben.Haben, bk.Betrag, rechnung.Umlage.ZahlungsKonto);
+
+                var forderungsHabenZeile = rechnung.Buchungssatz.Buchungszeilen
+                    .First(z => z.SollHaben == SollHaben.Haben);
+                var zahlungsSollZeile = zahlungsSatz.Buchungszeilen
+                    .First(z => z.SollHaben == SollHaben.Soll);
+                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                {
+                    SollZeile = zahlungsSollZeile,
+                    HabenZeile = forderungsHabenZeile
+                });
+
+                return zahlungsSatz;
+            }
+
             var umlage = await _ctx.Umlagen
                 .Include(u => u.NkVerrechnungsKonto)
                 .Include(u => u.ZahlungsKonto)
@@ -224,32 +262,48 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(forderungsSatz, SollHaben.Haben, bk.Betrag, umlage.NkVerrechnungsKonto);
             _ctx.Buchungssaetze.Add(forderungsSatz);
 
-            var rechnung = new Betriebskostenrechnung(bk.Betrag, bk.RechnungsDatum, bk.BetreffendesJahr)
+            var neueRechnung = new Betriebskostenrechnung(bk.Betrag, bk.RechnungsDatum, bk.BetreffendesJahr)
             {
                 Umlage = umlage,
                 Buchungssatz = forderungsSatz,
                 Notiz = bk.Notiz
             };
-            _ctx.Betriebskostenrechnungen.Add(rechnung);
+            _ctx.Betriebskostenrechnungen.Add(neueRechnung);
 
-            var zahlungsSatz = new Buchungssatz(
+            var neuerZahlungsSatz = new Buchungssatz(
                 zahlungsdatum,
                 $"Zahlung Betriebskosten {umlage.Typ.Bezeichnung} {bk.BetreffendesJahr}");
-            AddZeile(zahlungsSatz, SollHaben.Soll, bk.Betrag, umlage.NkVerrechnungsKonto);
-            AddZeile(zahlungsSatz, SollHaben.Haben, bk.Betrag, umlage.ZahlungsKonto);
-            return zahlungsSatz;
+            AddZeile(neuerZahlungsSatz, SollHaben.Soll, bk.Betrag, umlage.NkVerrechnungsKonto);
+            AddZeile(neuerZahlungsSatz, SollHaben.Haben, bk.Betrag, umlage.ZahlungsKonto);
+
+            _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = neuerZahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
+                HabenZeile = forderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
+            });
+
+            return neuerZahlungsSatz;
         }
 
         private async Task<Buchungssatz> ErstelleErhaltungsaufwendungAsync(
-            ErhaltungsaufwendungsInput ea, DateOnly zahlungsdatum)
+            ErhaltungsaufwendungsInput ea, DateOnly zahlungsdatum, Transaktion transaktion)
         {
-            var wohnung = await _ctx.Wohnungen
-                .Include(w => w.AufwandsKonto)
-                .FirstOrDefaultAsync(w => w.WohnungId == ea.WohnungId)
-                ?? throw new ArgumentException($"Wohnung {ea.WohnungId} nicht gefunden.");
-
-            var habenKonto = await _ctx.Buchungskonten.FindAsync(ea.HabenKontoId)
-                ?? throw new ArgumentException($"Buchungskonto {ea.HabenKontoId} nicht gefunden.");
+            Wohnung wohnung;
+            if (ea.ExistingErhaltungsaufwendungId.HasValue)
+            {
+                var existingEa = await _ctx.Erhaltungsaufwendungen
+                    .Include(e => e.Wohnung).ThenInclude(w => w.AufwandsKonto)
+                    .FirstOrDefaultAsync(e => e.ErhaltungsaufwendungId == ea.ExistingErhaltungsaufwendungId.Value)
+                    ?? throw new ArgumentException($"Erhaltungsaufwendung {ea.ExistingErhaltungsaufwendungId} nicht gefunden.");
+                wohnung = existingEa.Wohnung;
+            }
+            else
+            {
+                wohnung = await _ctx.Wohnungen
+                    .Include(w => w.AufwandsKonto)
+                    .FirstOrDefaultAsync(w => w.WohnungId == ea.WohnungId)
+                    ?? throw new ArgumentException($"Wohnung {ea.WohnungId} nicht gefunden.");
+            }
 
             var beschreibung = ea.Beschreibung is { Length: > 0 } b
                 ? $"Erhaltungsaufwendung {b}"
@@ -257,22 +311,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             var satz = new Buchungssatz(zahlungsdatum, beschreibung);
             AddZeile(satz, SollHaben.Soll, ea.Betrag, wohnung.AufwandsKonto);
-            AddZeile(satz, SollHaben.Haben, ea.Betrag, habenKonto);
+            AddZeile(satz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
             return satz;
         }
 
-        private async Task<Buchungssatz> ErstelleSonstigerBuchungssatzAsync(
-            SonstigerBuchungssatzInput sonstiger, DateOnly zahlungsdatum)
+        private static Buchungssatz ErstelleSonstigerBuchungssatz(
+            SonstigerBuchungssatzInput sonstiger, DateOnly zahlungsdatum, Transaktion transaktion)
         {
-            var sollKonto = await _ctx.Buchungskonten.FindAsync(sonstiger.SollKontoId)
-                ?? throw new ArgumentException($"Buchungskonto {sonstiger.SollKontoId} nicht gefunden.");
-
-            var habenKonto = await _ctx.Buchungskonten.FindAsync(sonstiger.HabenKontoId)
-                ?? throw new ArgumentException($"Buchungskonto {sonstiger.HabenKontoId} nicht gefunden.");
-
             var satz = new Buchungssatz(zahlungsdatum, sonstiger.Beschreibung ?? "Buchungssatz");
-            AddZeile(satz, SollHaben.Soll, sonstiger.Betrag, sollKonto);
-            AddZeile(satz, SollHaben.Haben, sonstiger.Betrag, habenKonto);
+            AddZeile(satz, SollHaben.Soll, sonstiger.Betrag, transaktion.Zahlungsempfaenger!.BuchungsKonto);
+            AddZeile(satz, SollHaben.Haben, sonstiger.Betrag, transaktion.Zahler!.BuchungsKonto);
             return satz;
         }
 

@@ -60,3 +60,9 @@ export interface WalterForderungsstatusEntry {
     grundmiete: number;
     grundmieteSeit?: string;
 }
+
+export interface WalterOffenerPostenStatus {
+    rechnungsbetrag: number;
+    schonGezahlt: number;
+    verbleibenderBetrag: number;
+}

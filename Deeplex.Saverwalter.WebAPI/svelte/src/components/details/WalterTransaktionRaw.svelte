@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
-        WalterComboBoxKontakt,
+        WalterComboBoxBankkonto,
         WalterTextArea,
         WalterNumberInput,
         WalterDatePicker
@@ -34,14 +34,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <Row>
-    <WalterComboBoxKontakt
+    <WalterComboBoxBankkonto
         {fetchImpl}
         {readonly}
         bind:value={entry.zahler}
         title="Zahler"
     />
 
-    <WalterComboBoxKontakt
+    <WalterComboBoxBankkonto
         {fetchImpl}
         {readonly}
         bind:value={entry.zahlungsempfaenger}

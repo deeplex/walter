@@ -28,17 +28,23 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
 
+            var bankkontoByKontaktId = (await ctx.Bankkontos
+                .Include(b => b.Besitzer)
+                .ToListAsync())
+                .Where(b => b.Besitzer.Count > 0)
+                .ToDictionary(b => b.Besitzer[0].KontaktId);
+
             Console.WriteLine("Buche Mietsollstellungen...");
             var sollZeilen = await BuecheMietsollAsync(ctx, today);
 
             Console.WriteLine("Buche Mietzahlungen (aus legacy Miete-Tabelle)...");
-            await BuecheMietzahlungenAsync(ctx, sollZeilen);
+            await BuecheMietzahlungenAsync(ctx, sollZeilen, bankkontoByKontaktId);
 
             Console.WriteLine("Buche BK-Rechnungseingänge...");
             await BuecheBkEingangAsync(ctx);
 
             Console.WriteLine("Buche BK-Zahlungen...");
-            await BuecheBkZahlungAsync(ctx);
+            await BuecheBkZahlungAsync(ctx, bankkontoByKontaktId);
 
             Console.WriteLine("Speichere...");
             await ctx.SaveChangesAsync();
@@ -84,8 +90,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Zahlungsdatum = monat,
                         Betrag = version.Grundmiete,
                         Verwendungszweck = satz.Beschreibung,
-                        Zahler = vertrag.Mieter.FirstOrDefault(),
-                        Zahlungsempfaenger = vertrag.Wohnung.Besitzer,
                     };
                     satz.Transaktion = transaktion;
 
@@ -118,7 +122,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 #pragma warning disable CS0618
         private static async Task BuecheMietzahlungenAsync(
             SaverwalterContext ctx,
-            Dictionary<(Vertrag, int, int), Buchungszeile> sollZeilen)
+            Dictionary<(Vertrag, int, int), Buchungszeile> sollZeilen,
+            Dictionary<int, Bankkonto> bankkontoByKontaktId)
         {
             var vertraege = await ctx.Vertraege
                 .Include(v => v.Versionen)
@@ -134,6 +139,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             foreach (var vertrag in vertraege)
             {
+                var zahlerBankkonto = vertrag.Mieter
+                    .Select(m => bankkontoByKontaktId.GetValueOrDefault(m.KontaktId))
+                    .FirstOrDefault(b => b != null);
+                var empfaengerBankkonto = vertrag.Wohnung.Besitzer is { } besitzer
+                    ? bankkontoByKontaktId.GetValueOrDefault(besitzer.KontaktId)
+                    : null;
+
                 foreach (var miete in vertrag.Mieten)
                 {
                     var betrag = (decimal)miete.Betrag;
@@ -153,8 +165,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Zahlungsdatum = miete.Zahlungsdatum,
                         Betrag = betrag,
                         Verwendungszweck = satz.Beschreibung,
-                        Zahler = vertrag.Mieter.FirstOrDefault(),
-                        Zahlungsempfaenger = vertrag.Wohnung.Besitzer,
+                        Zahler = zahlerBankkonto,
+                        Zahlungsempfaenger = empfaengerBankkonto,
                     };
                     satz.Transaktion = transaktion;
 
@@ -241,17 +253,24 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         ///   Soll:  Umlage.NkVerrechnungsKonto  (Kosten-Pool wird abgebaut)
         ///   Haben: Umlage.ZahlungsKonto         (Geld geht aus)
         /// </summary>
-        private static async Task BuecheBkZahlungAsync(SaverwalterContext ctx)
+        private static async Task BuecheBkZahlungAsync(
+            SaverwalterContext ctx,
+            Dictionary<int, Bankkonto> bankkontoByKontaktId)
         {
             var umlagen = await ctx.Umlagen
                 .Include(u => u.NkVerrechnungsKonto)
                 .Include(u => u.ZahlungsKonto)
                 .Include(u => u.Typ)
                 .Include(u => u.Betriebskostenrechnungen)
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Besitzer)
                 .ToListAsync();
 
             foreach (var umlage in umlagen)
             {
+                var zahlerBankkonto = umlage.Wohnungen
+                    .Select(w => w.Besitzer != null ? bankkontoByKontaktId.GetValueOrDefault(w.Besitzer.KontaktId) : null)
+                    .FirstOrDefault(b => b != null);
+
                 foreach (var rechnung in umlage.Betriebskostenrechnungen)
                 {
                     var satz = new Buchungssatz(
@@ -262,6 +281,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Zahlungsdatum = rechnung.Datum,
                         Betrag = rechnung.Betrag,
                         Verwendungszweck = satz.Beschreibung,
+                        Zahler = zahlerBankkonto,
                     };
                     satz.Transaktion = transaktion;
 

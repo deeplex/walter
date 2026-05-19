@@ -17,54 +17,50 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataTable, WalterTransaktion } from '$walter/components';
-    import { WalterTransaktionEntry } from '$walter/lib';
+    import { WalterDataTable } from '$walter/components';
+    import { WalterBankkontoEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+    import WalterBankkonto from '../details/WalterBankkonto.svelte';
 
-    export let fetchImpl: typeof fetch;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterTransaktionEntry> | undefined = {};
-    export let rows: WalterTransaktionEntry[] | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let rows: WalterBankkontoEntry[] | undefined = undefined;
+    export let entry: Partial<WalterBankkontoEntry> = {
+        permissions: { read: true, update: true, remove: true }
+    };
 
     const headers = [
-        { key: 'zahler.text', value: 'Zahler' },
-        { key: 'betrag', value: 'Betrag' },
-        { key: 'zahlungsempfaenger.text', value: 'Zahlungsempfänger' },
-        { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
-        { key: 'verwendungszweck', value: 'Memo' }
+        { key: 'bezeichnung', value: 'Bezeichnung', default: '' },
+        { key: 'iban', value: 'IBAN' },
+        { key: 'bank', value: 'Bank' }
     ];
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.transaktion(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
+        navigation.bankkonto(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/bankkontos/${row.id}`;
 
     const fetchData =
         rows === undefined
-            ? (p: Parameters<typeof WalterTransaktionEntry.GetPaged>[1]) =>
-                  WalterTransaktionEntry.GetPaged<WalterTransaktionEntry>(
-                      fetchImpl,
-                      p
-                  )
+            ? (p: Parameters<typeof WalterBankkontoEntry.GetPaged>[1]) =>
+                  WalterBankkontoEntry.GetPaged<WalterBankkontoEntry>(fetchImpl, p)
             : undefined;
 </script>
 
 <WalterDataTable
-    addUrl={WalterTransaktionEntry.ApiURL}
-    {on_click_row}
-    {rowHref}
+    addUrl={WalterBankkontoEntry.ApiURL}
     addEntry={entry}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
+    {on_click_row}
+    {rowHref}
     {rows}
     {fetchData}
-    initialSortBy="zahlungsdatum"
-    initialSortDir="desc"
+    initialSortBy="bezeichnung"
+    initialSortDir="asc"
     {headers}
     {fullHeight}
 >
-    {#if entry}
-        <WalterTransaktion {fetchImpl} />
-    {/if}
+    <WalterBankkonto {fetchImpl} {entry} />
 </WalterDataTable>

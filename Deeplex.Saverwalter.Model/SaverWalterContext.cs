@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<HKVO> HKVO { get; set; } = null!;
-        public DbSet<Konto> Kontos { get; set; } = null!;
+        public DbSet<Bankkonto> Bankkontos { get; set; } = null!;
 #pragma warning disable CS0618
         [Obsolete("Mieten ist durch das Buchungssatz/Sollstellung-Modell abgelöst. Tabelle bleibt für Migration erhalten.")]
         public DbSet<Miete> Mieten { get; set; } = null!;
@@ -110,6 +110,25 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey("HabenZeileId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
+
+            modelBuilder.Entity<Bankkonto>()
+                .HasOne(b => b.BuchungsKonto)
+                .WithMany()
+                .HasForeignKey("BuchungsKontoId")
+                .IsRequired();
+            modelBuilder.Entity<Bankkonto>()
+                .HasMany(b => b.Besitzer)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "BankkontoKontakt",
+                    r => r.HasOne<Kontakt>().WithMany().HasForeignKey("KontaktId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<Bankkonto>().WithMany().HasForeignKey("BankkontoId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("BankkontoId", "KontaktId").HasName("pk_bankkonto_besitzer");
+                        j.HasIndex("KontaktId").HasDatabaseName("ix_bankkonto_besitzer_kontakt_id");
+                        j.ToTable("bankkonto_besitzer");
+                    });
 
             modelBuilder.Entity<Buchungssatz>()
                 .HasOne(b => b.Transaktion)
@@ -196,8 +215,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<HKVO>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Kontakt>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Kontakt>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Konto>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Konto>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Bankkonto>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Bankkonto>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 #pragma warning disable CS0618
             modelBuilder.Entity<Miete>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Miete>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");

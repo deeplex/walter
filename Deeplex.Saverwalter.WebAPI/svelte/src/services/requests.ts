@@ -153,6 +153,11 @@ export const walter_selection = {
         return walter_get('/api/selection/buchungskonten', fetchImpl) as Promise<
             WalterSelectionEntry[]
         >;
+    },
+    bankkontos(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/bankkontos', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
     }
 };
 

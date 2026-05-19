@@ -30,16 +30,14 @@ export { default as WalterPreviewError } from './preview/WalterPreviewError.svel
 
 export { default as WalterAccount } from './details/WalterAccount.svelte';
 export { default as WalterAdresse } from './details/WalterAdresse.svelte';
+export { default as WalterBankkonto } from './details/WalterBankkonto.svelte';
 export { default as WalterKontakt } from './details/WalterKontakt.svelte';
 export { default as WalterMiete } from './details/WalterMiete.svelte';
 export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
 export { default as WalterTransaktion } from './details/WalterTransaktion.svelte';
-export { default as WalterBuchung } from './details/WalterBuchung.svelte';
-export { default as WalterBuchungPositionMiete } from './details/WalterBuchungPositionMiete.svelte';
-export { default as WalterBuchungPositionBK } from './details/WalterBuchungPositionBK.svelte';
-export { default as WalterBuchungPositionEA } from './details/WalterBuchungPositionEA.svelte';
+export { default as WalterTransaktionRaw } from './details/WalterTransaktionRaw.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
 export { default as WalterUmlagetyp } from './details/WalterUmlagetyp.svelte';
 export { default as WalterVertrag } from './details/WalterVertrag.svelte';
@@ -52,6 +50,7 @@ export { default as WalterMiettabelleWrapper } from './details/WalterMiettabelle
 
 export { default as WalterError } from './elements/WalterError.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
+export { default as WalterComboBoxBankkonto } from './elements/WalterComboBoxBankkonto.svelte';
 export { default as WalterComboBoxKontakt } from './elements/WalterComboBoxKontakt.svelte';
 export { default as WalterComboBoxWohnung } from './elements/WalterComboBoxWohnung.svelte';
 export { default as WalterComboBoxUmlagetyp } from './elements/WalterComboBoxUmlagetyp.svelte';
@@ -81,6 +80,7 @@ export { default as WalterNumberInput } from './elements/WalterNumberInput.svelt
 
 export { default as WalterAccounts } from './lists/WalterAccounts.svelte';
 export { default as WalterAdressen } from './lists/WalterAdressen.svelte';
+export { default as WalterBankkontos } from './lists/WalterBankkontos.svelte';
 export { default as WalterUmlagen } from './lists/WalterUmlagen.svelte';
 export { default as WalterUmlagetypen } from './lists/WalterUmlagetypen.svelte';
 export { default as WalterWohnungen } from './lists/WalterWohnungen.svelte';

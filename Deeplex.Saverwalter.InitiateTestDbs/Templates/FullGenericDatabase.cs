@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             // Still empty
             var mietminderungen = FillMietminderungen(ctx);
-            var kontos = FillKontos(ctx);
+            var bankkontos = FillBankkontos(ctx);
             var garagen = FillGaragen(ctx);
 
             // TODO
@@ -335,18 +335,18 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return garagen;
         }
 
-        static List<Konto> FillKontos(SaverwalterContext ctx)
+        static List<Bankkonto> FillBankkontos(SaverwalterContext ctx)
         {
-            Console.Write("Füge Kontos hinzu: ");
+            Console.Write("Füge Bankkontos hinzu: ");
 
-            var kontos = new List<Konto> { };
+            var bankkontos = new List<Bankkonto>();
 
             // TODO still empty...
 
-            ctx.Kontos.AddRange(kontos);
-            Console.WriteLine($"{kontos.Count} Kontos hinzugefügt");
+            ctx.Bankkontos.AddRange(bankkontos);
+            Console.WriteLine($"{bankkontos.Count} Bankkontos hinzugefügt");
 
-            return kontos;
+            return bankkontos;
         }
 
         static List<Mietminderung> FillMietminderungen(SaverwalterContext ctx)
