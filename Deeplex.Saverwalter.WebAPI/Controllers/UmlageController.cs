@@ -133,7 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<UmlageEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<UmlageEntryBase>> Get([FromQuery] PagedQuery query) => DbService.GetList(User!, query);
 
         [HttpPost]
         public Task<ActionResult<UmlageEntry>> Post([FromBody] UmlageEntry entry) => DbService.Post(User!, entry);

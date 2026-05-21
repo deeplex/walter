@@ -166,25 +166,41 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         {
             var vertrag = await _ctx.Vertraege
                 .Include(v => v.Versionen)
+                .Include(v => v.Mieter)
                 .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
                 .Include(v => v.NkBuchungskonto)
                 .Include(v => v.ZahlungsKonto)
                 .Include(v => v.Wohnung).ThenInclude(w => w.MietErtragskonto)
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .FirstOrDefaultAsync(v => v.VertragId == miete.VertragId)
                 ?? throw new ArgumentException($"Vertrag {miete.VertragId} nicht gefunden.");
 
             var monat = new DateOnly(miete.BetreffenderMonat.Year, miete.BetreffenderMonat.Month, 1);
+
+            if (string.IsNullOrWhiteSpace(transaktion.Verwendungszweck))
+            {
+                var mieterNamen = vertrag.Mieter.Count > 0
+                    ? string.Join(", ", vertrag.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+                var wohnungInfo = vertrag.Wohnung.Adresse?.Anschrift is { } a
+                    ? $"{a} – {vertrag.Wohnung.Bezeichnung}"
+                    : vertrag.Wohnung.Bezeichnung;
+                transaktion.Verwendungszweck = $"Miete {monat:MM/yyyy} | {mieterNamen} | {wohnungInfo}";
+            }
 
             if (miete.Kaltmiete > 0)
             {
                 var version = vertrag.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn)
                     ?? throw new InvalidOperationException($"Keine VertragVersion für {monat:MM/yyyy}.");
 
-                if (miete.Kaltmiete > version.Grundmiete)
-                    throw new InvalidOperationException(
-                        $"Kaltmiete ({miete.Kaltmiete:C}) übersteigt Grundmiete ({version.Grundmiete:C}).");
-
                 var sollZeile = FindeOderErstelleSollstellung(vertrag, monat, version);
+
+                var schonGezahlt = sollZeile.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
+                var verbleibend = sollZeile.Betrag - schonGezahlt;
+                if (miete.Kaltmiete > verbleibend + 0.005m)
+                    throw new InvalidOperationException(
+                        $"Kaltmiete ({miete.Kaltmiete:C}) übersteigt verbleibende Forderung ({verbleibend:C}).");
 
                 var kaltmieteSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung Kaltmiete {monat:MM/yyyy}");
                 AddZeile(kaltmieteSatz, SollHaben.Soll, miete.Kaltmiete, vertrag.ZahlungsKonto);

@@ -36,7 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'button', value: 'Stand hinzufügen' }
     ];
 
-    export let rows: WalterZaehlerEntry[];
+    export let rows: WalterZaehlerEntry[] | undefined = undefined;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerEntry> | undefined = {};
@@ -56,15 +56,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         open = true;
     }
-    const rowsAdd = rows.map((row) => ({
-        ...row,
-        button:
-            row.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum)
-                ? 'disabled'
-                : (e: CustomEvent) => add(e, row)
-    }));
+
+    $: transformRow = (row: DataTableRow) => {
+        const zaehler = row as unknown as WalterZaehlerEntry;
+        return {
+            ...zaehler,
+            button:
+                zaehler.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum)
+                    ? 'disabled'
+                    : (e: CustomEvent) => add(e, zaehler)
+        };
+    };
+
+    $: rowsAdd = rows?.map(transformRow);
 
     let open = false;
+
+    const fetchData =
+        rows === undefined
+            ? (p: Parameters<typeof WalterZaehlerEntry.GetPaged>[1]) =>
+                  WalterZaehlerEntry.GetPaged<WalterZaehlerEntry>(fetchImpl, p)
+            : undefined;
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.zaehler(e.detail.id);
@@ -89,6 +101,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     rows={rowsAdd}
+    {fetchData}
+    {transformRow}
     {headers}
     {fullHeight}
 >

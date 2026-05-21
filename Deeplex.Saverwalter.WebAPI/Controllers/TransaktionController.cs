@@ -46,9 +46,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Id = entity.TransaktionId;
                 if (entity.Zahler is { } zahler)
-                    Zahler = new SelectionEntry(zahler.BankkontoId, zahler.Iban ?? zahler.Bank ?? $"Bankkonto {zahler.BankkontoId}");
+                    Zahler = new SelectionEntry(zahler.BankkontoId, BankkontoLabel(zahler));
                 if (entity.Zahlungsempfaenger is { } empfaenger)
-                    Zahlungsempfaenger = new SelectionEntry(empfaenger.BankkontoId, empfaenger.Iban ?? empfaenger.Bank ?? $"Bankkonto {empfaenger.BankkontoId}");
+                    Zahlungsempfaenger = new SelectionEntry(empfaenger.BankkontoId, BankkontoLabel(empfaenger));
                 Zahlungsdatum = entity.Zahlungsdatum;
                 Betrag = entity.Betrag;
                 Verwendungszweck = entity.Verwendungszweck;

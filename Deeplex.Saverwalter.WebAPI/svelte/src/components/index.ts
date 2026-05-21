@@ -93,5 +93,6 @@ export { default as WalterVertragVersionen } from './lists/WalterVertragVersione
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
 export { default as WalterMieten } from './lists/WalterMieten.svelte';
+export { default as WalterVertragTransaktionen } from './lists/WalterVertragTransaktionen.svelte';
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
 export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';

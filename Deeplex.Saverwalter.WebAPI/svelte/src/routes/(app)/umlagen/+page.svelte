@@ -22,4 +22,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Umlagen" />
-<WalterUmlagen fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />
+<WalterUmlagen fetchImpl={data.fetchImpl} fullHeight />

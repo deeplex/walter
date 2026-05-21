@@ -70,6 +70,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         | undefined = undefined;
     export let layout: 'inline' | 'accordion' = 'inline';
     export let accordionTitle: string | undefined = undefined;
+    export let initialOpen = false;
     export let quickAddTitle: string | undefined = undefined;
     export let addUrl: string | undefined = undefined;
     export let addEntry: unknown = undefined;
@@ -422,6 +423,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {layout}
         accordionTitle={resolvedAccordionTitle}
         count={fetchData ? _totalCount : displayRows.length}
+        {initialOpen}
     >
         {#if showSkeleton}
             <DataTableSkeleton showHeader={false} showToolbar={false} />

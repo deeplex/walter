@@ -14,14 +14,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -119,11 +123,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<VertragController> _logger;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
         protected override VertragDbService DbService { get; }
 
-        public VertragController(ILogger<VertragController> logger, VertragDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+        public VertragController(
+            ILogger<VertragController> logger,
+            VertragDbService dbService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth,
+            HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
+            _ctx = ctx;
+            _auth = auth;
             _logger = logger;
         }
 
@@ -140,5 +153,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<VertragEntry>> Put(int id, VertragEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Returns all Transaktionen that have Buchungssätze touching this Vertrag's
+        /// MietBuchungskonto or NkBuchungskonto.
+        /// </summary>
+        [HttpGet("{id}/transaktionen")]
+        public async Task<ActionResult<IEnumerable<TransaktionEntry>>> GetTransaktionen(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var permissions = await GetPermissions(User!, vertrag, _auth);
+
+            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+
+            var transaktionen = await _ctx.Transaktionen
+                .Include(t => t.Zahler)
+                .Include(t => t.Zahlungsempfaenger)
+                .Include(t => t.Buchungssaetze)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Where(t => t.Buchungssaetze.Any(s =>
+                    s.Buchungszeilen.Any(z =>
+                        z.Buchungskonto.BuchungskontoId == mietKontoId ||
+                        z.Buchungskonto.BuchungskontoId == nkKontoId)))
+                .OrderByDescending(t => t.Zahlungsdatum)
+                .ToListAsync();
+
+            var result = transaktionen.Select(t => new TransaktionEntry(t, permissions));
+            return Ok(result);
+        }
     }
 }

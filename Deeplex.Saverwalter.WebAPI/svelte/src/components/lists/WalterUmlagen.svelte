@@ -31,10 +31,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const rowHref = (row: DataTableRow) => `/umlagen/${row.id}`;
 
     export let fullHeight = false;
-    export let rows: WalterUmlageEntry[];
+    export let rows: WalterUmlageEntry[] | undefined = undefined;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterUmlageEntry> | undefined = {};
     export let fetchImpl: typeof fetch;
+
+    const fetchData =
+        rows === undefined
+            ? (p: Parameters<typeof WalterUmlageEntry.GetPaged>[1]) =>
+                  WalterUmlageEntry.GetPaged<WalterUmlageEntry>(fetchImpl, p)
+            : undefined;
 </script>
 
 <WalterDataTable
@@ -46,6 +52,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     {rows}
+    {fetchData}
+    initialSortDir="asc"
     {headers}
     {fullHeight}
 >

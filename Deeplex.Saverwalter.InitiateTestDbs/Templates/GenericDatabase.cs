@@ -229,10 +229,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             FillVertragversionen(ctx, vertraege, random);
             var mieter = FillMieterSet(ctx, vertraege, random);
-            FillMieten(ctx, vertraege, random);
             FillErhaltungsaufwendungen(ctx, wohnungen, random);
             FillMietminderungen(ctx, vertraege, random);
-            FillBankkontos(ctx, eigentuemer, mieter, random);
+            var (mieterBankkontos, vertragBankkontos) = FillBankkontos(ctx, eigentuemer, mieter, vertraege, random);
+            FillTransaktionen(ctx, vertraege, mieterBankkontos, vertragBankkontos, random);
             FillGaragen(ctx, wohnungen, vertraege, random);
 
             var umlagen = FillUmlagen(ctx, adressen, random);
@@ -599,37 +599,154 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mieter;
         }
 
-        private static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege, Random random)
+        private static List<Transaktion> FillTransaktionen(
+            SaverwalterContext ctx,
+            List<Vertrag> vertraege,
+            Dictionary<Kontakt, Bankkonto> mieterBankkontos,
+            Dictionary<Vertrag, Bankkonto> vertragBankkontos,
+            Random random)
         {
-            Console.Write("Füge Mieten hinzu: ");
+            Console.Write("Füge Transaktionen hinzu: ");
 
-            var mieten = new List<Miete>();
+            var transaktionen = new List<Transaktion>();
+            // Track Sollstellungen already created to avoid duplicates across versions
+            // Use object reference as key — VertragId is 0 before SaveChanges
+            var sollstellungen = new Dictionary<(Vertrag, int Jahr, int Monat), Buchungszeile>();
 
             foreach (var vertrag in vertraege)
             {
+                mieterBankkontos.TryGetValue(vertrag.Mieter.FirstOrDefault()!, out var zahlerKonto);
+                vertragBankkontos.TryGetValue(vertrag, out var empfaengerKonto);
+
+                var mieterNamen = vertrag.Mieter.Count > 0
+                    ? string.Join(", ", vertrag.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+                var wohnungInfo = vertrag.Wohnung.Adresse?.Anschrift is { } a
+                    ? $"{a} – {vertrag.Wohnung.Bezeichnung}"
+                    : vertrag.Wohnung.Bezeichnung;
+
                 foreach (var version in vertrag.Versionen.OrderBy(v => v.Beginn))
                 {
-                    var ende = version.Ende() ?? GlobalToday;
-                    for (var date = version.Beginn; date <= ende; date = date.AddMonths(1))
+                    var payUntil = GlobalToday.AddMonths(-3);
+                    var ende = version.Ende() is { } versionEnde && versionEnde < payUntil
+                        ? versionEnde
+                        : payUntil;
+
+                    for (var monat = new DateOnly(version.Beginn.Year, version.Beginn.Month, 1);
+                         monat <= new DateOnly(ende.Year, ende.Month, 1);
+                         monat = monat.AddMonths(1))
                     {
+                        // ~7% chance of partial/late payment, ~93% normal
                         var zahlungsfaktor = 0.97m + ((decimal)random.NextDouble() * 0.08m);
                         if (random.NextDouble() < 0.07)
                         {
                             zahlungsfaktor = random.NextDouble() < 0.5
                                 ? 0.90m + ((decimal)random.NextDouble() * 0.06m)
-                                : 1.05m + ((decimal)random.NextDouble() * 0.07m);
+                                : 1.00m; // skip NK variation for simplicity
                         }
 
-                        var nebenkosten = Math.Round(version.Nebenkostenvorauszahlung * zahlungsfaktor, 2);
-                        var gesamt = Math.Round(version.Grundmiete + nebenkosten, 2);
-                        mieten.Add(new Miete(date, date, (double)gesamt) { Vertrag = vertrag });
+                        var kaltmiete = version.Grundmiete;
+                        var nkVz = Math.Round(version.Nebenkostenvorauszahlung * zahlungsfaktor, 2);
+                        var gesamt = kaltmiete + nkVz;
+                        var zahlungsdatum = DritterWerktag(monat).AddDays(random.Next(0, 5));
+                        var verwendungszweck = $"Miete {monat:MM/yyyy} | {mieterNamen} | {wohnungInfo}";
+
+                        var transaktion = new Transaktion
+                        {
+                            Zahlungsdatum = zahlungsdatum,
+                            Betrag = gesamt,
+                            Verwendungszweck = verwendungszweck,
+                            Zahler = zahlerKonto,
+                            Zahlungsempfaenger = empfaengerKonto
+                        };
+
+                        // Sollstellung (if not already created for this month)
+                        var sollKey = (vertrag, monat.Year, monat.Month);
+                        if (!sollstellungen.TryGetValue(sollKey, out var sollZeile))
+                        {
+                            var sollDatum = DritterWerktag(monat);
+                            var sollSatz = new Buchungssatz(sollDatum, $"Mietsoll {monat:MM/yyyy}");
+                            sollZeile = new Buchungszeile(SollHaben.Soll, kaltmiete)
+                            {
+                                Buchungssatz = sollSatz,
+                                Buchungskonto = vertrag.MietBuchungskonto
+                            };
+                            sollSatz.Buchungszeilen.Add(sollZeile);
+                            sollSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, kaltmiete)
+                            {
+                                Buchungssatz = sollSatz,
+                                Buchungskonto = vertrag.Wohnung.MietErtragskonto
+                            });
+                            ctx.Buchungssaetze.Add(sollSatz);
+                            sollstellungen[sollKey] = sollZeile;
+                        }
+
+                        // Kaltmiete payment: Soll ZahlungsKonto / Haben MietBuchungskonto
+                        var kaltmieteSatz = new Buchungssatz(zahlungsdatum, $"Mietzahlung Kaltmiete {monat:MM/yyyy}")
+                        {
+                            Transaktion = transaktion
+                        };
+                        var kaltmieteHaben = new Buchungszeile(SollHaben.Haben, kaltmiete)
+                        {
+                            Buchungssatz = kaltmieteSatz,
+                            Buchungskonto = vertrag.MietBuchungskonto
+                        };
+                        kaltmieteSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, kaltmiete)
+                        {
+                            Buchungssatz = kaltmieteSatz,
+                            Buchungskonto = vertrag.ZahlungsKonto
+                        });
+                        kaltmieteSatz.Buchungszeilen.Add(kaltmieteHaben);
+                        ctx.Buchungssaetze.Add(kaltmieteSatz);
+
+                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                        {
+                            SollZeile = sollZeile,
+                            HabenZeile = kaltmieteHaben
+                        });
+
+                        // NK-Vorauszahlung payment: Soll ZahlungsKonto / Haben NkBuchungskonto
+                        if (nkVz > 0)
+                        {
+                            var nkSatz = new Buchungssatz(zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}")
+                            {
+                                Transaktion = transaktion
+                            };
+                            nkSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, nkVz)
+                            {
+                                Buchungssatz = nkSatz,
+                                Buchungskonto = vertrag.ZahlungsKonto
+                            });
+                            nkSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, nkVz)
+                            {
+                                Buchungssatz = nkSatz,
+                                Buchungskonto = vertrag.NkBuchungskonto
+                            });
+                            ctx.Buchungssaetze.Add(nkSatz);
+                        }
+
+                        ctx.Transaktionen.Add(transaktion);
+                        transaktionen.Add(transaktion);
                     }
                 }
             }
 
-            ctx.Mieten.AddRange(mieten);
-            Console.WriteLine($"{mieten.Count} Mieten hinzugefügt");
-            return mieten;
+            Console.WriteLine($"{transaktionen.Count} Transaktionen hinzugefügt");
+            return transaktionen;
+        }
+
+        private static DateOnly DritterWerktag(DateOnly monat)
+        {
+            var tag = new DateOnly(monat.Year, monat.Month, 1);
+            int werktage = 0;
+            while (werktage < 3)
+            {
+                if (tag.DayOfWeek != DayOfWeek.Sunday)
+                    werktage++;
+                if (werktage < 3)
+                    tag = tag.AddDays(1);
+            }
+            return tag;
         }
 
         private static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(
@@ -715,10 +832,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mietminderungen;
         }
 
-        private static void FillBankkontos(
+        private static (Dictionary<Kontakt, Bankkonto> mieterBankkontos, Dictionary<Vertrag, Bankkonto> vertragBankkontos) FillBankkontos(
             SaverwalterContext ctx,
             List<Kontakt> eigentuemer,
             List<Kontakt> mieter,
+            List<Vertrag> vertraege,
             Random random)
         {
             Console.Write("Füge Bankkontos hinzu: ");
@@ -726,20 +844,43 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var bankkontos = new List<Bankkonto>();
             var banken = new[] { "Sparkasse", "Deutsche Bank", "Commerzbank", "Volksbank", "DKB", "ING" };
 
+            // One Bankkonto per Kontakt (Eigentuemer + Mieter)
+            var mieterBankkontos = new Dictionary<Kontakt, Bankkonto>();
             foreach (var kontakt in eigentuemer.Concat(mieter))
             {
                 var idx = bankkontos.Count;
-                bankkontos.Add(new Bankkonto
+                var bk = new Bankkonto
                 {
                     Bank = banken[random.Next(banken.Length)],
                     Iban = CreateGermanIban(random),
                     Besitzer = [kontakt],
                     BuchungsKonto = new Buchungskonto($"BANK{idx:D5}", $"Bankkonto {kontakt.Bezeichnung}", BuchungskontoTyp.Aktiv),
-                });
+                };
+                bankkontos.Add(bk);
+                if (mieter.Contains(kontakt))
+                    mieterBankkontos[kontakt] = bk;
+            }
+
+            // One Bankkonto per Vertrag's ZahlungsKonto (so OffeneForderungen can resolve it)
+            var vertragBankkontos = new Dictionary<Vertrag, Bankkonto>();
+            foreach (var vertrag in vertraege)
+            {
+                var idx = bankkontos.Count;
+                var besitzer = vertrag.Wohnung.Besitzer;
+                var bk = new Bankkonto
+                {
+                    Bank = banken[random.Next(banken.Length)],
+                    Iban = CreateGermanIban(random),
+                    Besitzer = besitzer != null ? [besitzer] : [],
+                    BuchungsKonto = vertrag.ZahlungsKonto,
+                };
+                bankkontos.Add(bk);
+                vertragBankkontos[vertrag] = bk;
             }
 
             ctx.Bankkontos.AddRange(bankkontos);
             Console.WriteLine($"{bankkontos.Count} Bankkontos hinzugefügt");
+            return (mieterBankkontos, vertragBankkontos);
         }
 
         private static List<Garage> FillGaragen(

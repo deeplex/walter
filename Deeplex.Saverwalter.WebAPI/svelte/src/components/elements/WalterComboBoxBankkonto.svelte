@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let value: WalterSelectionEntry | undefined;
     export let fetchImpl: typeof fetch;
     export let title: string | undefined = undefined;
+    export let initialId: number | undefined = undefined;
 
     let entries = walter_selection.bankkontos(fetchImpl);
     function onSubmit() {
@@ -47,6 +48,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:value
         titleText={title || 'Bankkonto'}
         {entries}
+        {initialId}
+        on:select
     />
 
     {#if !readonly}

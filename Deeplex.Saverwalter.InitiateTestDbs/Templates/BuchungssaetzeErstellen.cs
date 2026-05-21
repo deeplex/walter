@@ -26,13 +26,24 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
     {
         public static async Task BucheHistorischAsync(SaverwalterContext ctx)
         {
+            // Skip if the database was already seeded with Transaktionen directly
+            // (i.e., new GenericDatabase which creates Transaktionen instead of legacy Mieten)
+            var hasTransaktionen = await ctx.Transaktionen.AnyAsync();
+            if (hasTransaktionen)
+            {
+                Console.WriteLine("Datenbank enthält bereits Transaktionen – überspringe historische Buchung.");
+                return;
+            }
+
             var today = DateOnly.FromDateTime(DateTime.Today);
 
+            // A Kontakt may have multiple Bankkontos; take the first one per Kontakt.
             var bankkontoByKontaktId = (await ctx.Bankkontos
                 .Include(b => b.Besitzer)
                 .ToListAsync())
                 .Where(b => b.Besitzer.Count > 0)
-                .ToDictionary(b => b.Besitzer[0].KontaktId);
+                .GroupBy(b => b.Besitzer[0].KontaktId)
+                .ToDictionary(g => g.Key, g => g.First());
 
             Console.WriteLine("Buche Mietsollstellungen...");
             var sollZeilen = await BuecheMietsollAsync(ctx, today);

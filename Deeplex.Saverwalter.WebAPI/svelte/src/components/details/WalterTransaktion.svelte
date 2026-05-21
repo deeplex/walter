@@ -30,25 +30,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
-        type WalterSelectionEntry,
         type WalterTransaktionEntry
     } from '$walter/lib';
     import WalterTransaktionRaw from './WalterTransaktionRaw.svelte';
 
     export let fetchImpl: typeof fetch;
     export let buchung: TransaktionsInput = emptyTransaktionsInput();
-    let transaktionEntry: Partial<WalterTransaktionEntry> = {};
     export let isValid = false;
 
-    let zahler: WalterSelectionEntry | undefined = undefined;
-    let zahlungsempfaenger: WalterSelectionEntry | undefined = undefined;
+    let transaktionEntry: Partial<WalterTransaktionEntry> = {};
 
-    $: buchung.zahlerId = (zahler as WalterSelectionEntry | undefined)?.id as
-        | number
-        | undefined;
-    $: buchung.zahlungsempfaengerId = (
-        zahlungsempfaenger as WalterSelectionEntry | undefined
-    )?.id as number | undefined;
+    // Reset display state (zahler/zahlungsempfaenger) when parent swaps buchung object
+    let _prevBuchung = buchung;
+    $: if (buchung !== _prevBuchung) {
+        _prevBuchung = buchung;
+        transaktionEntry = {};
+    }
 
     $: verteilterBetrag =
         buchung.mieten.reduce(
@@ -74,7 +71,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: isSinglePosition = totalPositions === 1;
 
     $: offenerBetrag = (buchung.betrag || 0) - verteilterBetrag;
-    $: isValid = buchung.betrag > 0 && Math.abs(offenerBetrag) < 0.005;
+
+    let mieteInvalids: boolean[] = [];
+    $: isValid =
+        buchung.betrag > 0 &&
+        Math.abs(offenerBetrag) < 0.005 &&
+        !mieteInvalids.some(Boolean);
 
     function addMiete() {
         const available = Math.max(0, offenerBetrag);
@@ -123,9 +125,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function removeSonstiges(i: number) {
         buchung.sonstige = buchung.sonstige.filter((_, idx) => idx !== i);
     }
+
+    function onZahlerChange(e: CustomEvent) {
+        buchung.zahlerId = e.detail ? +e.detail.id || undefined : undefined;
+    }
+
+    function onZahlungsempfaengerChange(e: CustomEvent) {
+        buchung.zahlungsempfaengerId = e.detail ? +e.detail.id || undefined : undefined;
+    }
 </script>
 
-<WalterTransaktionRaw bind:entry={transaktionEntry} {fetchImpl} readonly />
+<WalterTransaktionRaw
+    bind:entry={transaktionEntry}
+    bind:betrag={buchung.betrag}
+    bind:zahlungsdatum={buchung.zahlungsdatum}
+    {fetchImpl}
+    initialZahlungsempfaengerId={buchung.zahlungsempfaengerId}
+    on:zahlerChange={onZahlerChange}
+    on:zahlungsempfaengerChange={onZahlungsempfaengerChange}
+/>
 
 {#if buchung.betrag > 0 && Math.abs(offenerBetrag) >= 0.005}
     <InlineNotification
@@ -158,7 +176,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktionPositionMiete
             {fetchImpl}
             bind:miete={buchung.mieten[i]}
-            bind:availableBetrag={transaktionEntry.betrag}
+            bind:availableBetrag={buchung.betrag}
+            bind:invalid={mieteInvalids[i]}
             {isSinglePosition}
         />
     </Tile>
@@ -182,7 +201,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktionPositionBK
             {fetchImpl}
             bind:bk={buchung.betriebskostenEingaenge[i]}
-            availableBetrag={transaktionEntry.betrag ?? 0}
+            availableBetrag={buchung.betrag ?? 0}
             {isSinglePosition}
         />
     </Tile>
@@ -206,7 +225,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktionPositionEA
             {fetchImpl}
             bind:ea={buchung.erhaltungsaufwendungen[i]}
-            availableBetrag={transaktionEntry.betrag ?? 0}
+            availableBetrag={buchung.betrag ?? 0}
             {isSinglePosition}
         />
     </Tile>
@@ -229,7 +248,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
         <WalterTransaktionPositionSonstiges
             bind:sonstiger={buchung.sonstige[i]}
-            availableBetrag={transaktionEntry.betrag ?? 0}
+            availableBetrag={buchung.betrag ?? 0}
             {isSinglePosition}
         />
     </Tile>

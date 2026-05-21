@@ -340,6 +340,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class UmlagePermissionHandler : WohnungPermissionHandlerBase<Umlage>
     {
+        public static IQueryable<Umlage> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.Umlagen;
+            var guid = user.GetUserId();
+            return ctx.Umlagen
+                .Where(e => e.Wohnungen.Any(w =>
+                    w.Verwalter.Count != 0 &&
+                    w.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid))));
+        }
+
         public static async Task<List<Umlage>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
             return await (user.IsInRole("Admin")
@@ -525,6 +537,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ZaehlerPermissionHandler : WohnungPermissionHandlerBase<Zaehler>
     {
+        public static IQueryable<Zaehler> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.ZaehlerSet;
+            var guid = user.GetUserId();
+            return ctx.ZaehlerSet
+                .Where(e =>
+                    e.Wohnung == null ||
+                    e.Wohnung.Verwalter.Count > 0 &&
+                    e.Wohnung.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)));
+        }
+
         public static async Task<List<Zaehler>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
             return await (user.IsInRole("Admin")

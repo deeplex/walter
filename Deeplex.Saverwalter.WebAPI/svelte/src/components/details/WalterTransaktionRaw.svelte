@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { createEventDispatcher } from 'svelte';
     import {
         WalterComboBoxBankkonto,
         WalterTextArea,
@@ -23,14 +24,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
 
     import { Row } from 'carbon-components-svelte';
-    import type { WalterTransaktionEntry } from '$walter/lib';
+    import type { WalterSelectionEntry, WalterTransaktionEntry } from '$walter/lib';
 
     export let entry: Partial<WalterTransaktionEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
+    export let initialZahlerId: number | undefined = undefined;
+    export let initialZahlungsempfaengerId: number | undefined = undefined;
+    export let betrag: number | undefined = undefined;
+    export let zahlungsdatum: string | undefined = undefined;
     $: {
         readonly = entry?.permissions?.update === false;
     }
+
+    const dispatch = createEventDispatcher<{
+        zahlerChange: WalterSelectionEntry | undefined;
+        zahlungsempfaengerChange: WalterSelectionEntry | undefined;
+    }>();
 </script>
 
 <Row>
@@ -39,6 +49,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {readonly}
         bind:value={entry.zahler}
         title="Zahler"
+        initialId={initialZahlerId}
+        on:select={(e) => dispatch('zahlerChange', e.detail.selectedItem)}
     />
 
     <WalterComboBoxBankkonto
@@ -46,22 +58,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {readonly}
         bind:value={entry.zahlungsempfaenger}
         title="Zahlungsempfänger"
+        initialId={initialZahlungsempfaengerId}
+        on:select={(e) => dispatch('zahlungsempfaengerChange', e.detail.selectedItem)}
     />
 </Row>
 
 <Row>
-    <WalterNumberInput
-        required
-        {readonly}
-        bind:value={entry.betrag}
-        label="Betrag"
-    />
-    <WalterDatePicker
-        required
-        disabled={readonly}
-        bind:value={entry.zahlungsdatum}
-        labelText="Zahlungsdatum"
-    />
+    {#if betrag !== undefined}
+        <WalterNumberInput required {readonly} bind:value={betrag} label="Betrag" />
+    {:else}
+        <WalterNumberInput required {readonly} bind:value={entry.betrag} label="Betrag" />
+    {/if}
+    {#if zahlungsdatum !== undefined}
+        <WalterDatePicker required disabled={readonly} bind:value={zahlungsdatum} labelText="Zahlungsdatum" />
+    {:else}
+        <WalterDatePicker required disabled={readonly} bind:value={entry.zahlungsdatum} labelText="Zahlungsdatum" />
+    {/if}
 </Row>
 <Row>
     <WalterTextArea

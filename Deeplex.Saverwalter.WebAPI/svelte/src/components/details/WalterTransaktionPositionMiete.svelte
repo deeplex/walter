@@ -35,6 +35,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let miete: MietzahlungsInput;
     export let availableBetrag = 0;
     export let isSinglePosition = false;
+    export let invalid = false;
 
     let vertrag: WalterSelectionEntry | undefined = undefined;
     let forderungsstatus: WalterForderungsstatusEntry | undefined = undefined;
@@ -48,6 +49,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: kaltmieteLabel = forderungsstatus?.grundmiete
         ? `Kaltmiete (€) — Grundmiete: ${forderungsstatus.grundmiete.toFixed(2)} € seit ${forderungsstatus.grundmieteSeit ?? '?'}`
         : 'Kaltmiete (€)';
+
+    $: kaltmieteMax = forderungsstatus
+        ? forderungsstatus.sollstellungVorhanden
+            ? forderungsstatus.verbleibendeForderung
+            : forderungsstatus.grundmiete
+        : undefined;
+
+    $: invalid = !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
 
     $: verteile(availableBetrag);
 
@@ -136,34 +145,45 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <Row>
         <Column>
             {#if forderungsstatus.sollstellungVorhanden}
-                {@const erwartet =
-                    forderungsstatus.verbleibendeForderung +
-                    forderungsstatus.nkVorauszahlung}
-                {@const aktuell =
-                    (miete.kaltmiete || 0) + (miete.nkVorauszahlung || 0)}
                 <Tag type="green">
-                    Forderung: {forderungsstatus.forderungsbetrag.toFixed(2)} € —
-                    noch offen: {forderungsstatus.verbleibendeForderung.toFixed(
+                    Bereits gezahlt: {forderungsstatus.schonGezahlt.toFixed(2)} €
+                    — Verbleibende Forderung: {forderungsstatus.verbleibendeForderung.toFixed(
                         2
                     )} €
                 </Tag>
-                {#if Math.abs(aktuell - erwartet) >= 0.005}
+                {#if invalid}
+                    <InlineNotification
+                        kind="error"
+                        title="Kaltmiete zu hoch:"
+                        subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
+                        hideCloseButton
+                    />
+                {:else if miete.kaltmiete < forderungsstatus.verbleibendeForderung - 0.005}
                     <InlineNotification
                         kind="warning"
-                        title="Betrag weicht von Forderung ab:"
-                        subtitle="Erwartet {erwartet.toFixed(
+                        title="Betrag liegt unter geforderter Kaltmiete:"
+                        subtitle="Erwartet {forderungsstatus.verbleibendeForderung.toFixed(
                             2
-                        )} €, eingetragen {aktuell.toFixed(2)} €"
+                        )} €"
                         hideCloseButton
                     />
                 {/if}
             {:else}
-                <InlineNotification
-                    kind="info"
-                    title="Keine Sollstellung"
-                    subtitle="Für diesen Monat liegt noch keine Sollstellung vor. Sie wird automatisch erstellt."
-                    hideCloseButton
-                />
+                {#if invalid}
+                    <InlineNotification
+                        kind="error"
+                        title="Kaltmiete zu hoch:"
+                        subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
+                        hideCloseButton
+                    />
+                {:else}
+                    <InlineNotification
+                        kind="info"
+                        title="Keine Sollstellung"
+                        subtitle="Für diesen Monat liegt noch keine Sollstellung vor. Sie wird automatisch erstellt."
+                        hideCloseButton
+                    />
+                {/if}
             {/if}
         </Column>
     </Row>

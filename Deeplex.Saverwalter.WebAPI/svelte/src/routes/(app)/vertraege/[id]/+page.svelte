@@ -19,7 +19,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterAbrechnungsresultate,
         WalterKontakte,
-        WalterMieten,
         WalterMietminderungen,
         WalterHeaderDetail,
         WalterGrid,
@@ -40,7 +39,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterKontaktEntry
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
-    import { ClickableTile } from 'carbon-components-svelte';
+    import WalterVertragTransaktionen from '$walter/components/lists/WalterVertragTransaktionen.svelte';
     import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
@@ -91,11 +90,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        <WalterMieten
+        <WalterVertragTransaktionen
             fetchImpl={data.fetchImpl}
             vertrag={data.entry}
-            title="Mietzahlungen"
-            rows={data.mietzahlungen}
+            title="Transaktionen"
+            rows={data.transaktionen}
         />
         <WalterMietminderungen
             entry={mietminderungEntry}

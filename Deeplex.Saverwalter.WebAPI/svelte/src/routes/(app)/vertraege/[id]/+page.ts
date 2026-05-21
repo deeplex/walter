@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterMietzahlungListEntry, WalterMietzahlungApiURL, WalterVertragEntry } from '$walter/lib';
+import { WalterTransaktionEntry, WalterVertragEntry } from '$walter/lib';
 import { fileURL } from '$walter/services/files';
 import { walter_get } from '$walter/services/requests';
 import type { PageLoad } from './$types';
@@ -22,13 +22,11 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const apiURL = `${WalterVertragEntry.ApiURL}/${params.id}`;
     const fileUrl = fileURL.vertrag(params.id);
 
-    const mietzahlungenPromise = (
-        walter_get(`${WalterMietzahlungApiURL}/${params.id}`, fetch) as Promise<
-            WalterMietzahlungListEntry[]
+    const transaktionenPromise = (
+        walter_get(`${WalterVertragEntry.ApiURL}/${params.id}/transaktionen`, fetch) as Promise<
+            WalterTransaktionEntry[]
         >
-    )
-        .then((list) => list.map(WalterMietzahlungListEntry.fromJson))
-        .catch(() => [] as WalterMietzahlungListEntry[]);
+    ).catch(() => [] as WalterTransaktionEntry[]);
 
     return {
         fetchImpl: fetch,
@@ -36,6 +34,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         apiURL: apiURL,
         fileURL: fileUrl,
         entry: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch),
-        mietzahlungen: mietzahlungenPromise
+        transaktionen: transaktionenPromise
     };
 };

@@ -17,33 +17,72 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterUmlageEntry,
+        WalterZaehlerEntry,
         WalterZaehlerstandEntry,
         type WalterUmlageEntry as WalterUmlageEntryType,
-        type WalterZaehlerEntry,
+        type WalterZaehlerEntry as WalterZaehlerEntryType,
         type TransaktionsInput
     } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
     import { NumberInput, SkeletonText, Tile } from 'carbon-components-svelte';
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
+    import { walter_get } from '$walter/services/requests';
     import WalterZaehlerstand from './WalterZaehlerstand.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { invalidateAll } from '$app/navigation';
     import { onMount } from 'svelte';
 
+    interface OffeneMietForderungEntry {
+        vertragId: number;
+        vertragBezeichnung: string;
+        monat: string;
+        sollbetrag: number;
+        gezahlt: number;
+        offen: number;
+        zahlungsempfaengerId?: number;
+    }
+
     export let fetchImpl: typeof fetch;
 
     let umlagen: WalterUmlageEntryType[] = [];
+    let zaehler: WalterZaehlerEntryType[] = [];
     let umlagenReady = false;
 
-    onMount(async () => {
+    // ── Offene Mietforderungen ──────────────────────────────────────────────
+    let offeneMietForderungen: OffeneMietForderungEntry[] = [];
+    let mietForderungenReady = false;
+
+    async function ladeOffeneMietForderungen(jahr: number) {
+        mietForderungenReady = false;
         try {
-            umlagen =
-                await WalterUmlageEntry.GetAll<WalterUmlageEntryType>(
-                    fetchImpl
-                );
+            const resp = await walter_get(
+                `/api/offene-forderungen/${jahr}`,
+                fetchImpl
+            );
+            offeneMietForderungen = (resp as OffeneMietForderungEntry[]) ?? [];
         } catch (e) {
-            console.error('Konnte Umlagen nicht laden:', e);
+            console.error('Konnte offene Forderungen nicht laden:', e);
+            offeneMietForderungen = [];
+        }
+        mietForderungenReady = true;
+    }
+
+    onMount(async () => {
+        await ladeOffeneMietForderungen(selectedYear);
+        try {
+            const [umlPaged, zaehlerPaged] = await Promise.all([
+                WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(fetchImpl, {
+                    take: 10000
+                }),
+                WalterZaehlerEntry.GetPaged<WalterZaehlerEntryType>(fetchImpl, {
+                    take: 10000
+                })
+            ]);
+            umlagen = umlPaged.items;
+            zaehler = zaehlerPaged.items;
+        } catch (e) {
+            console.error('Konnte Umlagen/Zähler nicht laden:', e);
         }
         umlagenReady = true;
     });
@@ -62,27 +101,78 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         history.replaceState(history.state, '', `?${params}`);
     }
 
-    // ── Meter reading tasks ─────────────────────────────────────────────────
-    type MeterTask = { zaehler: WalterZaehlerEntry };
+    let _lastLoadedYear = selectedYear;
+    $: if (selectedYear !== _lastLoadedYear) {
+        _lastLoadedYear = selectedYear;
+        ladeOffeneMietForderungen(selectedYear);
+    }
 
-    function hasMeterReadingForYear(zaehler: WalterZaehlerEntry, year: number) {
-        const inList = (zaehler.staende || []).some(
+    // ── Rent payment QuickAdd ───────────────────────────────────────────────
+    let addRentOpen = false;
+    let rentModalTitle = 'Mietzahlung';
+    let rentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
+    let rentBuchungsInputValid = false;
+
+    function openRentQuickAdd(
+        e: CustomEvent,
+        forderung: OffeneMietForderungEntry
+    ) {
+        e.stopPropagation();
+        rentModalTitle = forderung.vertragBezeichnung;
+        rentBuchungsInput = {
+            ...emptyTransaktionsInput(),
+            betrag: forderung.offen,
+            zahlungsempfaengerId: forderung.zahlungsempfaengerId,
+            mieten: [
+                {
+                    vertragId: forderung.vertragId,
+                    betreffenderMonat: forderung.monat,
+                    kaltmiete: forderung.offen,
+                    nkVorauszahlung: 0
+                }
+            ]
+        };
+        addRentOpen = true;
+    }
+
+    async function onSubmitRent() {
+        await invalidateAll();
+        await ladeOffeneMietForderungen(selectedYear);
+    }
+
+    const forderungHeaders = [
+        { key: 'monat', value: 'Monat' },
+        { key: 'vertrag', value: 'Vertrag' },
+        { key: 'offen', value: 'Offen (€)' },
+        { key: 'button', value: '' }
+    ];
+
+    $: forderungTableRows = offeneMietForderungen.map((f) => ({
+        id: `forderung-${f.vertragId}-${f.monat}`,
+        monat: new Date(f.monat + 'T00:00:00').toLocaleDateString('de-DE', {
+            month: 'long',
+            year: 'numeric'
+        }),
+        vertrag: f.vertragBezeichnung,
+        offen: f.offen.toFixed(2),
+        button: (e: CustomEvent) => openRentQuickAdd(e, f)
+    }));
+
+    // ── Meter reading tasks ─────────────────────────────────────────────────
+    type MeterTask = { zaehler: WalterZaehlerEntryType };
+
+    function hasMeterReadingForYear(z: WalterZaehlerEntryType, year: number) {
+        const inList = (z.staende || []).some(
             (s) => new Date(s.datum).getFullYear() === year
         );
-        const lastYear = zaehler.lastZaehlerstand
-            ? new Date(zaehler.lastZaehlerstand.datum).getFullYear()
+        const lastYear = z.lastZaehlerstand
+            ? new Date(z.lastZaehlerstand.datum).getFullYear()
             : undefined;
         return inList || lastYear === year;
     }
 
     function buildMeterTasks(year: number): MeterTask[] {
-        const byId = new Map<number, WalterZaehlerEntry>();
-        umlagen.forEach((u) =>
-            (u.zaehler || []).forEach((z) => {
-                if (!byId.has(z.id)) byId.set(z.id, z);
-            })
-        );
-        return [...byId.values()]
+        return zaehler
             .filter((z) => !!z.permissions?.update)
             .filter((z) => !z.ende || new Date(z.ende).getFullYear() >= year)
             .filter((z) => !hasMeterReadingForYear(z, year))
@@ -92,7 +182,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let meterTasks: MeterTask[] = [];
     $: {
-        umlagen;
+        zaehler;
         meterTasks = buildMeterTasks(selectedYear);
     }
 
@@ -136,15 +226,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 addZaehlerstandEntry.zaehler
         } as WalterZaehlerstandEntry;
 
-        umlagen.forEach((u) =>
-            (u.zaehler || []).forEach((z) => {
-                if (z.id === +value.zaehler?.id) {
-                    z.staende = [...(z.staende || []), value];
-                    z.lastZaehlerstand = value;
-                }
-            })
-        );
-        umlagen = [...umlagen];
+        zaehler.forEach((z) => {
+            if (z.id === +value.zaehler?.id) {
+                z.staende = [...(z.staende || []), value];
+                z.lastZaehlerstand = value;
+            }
+        });
+        zaehler = [...zaehler];
         meterTasks = buildMeterTasks(selectedYear);
         addZaehlerstandOpen = false;
         addZaehlerstandEntry = {};
@@ -184,10 +272,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     async function onSubmitBilling() {
         await invalidateAll();
         try {
-            umlagen =
-                await WalterUmlageEntry.GetAll<WalterUmlageEntryType>(
-                    fetchImpl
+            const paged =
+                await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
+                    fetchImpl,
+                    { take: 10000 }
                 );
+            umlagen = paged.items;
         } catch (e) {
             console.error(e);
         }
@@ -208,6 +298,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         button: (e: CustomEvent) => openBillingQuickAdd(e, u)
     }));
 </script>
+
+<WalterDataWrapperQuickAdd
+    title={rentModalTitle}
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={rentBuchungsInput}
+    bind:addModalOpen={addRentOpen}
+    onSubmit={onSubmitRent}
+    submitDisabled={!rentBuchungsInputValid}
+>
+    <WalterTransaktion
+        {fetchImpl}
+        bind:buchung={rentBuchungsInput}
+        bind:isValid={rentBuchungsInputValid}
+    />
+</WalterDataWrapperQuickAdd>
 
 <WalterDataWrapperQuickAdd
     title={addZaehlerstandEntry.zaehler?.text || 'Zählerstand'}
@@ -245,15 +350,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     </div>
 
-    {#if !umlagenReady}
+    {#if !mietForderungenReady || !umlagenReady}
         <SkeletonText style="margin: 0; height: 42px;" />
         <div style="height: 2px;" />
         <SkeletonText style="margin: 0; height: 42px;" />
-    {:else if meterTableRows.length === 0 && billingTableRows.length === 0}
+        <div style="height: 2px;" />
+        <SkeletonText style="margin: 0; height: 42px;" />
+    {:else if forderungTableRows.length === 0 && meterTableRows.length === 0 && billingTableRows.length === 0}
         <p style="color: var(--cds-text-02); margin: 1rem;">
             Alles erledigt für {selectedYear}
         </p>
     {:else}
+        <WalterDataTable
+            layout="accordion"
+            accordionTitle="Offene Mietforderungen"
+            initialOpen={forderungTableRows.length > 0}
+            rows={forderungTableRows}
+            headers={forderungHeaders}
+        />
         <WalterDataTable
             layout="accordion"
             accordionTitle="Zählerstände fällig"
@@ -262,10 +376,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Abrechnungen ausstehend"
+            accordionTitle="Rechnungen ausstehend"
             rows={billingTableRows}
             headers={billingHeaders}
         />
+        <!-- <WalterDataTable
+            layout="accordion"
+            accordionTitle="Rechnungen unbezahlt"
+        /> -->
     {/if}
 </Tile>
 

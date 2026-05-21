@@ -20,8 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let layout: 'inline' | 'accordion' = 'inline';
     export let accordionTitle: string = '';
     export let count = 0;
+    export let initialOpen = false;
 
-    let open = false;
+    let open = initialOpen;
 </script>
 
 {#if layout === 'accordion'}

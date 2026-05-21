@@ -19,6 +19,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 {
@@ -354,11 +355,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         public ActionResult<IEnumerable<SelectionEntry>> GetBankkontos()
         {
             var list = Ctx.Bankkontos
-                .Select(b => new { b.BankkontoId, b.Iban, b.Bank })
+                .Include(b => b.Besitzer)
                 .ToList();
             return Ok(list.Select(b => new SelectionEntry(
                 b.BankkontoId,
-                b.Iban ?? b.Bank ?? $"Bankkonto {b.BankkontoId}")));
+                BankkontoLabel(b))));
+        }
+
+        internal static string BankkontoLabel(Bankkonto b)
+        {
+            var parts = new List<string>();
+            var besitzer = b.Besitzer.FirstOrDefault()?.Bezeichnung;
+            if (!string.IsNullOrWhiteSpace(besitzer)) parts.Add(besitzer);
+            if (!string.IsNullOrWhiteSpace(b.Bank)) parts.Add(b.Bank);
+            if (!string.IsNullOrWhiteSpace(b.Iban)) parts.Add(b.Iban);
+            return parts.Count > 0 ? string.Join(" – ", parts) : $"Bankkonto {b.BankkontoId}";
         }
     }
 }

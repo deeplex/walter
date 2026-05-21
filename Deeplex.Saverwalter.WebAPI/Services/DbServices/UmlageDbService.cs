@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -33,10 +34,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var userId = user.GetUserId();
-            var baseQuery = Ctx.Umlagen
+        public Task<PagedResult<UmlageEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            UmlagePermissionHandler.GetQueryable(Ctx, user)
                 .AsSplitQuery()
                 .Include(u => u.Typ)
                 .Include(u => u.Betriebskostenrechnungen)
@@ -44,22 +43,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         .ThenInclude(s => s.Buchungszeilen)
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Adresse)
-                        .ThenInclude(a => a.Wohnungen)
                 .Include(u => u.Wohnungen)
-                    .ThenInclude(w => w.Verwalter);
-
-            var list = await (user.IsInRole("Admin")
-                ? baseQuery.ToListAsync()
-                : baseQuery
-                    .Where(e => e.Wohnungen.Any(w =>
-                        w.Verwalter.Count != 0 &&
-                        w.Verwalter.AsQueryable()
-                            .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, userId))))
-                    .ToListAsync());
-
-            return await Task.WhenAll(list
-                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+                    .ThenInclude(w => w.Verwalter)
+                .PagedAsync(query,
+                    searchPredicate: t => e =>
+                        e.Typ.Bezeichnung.ToLower().Contains(t) ||
+                        e.Wohnungen.Any(w =>
+                            w.Bezeichnung.ToLower().Contains(t) ||
+                            (w.Adresse != null && (
+                                w.Adresse.Strasse.ToLower().Contains(t) ||
+                                w.Adresse.Stadt.ToLower().Contains(t)))),
+                    applySort: (q, sortBy, dir) => sortBy switch
+                    {
+                        "wohnungenBezeichnung" => q.SortBy(e => e.Wohnungen.Count, dir),
+                        _ => q.SortBy(e => e.Typ.Bezeichnung, dir)
+                    },
+                    toEntry: async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Umlage>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
