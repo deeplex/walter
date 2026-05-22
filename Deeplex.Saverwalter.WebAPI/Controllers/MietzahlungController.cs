@@ -102,6 +102,47 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result);
         }
 
+        public class BkForderungInfo
+        {
+            public int BetriebskostenrechnungId { get; set; }
+            public decimal Betrag { get; set; }
+            public DateOnly Datum { get; set; }
+            public decimal SchonGezahlt { get; set; }
+            public decimal Verbleibend { get; set; }
+        }
+
+        /// <summary>
+        /// Gibt existierende Betriebskostenrechnungen für eine Umlage in einem Jahr zurück.
+        /// </summary>
+        [HttpGet("bk/check-forderung")]
+        public async Task<ActionResult<IEnumerable<BkForderungInfo>>> CheckForderung([FromQuery] int umlageId, [FromQuery] int year)
+        {
+            var umlage = await ctx.Umlagen.FindAsync(umlageId);
+            if (umlage is null) return NotFound();
+            var authRx = await auth.AuthorizeAsync(User, umlage, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var rechnungen = await ctx.Betriebskostenrechnungen
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .Where(r => r.Umlage.UmlageId == umlageId && r.BetreffendesJahr == year)
+                .ToListAsync();
+
+            return Ok(rechnungen.Select(r =>
+            {
+                var habenZeile = r.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+                var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
+                return new BkForderungInfo
+                {
+                    BetriebskostenrechnungId = r.BetriebskostenrechnungId,
+                    Betrag = r.Betrag,
+                    Datum = r.Datum,
+                    SchonGezahlt = schonGezahlt,
+                    Verbleibend = r.Betrag - schonGezahlt
+                };
+            }));
+        }
+
         /// <summary>
         /// Offener Posten einer Betriebskostenrechnung — Rechnungsbetrag minus bereits gebuchte Zahlungen.
         /// </summary>

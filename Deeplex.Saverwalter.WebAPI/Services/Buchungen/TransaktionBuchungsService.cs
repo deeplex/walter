@@ -121,6 +121,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     .FirstOrDefaultAsync(b => b.BankkontoId == input.ZahlungsempfaengerId.Value)
                     ?? throw new ArgumentException($"Zahlungsempfänger {input.ZahlungsempfaengerId} nicht gefunden.");
 
+            if (transaktion.Zahler is null && input.BetriebskostenEingaenge.Count > 0)
+                transaktion.Zahler = await ResolveZahlerFromBkAsync(input.BetriebskostenEingaenge[0]);
+
             if (input.Erhaltungsaufwendungen.Count > 0 && transaktion.Zahler is null)
                 throw new ArgumentException("Erhaltungsaufwendungen erfordern ein Zahlerkonto.");
 
@@ -239,12 +242,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             if (bk.ExistingBetriebskostenrechnungId.HasValue)
             {
                 var rechnung = await _ctx.Betriebskostenrechnungen
-                    .Include(b => b.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .Include(b => b.Buchungssatz).ThenInclude(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
                     .Include(b => b.Umlage).ThenInclude(u => u.NkVerrechnungsKonto)
                     .Include(b => b.Umlage).ThenInclude(u => u.ZahlungsKonto)
                     .Include(b => b.Umlage).ThenInclude(u => u.Typ)
                     .FirstOrDefaultAsync(b => b.BetriebskostenrechnungId == bk.ExistingBetriebskostenrechnungId.Value)
                     ?? throw new ArgumentException($"Betriebskostenrechnung {bk.ExistingBetriebskostenrechnungId} nicht gefunden.");
+
+                var forderungsHabenZeile = rechnung.Buchungssatz.Buchungszeilen
+                    .First(z => z.SollHaben == SollHaben.Haben);
+                var schonGezahlt = forderungsHabenZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                var verbleibend = rechnung.Betrag - schonGezahlt;
+                if (bk.Betrag > verbleibend + 0.005m)
+                    throw new InvalidOperationException(
+                        $"Zahlungsbetrag ({bk.Betrag:C}) übersteigt verbleibende Forderung ({verbleibend:C}).");
 
                 var zahlungsSatz = new Buchungssatz(
                     zahlungsdatum,
@@ -252,8 +263,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 AddZeile(zahlungsSatz, SollHaben.Soll, bk.Betrag, rechnung.Umlage.NkVerrechnungsKonto);
                 AddZeile(zahlungsSatz, SollHaben.Haben, bk.Betrag, rechnung.Umlage.ZahlungsKonto);
 
-                var forderungsHabenZeile = rechnung.Buchungssatz.Buchungszeilen
-                    .First(z => z.SollHaben == SollHaben.Haben);
                 var zahlungsSollZeile = zahlungsSatz.Buchungszeilen
                     .First(z => z.SollHaben == SollHaben.Soll);
                 _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
@@ -341,6 +350,32 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         }
 
         // ── Hilfsfunktionen ───────────────────────────────────────────────────────
+
+        private async Task<Bankkonto?> ResolveZahlerFromBkAsync(BetriebskostenEingangInput bk)
+        {
+            var umlageId = bk.ExistingBetriebskostenrechnungId.HasValue
+                ? await _ctx.Betriebskostenrechnungen
+                    .Where(r => r.BetriebskostenrechnungId == bk.ExistingBetriebskostenrechnungId.Value)
+                    .Select(r => (int?)r.Umlage.UmlageId)
+                    .FirstOrDefaultAsync()
+                : bk.UmlageId;
+
+            if (umlageId is null) return null;
+
+            var besitzerIds = await _ctx.Umlagen
+                .Where(u => u.UmlageId == umlageId)
+                .SelectMany(u => u.Wohnungen)
+                .Where(w => w.Besitzer != null)
+                .Select(w => w.Besitzer!.KontaktId)
+                .Distinct()
+                .ToListAsync();
+
+            if (besitzerIds.Count == 0) return null;
+
+            return await _ctx.Bankkontos
+                .Include(b => b.BuchungsKonto)
+                .FirstOrDefaultAsync(b => b.Besitzer.Any(k => besitzerIds.Contains(k.KontaktId)));
+        }
 
         private Buchungszeile FindeOderErstelleSollstellung(Vertrag vertrag, DateOnly monat, VertragVersion version)
         {

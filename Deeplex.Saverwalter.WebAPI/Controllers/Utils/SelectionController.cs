@@ -362,6 +362,43 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 BankkontoLabel(b))));
         }
 
+        [HttpGet]
+        [Route("api/selection/zahler-bankkonto/betriebskostenrechnung/{rechnungId}")]
+        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForBkRechnung(int rechnungId)
+        {
+            var umlageId = await Ctx.Betriebskostenrechnungen
+                .Where(r => r.BetriebskostenrechnungId == rechnungId)
+                .Select(r => (int?)r.Umlage.UmlageId)
+                .FirstOrDefaultAsync();
+
+            if (umlageId is null) return NotFound();
+
+            return await GetZahlerBankkontoForUmlage(umlageId.Value);
+        }
+
+        [HttpGet]
+        [Route("api/selection/zahler-bankkonto/umlage/{umlageId}")]
+        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForUmlage(int umlageId)
+        {
+            var besitzerIds = await Ctx.Umlagen
+                .Where(u => u.UmlageId == umlageId)
+                .SelectMany(u => u.Wohnungen)
+                .Where(w => w.Besitzer != null)
+                .Select(w => w.Besitzer!.KontaktId)
+                .Distinct()
+                .ToListAsync();
+
+            if (besitzerIds.Count == 0) return NotFound();
+
+            var bankkonto = await Ctx.Bankkontos
+                .Include(b => b.Besitzer)
+                .FirstOrDefaultAsync(b => b.Besitzer.Any(k => besitzerIds.Contains(k.KontaktId)));
+
+            if (bankkonto is null) return NotFound();
+
+            return Ok(new SelectionEntry(bankkonto.BankkontoId, BankkontoLabel(bankkonto)));
+        }
+
         internal static string BankkontoLabel(Bankkonto b)
         {
             var parts = new List<string>();

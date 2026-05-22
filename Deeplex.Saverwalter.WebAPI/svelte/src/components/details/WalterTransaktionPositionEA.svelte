@@ -23,7 +23,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterTextInput
     } from '$walter/components';
     import { walter_selection, walter_get } from '$walter/services/requests';
-    import type { WalterSelectionEntry, WalterOffenerPostenStatus } from '$walter/lib';
+    import type {
+        WalterSelectionEntry,
+        WalterOffenerPostenStatus
+    } from '$walter/lib';
     import type { ErhaltungsaufwendungsInput } from '$walter/lib';
 
     export let fetchImpl: typeof fetch;
@@ -40,9 +43,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_selection.erhaltungsaufwendungen(fetchImpl);
 
     $: ea.wohnungId = wohnung?.id as number | undefined;
-    $: ea.existingErhaltungsaufwendungId = existingEa?.id as
-        | number
-        | undefined;
+    $: ea.existingErhaltungsaufwendungId = existingEa?.id as number | undefined;
     $: if (isSinglePosition && availableBetrag > 0) {
         ea.betrag = availableBetrag;
     }
@@ -98,7 +99,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 size="small"
                 on:click={switchToExisting}
             >
-                Bestehend verknüpfen
+                Bestehende Forderung zahlen
             </Button>
         </div>
     </Column>

@@ -15,20 +15,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column, Button, Tag, InlineNotification } from 'carbon-components-svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import {
+        Row,
+        Column,
+        Button,
+        Tag,
+        InlineNotification
+    } from 'carbon-components-svelte';
     import {
         WalterComboBox,
         WalterDatePicker,
         WalterNumberInput
     } from '$walter/components';
     import { walter_selection, walter_get } from '$walter/services/requests';
-    import type { WalterSelectionEntry, WalterOffenerPostenStatus } from '$walter/lib';
+    import type {
+        WalterSelectionEntry,
+        WalterOffenerPostenStatus
+    } from '$walter/lib';
     import type { BetriebskostenEingangInput } from '$walter/lib';
+
+    const dispatch = createEventDispatcher<{
+        zahlerResolved: number | undefined;
+    }>();
 
     export let fetchImpl: typeof fetch;
     export let bk: BetriebskostenEingangInput;
     export let availableBetrag = 0;
     export let isSinglePosition = false;
+    export let invalid = false;
 
     let modeExisting = false;
     let umlage: WalterSelectionEntry | undefined = undefined;
@@ -43,14 +58,91 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bk.betreffendesJahr = new Date().getFullYear() - 1;
     }
 
-    $: bk.umlageId = umlage?.id as number | undefined;
-    $: bk.existingBetriebskostenrechnungId = existingBk?.id as
-        | number
-        | undefined;
+    // Auto-resolve Zahler if Umlage is pre-filled (e.g. from quickadd context)
+    onMount(() => {
+        if (bk.umlageId) resolveAndDispatchZahler(bk.umlageId);
+    });
+
+    async function resolveAndDispatchZahler(umlageId: number | undefined) {
+        if (!umlageId) {
+            dispatch('zahlerResolved', undefined);
+            return;
+        }
+        try {
+            const resp = await walter_get(
+                `/api/selection/zahler-bankkonto/umlage/${umlageId}`,
+                fetchImpl
+            );
+            dispatch(
+                'zahlerResolved',
+                (resp as WalterSelectionEntry | null)?.id as number | undefined
+            );
+        } catch {
+            dispatch('zahlerResolved', undefined);
+        }
+    }
+
+    function onUmlageSelect(e: CustomEvent) {
+        umlage = e.detail?.selectedItem;
+        bk.umlageId = umlage?.id as number | undefined;
+        resolveAndDispatchZahler(bk.umlageId);
+    }
+
+    async function onExistingBkSelect(e: CustomEvent) {
+        existingBk = e.detail?.selectedItem;
+        bk.existingBetriebskostenrechnungId = existingBk?.id as
+            | number
+            | undefined;
+        ladeOffenerPosten(existingBk?.id as number | undefined);
+        if (existingBk?.id) {
+            try {
+                const resp = await walter_get(
+                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${existingBk.id}`,
+                    fetchImpl
+                );
+                dispatch(
+                    'zahlerResolved',
+                    (resp as WalterSelectionEntry | null)?.id as
+                        | number
+                        | undefined
+                );
+            } catch {
+                dispatch('zahlerResolved', undefined);
+            }
+        } else {
+            dispatch('zahlerResolved', undefined);
+        }
+    }
+
+    type BkForderungInfo = { betriebskostenrechnungId: number; betrag: number; datum: string; schonGezahlt: number; verbleibend: number };
+    let existingeForderungen: BkForderungInfo[] = [];
+    $: if (!modeExisting && bk.umlageId && bk.betreffendesJahr) {
+        walter_get(
+            `/api/mietzahlungen/bk/check-forderung?umlageId=${bk.umlageId}&year=${bk.betreffendesJahr}`,
+            fetchImpl
+        )
+            .then((r) => { existingeForderungen = (r as BkForderungInfo[]) ?? []; })
+            .catch(() => { existingeForderungen = []; });
+    } else if (modeExisting) {
+        existingeForderungen = [];
+    }
+
+    function forderungStatus(f: BkForderungInfo): string {
+        if (f.verbleibend <= 0) return 'vollständig bezahlt';
+        if (f.schonGezahlt > 0) return `${f.schonGezahlt.toFixed(2)} € bereits gezahlt, ${f.verbleibend.toFixed(2)} € offen`;
+        return 'noch nicht bezahlt';
+    }
+
+    $: invalid = modeExisting
+        ? !!(
+              offenerPosten &&
+              bk.betrag > offenerPosten.verbleibenderBetrag + 0.005
+          )
+        : false;
+
     $: if (isSinglePosition && availableBetrag > 0) {
         bk.betrag = availableBetrag;
     }
-    $: ladeOffenerPosten(existingBk?.id as number | undefined);
 
     async function ladeOffenerPosten(id: number | undefined) {
         if (!id) {
@@ -73,17 +165,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
+    let autoSelectBkId: number | undefined = undefined;
+
     function switchToNew() {
         modeExisting = false;
         bk.existingBetriebskostenrechnungId = undefined;
-        existingBk = undefined;
-        offenerPosten = undefined;
     }
 
-    function switchToExisting() {
+    async function switchToExisting() {
+        const first = existingeForderungen[0];
         modeExisting = true;
-        bk.umlageId = undefined;
-        umlage = undefined;
+        if (first && !bk.existingBetriebskostenrechnungId) {
+            autoSelectBkId = first.betriebskostenrechnungId;
+            bk.existingBetriebskostenrechnungId = first.betriebskostenrechnungId;
+            ladeOffenerPosten(first.betriebskostenrechnungId);
+            try {
+                const resp = await walter_get(
+                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${first.betriebskostenrechnungId}`,
+                    fetchImpl
+                );
+                dispatch('zahlerResolved', (resp as WalterSelectionEntry | null)?.id as number | undefined);
+            } catch { dispatch('zahlerResolved', undefined); }
+        }
     }
 </script>
 
@@ -100,9 +203,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Button
                 kind={modeExisting ? 'primary' : 'ghost'}
                 size="small"
-                on:click={switchToExisting}
+                on:click={() => switchToExisting()}
             >
-                Bestehend verknüpfen
+                Bestehende Forderung zahlen
             </Button>
         </div>
     </Column>
@@ -116,6 +219,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 titleText="Betriebskostenrechnung"
                 entries={betriebskostenrechnungen}
                 bind:value={existingBk}
+                initialId={autoSelectBkId}
+                on:select={onExistingBkSelect}
             />
         </Column>
         <Column>
@@ -133,18 +238,37 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <InlineNotification
                         kind="warning"
                         title="Bereits vollständig bezahlt"
-                        subtitle="Rechnungsbetrag: {offenerPosten.rechnungsbetrag.toFixed(2)} €, bereits gezahlt: {offenerPosten.schonGezahlt.toFixed(2)} €"
+                        subtitle="Rechnungsbetrag: {offenerPosten.rechnungsbetrag.toFixed(
+                            2
+                        )} €, bereits gezahlt: {offenerPosten.schonGezahlt.toFixed(
+                            2
+                        )} €"
                         hideCloseButton
                     />
                 {:else}
                     <Tag type="blue">
-                        Rechnungsbetrag: {offenerPosten.rechnungsbetrag.toFixed(2)} € —
-                        noch offen: {offenerPosten.verbleibenderBetrag.toFixed(2)} €
+                        Rechnungsbetrag: {offenerPosten.rechnungsbetrag.toFixed(
+                            2
+                        )} € — noch offen: {offenerPosten.verbleibenderBetrag.toFixed(
+                            2
+                        )} €
                     </Tag>
                     {#if offenerPosten.schonGezahlt > 0}
                         <Tag type="green">
-                            Bereits gezahlt: {offenerPosten.schonGezahlt.toFixed(2)} €
+                            Bereits gezahlt: {offenerPosten.schonGezahlt.toFixed(
+                                2
+                            )} €
                         </Tag>
+                    {/if}
+                    {#if invalid}
+                        <InlineNotification
+                            kind="error"
+                            title="Betrag zu hoch:"
+                            subtitle="Maximal {offenerPosten.verbleibenderBetrag.toFixed(
+                                2
+                            )} € erlaubt"
+                            hideCloseButton
+                        />
                     {/if}
                 {/if}
             </Column>
@@ -159,6 +283,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 entries={umlagen}
                 bind:value={umlage}
                 initialId={bk.umlageId}
+                on:select={onUmlageSelect}
             />
         </Column>
         <Column>
@@ -186,4 +311,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </Column>
     </Row>
+    {#if existingeForderungen.length > 0}
+        <Row>
+            <Column>
+                <InlineNotification
+                    kind="warning"
+                    title="Bereits {existingeForderungen.length} Forderung{existingeForderungen.length > 1 ? 'en' : ''} für dieses Jahr vorhanden"
+                    subtitle={existingeForderungen.map(f => `${f.betrag.toFixed(2)} € vom ${new Date(f.datum).toLocaleDateString('de-DE')} (${forderungStatus(f)})`).join(' | ')}
+                    hideCloseButton
+                />
+            </Column>
+        </Row>
+    {/if}
 {/if}

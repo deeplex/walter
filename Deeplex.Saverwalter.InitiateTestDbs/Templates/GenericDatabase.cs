@@ -231,7 +231,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var mieter = FillMieterSet(ctx, vertraege, random);
             FillErhaltungsaufwendungen(ctx, wohnungen, random);
             FillMietminderungen(ctx, vertraege, random);
-            var (mieterBankkontos, vertragBankkontos) = FillBankkontos(ctx, eigentuemer, mieter, vertraege, random);
+            var (mieterBankkontos, vertragBankkontos, eigentuemerBankkontos) = FillBankkontos(ctx, eigentuemer, mieter, vertraege, random);
             FillTransaktionen(ctx, vertraege, mieterBankkontos, vertragBankkontos, random);
             FillGaragen(ctx, wohnungen, vertraege, random);
 
@@ -239,7 +239,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var hauszaehlerHeizung = FillZaehlerSet(ctx, umlagen);
             FillZaehlerstaende(ctx, vertraege, random);
             FillHKVO(ctx, umlagen, hauszaehlerHeizung);
-            FillBetriebskostenrechnungen(ctx, umlagen, random);
+            FillBetriebskostenrechnungen(ctx, umlagen, eigentuemerBankkontos, random);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
             await ctx.SaveChangesAsync();
@@ -832,7 +832,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mietminderungen;
         }
 
-        private static (Dictionary<Kontakt, Bankkonto> mieterBankkontos, Dictionary<Vertrag, Bankkonto> vertragBankkontos) FillBankkontos(
+        private static (Dictionary<Kontakt, Bankkonto> mieterBankkontos, Dictionary<Vertrag, Bankkonto> vertragBankkontos, Dictionary<Kontakt, Bankkonto> eigentuemerBankkontos) FillBankkontos(
             SaverwalterContext ctx,
             List<Kontakt> eigentuemer,
             List<Kontakt> mieter,
@@ -846,6 +846,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             // One Bankkonto per Kontakt (Eigentuemer + Mieter)
             var mieterBankkontos = new Dictionary<Kontakt, Bankkonto>();
+            var eigentuemerBankkontos = new Dictionary<Kontakt, Bankkonto>();
             foreach (var kontakt in eigentuemer.Concat(mieter))
             {
                 var idx = bankkontos.Count;
@@ -859,6 +860,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 bankkontos.Add(bk);
                 if (mieter.Contains(kontakt))
                     mieterBankkontos[kontakt] = bk;
+                else
+                    eigentuemerBankkontos[kontakt] = bk;
             }
 
             // One Bankkonto per Vertrag's ZahlungsKonto (so OffeneForderungen can resolve it)
@@ -880,7 +883,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             ctx.Bankkontos.AddRange(bankkontos);
             Console.WriteLine($"{bankkontos.Count} Bankkontos hinzugefügt");
-            return (mieterBankkontos, vertragBankkontos);
+            return (mieterBankkontos, vertragBankkontos, eigentuemerBankkontos);
         }
 
         private static List<Garage> FillGaragen(
@@ -1126,6 +1129,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         private static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(
             SaverwalterContext ctx,
             List<Umlage> umlagen,
+            Dictionary<Kontakt, Bankkonto> eigentuemerBankkontos,
             Random random)
         {
             Console.Write("Füge Betriebskostenrechnung hinzu: ");
@@ -1134,11 +1138,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             foreach (var umlage in umlagen)
             {
+                var zahlerBankkonto = umlage.Wohnungen
+                    .Select(w => w.Besitzer != null ? eigentuemerBankkontos.GetValueOrDefault(w.Besitzer) : null)
+                    .FirstOrDefault(b => b != null);
+
                 var beginn = GetEarliestDate(umlage.Wohnungen.ToList());
                 if (beginn == default)
-                {
                     beginn = GlobalToday.AddYears(-3);
-                }
 
                 for (var year = beginn.Year; year < GlobalToday.Year; year++)
                 {
@@ -1154,30 +1160,54 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var annualFactor = (decimal)(1 + ((year - beginn.Year) * (0.01 + random.NextDouble() * 0.015)));
                     var betrag = Math.Round(basisbetrag * annualFactor, 2);
                     var datum = new DateOnly(year, 12, 31);
-                    var buchungssatz = new Buchungssatz(datum, $"BK-Zahlung {umlage.Typ.Bezeichnung} {year}");
-                    var transaktion = new Transaktion
+
+                    // 1. Forderungs-Buchungssatz: Haben NkVerrechnungsKonto (Kosten-Pool wächst)
+                    var forderungsSatz = new Buchungssatz(datum, $"BK-Eingang {umlage.Typ.Bezeichnung} {year}");
+                    var forderungsHaben = new Buchungszeile(SollHaben.Haben, betrag)
+                    {
+                        Buchungssatz = forderungsSatz,
+                        Buchungskonto = umlage.NkVerrechnungsKonto
+                    };
+                    forderungsSatz.Buchungszeilen.Add(forderungsHaben);
+
+                    // 2. Zahlungs-Transaktion + Buchungssatz: Soll NkVerrechnungsKonto / Haben ZahlungsKonto
+                    var zahlungsSatz = new Buchungssatz(datum, $"BK-Zahlung {umlage.Typ.Bezeichnung} {year}");
+                    var zahlungsTransaktion = new Transaktion
                     {
                         Zahlungsdatum = datum,
                         Betrag = betrag,
-                        Verwendungszweck = buchungssatz.Beschreibung,
+                        Verwendungszweck = zahlungsSatz.Beschreibung,
+                        Zahler = zahlerBankkonto,
                     };
-                    buchungssatz.Transaktion = transaktion;
-                    buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                    zahlungsSatz.Transaktion = zahlungsTransaktion;
+                    var zahlungsSoll = new Buchungszeile(SollHaben.Soll, betrag)
                     {
-                        Buchungssatz = buchungssatz,
+                        Buchungssatz = zahlungsSatz,
                         Buchungskonto = umlage.NkVerrechnungsKonto
-                    });
-                    buchungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                    };
+                    zahlungsSatz.Buchungszeilen.Add(zahlungsSoll);
+                    zahlungsSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
                     {
-                        Buchungssatz = buchungssatz,
+                        Buchungssatz = zahlungsSatz,
                         Buchungskonto = umlage.ZahlungsKonto
                     });
+
+                    // 3. OPOS-Ausgleich
+                    ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                    {
+                        SollZeile = zahlungsSoll,
+                        HabenZeile = forderungsHaben
+                    });
+
                     var rechnung = new Betriebskostenrechnung(betrag, datum, year)
                     {
                         Umlage = umlage,
-                        Buchungssatz = buchungssatz
+                        Buchungssatz = forderungsSatz,
                     };
                     betriebskostenrechnungen.Add(rechnung);
+                    ctx.Buchungssaetze.Add(forderungsSatz);
+                    ctx.Buchungssaetze.Add(zahlungsSatz);
+                    ctx.Transaktionen.Add(zahlungsTransaktion);
                 }
             }
 

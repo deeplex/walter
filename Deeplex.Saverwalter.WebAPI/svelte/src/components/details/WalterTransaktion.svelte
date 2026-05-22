@@ -73,10 +73,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: offenerBetrag = (buchung.betrag || 0) - verteilterBetrag;
 
     let mieteInvalids: boolean[] = [];
+    let bkInvalids: boolean[] = [];
     $: isValid =
         buchung.betrag > 0 &&
         Math.abs(offenerBetrag) < 0.005 &&
-        !mieteInvalids.some(Boolean);
+        !mieteInvalids.some(Boolean) &&
+        !bkInvalids.some(Boolean);
 
     function addMiete() {
         const available = Math.max(0, offenerBetrag);
@@ -88,9 +90,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function addBK() {
         const available = Math.max(0, offenerBetrag);
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         buchung.betriebskostenEingaenge = [
             ...buchung.betriebskostenEingaenge,
-            { betrag: available, betreffendesJahr: new Date().getFullYear() - 1 }
+            { betrag: available, betreffendesJahr: now.getFullYear() - 1, rechnungsDatum: today }
         ];
     }
 
@@ -130,6 +134,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         buchung.zahlerId = e.detail ? +e.detail.id || undefined : undefined;
     }
 
+    function onZahlerResolved(e: CustomEvent<number | undefined>) {
+        if (buchung.zahlerId) return; // don't overwrite explicit user selection
+        buchung.zahlerId = e.detail;
+    }
+
     function onZahlungsempfaengerChange(e: CustomEvent) {
         buchung.zahlungsempfaengerId = e.detail ? +e.detail.id || undefined : undefined;
     }
@@ -140,6 +149,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:betrag={buchung.betrag}
     bind:zahlungsdatum={buchung.zahlungsdatum}
     {fetchImpl}
+    initialZahlerId={buchung.zahlerId}
     initialZahlungsempfaengerId={buchung.zahlungsempfaengerId}
     on:zahlerChange={onZahlerChange}
     on:zahlungsempfaengerChange={onZahlungsempfaengerChange}
@@ -159,7 +169,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <hr style="margin: 1rem 0" />
 
 <!-- Mieten -->
-{#each buchung.mieten as miete, i (i)}
+{#each buchung.mieten as _, i (i)}
     <Tile style="margin-bottom: 1rem">
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
@@ -184,7 +194,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/each}
 
 <!-- Betriebskosten -->
-{#each buchung.betriebskostenEingaenge as bk, i (i)}
+{#each buchung.betriebskostenEingaenge as _, i (i)}
     <Tile style="margin-bottom: 1rem">
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
@@ -202,13 +212,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {fetchImpl}
             bind:bk={buchung.betriebskostenEingaenge[i]}
             availableBetrag={buchung.betrag ?? 0}
+            bind:invalid={bkInvalids[i]}
             {isSinglePosition}
+            on:zahlerResolved={onZahlerResolved}
         />
     </Tile>
 {/each}
 
 <!-- Erhaltungsaufwendungen -->
-{#each buchung.erhaltungsaufwendungen as ea, i (i)}
+{#each buchung.erhaltungsaufwendungen as _, i (i)}
     <Tile style="margin-bottom: 1rem">
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
