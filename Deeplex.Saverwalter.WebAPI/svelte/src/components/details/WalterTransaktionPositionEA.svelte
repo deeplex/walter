@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column, Button, Tag } from 'carbon-components-svelte';
+    import { Row, Column, Button, Tag, InlineNotification } from 'carbon-components-svelte';
     import {
         WalterComboBox,
         WalterComboBoxWohnung,
@@ -33,6 +33,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let ea: ErhaltungsaufwendungsInput;
     export let availableBetrag = 0;
     export let isSinglePosition = false;
+    export let invalid = false;
 
     let modeExisting = false;
     let wohnung: WalterSelectionEntry | undefined = undefined;
@@ -44,6 +45,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: ea.wohnungId = wohnung?.id as number | undefined;
     $: ea.existingErhaltungsaufwendungId = existingEa?.id as number | undefined;
+    $: invalid = modeExisting ? !ea.existingErhaltungsaufwendungId : !ea.wohnungId;
     $: if (isSinglePosition && availableBetrag > 0) {
         ea.betrag = availableBetrag;
     }
@@ -134,6 +136,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </Column>
     </Row>
+    {#if eaInfo && ea.betrag < eaInfo.verbleibenderBetrag - 0.005}
+        <Row>
+            <Column>
+                <InlineNotification
+                    kind="warning"
+                    title="Teilzahlung:"
+                    subtitle="Noch {(eaInfo.verbleibenderBetrag - ea.betrag).toFixed(2)} € offen nach dieser Zahlung"
+                    hideCloseButton
+                />
+            </Column>
+        </Row>
+    {/if}
 {:else}
     <Row>
         <Column>

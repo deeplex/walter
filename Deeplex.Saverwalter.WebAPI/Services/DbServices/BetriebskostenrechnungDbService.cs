@@ -136,6 +136,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             });
         }
 
+        public override async Task<ActionResult<BetriebskostenrechnungEntry>> Post(ClaimsPrincipal user, BetriebskostenrechnungEntry entry)
+        {
+            if (entry.Umlage == null)
+                return new BadRequestObjectResult("entry.Umlage can't be null.");
+
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id);
+            if (umlage is null)
+                return new BadRequestObjectResult($"Did not find Umlage with Id {entry.Umlage.Id}");
+
+            var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.Update]);
+            if (!authRx.Succeeded)
+                return new ForbidResult();
+
+            return await Add(entry);
+        }
+
         private async Task<BetriebskostenrechnungEntry> Add(BetriebskostenrechnungEntry entry)
         {
             if (entry.Umlage == null)

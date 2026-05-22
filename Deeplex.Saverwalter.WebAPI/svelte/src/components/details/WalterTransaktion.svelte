@@ -74,11 +74,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let mieteInvalids: boolean[] = [];
     let bkInvalids: boolean[] = [];
+    let eaInvalids: boolean[] = [];
     $: isValid =
         buchung.betrag > 0 &&
         Math.abs(offenerBetrag) < 0.005 &&
         !mieteInvalids.some(Boolean) &&
-        !bkInvalids.some(Boolean);
+        !bkInvalids.some(Boolean) &&
+        !eaInvalids.some(Boolean);
 
     function addMiete() {
         const available = Math.max(0, offenerBetrag);
@@ -238,6 +240,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {fetchImpl}
             bind:ea={buchung.erhaltungsaufwendungen[i]}
             availableBetrag={buchung.betrag ?? 0}
+            bind:invalid={eaInvalids[i]}
             {isSinglePosition}
         />
     </Tile>

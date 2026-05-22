@@ -107,6 +107,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
+        [Route("api/selection/betriebskostenrechnungen/offen")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetBetriebskostenrechnungenOffen()
+        {
+            var list = await Ctx.Betriebskostenrechnungen
+                .AsSplitQuery()
+                .Include(e => e.Umlage).ThenInclude(u => u.Typ)
+                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .ToListAsync();
+
+            return Ok(list
+                .Where(e =>
+                {
+                    var habenZeile = e.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+                    var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
+                    return e.Betrag - schonGezahlt > 0.005m;
+                })
+                .Select(e => new SelectionEntry(
+                    e.BetriebskostenrechnungId,
+                    $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}")));
+        }
+
+        [HttpGet]
         [Route("api/selection/erhaltungsaufwendungen")]
         public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetErhaltungsaufwendungen()
         {

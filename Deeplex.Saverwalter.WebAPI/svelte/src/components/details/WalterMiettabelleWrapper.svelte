@@ -33,6 +33,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { invalidateAll } from '$app/navigation';
     import { onMount } from 'svelte';
 
+    interface OffeneBkForderungEntry {
+        betriebskostenrechnungId: number;
+        bezeichnung: string;
+        betrag: number;
+        schonGezahlt: number;
+        verbleibend: number;
+    }
+
     interface OffeneMietForderungEntry {
         vertragId: number;
         vertragBezeichnung: string;
@@ -68,8 +76,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         mietForderungenReady = true;
     }
 
+    // ── Offene BK-Forderungen ───────────────────────────────────────────────
+    let offeneBkForderungen: OffeneBkForderungEntry[] = [];
+    let bkForderungenReady = false;
+
+    async function ladeOffeneBkForderungen(jahr: number) {
+        bkForderungenReady = false;
+        try {
+            const resp = await walter_get(
+                `/api/offene-forderungen/bk/${jahr}`,
+                fetchImpl
+            );
+            offeneBkForderungen = (resp as OffeneBkForderungEntry[]) ?? [];
+        } catch (e) {
+            console.error('Konnte offene BK-Forderungen nicht laden:', e);
+            offeneBkForderungen = [];
+        }
+        bkForderungenReady = true;
+    }
+
     onMount(async () => {
-        await ladeOffeneMietForderungen(selectedYear);
+        await Promise.all([
+            ladeOffeneMietForderungen(selectedYear),
+            ladeOffeneBkForderungen(selectedYear)
+        ]);
         try {
             const [umlPaged, zaehlerPaged] = await Promise.all([
                 WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(fetchImpl, {
@@ -105,6 +135,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: if (selectedYear !== _lastLoadedYear) {
         _lastLoadedYear = selectedYear;
         ladeOffeneMietForderungen(selectedYear);
+        ladeOffeneBkForderungen(selectedYear);
     }
 
     // ── Rent payment QuickAdd ───────────────────────────────────────────────
@@ -283,6 +314,49 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
+    // ── BK payment QuickAdd ─────────────────────────────────────────────────
+    let addBkPaymentOpen = false;
+    let bkPaymentModalTitle = 'Betriebskostenrechnung bezahlen';
+    let bkPaymentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
+    let bkPaymentBuchungsInputValid = false;
+
+    function openBkPaymentQuickAdd(
+        e: CustomEvent,
+        forderung: OffeneBkForderungEntry
+    ) {
+        e.stopPropagation();
+        bkPaymentModalTitle = forderung.bezeichnung;
+        bkPaymentBuchungsInput = {
+            ...emptyTransaktionsInput(),
+            betrag: forderung.verbleibend,
+            betriebskostenEingaenge: [
+                {
+                    betrag: forderung.verbleibend,
+                    existingBetriebskostenrechnungId:
+                        forderung.betriebskostenrechnungId
+                }
+            ]
+        };
+        addBkPaymentOpen = true;
+    }
+
+    async function onSubmitBkPayment() {
+        await ladeOffeneBkForderungen(selectedYear);
+    }
+
+    const bkForderungHeaders = [
+        { key: 'bezeichnung', value: 'Betriebskostenrechnung' },
+        { key: 'verbleibend', value: 'Offen (€)' },
+        { key: 'button', value: '' }
+    ];
+
+    $: bkForderungTableRows = offeneBkForderungen.map((f) => ({
+        id: `bk-${f.betriebskostenrechnungId}`,
+        bezeichnung: f.bezeichnung,
+        verbleibend: f.verbleibend.toFixed(2),
+        button: (e: CustomEvent) => openBkPaymentQuickAdd(e, f)
+    }));
+
     $: billingTasks = umlagen.filter(
         (u) =>
             (u.selectedWohnungen || []).length > 0 &&
@@ -339,6 +413,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </WalterDataWrapperQuickAdd>
 
+<WalterDataWrapperQuickAdd
+    title={bkPaymentModalTitle}
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={bkPaymentBuchungsInput}
+    bind:addModalOpen={addBkPaymentOpen}
+    onSubmit={onSubmitBkPayment}
+    submitDisabled={!bkPaymentBuchungsInputValid}
+>
+    <WalterTransaktion
+        {fetchImpl}
+        bind:buchung={bkPaymentBuchungsInput}
+        bind:isValid={bkPaymentBuchungsInputValid}
+    />
+</WalterDataWrapperQuickAdd>
+
 <Tile light>
     <div class="year-selector">
         <NumberInput
@@ -350,17 +439,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     </div>
 
-    {#if !mietForderungenReady || !umlagenReady}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-        <SkeletonText style="margin: 0; height: 42px;" />
-    {:else if forderungTableRows.length === 0 && meterTableRows.length === 0 && billingTableRows.length === 0}
-        <p style="color: var(--cds-text-02); margin: 1rem;">
-            Alles erledigt für {selectedYear}
-        </p>
-    {:else}
+    {#if mietForderungenReady}
         <WalterDataTable
             layout="accordion"
             accordionTitle="Offene Mietforderungen"
@@ -368,23 +447,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={forderungTableRows}
             headers={forderungHeaders}
         />
+    {:else}
+        <SkeletonText style="margin: 0; height: 42px;" />
+        <div style="height: 2px;" />
+    {/if}
+
+    {#if umlagenReady}
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Zählerstände fällig"
-            rows={meterTableRows}
-            headers={meterHeaders}
-        />
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Rechnungen ausstehend"
+            accordionTitle="Fehlende Betriebskostenrechnungen"
+            initialOpen={billingTableRows.length > 0}
             rows={billingTableRows}
             headers={billingHeaders}
         />
-        <!-- <WalterDataTable
-            layout="accordion"
-            accordionTitle="Rechnungen unbezahlt"
-        /> -->
+    {:else}
+        <SkeletonText style="margin: 0; height: 42px;" />
+        <div style="height: 2px;" />
     {/if}
+
+    {#if bkForderungenReady}
+        <WalterDataTable
+            layout="accordion"
+            accordionTitle="Offene BK-Forderungen"
+            initialOpen={bkForderungTableRows.length > 0}
+            rows={bkForderungTableRows}
+            headers={bkForderungHeaders}
+        />
+    {:else}
+        <SkeletonText style="margin: 0; height: 42px;" />
+        <div style="height: 2px;" />
+    {/if}
+
+    <WalterDataTable
+        layout="accordion"
+        accordionTitle="Zählerstände fällig"
+        rows={meterTableRows}
+        headers={meterHeaders}
+    />
 </Tile>
 
 <style>

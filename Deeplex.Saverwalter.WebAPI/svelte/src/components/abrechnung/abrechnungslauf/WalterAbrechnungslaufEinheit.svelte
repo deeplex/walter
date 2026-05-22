@@ -107,7 +107,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const anteil = z.anteile.find((a) => a.vertragId === vertragId);
         const faktor = anteil?.anteilFaktor ?? 0;
         return {
-            id: `${z.umlageId}`,
+            id: `${z.umlageId}-${z.betriebskostenrechnungId ?? 'none'}`,
             umlageId: z.umlageId,
             rechnungId: z.betriebskostenrechnungId,
             typ: z.bezeichnung,

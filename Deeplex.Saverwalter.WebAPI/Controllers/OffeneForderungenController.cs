@@ -154,6 +154,48 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.VertragBezeichnung));
         }
 
+        public class OffeneBkForderungEntry
+        {
+            public int BetriebskostenrechnungId { get; set; }
+            public string Bezeichnung { get; set; } = "";
+            public decimal Betrag { get; set; }
+            public decimal SchonGezahlt { get; set; }
+            public decimal Verbleibend { get; set; }
+        }
+
+        [HttpGet("bk/{jahr}")]
+        public async Task<ActionResult<IEnumerable<OffeneBkForderungEntry>>> GetOffeneBkForderungen(int jahr)
+        {
+            var rechnungen = await ctx.Betriebskostenrechnungen
+                .AsSplitQuery()
+                .Include(r => r.Umlage).ThenInclude(u => u.Typ)
+                .Include(r => r.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .Where(r => r.BetreffendesJahr == jahr)
+                .ToListAsync();
+
+            var result = rechnungen
+                .Select(r =>
+                {
+                    var habenZeile = r.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+                    var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
+                    return new { r, schonGezahlt, verbleibend = r.Betrag - schonGezahlt };
+                })
+                .Where(x => x.verbleibend > 0.005m)
+                .Select(x => new OffeneBkForderungEntry
+                {
+                    BetriebskostenrechnungId = x.r.BetriebskostenrechnungId,
+                    Bezeichnung = $"{x.r.Umlage.Typ.Bezeichnung} – {x.r.Umlage.GetWohnungenBezeichnung()}",
+                    Betrag = x.r.Betrag,
+                    SchonGezahlt = x.schonGezahlt,
+                    Verbleibend = x.verbleibend
+                })
+                .OrderBy(e => e.Bezeichnung);
+
+            return Ok(result);
+        }
+
         private Buchungszeile ErstelleSollstellung(Vertrag vertrag, DateOnly monat, decimal grundmiete)
         {
             var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");

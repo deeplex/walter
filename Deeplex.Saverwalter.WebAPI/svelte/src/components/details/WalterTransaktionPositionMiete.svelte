@@ -56,7 +56,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             : forderungsstatus.grundmiete
         : undefined;
 
-    $: invalid = !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
+    $: invalid =
+        !miete.vertragId ||
+        !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
 
     $: verteile(availableBetrag);
 

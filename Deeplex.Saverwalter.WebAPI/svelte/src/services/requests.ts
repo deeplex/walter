@@ -40,6 +40,12 @@ export const walter_selection = {
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
     },
+    betriebskostenrechnungenOffen(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/betriebskostenrechnungen/offen',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
     erhaltungsaufwendungen(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/erhaltungsaufwendungen',

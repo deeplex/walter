@@ -52,15 +52,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const umlagen = walter_selection.umlagen(fetchImpl);
     const betriebskostenrechnungen =
-        walter_selection.betriebskostenrechnungen(fetchImpl);
+        walter_selection.betriebskostenrechnungenOffen(fetchImpl);
 
     if (!bk.betreffendesJahr) {
         bk.betreffendesJahr = new Date().getFullYear() - 1;
     }
 
-    // Auto-resolve Zahler if Umlage is pre-filled (e.g. from quickadd context)
-    onMount(() => {
-        if (bk.umlageId) resolveAndDispatchZahler(bk.umlageId);
+    onMount(async () => {
+        if (bk.existingBetriebskostenrechnungId) {
+            modeExisting = true;
+            autoSelectBkId = bk.existingBetriebskostenrechnungId;
+            await ladeOffenerPosten(bk.existingBetriebskostenrechnungId);
+            try {
+                const resp = await walter_get(
+                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${bk.existingBetriebskostenrechnungId}`,
+                    fetchImpl
+                );
+                dispatch('zahlerResolved', (resp as WalterSelectionEntry | null)?.id as number | undefined);
+            } catch {
+                dispatch('zahlerResolved', undefined);
+            }
+        } else if (bk.umlageId) {
+            resolveAndDispatchZahler(bk.umlageId);
+        }
     });
 
     async function resolveAndDispatchZahler(umlageId: number | undefined) {
@@ -134,11 +148,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     $: invalid = modeExisting
-        ? !!(
-              offenerPosten &&
-              bk.betrag > offenerPosten.verbleibenderBetrag + 0.005
+        ? !bk.existingBetriebskostenrechnungId ||
+          !!(
+              (offenerPosten &&
+                  bk.betrag > offenerPosten.verbleibenderBetrag + 0.005) ||
+              bk.betrag > availableBetrag + 0.005
           )
-        : false;
+        : !bk.umlageId || !bk.rechnungsDatum || !bk.betreffendesJahr;
 
     $: if (isSinglePosition && availableBetrag > 0) {
         bk.betrag = availableBetrag;
@@ -157,7 +173,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             if (resp && typeof resp === 'object' && 'rechnungsbetrag' in resp) {
                 offenerPosten = resp as WalterOffenerPostenStatus;
                 if (isSinglePosition && offenerPosten.verbleibenderBetrag > 0) {
-                    bk.betrag = offenerPosten.verbleibenderBetrag;
+                    bk.betrag = Math.min(offenerPosten.verbleibenderBetrag, availableBetrag);
                 }
             }
         } catch {
@@ -260,13 +276,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             )} €
                         </Tag>
                     {/if}
-                    {#if invalid}
+                    {#if bk.betrag > offenerPosten.verbleibenderBetrag + 0.005}
                         <InlineNotification
                             kind="error"
                             title="Betrag zu hoch:"
-                            subtitle="Maximal {offenerPosten.verbleibenderBetrag.toFixed(
-                                2
-                            )} € erlaubt"
+                            subtitle="Maximal {offenerPosten.verbleibenderBetrag.toFixed(2)} € offen"
+                            hideCloseButton
+                        />
+                    {:else if bk.betrag > availableBetrag + 0.005}
+                        <InlineNotification
+                            kind="error"
+                            title="Betrag übersteigt Transaktionsbetrag:"
+                            subtitle="Maximal {availableBetrag.toFixed(2)} € verfügbar"
+                            hideCloseButton
+                        />
+                    {:else if bk.betrag < offenerPosten.verbleibenderBetrag - 0.005}
+                        <InlineNotification
+                            kind="warning"
+                            title="Teilzahlung:"
+                            subtitle="Noch {(offenerPosten.verbleibenderBetrag - bk.betrag).toFixed(2)} € offen nach dieser Zahlung"
                             hideCloseButton
                         />
                     {/if}
