@@ -78,6 +78,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let beforeSubmit:
         | undefined
         | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
+    export let submitDisabled = false;
     export let on_click_row: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
@@ -413,6 +414,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             bind:addModalOpen
             {onSubmit}
             {beforeSubmit}
+            {submitDisabled}
             title={resolvedQuickAddTitle}
         >
             <slot />

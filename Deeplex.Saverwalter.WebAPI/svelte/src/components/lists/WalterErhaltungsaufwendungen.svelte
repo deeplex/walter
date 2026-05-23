@@ -15,20 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import {
-        WalterDataTable,
-        WalterErhaltungsaufwendung
-    } from '$walter/components';
-    import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
+    import WalterErhaltungsaufwendung from '../details/WalterErhaltungsaufwendung.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterErhaltungsaufwendungEntry, validateErhaltungsaufwendung } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
-
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-    export let rows: WalterErhaltungsaufwendungEntry[] | undefined = undefined;
-    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = {};
 
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },
@@ -38,30 +28,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'datum', value: 'Datum' }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.erhaltungsaufwendung(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/erhaltungsaufwendungen/${row.id}`;
-
-    const fetchData = rows === undefined
-        ? (p: Parameters<typeof WalterErhaltungsaufwendungEntry.GetPaged>[1]) =>
-              WalterErhaltungsaufwendungEntry.GetPaged<WalterErhaltungsaufwendungEntry>(fetchImpl, p)
-        : undefined;
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let rows: WalterErhaltungsaufwendungEntry[] | undefined = undefined;
+    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = {};
 </script>
 
-<WalterDataTable
-    addUrl={WalterErhaltungsaufwendungEntry.ApiURL}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
-    {rows}
-    {fetchData}
+<WalterSimpleList
+    entityClass={WalterErhaltungsaufwendungEntry}
+    validate={validateErhaltungsaufwendung}
     {headers}
+    navFn={navigation.erhaltungsaufwendung}
+    routeBase="erhaltungsaufwendungen"
+    formComponent={WalterErhaltungsaufwendung}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterErhaltungsaufwendung {fetchImpl} {entry} />
-    {/if}
-</WalterDataTable>
+/>

@@ -25,11 +25,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const apiURL = `/api/miete`;
     const title = 'Neue Miete';
 
-    const entry: Partial<WalterMieteEntry> = {};
+    let entry: Partial<WalterMieteEntry> = {};
 </script>
 
 <WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
-    <WalterMietminderung {entry} />
+    <WalterMietminderung bind:entry />
 </WalterGrid>

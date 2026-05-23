@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterVertragVersionEntry } from '$walter/lib';
+import { WalterVertragEntry, WalterVertragVersionEntry } from '$walter/lib';
 import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
@@ -25,12 +25,14 @@ export const load: PageLoad = async ({ params, fetch }) => {
         params.id,
         fetch
     );
+    const vertrag = WalterVertragEntry.GetOne<WalterVertragEntry>(`${(await entry).vertrag.id}`, fetch);
 
     return {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
         fileURL: fileUrl,
+        vertrag,
         entry
     };
 };

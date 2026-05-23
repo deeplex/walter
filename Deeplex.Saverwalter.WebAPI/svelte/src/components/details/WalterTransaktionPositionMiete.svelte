@@ -58,7 +58,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: invalid =
         !miete.vertragId ||
-        !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
+        !!(
+            kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005
+        );
 
     $: verteile(availableBetrag);
 
@@ -170,22 +172,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         hideCloseButton
                     />
                 {/if}
-            {:else}
-                {#if invalid}
-                    <InlineNotification
-                        kind="error"
-                        title="Kaltmiete zu hoch:"
-                        subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
-                        hideCloseButton
-                    />
-                {:else}
-                    <InlineNotification
-                        kind="info"
-                        title="Keine Sollstellung"
-                        subtitle="Für diesen Monat liegt noch keine Sollstellung vor. Sie wird automatisch erstellt."
-                        hideCloseButton
-                    />
-                {/if}
+            {:else if invalid}
+                <InlineNotification
+                    kind="error"
+                    title="Kaltmiete zu hoch:"
+                    subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
+                    hideCloseButton
+                />
             {/if}
         </Column>
     </Row>

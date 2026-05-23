@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
-    import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
+    import { WalterZaehlerEntry, WalterZaehlerstandEntry, validateZaehler } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [
@@ -81,6 +81,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.zaehler(e.detail.id);
     const rowHref = (row: DataTableRow) => `/zaehler/${row.id}`;
+
+    $: submitDisabled = !validateZaehler(entry);
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -95,6 +97,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataTable
     addUrl={WalterZaehlerEntry.ApiURL}
     addEntry={entry}
+    {submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
@@ -107,6 +110,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterZaehler {fetchImpl} {entry} />
+        <WalterZaehler {fetchImpl} bind:entry />
     {/if}
 </WalterDataTable>

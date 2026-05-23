@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import { convertDateGerman } from '$walter/services/utils';
     import type { PageData } from './$types';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, validateZaehlerstand } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
@@ -49,6 +49,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateZaehlerstand(data.entry)}
 />
 
 <WalterGrid>

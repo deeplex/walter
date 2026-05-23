@@ -15,12 +15,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterDataTable } from '$walter/components';
-    import { WalterKontaktEntry } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
     import WalterKontakt from '../details/WalterKontakt.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterKontaktEntry, validateKontakt } from '$walter/lib';
+    import { navigation } from '$walter/services/navigation';
+
+    const headers = [
+        { key: 'bezeichnung', value: 'Name' },
+        { key: 'adresse.anschrift', value: 'Anschrift' },
+        { key: 'telefon', value: 'Telefon' },
+        { key: 'mobil', value: 'Mobil' },
+        { key: 'email', value: 'E-Mail' }
+    ];
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -29,39 +35,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let entry: Partial<WalterKontaktEntry> = {
         permissions: { read: true, update: true, remove: true }
     };
-
-    const headers = [
-        { key: 'bezeichnung', value: 'Name', default: '' },
-        { key: 'adresse.anschrift', value: 'Anschrift' },
-        { key: 'telefon', value: 'Telefon' },
-        { key: 'mobil', value: 'Mobil' },
-        { key: 'email', value: 'E-Mail' }
-    ];
-
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.kontakt(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/kontakte/${row.id}`;
-
-    const fetchData = rows === undefined
-        ? (p: Parameters<typeof WalterKontaktEntry.GetPaged>[1]) =>
-              WalterKontaktEntry.GetPaged<WalterKontaktEntry>(fetchImpl, p)
-        : undefined;
 </script>
 
-<WalterDataTable
-    addUrl={WalterKontaktEntry.ApiURL}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
+<WalterSimpleList
+    entityClass={WalterKontaktEntry}
+    validate={validateKontakt}
+    {headers}
+    navFn={navigation.kontakt}
+    routeBase="kontakte"
+    formComponent={WalterKontakt}
+    {fetchImpl}
+    {entry}
     {rows}
-    {fetchData}
+    {title}
+    {fullHeight}
     initialSortBy="bezeichnung"
     initialSortDir="asc"
-    {headers}
-    {fullHeight}
->
-    <WalterKontakt {fetchImpl} {entry} />
-</WalterDataTable>
+/>

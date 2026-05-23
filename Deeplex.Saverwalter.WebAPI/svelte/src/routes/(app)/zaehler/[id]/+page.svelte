@@ -28,7 +28,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
-        type WalterZaehlerstandEntry
+        type WalterZaehlerstandEntry,
+        validateZaehler
     } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
@@ -62,10 +63,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateZaehler(data.entry)}
 />
 
 <WalterGrid>
-    <WalterZaehler fetchImpl={data.fetchImpl} entry={data.entry} />
+    <WalterZaehler fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterZaehlerstaende

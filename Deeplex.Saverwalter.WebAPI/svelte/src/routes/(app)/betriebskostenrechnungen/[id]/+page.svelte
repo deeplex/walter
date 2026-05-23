@@ -26,7 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile
     } from '$walter/components';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, validateBetriebskostenrechnung } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
@@ -56,12 +56,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateBetriebskostenrechnung(data.entry)}
 />
 
 <WalterGrid>
     <WalterBetriebskostenrechnung
         fetchImpl={data.fetchImpl}
-        entry={data.entry}
+        bind:entry={data.entry}
     />
 
     <WalterLinks>

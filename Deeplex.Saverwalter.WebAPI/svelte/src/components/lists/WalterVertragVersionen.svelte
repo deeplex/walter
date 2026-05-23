@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,10 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterDataTable, WalterVertragVersion } from '$walter/components';
-    import { WalterVertragVersionEntry } from '$walter/lib';
+    import WalterVertragVersion from '../details/WalterVertragVersion.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterVertragVersionEntry, validateVertragVersion } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     const headers = [
         { key: 'beginn', value: 'Beginn' },
@@ -27,30 +27,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'notiz', value: 'Notiz' }
     ];
 
-    export let rows: WalterVertragVersionEntry[];
+    export let rows: WalterVertragVersionEntry[] | undefined = undefined;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.vertragversion(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/vertragversionen/${row.id}`;
-
     export let entry: Partial<WalterVertragVersionEntry> | undefined = {};
 </script>
 
-<WalterDataTable
-    addUrl={WalterVertragVersionEntry.ApiURL}
-    {on_click_row}
-    {rowHref}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterVertragVersionEntry}
+    validate={validateVertragVersion}
     {headers}
+    navFn={navigation.vertragversion}
+    routeBase="vertragversionen"
+    formComponent={WalterVertragVersion}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterVertragVersion {entry} />
-    {/if}
-</WalterDataTable>
+/>

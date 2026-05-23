@@ -52,3 +52,4 @@ export {
     type TransaktionsInput,
     emptyTransaktionsInput
 } from './WalterTransaktion';
+export * from './WalterValidation';

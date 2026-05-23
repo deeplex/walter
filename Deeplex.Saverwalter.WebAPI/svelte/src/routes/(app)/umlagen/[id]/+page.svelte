@@ -31,7 +31,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterFileWrapper,
         type WalterBetriebskostenrechnungEntry,
-        type WalterSelectionEntry
+        type WalterSelectionEntry,
+        validateUmlage
     } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
@@ -77,6 +78,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateUmlage(data.entry)}
 />
 
 <WalterGrid>

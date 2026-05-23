@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,38 +15,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterDataTable, WalterUmlagetyp } from '$walter/components';
-    import { WalterUmlagetypEntry } from '$walter/lib';
+    import WalterUmlagetyp from '../details/WalterUmlagetyp.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterUmlagetypEntry, validateUmlagetyp } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [{ key: 'bezeichnung', value: 'Bezeichnung' }];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.umlagetyp(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/umlagetypen/${row.id}`;
-
     export let fullHeight = false;
-    export let rows: WalterUmlagetypEntry[];
+    export let rows: WalterUmlagetypEntry[] | undefined = undefined;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterUmlagetypEntry> | undefined = {};
-    export let fetchImpl: typeof fetch;
+    export let fetchImpl: typeof fetch | undefined = undefined;
 </script>
 
-<WalterDataTable
-    addUrl={WalterUmlagetypEntry.ApiURL}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterUmlagetypEntry}
+    validate={validateUmlagetyp}
     {headers}
+    navFn={navigation.umlagetyp}
+    routeBase="umlagetypen"
+    formComponent={WalterUmlagetyp}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterUmlagetyp {fetchImpl} {entry} />
-    {/if}
-</WalterDataTable>
+/>

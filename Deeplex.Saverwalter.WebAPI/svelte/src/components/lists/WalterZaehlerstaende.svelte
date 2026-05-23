@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,13 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterDataTable, WalterZaehlerstand } from '$walter/components';
-
-    import { WalterZaehlerstandEntry } from '$walter/lib';
+    import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterZaehlerstandEntry, validateZaehlerstand } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
-    export let fetchImpl: typeof fetch;
 
     const headers = [
         { key: 'datum', value: 'Datum' },
@@ -29,29 +26,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'einheit', value: 'Einheit' }
     ];
 
-    export let rows: WalterZaehlerstandEntry[];
+    export let fetchImpl: typeof fetch;
+    export let rows: WalterZaehlerstandEntry[] | undefined = undefined;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = {};
-
-    const on_click_row = (e: CustomEvent) =>
-        navigation.zaehlerstand(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/zaehlerstaende/${row.id}`;
 </script>
 
-<WalterDataTable
-    addUrl={WalterZaehlerstandEntry.ApiURL}
-    {on_click_row}
-    {rowHref}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterZaehlerstandEntry}
+    validate={validateZaehlerstand}
     {headers}
+    navFn={navigation.zaehlerstand}
+    routeBase="zaehlerstaende"
+    formComponent={WalterZaehlerstand}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterZaehlerstand {fetchImpl} {entry} />
-    {/if}
-</WalterDataTable>
+/>

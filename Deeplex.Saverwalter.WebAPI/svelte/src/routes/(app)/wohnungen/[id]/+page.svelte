@@ -34,7 +34,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterFileWrapper,
         type WalterErhaltungsaufwendungEntry,
         type WalterUmlageEntry,
-        type WalterZaehlerEntry
+        type WalterZaehlerEntry,
+        validateWohnung
     } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
     import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
@@ -91,10 +92,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateWohnung(data.entry)}
 />
 
 <WalterGrid>
-    <WalterWohnung fetchImpl={data.fetchImpl} entry={data.entry} />
+    <WalterWohnung fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen

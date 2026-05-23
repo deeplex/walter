@@ -27,16 +27,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterLinks
     } from '$walter/components';
-    import {
-        getMietminderungEntry,
-        getVertragversionEntry
-    } from './utils';
+    import { getMietminderungEntry, getVertragversionEntry } from './utils';
     import {
         WalterFileWrapper,
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
-        WalterKontaktEntry
+        WalterKontaktEntry,
+        validateVertrag
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import WalterVertragTransaktionen from '$walter/components/lists/WalterVertragTransaktionen.svelte';
@@ -66,6 +64,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    $: submitDisabled = !validateVertrag(data.entry);
 </script>
 
 <WalterHeaderDetail
@@ -73,6 +73,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={submitDisabled}
 />
 
 <WalterGrid>

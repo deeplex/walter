@@ -179,6 +179,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         padding-right: 4em !important;
     }
 
+    /* Visual disabled state for Carbon's HeaderGlobalAction (no built-in :disabled style) */
+    :global(.bx--header__action:disabled) {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
     /* Toolbar sticky for full-page tables — must live here (after Carbon CSS in cascade) */
     :global(.sticky-chrome .bx--table-toolbar) {
         position: sticky !important;

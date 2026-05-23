@@ -28,11 +28,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type TransaktionsInput,
         type WalterVertragVersionEntry
     } from '$walter/lib';
-    import { emptyTransaktionsInput } from '$walter/lib';
+    import {
+        emptyTransaktionsInput,
+        validateVertragQuickAdd
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { invalidateAll } from '$app/navigation';
-    import { Tile } from 'carbon-components-svelte';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -42,7 +44,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let entryVersion: Partial<WalterVertragVersionEntry> = {};
     let entryVersionBeginn: string | undefined = undefined;
+    let hasOverlap = false;
     $: if (entry) entry.versionen = [entryVersion as WalterVertragVersionEntry];
+    $: submitDisabled = !validateVertragQuickAdd(entry) || hasOverlap;
 
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
@@ -59,6 +63,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let modalOpen = false;
     let modalTitle = 'Mietzahlung';
     let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
+    let transaktionIsValid = false;
 
     function add(e: CustomEvent, vertrag: WalterVertragEntry) {
         e.stopPropagation();
@@ -103,13 +108,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addEntry={buchungsInput}
     bind:addModalOpen={modalOpen}
     {onSubmit}
+    submitDisabled={!transaktionIsValid}
 >
-    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
+    <WalterTransaktion
+        {fetchImpl}
+        bind:buchung={buchungsInput}
+        bind:isValid={transaktionIsValid}
+    />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataTable
     addUrl={WalterVertragEntry.ApiURL}
     addEntry={entry}
+    {submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
@@ -124,7 +135,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterVertrag {fetchImpl} {entry} bind:beginn={entryVersionBeginn} />
-        <WalterVertragVersion entry={entryVersion} bind:beginn={entryVersionBeginn} />
+        <WalterVertrag {fetchImpl} bind:entry />
+        <WalterVertragVersion
+            bind:hasOverlap
+            {fetchImpl}
+            bind:entry={entryVersion}
+            bind:vertrag={entry}
+            bind:beginn={entryVersionBeginn}
+        />
     {/if}
 </WalterDataTable>

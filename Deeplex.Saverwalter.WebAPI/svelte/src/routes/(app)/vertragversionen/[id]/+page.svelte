@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile
     } from '$walter/components';
     import type { PageData } from './$types';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, validateVertragVersion } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
@@ -35,6 +35,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    let hasOverlap = false;
+    $: submitDisabled = !validateVertragVersion(data.entry) || hasOverlap;
 </script>
 
 <WalterHeaderDetail
@@ -42,10 +45,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={submitDisabled}
 />
 
 <WalterGrid>
-    <WalterVertragVersion entry={data.entry} />
+    <WalterVertragVersion
+        bind:hasOverlap
+        bind:vertrag={data.vertrag}
+        bind:entry={data.entry}
+        fetchImpl={data.fetchImpl}
+    />
     <WalterLinkTile
         bind:fileWrapper
         fileref={fileURL.vertrag(`${data.entry.vertrag.id}`)}

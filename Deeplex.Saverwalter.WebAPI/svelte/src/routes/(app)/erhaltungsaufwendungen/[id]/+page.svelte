@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterLinks
     } from '$walter/components';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, validateErhaltungsaufwendung } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
@@ -43,10 +43,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateErhaltungsaufwendung(data.entry)}
 />
 
 <WalterGrid>
-    <WalterErhaltungsaufwendung fetchImpl={data.fetchImpl} entry={data.entry} />
+    <WalterErhaltungsaufwendung fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterLinkTile

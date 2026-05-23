@@ -24,19 +24,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import { UserRole, getAuthState } from '$walter/services/auth';
     import type { WalterWohnungEntry } from '$walter/lib';
+    import { validateWohnung } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
-    const entry: Partial<WalterWohnungEntry> = {};
+    let entry: Partial<WalterWohnungEntry> = {};
 
     const currentAuthState = browser ? getAuthState() : undefined;
 </script>
 
 {#if currentAuthState && ($currentAuthState?.role === UserRole.Owner || $currentAuthState?.role === UserRole.Admin)}
-    <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
+    <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} disabled={!validateWohnung(entry)} />
 
     <WalterGrid>
-        <WalterWohnung fetchImpl={data.fetchImpl} {entry} />
+        <WalterWohnung fetchImpl={data.fetchImpl} bind:entry />
     </WalterGrid>
 {:else}
     <WalterHeaderNew apiURL={data.apiURL} {entry} title="Fehler" />

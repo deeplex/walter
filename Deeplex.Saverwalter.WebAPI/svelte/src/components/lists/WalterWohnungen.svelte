@@ -15,19 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterDataTable, WalterWohnung } from '$walter/components';
-    import { WalterWohnungEntry } from '$walter/lib';
+    import WalterWohnung from '../details/WalterWohnung.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterWohnungEntry, validateWohnung } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import { get } from 'svelte/store';
     import { UserRole, authState } from '$walter/services/auth';
-
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterWohnungEntry> | undefined = {};
-    export let rows: WalterWohnungEntry[] | undefined = undefined;
 
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
@@ -36,35 +29,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'bewohner', value: 'Bewohner' }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.wohnung(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/wohnungen/${row.id}`;
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let fetchImpl: typeof fetch;
+    export let entry: Partial<WalterWohnungEntry> | undefined = {};
+    export let rows: WalterWohnungEntry[] | undefined = undefined;
 
     const userRole = authState && get(authState)?.role;
     const readonly = userRole !== UserRole.Owner && userRole !== UserRole.Admin;
-
-    const fetchData = rows === undefined
-        ? (p: Parameters<typeof WalterWohnungEntry.GetPaged>[1]) =>
-              WalterWohnungEntry.GetPaged<WalterWohnungEntry>(fetchImpl, p)
-        : undefined;
 </script>
 
-<WalterDataTable
-    {readonly}
-    addUrl={WalterWohnungEntry.ApiURL}
-    addEntry={entry}
-    layout={title !== undefined ? 'accordion' : 'inline'}
-    accordionTitle={title}
-    quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
-    {rows}
-    {fetchData}
-    initialSortDir="asc"
+<WalterSimpleList
+    entityClass={WalterWohnungEntry}
+    validate={validateWohnung}
     {headers}
+    navFn={navigation.wohnung}
+    routeBase="wohnungen"
+    formComponent={WalterWohnung}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterWohnung {fetchImpl} {entry} />
-    {/if}
-</WalterDataTable>
+    {readonly}
+    initialSortDir="asc"
+/>

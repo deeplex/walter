@@ -21,15 +21,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderNew
     } from '$walter/components';
     import type { WalterUmlagetypEntry } from '$walter/lib';
+    import { validateUmlagetyp } from '$walter/lib';
     import type { PageData } from './$types';
 
-    const entry: Partial<WalterUmlagetypEntry> = {};
+    let entry: Partial<WalterUmlagetypEntry> = {};
 
     export let data: PageData;
 </script>
 
-<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
+<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} disabled={!validateUmlagetyp(entry)} />
 
 <WalterGrid>
-    <WalterUmlagetyp fetchImpl={data.fetchImpl} {entry} />
+    <WalterUmlagetyp fetchImpl={data.fetchImpl} bind:entry />
 </WalterGrid>

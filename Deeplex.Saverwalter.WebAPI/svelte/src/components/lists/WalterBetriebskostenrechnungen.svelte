@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterBetriebskostenrechnung,
         WalterDataTable
     } from '$walter/components';
-    import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
+    import { WalterBetriebskostenrechnungEntry, validateBetriebskostenrechnung } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
@@ -56,6 +56,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
               WalterBetriebskostenrechnungEntry.GetPaged<WalterBetriebskostenrechnungEntry>(fetchImpl, p)
         : undefined;
 
+    $: submitDisabled = !validateBetriebskostenrechnung(entry);
+
     $: enrichedRows = rows
         ? [...rows]
               .map(enrich)
@@ -75,6 +77,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataTable
     addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     addEntry={entry}
+    submitDisabled={submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
@@ -87,6 +90,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterBetriebskostenrechnung {fetchImpl} {entry} />
+        <WalterBetriebskostenrechnung {fetchImpl} bind:entry />
     {/if}
 </WalterDataTable>

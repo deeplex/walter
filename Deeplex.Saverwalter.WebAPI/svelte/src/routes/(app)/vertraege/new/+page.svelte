@@ -25,6 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterVertragEntry,
         WalterVertragVersionEntry
     } from '$walter/lib';
+    import { validateVertragQuickAdd } from '$walter/lib';
     import { Tile } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 
@@ -35,12 +36,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let entry: Partial<WalterVertragEntry> = {
         versionen: [entryVersion as WalterVertragVersionEntry]
     };
+    let hasOverlap = false;
+    $: submitDisabled = !validateVertragQuickAdd(entry) || hasOverlap;
 </script>
 
-<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
+<WalterHeaderNew
+    apiURL={data.apiURL}
+    {entry}
+    title={data.title}
+    disabled={submitDisabled}
+/>
 
 <WalterGrid>
-    <WalterVertrag fetchImpl={data.fetchImpl} {entry} bind:beginn={entryVersionBeginn} />
+    <WalterVertrag fetchImpl={data.fetchImpl} bind:entry />
     <Tile light>Nachtrag:</Tile>
-    <WalterVertragVersion entry={entryVersion} bind:beginn={entryVersionBeginn} />
+    <WalterVertragVersion
+        bind:hasOverlap
+        fetchImpl={data.fetchImpl}
+        bind:entry={entryVersion}
+        bind:vertrag={entry}
+        bind:beginn={entryVersionBeginn}
+    />
 </WalterGrid>

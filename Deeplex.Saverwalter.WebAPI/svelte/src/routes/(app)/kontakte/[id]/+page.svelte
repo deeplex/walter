@@ -27,7 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterKontakt
     } from '$walter/components';
-    import { WalterFileWrapper, WalterTransaktionEntry } from '$walter/lib';
+    import { WalterFileWrapper, WalterTransaktionEntry, validateKontakt } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
     import WalterTransaktion from '$walter/components/details/WalterTransaktionRaw.svelte';
     import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
@@ -56,6 +56,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateKontakt(data.entry)}
 />
 
 <WalterGrid>

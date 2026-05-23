@@ -27,6 +27,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let entry: Partial<WalterTransaktionEntry> | undefined = {};
     export let rows: WalterTransaktionEntry[] | undefined = undefined;
 
+    let transaktionIsValid = false;
+
     const headers = [
         { key: 'zahler.text', value: 'Zahler' },
         { key: 'betrag', value: 'Betrag' },
@@ -54,6 +56,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {on_click_row}
     {rowHref}
     addEntry={entry}
+    submitDisabled={!transaktionIsValid}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
@@ -65,6 +68,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterTransaktion {fetchImpl} />
+        <WalterTransaktion {fetchImpl} bind:isValid={transaktionIsValid} />
     {/if}
 </WalterDataTable>
