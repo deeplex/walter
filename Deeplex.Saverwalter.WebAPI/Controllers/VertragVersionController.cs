@@ -34,6 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Personenzahl { get; set; }
             public DateOnly Beginn { get; set; }
             public decimal Grundmiete { get; set; }
+            public decimal Nebenkostenvorauszahlung { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -45,6 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Personenzahl = entity.Personenzahl;
                 Beginn = entity.Beginn;
                 Grundmiete = entity.Grundmiete;
+                Nebenkostenvorauszahlung = entity.Nebenkostenvorauszahlung;
 
                 Permissions = permissions;
             }

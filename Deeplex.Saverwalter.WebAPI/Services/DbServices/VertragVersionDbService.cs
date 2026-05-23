@@ -84,7 +84,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
             var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
             {
-                Vertrag = vertrag!
+                Vertrag = vertrag!,
+                Nebenkostenvorauszahlung = entry.Nebenkostenvorauszahlung
             };
 
             SetOptionalValues(entity, entry);
@@ -101,6 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entity.Beginn = entry.Beginn;
                 entity.Grundmiete = entry.Grundmiete;
                 entity.Personenzahl = entry.Personenzahl;
+                entity.Nebenkostenvorauszahlung = entry.Nebenkostenvorauszahlung;
 
                 SetOptionalValues(entity, entry);
                 Ctx.VertragVersionen.Update(entity);

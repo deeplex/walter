@@ -24,7 +24,9 @@ export async function handle_save(apiURL: string, entry: unknown) {
         'Speichern fehlgeschlagen',
         (a: unknown) => a as string,
         (a: unknown) =>
-            `Speichern fehlgeschlagen.
+            typeof a === 'string'
+                ? a
+                : `Speichern fehlgeschlagen.
             Folgende Einträge sind erforderlich:
             ${Object.keys((a as { errors: string }).errors)
                 .map((e) => e.split('.').pop())

@@ -94,6 +94,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
+                var beginn = entry.Versionen?.FirstOrDefault()?.Beginn;
+                if (beginn.HasValue)
+                {
+                    var conflict = await FindOverlappingVertrag(entry.Wohnung.Id, beginn.Value, entry.Ende);
+                    if (conflict is not null) return new ConflictObjectResult(conflict);
+                }
+
                 return await Add(entry);
             }
             catch
@@ -136,6 +143,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     throw new ArgumentException("entry has no Wohnung.");
                 }
+
+                var beginn = await Ctx.VertragVersionen
+                    .Where(v => v.Vertrag.VertragId == id)
+                    .MinAsync(v => (DateOnly?)v.Beginn);
+                if (beginn.HasValue)
+                {
+                    var conflict = await FindOverlappingVertrag(entry.Wohnung.Id, beginn.Value, entry.Ende, excludeId: id);
+                    if (conflict is not null) return new ConflictObjectResult(conflict);
+                }
+
                 entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
 
                 await SetOptionalValues(entity, entry);
@@ -144,6 +161,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 return new VertragEntry(entity, entry.Permissions);
             });
+        }
+
+        private async Task<string?> FindOverlappingVertrag(int wohnungId, DateOnly beginn, DateOnly? ende, int excludeId = 0)
+        {
+            var existing = await Ctx.Vertraege
+                .Where(v => v.Wohnung.WohnungId == wohnungId && v.VertragId != excludeId)
+                .Select(v => new
+                {
+                    Ende = v.Ende,
+                    Beginn = v.Versionen.Min(vv => (DateOnly?)vv.Beginn),
+                    Mieter = v.Mieter.Select(m => m.Bezeichnung)
+                })
+                .ToListAsync();
+
+            var conflict = existing.FirstOrDefault(v =>
+                v.Beginn.HasValue &&
+                beginn <= (v.Ende ?? DateOnly.MaxValue) &&
+                (ende ?? DateOnly.MaxValue) >= v.Beginn.Value);
+
+            if (conflict is null) return null;
+
+            var mieter = string.Join(", ", conflict.Mieter);
+            var endeText = conflict.Ende.HasValue ? conflict.Ende.Value.ToString("dd.MM.yyyy") : "offen";
+            return $"Konflikt mit bestehendem Vertrag ({mieter}) vom {conflict.Beginn!.Value:dd.MM.yyyy} bis {endeText}.";
         }
 
         private async Task SetOptionalValues(Vertrag entity, VertragEntry entry)
@@ -162,6 +203,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     var entityVersion = new VertragVersion(entryVersion.Beginn, entryVersion.Grundmiete, entryVersion.Personenzahl)
                     {
                         Vertrag = entity,
+                        Nebenkostenvorauszahlung = entryVersion.Nebenkostenvorauszahlung
                     };
                     entity.Versionen.Add(entityVersion);
                 }

@@ -26,16 +26,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let entry: Partial<WalterVertragVersionEntry> = {};
     export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
     export let readonly = false;
+    export let beginn: string | undefined = entry.beginn;
     $: {
         readonly = entry?.permissions?.update === false;
     }
+    $: entry.beginn = beginn;
 </script>
 
 <Row>
     <WalterDatePicker
         required
         disabled={readonly}
-        bind:value={entry.beginn}
+        bind:value={beginn}
         labelText="Beginn"
     />
     <WalterNumberInput
@@ -44,6 +46,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         hideSteppers
         bind:value={entry.grundmiete}
         label="Grundmiete"
+    />
+    <WalterNumberInput
+        {readonly}
+        hideSteppers
+        bind:value={entry.nebenkostenvorauszahlung}
+        label="Nebenkostenvorauszahlung"
     />
     <WalterNumberInput
         required

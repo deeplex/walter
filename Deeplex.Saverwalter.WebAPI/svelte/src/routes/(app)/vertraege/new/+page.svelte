@@ -31,6 +31,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let data: PageData;
 
     let entryVersion: Partial<WalterVertragVersionEntry> = {};
+    let entryVersionBeginn: string | undefined = undefined;
     let entry: Partial<WalterVertragEntry> = {
         versionen: [entryVersion as WalterVertragVersionEntry]
     };
@@ -39,7 +40,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterVertrag fetchImpl={data.fetchImpl} {entry} />
+    <WalterVertrag fetchImpl={data.fetchImpl} {entry} bind:beginn={entryVersionBeginn} />
     <Tile light>Nachtrag:</Tile>
-    <WalterVertragVersion entry={entryVersion} />
+    <WalterVertragVersion entry={entryVersion} bind:beginn={entryVersionBeginn} />
 </WalterGrid>

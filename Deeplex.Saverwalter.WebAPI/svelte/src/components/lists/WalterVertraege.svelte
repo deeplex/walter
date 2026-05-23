@@ -20,19 +20,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterDataTable,
         WalterTransaktion,
-        WalterVertrag
+        WalterVertrag,
+        WalterVertragVersion
     } from '$walter/components';
-    import { WalterVertragEntry, type TransaktionsInput } from '$walter/lib';
+    import {
+        WalterVertragEntry,
+        type TransaktionsInput,
+        type WalterVertragVersionEntry
+    } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { invalidateAll } from '$app/navigation';
+    import { Tile } from 'carbon-components-svelte';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
     export let entry: Partial<WalterVertragEntry> | undefined = {};
     export let rows: WalterVertragEntry[] | undefined = undefined;
+
+    let entryVersion: Partial<WalterVertragVersionEntry> = {};
+    let entryVersionBeginn: string | undefined = undefined;
+    $: if (entry) entry.versionen = [entryVersion as WalterVertragVersionEntry];
 
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
@@ -114,6 +124,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterVertrag {fetchImpl} {entry} />
+        <WalterVertrag {fetchImpl} {entry} bind:beginn={entryVersionBeginn} />
+        <WalterVertragVersion entry={entryVersion} bind:beginn={entryVersionBeginn} />
     {/if}
 </WalterDataTable>

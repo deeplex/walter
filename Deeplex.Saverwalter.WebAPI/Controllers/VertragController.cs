@@ -144,6 +144,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<PagedResult<VertragEntryBase>> Get([FromQuery] PagedQuery query)
             => DbService.GetList(User!, query);
 
+        public record VertragOverlapInfo(int Id, DateOnly Beginn, DateOnly? Ende, string Mieter);
+
+        [HttpGet("check-overlap")]
+        public async Task<ActionResult<VertragOverlapInfo?>> CheckOverlap(
+            [FromQuery] int wohnungId,
+            [FromQuery] DateOnly beginn,
+            [FromQuery] DateOnly? ende,
+            [FromQuery] int excludeId = 0)
+        {
+            var existing = await _ctx.Vertraege
+                .Where(v => v.Wohnung.WohnungId == wohnungId && v.VertragId != excludeId)
+                .Select(v => new
+                {
+                    Id = v.VertragId,
+                    Ende = v.Ende,
+                    Beginn = v.Versionen.Min(vv => (DateOnly?)vv.Beginn),
+                    Mieter = v.Mieter.Select(m => m.Bezeichnung)
+                })
+                .ToListAsync();
+
+            var conflict = existing.FirstOrDefault(v =>
+                v.Beginn.HasValue &&
+                beginn <= (v.Ende ?? DateOnly.MaxValue) &&
+                (ende ?? DateOnly.MaxValue) >= v.Beginn.Value);
+
+            if (conflict is null) return Ok(null);
+
+            return Ok(new VertragOverlapInfo(
+                conflict.Id,
+                conflict.Beginn!.Value,
+                conflict.Ende,
+                string.Join(", ", conflict.Mieter)));
+        }
+
         [HttpPost]
         public Task<ActionResult<VertragEntry>> Post([FromBody] VertragEntry entry) => DbService.Post(User!, entry);
 

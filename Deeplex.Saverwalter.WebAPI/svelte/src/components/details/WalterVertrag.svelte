@@ -23,17 +23,53 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterMultiSelectKontakt
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
-    import { Row, TextInput } from 'carbon-components-svelte';
+    import { Row, TextInput, InlineNotification } from 'carbon-components-svelte';
     import { convertDateGerman } from '$walter/services/utils';
+    import { walter_fetch } from '$walter/services/requests';
 
     export let entry: Partial<WalterVertragEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
+    export let beginn: string | undefined = undefined;
     $: {
         readonly = entry?.permissions?.update === false;
     }
+
+    type OverlapConflict = { id: number; beginn: string; ende: string | null; mieter: string };
+
+    async function fetchOverlap(wohnungId: number | undefined, beginn: string | undefined, ende: string | undefined, excludeId: number | undefined): Promise<OverlapConflict | null> {
+        if (!wohnungId || !beginn) return null;
+        const params = new URLSearchParams({ wohnungId: String(wohnungId), beginn });
+        if (ende) params.set('ende', ende);
+        if (excludeId) params.set('excludeId', String(excludeId));
+        try {
+            const response = await walter_fetch(fetchImpl, `/api/vertraege/check-overlap?${params}`);
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    $: overlapPromise = fetchOverlap(
+        entry.wohnung?.id,
+        beginn ?? entry.beginn,
+        entry.ende,
+        entry.id
+    );
 </script>
 
+{#await overlapPromise then overlap}
+    {#if overlap}
+        <InlineNotification kind="error" title="Konflikt:" hideCloseButton>
+            <svelte:fragment slot="subtitle">
+                Konflikt mit bestehendem Vertrag
+                <a href="/vertraege/{overlap.id}">{overlap.mieter || 'Unbekannt'}</a>
+                vom {new Date(overlap.beginn).toLocaleDateString('de-DE')}
+                bis {overlap.ende ? new Date(overlap.ende).toLocaleDateString('de-DE') : 'offen'}.
+            </svelte:fragment>
+        </InlineNotification>
+    {/if}
+{/await}
 <Row>
     <TextInput
         placeholder="Wird aus Nachtrag genommen"
