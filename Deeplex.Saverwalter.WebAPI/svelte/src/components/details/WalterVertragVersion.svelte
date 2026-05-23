@@ -28,8 +28,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { walter_fetch } from '$walter/services/requests';
 
     export let entry: Partial<WalterVertragVersionEntry> = {};
-    export let vertrag: Partial<WalterVertragEntry>;
-    export let fetchImpl: typeof fetch;
+    export let vertrag: Partial<WalterVertragEntry> | undefined = undefined;
+    export let fetchImpl: typeof fetch | undefined = undefined;
     export let readonly = false;
     export let beginn: string | undefined = entry.beginn;
     export let hasOverlap = false;
@@ -40,7 +40,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ende: string | undefined,
         excludeId: string | number | undefined
     ) {
-        if (!wohnungId || !b) {
+        if (!fetchImpl || !wohnungId || !b) {
             overlapConflict = null;
             hasOverlap = false;
             return;
