@@ -73,6 +73,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             mieten: [
                 {
                     kaltmiete: 0,
+                    garagen: [],
                     nkVorauszahlung: 0,
                     vertragId: vertrag.id as number
                 }

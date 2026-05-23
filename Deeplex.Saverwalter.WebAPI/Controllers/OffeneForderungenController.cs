@@ -27,15 +27,22 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/offene-forderungen")]
     public class OffeneForderungenController(SaverwalterContext ctx) : ControllerBase
     {
+        public class OffeneGarageInfo
+        {
+            public int GarageVertragId { get; set; }
+            public string GarageKennung { get; set; } = "";
+            public decimal Offen { get; set; }
+        }
+
         public class OffeneForderungEntry
         {
             public int VertragId { get; set; }
             public string VertragBezeichnung { get; set; } = "";
             public string Monat { get; set; } = "";
-            public decimal Sollbetrag { get; set; }
-            public decimal Gezahlt { get; set; }
+            public decimal KaltmieteOffen { get; set; }
             public decimal Offen { get; set; }
             public int? ZahlungsempfaengerId { get; set; }
+            public List<OffeneGarageInfo> Garagen { get; set; } = [];
         }
 
         [HttpGet("{jahr}")]
@@ -65,6 +72,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Include(v => v.MietBuchungskonto)
                     .ThenInclude(k => k.Buchungszeilen)
                         .ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Versionen)
+                .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Garage).ThenInclude(g => g.Ertragskonto)
+                .Include(v => v.GarageVertraege)
+                    .ThenInclude(gv => gv.MietBuchungskonto)
+                        .ThenInclude(k => k.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungssatz)
                 .Where(v => v.Versionen.Any(ver => ver.Beginn <= endOfYear)
                          && (v.Ende == null || v.Ende >= startOfYear))
                 .ToListAsync();
@@ -86,11 +99,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Select(z => z.BuchungszeileId)
                 .ToHashSet();
 
+            var garageSollZeileIds = vertraege
+                .SelectMany(v => v.GarageVertraege)
+                .SelectMany(gv => gv.MietBuchungskonto?.Buchungszeilen ?? [])
+                .Where(z => z.SollHaben == SollHaben.Soll)
+                .Select(z => z.BuchungszeileId)
+                .ToHashSet();
+
             // Load OPOS separately to avoid AsSplitQuery issues with dual ThenInclude chains
+            var allSollZeileIds = sollZeileIds.Concat(garageSollZeileIds).ToHashSet();
             var oposBySollZeile = (await ctx.OffenePostenAusgleiche
                 .Include(o => o.HabenZeile)
                 .Include(o => o.SollZeile)
-                .Where(o => sollZeileIds.Contains(o.SollZeile.BuchungszeileId))
+                .Where(o => allSollZeileIds.Contains(o.SollZeile.BuchungszeileId))
                 .ToListAsync())
                 .GroupBy(o => o.SollZeile.BuchungszeileId)
                 .ToDictionary(g => g.Key, g => g.Sum(o => o.HabenZeile.Betrag));
@@ -128,9 +149,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             sollZeile = ErstelleSollstellung(vertrag, monat, version.Grundmiete);
 
                         var gezahlt = oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
-                        var offen = sollZeile.Betrag - gezahlt;
+                        var kaltmieteOffen = sollZeile.Betrag - gezahlt;
 
-                        if (offen > 0.005m)
+                        // Collect open garage forderungen for this month
+                        var offeneGaragen = new List<OffeneGarageInfo>();
+                        foreach (var gv in vertrag.GarageVertraege)
+                        {
+                            var gvVersion = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
+                            if (gvVersion == null) continue;
+
+                            var gvSollZeile = gv.MietBuchungskonto.Buchungszeilen
+                                .FirstOrDefault(z =>
+                                    z.SollHaben == SollHaben.Soll
+                                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
+                                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+
+                            if (gvSollZeile == null)
+                                gvSollZeile = ErstelleGarageSollstellung(gv, monat, gvVersion.GaragenMiete);
+
+                            var gvGezahlt = oposBySollZeile.TryGetValue(gvSollZeile.BuchungszeileId, out var gg) ? gg : 0m;
+                            var gvOffen = gvSollZeile.Betrag - gvGezahlt;
+
+                            if (gvOffen > 0.005m)
+                                offeneGaragen.Add(new OffeneGarageInfo
+                                {
+                                    GarageVertragId = gv.GarageVertragId,
+                                    GarageKennung = gv.Garage.Kennung,
+                                    Offen = gvOffen
+                                });
+                        }
+
+                        var totalOffen = kaltmieteOffen + offeneGaragen.Sum(og => og.Offen);
+
+                        if (totalOffen > 0.005m)
                         {
                             bankkontoByZahlungsKonto.TryGetValue(vertrag.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
                             result.Add(new OffeneForderungEntry
@@ -138,10 +189,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                                 VertragId = vertrag.VertragId,
                                 VertragBezeichnung = BuildBezeichnung(vertrag),
                                 Monat = monat.ToString("yyyy-MM-dd"),
-                                Sollbetrag = sollZeile.Betrag,
-                                Gezahlt = gezahlt,
-                                Offen = offen,
-                                ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId
+                                KaltmieteOffen = kaltmieteOffen,
+                                Offen = totalOffen,
+                                ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId,
+                                Garagen = offeneGaragen
                             });
                         }
                     }
@@ -194,6 +245,136 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .OrderBy(e => e.Bezeichnung);
 
             return Ok(result);
+        }
+
+        public class OffeneGarageForderungEntry
+        {
+            public int GarageVertragId { get; set; }
+            public string Bezeichnung { get; set; } = "";
+            public string Monat { get; set; } = "";
+            public decimal Offen { get; set; }
+            public int? ZahlungsempfaengerId { get; set; }
+        }
+
+        [HttpGet("garagen/{jahr}")]
+        public async Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> GetOffeneGarageForderungen(int jahr)
+        {
+            var startOfYear = new DateOnly(jahr, 1, 1);
+            var endOfYear = new DateOnly(jahr, 12, 31);
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var bisMonat = today.Year == jahr
+                ? new DateOnly(today.Year, today.Month, 1)
+                : today.Year > jahr ? endOfYear : startOfYear.AddMonths(-1);
+
+            if (bisMonat < startOfYear)
+                return Ok(Array.Empty<OffeneGarageForderungEntry>());
+
+            var garageVertraege = await ctx.GarageVertraege
+                .Include(gv => gv.Versionen)
+                .Include(gv => gv.Garage).ThenInclude(g => g.Ertragskonto)
+                .Include(gv => gv.Mieter)
+                .Include(gv => gv.ZahlungsKonto)
+                .Include(gv => gv.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungssatz)
+                .Where(gv => gv.Vertrag == null
+                    && gv.Versionen.Any(v => v.Beginn <= endOfYear)
+                    && (gv.Ende == null || gv.Ende >= startOfYear))
+                .ToListAsync();
+
+            var garageSollZeileIds = garageVertraege
+                .SelectMany(gv => gv.MietBuchungskonto?.Buchungszeilen ?? [])
+                .Where(z => z.SollHaben == SollHaben.Soll)
+                .Select(z => z.BuchungszeileId)
+                .ToHashSet();
+
+            var oposBySollZeile = (await ctx.OffenePostenAusgleiche
+                .Include(o => o.HabenZeile)
+                .Include(o => o.SollZeile)
+                .Where(o => garageSollZeileIds.Contains(o.SollZeile.BuchungszeileId))
+                .ToListAsync())
+                .GroupBy(o => o.SollZeile.BuchungszeileId)
+                .ToDictionary(g => g.Key, g => g.Sum(o => o.HabenZeile.Betrag));
+
+            var zahlungsKontoIds = garageVertraege
+                .Select(gv => gv.ZahlungsKonto.BuchungskontoId)
+                .ToHashSet();
+            var bankkontoByZahlungsKonto = (await ctx.Bankkontos
+                .Include(b => b.BuchungsKonto)
+                .Where(b => zahlungsKontoIds.Contains(b.BuchungsKonto.BuchungskontoId))
+                .ToListAsync())
+                .GroupBy(b => b.BuchungsKonto.BuchungskontoId)
+                .ToDictionary(g => g.Key, g => g.First().BankkontoId);
+
+            var result = new List<OffeneGarageForderungEntry>();
+
+            foreach (var gv in garageVertraege)
+            {
+                var beginn = gv.Beginn();
+                var vonMonat = new DateOnly(jahr, beginn.Year < jahr ? 1 : beginn.Month, 1);
+                var bisMonatFuerGv = gv.Ende.HasValue && gv.Ende.Value < bisMonat
+                    ? new DateOnly(gv.Ende.Value.Year, gv.Ende.Value.Month, 1)
+                    : bisMonat;
+
+                var monat = vonMonat;
+                while (monat <= bisMonatFuerGv)
+                {
+                    var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
+                    if (version != null)
+                    {
+                        var sollZeile = gv.MietBuchungskonto.Buchungszeilen
+                            .FirstOrDefault(z =>
+                                z.SollHaben == SollHaben.Soll
+                                && z.Buchungssatz.Buchungsdatum.Year == monat.Year
+                                && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+
+                        if (sollZeile == null)
+                            sollZeile = ErstelleGarageSollstellung(gv, monat, version.GaragenMiete);
+
+                        var gezahlt = oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                        var offen = sollZeile.Betrag - gezahlt;
+
+                        if (offen > 0.005m)
+                        {
+                            var mieterNamen = gv.Mieter.Count > 0
+                                ? string.Join(", ", gv.Mieter.Select(m => m.Bezeichnung))
+                                : "Leerstand";
+                            bankkontoByZahlungsKonto.TryGetValue(gv.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
+                            result.Add(new OffeneGarageForderungEntry
+                            {
+                                GarageVertragId = gv.GarageVertragId,
+                                Bezeichnung = $"{gv.Garage.Kennung} | {mieterNamen}",
+                                Monat = monat.ToString("yyyy-MM-dd"),
+                                Offen = offen,
+                                ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId
+                            });
+                        }
+                    }
+                    monat = monat.AddMonths(1);
+                }
+            }
+
+            await ctx.SaveChangesAsync();
+            return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.Bezeichnung));
+        }
+
+        private Buchungszeile ErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, decimal garagenMiete)
+        {
+            var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
+            var sollZeile = new Buchungszeile(SollHaben.Soll, garagenMiete)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = gv.MietBuchungskonto
+            };
+            satz.Buchungszeilen.Add(sollZeile);
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, garagenMiete)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = gv.Garage.Ertragskonto
+            });
+            ctx.Buchungssaetze.Add(satz);
+            return sollZeile;
         }
 
         private Buchungszeile ErstelleSollstellung(Vertrag vertrag, DateOnly monat, decimal grundmiete)

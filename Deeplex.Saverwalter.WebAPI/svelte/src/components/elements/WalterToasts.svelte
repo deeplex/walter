@@ -175,7 +175,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         z-index: 9001;
         height: 0.25em;
         width: 0; /* Set initial width to 0 */
-        animation: progressBarAnimation 2s linear forwards;
+        animation: progressBarAnimation 3s linear forwards;
     }
 
     .progress-bar-error {

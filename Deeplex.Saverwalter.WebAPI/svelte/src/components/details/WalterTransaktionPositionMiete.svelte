@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Row,
         Column,
         InlineNotification,
-        Tag
+        InlineLoading
     } from 'carbon-components-svelte';
     import {
         WalterComboBox,
@@ -36,7 +36,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let availableBetrag = 0;
     export let isSinglePosition = false;
     export let invalid = false;
+    export let statusText = '';
 
+    let isLoading = false;
     let vertrag: WalterSelectionEntry | undefined = undefined;
     let forderungsstatus: WalterForderungsstatusEntry | undefined = undefined;
 
@@ -46,8 +48,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let betreffenderMonat: string = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     miete.betreffenderMonat = betreffenderMonat;
 
+    $: statusText = forderungsstatus?.sollstellungVorhanden
+        ? `Bereits gezahlt: ${forderungsstatus.schonGezahlt.toFixed(2)} € — Verbleibend: ${forderungsstatus.verbleibendeForderung.toFixed(2)} €`
+        : '';
+
     $: kaltmieteLabel = forderungsstatus?.grundmiete
-        ? `Kaltmiete (€) — Grundmiete: ${forderungsstatus.grundmiete.toFixed(2)} € seit ${forderungsstatus.grundmieteSeit ?? '?'}`
+        ? forderungsstatus.sollstellungVorhanden
+            ? `Kaltmiete (€) — Grundmiete: ${forderungsstatus.grundmiete.toFixed(2)} € — Verbleibend: ${forderungsstatus.verbleibendeForderung.toFixed(2)} €`
+            : `Kaltmiete (€) — Grundmiete: ${forderungsstatus.grundmiete.toFixed(2)} €`
         : 'Kaltmiete (€)';
 
     $: kaltmieteMax = forderungsstatus
@@ -58,29 +66,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: invalid =
         !miete.vertragId ||
-        !!(
-            kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005
-        );
+        !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
 
     $: verteile(availableBetrag);
 
-    // Distribute betrag across kaltmiete / NK using forderungsstatus (or grundmiete as fallback).
+    // Distribute betrag: Kaltmiete → Garagenmieten → NK-VZ
     function verteile(betrag: number) {
         if (!isSinglePosition) return;
+
         const kaltmieteSoll = forderungsstatus
             ? forderungsstatus.sollstellungVorhanden
                 ? forderungsstatus.verbleibendeForderung
                 : forderungsstatus.grundmiete
             : betrag;
-        const kaltmiete = Math.min(betrag, Math.max(0, kaltmieteSoll));
-        miete.kaltmiete = kaltmiete;
-        miete.nkVorauszahlung = Math.max(0, betrag - kaltmiete);
+
+        let remaining = betrag;
+        miete.kaltmiete = Math.min(remaining, Math.max(0, kaltmieteSoll));
+        remaining = Math.max(0, remaining - miete.kaltmiete);
+
+        if (miete.garagen && forderungsstatus?.garagen) {
+            for (const g of miete.garagen) {
+                const gStatus = forderungsstatus.garagen.find(
+                    (fs) => fs.garageVertragId === g.garageVertragId
+                );
+                const soll = gStatus
+                    ? gStatus.sollstellungVorhanden
+                        ? gStatus.verbleibendeForderung
+                        : gStatus.garagenMiete
+                    : g.betrag;
+                g.betrag = Math.min(remaining, Math.max(0, soll));
+                remaining = Math.max(0, remaining - g.betrag);
+            }
+        }
+
+        miete.nkVorauszahlung = Math.max(0, remaining);
     }
 
     async function ladeForderungsstatus() {
         const vertragId = miete.vertragId;
         const monat = miete.betreffenderMonat;
         if (!vertragId || !monat) return;
+        isLoading = true;
         try {
             const resp = await walter_get(
                 `/api/mietzahlungen/${vertragId}/forderung/${monat}`,
@@ -88,17 +114,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
             if (resp && typeof resp === 'object' && 'monat' in resp) {
                 forderungsstatus = resp as WalterForderungsstatusEntry;
+
+                // Sync garage entries with the status from backend
+                miete.garagen = (forderungsstatus.garagen ?? []).map((g) => ({
+                    garageVertragId: g.garageVertragId,
+                    garageKennung: g.garageKennung,
+                    betrag: g.sollstellungVorhanden
+                        ? g.verbleibendeForderung
+                        : g.garagenMiete
+                }));
             }
 
             if (isSinglePosition) verteile(availableBetrag);
         } catch {
             /* ignore */
+        } finally {
+            isLoading = false;
         }
     }
 
     function onVertragSelect(e: CustomEvent) {
         vertrag = e.detail?.selectedItem;
         miete.vertragId = vertrag?.id as number | undefined;
+        miete.garagen = [];
         forderungsstatus = undefined;
         ladeForderungsstatus();
     }
@@ -106,6 +144,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: if (betreffenderMonat !== undefined) {
         miete.betreffenderMonat = betreffenderMonat;
         ladeForderungsstatus();
+    }
+
+    function garageLabel(g: { garageKennung: string; garageVertragId: number }, status: WalterForderungsstatusEntry | undefined) {
+        const gst = status?.garagen?.find((s) => s.garageVertragId === g.garageVertragId);
+        if (!gst) return `Garagenmiete ${g.garageKennung} (€)`;
+        const hint = gst.sollstellungVorhanden
+            ? `Grundmiete: ${gst.garagenMiete.toFixed(2)} € | Verbleibend: ${gst.verbleibendeForderung.toFixed(2)} €`
+            : `Grundmiete: ${gst.garagenMiete.toFixed(2)} €`;
+        return `Garagenmiete ${g.garageKennung} (€) — ${hint}`;
     }
 </script>
 
@@ -145,34 +192,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Column>
 </Row>
 
+{#if isLoading}
+    <Row>
+        <Column>
+            <InlineLoading description="Garagenmieten werden geladen…" />
+        </Column>
+    </Row>
+{:else}
+    {#each miete.garagen ?? [] as garage}
+        <Row>
+            <Column>
+                <WalterNumberInput
+                    label={garageLabel(garage, forderungsstatus)}
+                    bind:value={garage.betrag}
+                />
+            </Column>
+        </Row>
+    {/each}
+{/if}
+
 {#if forderungsstatus}
     <Row>
         <Column>
-            {#if forderungsstatus.sollstellungVorhanden}
-                <Tag type="green">
-                    Bereits gezahlt: {forderungsstatus.schonGezahlt.toFixed(2)} €
-                    — Verbleibende Forderung: {forderungsstatus.verbleibendeForderung.toFixed(
-                        2
-                    )} €
-                </Tag>
-                {#if invalid}
-                    <InlineNotification
-                        kind="error"
-                        title="Kaltmiete zu hoch:"
-                        subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
-                        hideCloseButton
-                    />
-                {:else if miete.kaltmiete < forderungsstatus.verbleibendeForderung - 0.005}
-                    <InlineNotification
-                        kind="warning"
-                        title="Betrag liegt unter geforderter Kaltmiete:"
-                        subtitle="Erwartet {forderungsstatus.verbleibendeForderung.toFixed(
-                            2
-                        )} €"
-                        hideCloseButton
-                    />
-                {/if}
-            {:else if invalid}
+            {#if forderungsstatus.sollstellungVorhanden && invalid}
+                <InlineNotification
+                    kind="error"
+                    title="Kaltmiete zu hoch:"
+                    subtitle="Maximal {kaltmieteMax?.toFixed(2)} € erlaubt"
+                    hideCloseButton
+                />
+            {:else if forderungsstatus.sollstellungVorhanden && miete.kaltmiete < forderungsstatus.verbleibendeForderung - 0.005}
+                <InlineNotification
+                    kind="warning"
+                    title="Betrag liegt unter geforderter Kaltmiete:"
+                    subtitle="Erwartet {forderungsstatus.verbleibendeForderung.toFixed(2)} €"
+                    hideCloseButton
+                />
+            {:else if !forderungsstatus.sollstellungVorhanden && invalid}
                 <InlineNotification
                     kind="error"
                     title="Kaltmiete zu hoch:"

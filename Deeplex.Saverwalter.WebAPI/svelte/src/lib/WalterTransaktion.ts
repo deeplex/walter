@@ -59,10 +59,24 @@ export class WalterTransaktionEntry extends WalterApiHandler {
     }
 }
 
+export interface GaragenmietInput {
+    garageVertragId: number;
+    garageKennung: string;
+    betrag: number;
+}
+
+export interface StandaloneGaragenmietInput {
+    garageVertragId: number;
+    garageKennung: string;
+    betreffenderMonat: string;
+    betrag: number;
+}
+
 export interface MietzahlungsInput {
     vertragId?: number;
     betreffenderMonat?: string;
     kaltmiete: number;
+    garagen: GaragenmietInput[];
     nkVorauszahlung: number;
 }
 
@@ -95,9 +109,14 @@ export interface TransaktionsInput {
     verwendungszweck: string;
     notiz?: string;
     mieten: MietzahlungsInput[];
+    garagenEingaenge: StandaloneGaragenmietInput[];
     betriebskostenEingaenge: BetriebskostenEingangInput[];
     erhaltungsaufwendungen: ErhaltungsaufwendungsInput[];
     sonstige: SonstigerBuchungssatzInput[];
+}
+
+export function emptyMietzahlungsInput(vertragId?: number): MietzahlungsInput {
+    return { kaltmiete: 0, garagen: [], nkVorauszahlung: 0, vertragId };
 }
 
 export function emptyTransaktionsInput(): TransaktionsInput {
@@ -106,6 +125,7 @@ export function emptyTransaktionsInput(): TransaktionsInput {
         zahlungsdatum: new Date().toISOString().slice(0, 10),
         verwendungszweck: '',
         mieten: [],
+        garagenEingaenge: [],
         betriebskostenEingaenge: [],
         erhaltungsaufwendungen: [],
         sonstige: []

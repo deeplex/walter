@@ -421,6 +421,65 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
+    public class GaragePermissionHandler : WohnungPermissionHandlerBase<Garage>
+    {
+        public static IQueryable<Garage> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            // Garagen sind allen verwaltenden Nutzern sichtbar
+            if (user.IsInRole("Admin"))
+                return ctx.Garagen;
+            var guid = user.GetUserId();
+            return ctx.Garagen
+                .Where(e => e.Vertraege.Any(gv =>
+                    gv.Vertrag != null &&
+                    gv.Vertrag.Wohnung.Verwalter.Count > 0 &&
+                    gv.Vertrag.Wohnung.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)))
+                    || ctx.Wohnungen.Any(w =>
+                        w.Verwalter.Count > 0 &&
+                        w.Verwalter.AsQueryable()
+                            .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid))));
+        }
+
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            Garage entity)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+    }
+
+    public class GarageVertragPermissionHandler : WohnungPermissionHandlerBase<GarageVertrag>
+    {
+        public static IQueryable<GarageVertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+                return ctx.GarageVertraege;
+            var guid = user.GetUserId();
+            return ctx.GarageVertraege
+                .Where(e =>
+                    (e.Vertrag != null &&
+                     e.Vertrag.Wohnung.Verwalter.Count > 0 &&
+                     e.Vertrag.Wohnung.Verwalter.AsQueryable()
+                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid))) ||
+                    ctx.Wohnungen.Any(w =>
+                        w.Verwalter.Count > 0 &&
+                        w.Verwalter.AsQueryable()
+                            .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid))));
+        }
+
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            GarageVertrag entity)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+    }
+
     public class VertragPermissionHandler : WohnungPermissionHandlerBase<Vertrag>
     {
         public static IQueryable<Vertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)

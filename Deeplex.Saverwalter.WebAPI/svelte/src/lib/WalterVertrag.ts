@@ -16,6 +16,7 @@
 import type { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterKontaktEntry } from './WalterKontakt';
 import { WalterMieteEntry } from './WalterMiete';
 import { WalterMietminderungEntry } from './WalterMietminderung';
@@ -43,6 +44,7 @@ export class WalterVertragEntry extends WalterApiHandler {
         public mietminderungen: WalterMietminderungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
+        public garageVertraege: WalterGarageVertragEntry[],
         public permissions: WalterPermissions
     ) {
         super();
@@ -72,6 +74,9 @@ export class WalterVertragEntry extends WalterApiHandler {
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
         const abrechnungsresultate = json.abrechnungsresultate;
+        const garageVertraege = json.garageVertraege?.map(
+            WalterGarageVertragEntry.fromJson
+        );
 
         return new WalterVertragEntry(
             json.id,
@@ -90,6 +95,7 @@ export class WalterVertragEntry extends WalterApiHandler {
             mietminderungen,
             betriebskostenrechnungen,
             abrechnungsresultate,
+            garageVertraege,
             permissions
         );
     }

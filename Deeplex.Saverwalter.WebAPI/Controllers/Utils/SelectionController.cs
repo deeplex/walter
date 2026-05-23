@@ -224,6 +224,34 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
+        [Route("api/selection/garagen")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetGaragen()
+        {
+            var list = GaragePermissionHandler.GetQueryable(Ctx, User).ToList();
+            return Ok(list.Select(e => new SelectionEntry(
+                e.GarageId,
+                e.Kennung,
+                e.Besitzer?.Bezeichnung)));
+        }
+
+        [HttpGet]
+        [Route("api/selection/garage-vertraege")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetGarageVertraege()
+        {
+            var list = await GarageVertragPermissionHandler.GetQueryable(Ctx, User)
+                .Include(gv => gv.Garage)
+                .Include(gv => gv.Mieter)
+                .ToListAsync();
+            return Ok(list.Select(e =>
+            {
+                var mieter = e.Mieter.Any()
+                    ? string.Join(", ", e.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+                return new SelectionEntry(e.GarageVertragId, $"{e.Garage.Kennung} | {mieter}", null);
+            }));
+        }
+
+        [HttpGet]
         [Route("api/selection/wohnungen")]
         public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetWohnungen()
         {

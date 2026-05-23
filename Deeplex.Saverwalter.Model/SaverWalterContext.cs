@@ -29,6 +29,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<OffenerPostenAusgleich> OffenePostenAusgleiche { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
+        public DbSet<GarageVertrag> GarageVertraege { get; set; } = null!;
+        public DbSet<GarageVertragVersion> GarageVertragVersionen { get; set; } = null!;
         public DbSet<HKVO> HKVO { get; set; } = null!;
         public DbSet<Bankkonto> Bankkontos { get; set; } = null!;
 #pragma warning disable CS0618
@@ -201,6 +203,35 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey("ZahlungsKontoId")
                 .IsRequired();
 
+            modelBuilder.Entity<Garage>()
+                .HasOne(g => g.Ertragskonto)
+                .WithMany()
+                .HasForeignKey("ErtragskontoId")
+                .IsRequired();
+            modelBuilder.Entity<GarageVertrag>()
+                .HasOne(g => g.MietBuchungskonto)
+                .WithMany()
+                .HasForeignKey("MietBuchungskontoId")
+                .IsRequired();
+            modelBuilder.Entity<GarageVertrag>()
+                .HasOne(g => g.ZahlungsKonto)
+                .WithMany()
+                .HasForeignKey("ZahlungsKontoId")
+                .IsRequired();
+            modelBuilder.Entity<GarageVertrag>()
+                .HasMany(g => g.Mieter)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "GarageVertragKontakt",
+                    r => r.HasOne<Kontakt>().WithMany().HasForeignKey("KontaktId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<GarageVertrag>().WithMany().HasForeignKey("GarageVertragId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("GarageVertragId", "KontaktId").HasName("pk_garage_vertrag_mieter");
+                        j.HasIndex("KontaktId").HasDatabaseName("ix_garage_vertrag_mieter_kontakt_id");
+                        j.ToTable("garage_vertrag_mieter");
+                    });
+
             modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -211,6 +242,10 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<GarageVertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<GarageVertrag>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<GarageVertragVersion>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<GarageVertragVersion>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<HKVO>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<HKVO>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Kontakt>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");

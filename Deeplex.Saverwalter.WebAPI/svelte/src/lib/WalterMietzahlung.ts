@@ -50,6 +50,16 @@ export class WalterMietzahlungListEntry {
     }
 }
 
+export interface WalterGarageForderungsstatusEntry {
+    garageVertragId: number;
+    garageKennung: string;
+    garagenMiete: number;
+    forderungsbetrag: number;
+    schonGezahlt: number;
+    verbleibendeForderung: number;
+    sollstellungVorhanden: boolean;
+}
+
 export interface WalterForderungsstatusEntry {
     monat: string;
     forderungsbetrag: number;
@@ -59,6 +69,7 @@ export interface WalterForderungsstatusEntry {
     sollstellungVorhanden: boolean;
     grundmiete: number;
     grundmieteSeit?: string;
+    garagen: WalterGarageForderungsstatusEntry[];
 }
 
 export interface WalterOffenerPostenStatus {

@@ -22,6 +22,7 @@ import {
     WalterAdresseEntry,
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
+    WalterGarageEntry,
     WalterKontaktEntry,
     WalterMieteEntry,
     WalterMietminderungEntry,
@@ -43,6 +44,7 @@ export const fileURL = {
         `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,
     erhaltungsaufwendung: (id: string) =>
         `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}/files`,
+    garage: (id: string) => `${WalterGarageEntry.ApiURL}/${id}/files`,
     miete: (id: string) => `${WalterMieteEntry.ApiURL}/${id}/files`,
     mietminderung: (id: string) =>
         `${WalterMietminderungEntry.ApiURL}/${id}/files`,

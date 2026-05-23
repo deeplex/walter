@@ -38,11 +38,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         // ── Input-DTOs ──────────────────────────────────────────────────────────
 
+        public class GaragenmietInput
+        {
+            public int GarageVertragId { get; set; }
+            public decimal Betrag { get; set; }
+        }
+
+        public class StandaloneGaragenmietInput
+        {
+            public int GarageVertragId { get; set; }
+            public DateOnly BetreffenderMonat { get; set; }
+            public decimal Betrag { get; set; }
+        }
+
         public class MietzahlungsInput
         {
             public int VertragId { get; set; }
             public DateOnly BetreffenderMonat { get; set; }
             public decimal Kaltmiete { get; set; }
+            public List<GaragenmietInput> Garagen { get; set; } = [];
             public decimal NkVorauszahlung { get; set; }
         }
 
@@ -79,6 +93,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public string Verwendungszweck { get; set; } = string.Empty;
             public string? Notiz { get; set; }
             public List<MietzahlungsInput> Mieten { get; set; } = [];
+            public List<StandaloneGaragenmietInput> GaragenEingaenge { get; set; } = [];
             public List<BetriebskostenEingangInput> BetriebskostenEingaenge { get; set; } = [];
             public List<ErhaltungsaufwendungsInput> Erhaltungsaufwendungen { get; set; } = [];
             public List<SonstigerBuchungssatzInput> Sonstige { get; set; } = [];
@@ -89,7 +104,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         public async Task<Transaktion> BucheAsync(TransaktionsInput input)
         {
             var totalBetrag =
-                input.Mieten.Sum(m => m.Kaltmiete + m.NkVorauszahlung) +
+                input.Mieten.Sum(m => m.Kaltmiete + m.NkVorauszahlung + m.Garagen.Sum(g => g.Betrag)) +
+                input.GaragenEingaenge.Sum(g => g.Betrag) +
                 input.BetriebskostenEingaenge.Sum(b => b.Betrag) +
                 input.Erhaltungsaufwendungen.Sum(e => e.Betrag) +
                 input.Sonstige.Sum(s => s.Betrag);
@@ -134,6 +150,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             foreach (var miete in input.Mieten)
                 await ErstelleMietzahlungAsync(miete, transaktion);
+
+            foreach (var garage in input.GaragenEingaenge)
+                await ErstelleGaragenmietzahlungAsync(
+                    new GaragenmietInput { GarageVertragId = garage.GarageVertragId, Betrag = garage.Betrag },
+                    transaktion,
+                    new DateOnly(garage.BetreffenderMonat.Year, garage.BetreffenderMonat.Month, 1));
 
             foreach (var bk in input.BetriebskostenEingaenge)
             {
@@ -219,6 +241,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 });
             }
 
+            foreach (var garage in miete.Garagen)
+                await ErstelleGaragenmietzahlungAsync(garage, transaktion, monat);
+
             if (miete.NkVorauszahlung > 0)
             {
                 var nkSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}");
@@ -227,6 +252,59 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 nkSatz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(nkSatz);
             }
+        }
+
+        private async Task ErstelleGaragenmietzahlungAsync(GaragenmietInput garage, Transaktion transaktion, DateOnly monat)
+        {
+            var gv = await _ctx.GarageVertraege
+                .Include(g => g.Versionen)
+                .Include(g => g.Garage).ThenInclude(g => g.Ertragskonto)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
+                .Include(g => g.ZahlungsKonto)
+                .FirstOrDefaultAsync(g => g.GarageVertragId == garage.GarageVertragId)
+                ?? throw new ArgumentException($"GarageVertrag {garage.GarageVertragId} nicht gefunden.");
+
+            var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn)
+                ?? throw new InvalidOperationException($"Keine GarageVertragVersion für {monat:MM/yyyy}.");
+
+            var sollZeile = FindeOderErstelleGarageSollstellung(gv, monat, version);
+
+            var schonGezahlt = sollZeile.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
+            var verbleibend = sollZeile.Betrag - schonGezahlt;
+            if (garage.Betrag > verbleibend + 0.005m)
+                throw new InvalidOperationException(
+                    $"Garagenmiete ({garage.Betrag:C}) übersteigt verbleibende Forderung ({verbleibend:C}).");
+
+            var satz = new Buchungssatz(transaktion.Zahlungsdatum, $"Garagenmietzahlung {monat:MM/yyyy} | {gv.Garage.Kennung}");
+            AddZeile(satz, SollHaben.Soll, garage.Betrag, gv.ZahlungsKonto);
+            AddZeile(satz, SollHaben.Haben, garage.Betrag, gv.MietBuchungskonto);
+            satz.Transaktion = transaktion;
+            _ctx.Buchungssaetze.Add(satz);
+
+            var habenZeile = satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
+            _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = sollZeile,
+                HabenZeile = habenZeile
+            });
+        }
+
+        private Buchungszeile FindeOderErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, GarageVertragVersion version)
+        {
+            var vorhandene = gv.MietBuchungskonto.Buchungszeilen
+                .FirstOrDefault(z =>
+                    z.SollHaben == SollHaben.Soll
+                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
+                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+
+            if (vorhandene != null) return vorhandene;
+
+            var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
+            AddZeile(satz, SollHaben.Soll, version.GaragenMiete, gv.MietBuchungskonto);
+            AddZeile(satz, SollHaben.Haben, version.GaragenMiete, gv.Garage.Ertragskonto);
+            _ctx.Buchungssaetze.Add(satz);
+            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
         }
 
         /// <summary>

@@ -82,6 +82,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <WalterSideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
         <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
+        <WalterSideNavLink icon={Building} text="Garagen" href="/garagen" />
         <SideNavDivider />
         <div>
             <SideNavMenu icon={ListBoxes} text="Erweitert">

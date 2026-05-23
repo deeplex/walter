@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import { Add, TrashCan } from 'carbon-icons-svelte';
     import WalterTransaktionPositionMiete from './WalterTransaktionPositionMiete.svelte';
+    import WalterTransaktionPositionGarage from './WalterTransaktionPositionGarage.svelte';
     import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
     import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
     import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
@@ -49,9 +50,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: verteilterBetrag =
         buchung.mieten.reduce(
-            (s, m) => s + (m.kaltmiete || 0) + (m.nkVorauszahlung || 0),
+            (s, m) =>
+                s +
+                (m.kaltmiete || 0) +
+                (m.garagen?.reduce((gs, g) => gs + (g.betrag || 0), 0) || 0) +
+                (m.nkVorauszahlung || 0),
             0
         ) +
+        (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) || 0) +
         buchung.betriebskostenEingaenge.reduce(
             (s, b) => s + (b.betrag || 0),
             0
@@ -64,6 +70,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: totalPositions =
         buchung.mieten.length +
+        (buchung.garagenEingaenge?.length || 0) +
         buchung.betriebskostenEingaenge.length +
         buchung.erhaltungsaufwendungen.length +
         buchung.sonstige.length;
@@ -73,20 +80,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: offenerBetrag = (buchung.betrag || 0) - verteilterBetrag;
 
     let mieteInvalids: boolean[] = [];
+    let mieteStatusTexts: string[] = [];
+    let garageInvalids: boolean[] = [];
     let bkInvalids: boolean[] = [];
     let eaInvalids: boolean[] = [];
     $: isValid =
         buchung.betrag > 0 &&
         Math.abs(offenerBetrag) < 0.005 &&
         !mieteInvalids.some(Boolean) &&
+        !garageInvalids.some(Boolean) &&
         !bkInvalids.some(Boolean) &&
         !eaInvalids.some(Boolean);
 
-    function addMiete() {
+    function addWohnungsmiete() {
         const available = Math.max(0, offenerBetrag);
         buchung.mieten = [
             ...buchung.mieten,
-            { kaltmiete: available, nkVorauszahlung: 0 }
+            { kaltmiete: available, garagen: [], nkVorauszahlung: 0 }
         ];
     }
 
@@ -126,6 +136,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function addSonstiges() {
         const available = Math.max(0, offenerBetrag);
         buchung.sonstige = [...buchung.sonstige, { betrag: available }];
+    }
+
+    function addGarage() {
+        const available = Math.max(0, offenerBetrag);
+        const now = new Date();
+        const monat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+        buchung.garagenEingaenge = [
+            ...(buchung.garagenEingaenge ?? []),
+            { garageVertragId: 0, garageKennung: '', betreffenderMonat: monat, betrag: available }
+        ];
+    }
+
+    function removeGarage(i: number) {
+        buchung.garagenEingaenge = buchung.garagenEingaenge.filter((_, idx) => idx !== i);
     }
 
     function removeSonstiges(i: number) {
@@ -176,7 +200,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
         >
-            <strong>Mietzahlung</strong>
+            <div>
+                <strong>Mietzahlung</strong>
+                {#if mieteStatusTexts[i]}
+                    <span style="margin-left: 0.75rem; font-size: 0.8rem; opacity: 0.7">{mieteStatusTexts[i]}</span>
+                {/if}
+            </div>
             <Button
                 kind="ghost"
                 size="small"
@@ -190,7 +219,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             bind:miete={buchung.mieten[i]}
             bind:availableBetrag={buchung.betrag}
             bind:invalid={mieteInvalids[i]}
+            bind:statusText={mieteStatusTexts[i]}
             {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- Standalone Garagen -->
+{#each buchung.garagenEingaenge ?? [] as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Garagenmiete</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeGarage(i)}
+            />
+        </div>
+        <WalterTransaktionPositionGarage
+            {fetchImpl}
+            bind:garage={buchung.garagenEingaenge[i]}
+            bind:invalid={garageInvalids[i]}
         />
     </Tile>
 {/each}
@@ -273,8 +326,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <Row style="margin-bottom: 1.5rem">
     <Column>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-            <Button kind="tertiary" size="small" icon={Add} on:click={addMiete}>
-                Miete
+            <Button kind="tertiary" size="small" icon={Add} on:click={addWohnungsmiete}>
+                Wohnungsmiete
+            </Button>
+            <Button kind="tertiary" size="small" icon={Add} on:click={addGarage}>
+                Garagenmiete
             </Button>
             <Button kind="tertiary" size="small" icon={Add} on:click={addBK}>
                 Betriebskostenrechnung

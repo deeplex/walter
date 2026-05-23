@@ -232,8 +232,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             FillErhaltungsaufwendungen(ctx, wohnungen, random);
             FillMietminderungen(ctx, vertraege, random);
             var (mieterBankkontos, vertragBankkontos, eigentuemerBankkontos) = FillBankkontos(ctx, eigentuemer, mieter, vertraege, random);
-            FillTransaktionen(ctx, vertraege, mieterBankkontos, vertragBankkontos, random);
-            FillGaragen(ctx, wohnungen, vertraege, random);
+            var (_, garageVertraegeByVertrag) = FillGaragen(ctx, wohnungen, vertraege, mieter, random);
+            FillTransaktionen(ctx, vertraege, mieterBankkontos, vertragBankkontos, garageVertraegeByVertrag, random);
 
             var umlagen = FillUmlagen(ctx, adressen, random);
             var hauszaehlerHeizung = FillZaehlerSet(ctx, umlagen);
@@ -604,6 +604,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             List<Vertrag> vertraege,
             Dictionary<Kontakt, Bankkonto> mieterBankkontos,
             Dictionary<Vertrag, Bankkonto> vertragBankkontos,
+            Dictionary<Vertrag, List<GarageVertrag>> garageVertraegeByVertrag,
             Random random)
         {
             Console.Write("Füge Transaktionen hinzu: ");
@@ -612,6 +613,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             // Track Sollstellungen already created to avoid duplicates across versions
             // Use object reference as key — VertragId is 0 before SaveChanges
             var sollstellungen = new Dictionary<(Vertrag, int Jahr, int Monat), Buchungszeile>();
+            var garageSollstellungen = new Dictionary<(GarageVertrag, int Jahr, int Monat), Buchungszeile>();
 
             foreach (var vertrag in vertraege)
             {
@@ -647,7 +649,27 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                         var kaltmiete = version.Grundmiete;
                         var nkVz = Math.Round(version.Nebenkostenvorauszahlung * zahlungsfaktor, 2);
-                        var gesamt = kaltmiete + nkVz;
+
+                        // Determine active garage components for this month
+                        var garageComponents = new List<(GarageVertrag gv, decimal garagenMiete)>();
+                        if (garageVertraegeByVertrag.TryGetValue(vertrag, out var linkedGv))
+                        {
+                            foreach (var gv in linkedGv)
+                            {
+                                var gvBeginn = gv.Beginn();
+                                if (gvBeginn == DateOnly.MinValue || gvBeginn > monat) continue;
+                                if (gv.Ende.HasValue && gv.Ende.Value < monat) continue;
+                                var gvVersion = gv.Versionen
+                                    .Where(v => v.Beginn <= monat)
+                                    .OrderByDescending(v => v.Beginn)
+                                    .FirstOrDefault();
+                                if (gvVersion != null)
+                                    garageComponents.Add((gv, gvVersion.GaragenMiete));
+                            }
+                        }
+
+                        var garageTotal = garageComponents.Sum(g => g.garagenMiete);
+                        var gesamt = kaltmiete + nkVz + garageTotal;
                         var zahlungsdatum = DritterWerktag(monat).AddDays(random.Next(0, 5));
                         var verwendungszweck = $"Miete {monat:MM/yyyy} | {mieterNamen} | {wohnungInfo}";
 
@@ -723,6 +745,54 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                                 Buchungskonto = vertrag.NkBuchungskonto
                             });
                             ctx.Buchungssaetze.Add(nkSatz);
+                        }
+
+                        // Garage rent components — embedded in the same Transaktion
+                        foreach (var (gv, garagenMiete) in garageComponents)
+                        {
+                            // Garage Sollstellung
+                            var gvSollKey = (gv, monat.Year, monat.Month);
+                            if (!garageSollstellungen.TryGetValue(gvSollKey, out var gvSollZeile))
+                            {
+                                var gvSollSatz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
+                                gvSollZeile = new Buchungszeile(SollHaben.Soll, garagenMiete)
+                                {
+                                    Buchungssatz = gvSollSatz,
+                                    Buchungskonto = gv.MietBuchungskonto
+                                };
+                                gvSollSatz.Buchungszeilen.Add(gvSollZeile);
+                                gvSollSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, garagenMiete)
+                                {
+                                    Buchungssatz = gvSollSatz,
+                                    Buchungskonto = gv.Garage.Ertragskonto
+                                });
+                                ctx.Buchungssaetze.Add(gvSollSatz);
+                                garageSollstellungen[gvSollKey] = gvSollZeile;
+                            }
+
+                            // Garage payment Buchungssatz (part of same Transaktion)
+                            var gvZahlSatz = new Buchungssatz(zahlungsdatum, $"Garagenmietzahlung {monat:MM/yyyy} | {gv.Garage.Kennung}")
+                            {
+                                Transaktion = transaktion
+                            };
+                            var gvHabenZeile = new Buchungszeile(SollHaben.Haben, garagenMiete)
+                            {
+                                Buchungssatz = gvZahlSatz,
+                                Buchungskonto = gv.MietBuchungskonto
+                            };
+                            gvZahlSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, garagenMiete)
+                            {
+                                Buchungssatz = gvZahlSatz,
+                                Buchungskonto = gv.ZahlungsKonto
+                            });
+                            gvZahlSatz.Buchungszeilen.Add(gvHabenZeile);
+                            ctx.Buchungssaetze.Add(gvZahlSatz);
+
+                            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                            {
+                                SollZeile = gvSollZeile,
+                                HabenZeile = gvHabenZeile
+                            });
                         }
 
                         ctx.Transaktionen.Add(transaktion);
@@ -886,42 +956,266 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return (mieterBankkontos, vertragBankkontos, eigentuemerBankkontos);
         }
 
-        private static List<Garage> FillGaragen(
+        private static (List<Garage>, Dictionary<Vertrag, List<GarageVertrag>>) FillGaragen(
             SaverwalterContext ctx,
             List<Wohnung> wohnungen,
             List<Vertrag> vertraege,
+            List<Kontakt> mieter,
             Random random)
         {
             Console.Write("Füge Garagen hinzu: ");
 
             var garagen = new List<Garage>();
+            var allGarageVertraege = new List<GarageVertrag>();
+            var linkedByVertrag = new Dictionary<Vertrag, List<GarageVertrag>>();
+            var gvCounter = 0;
+
+            var activeVertraege = vertraege
+                .Where(v => v.Ende == null || v.Ende >= GlobalToday)
+                .ToList();
 
             foreach (var wohnung in wohnungen)
             {
-                if (random.NextDouble() >= 0.22)
-                {
-                    continue;
-                }
+                if (random.NextDouble() >= 0.22) continue;
 
-                var garage = new Garage($"G-{wohnung.WohnungId:0000}")
+                var garageKennung = $"G-{wohnung.WohnungId:0000}";
+                var garage = new Garage(garageKennung)
                 {
                     Besitzer = wohnung.Besitzer!,
                     Adresse = wohnung.Adresse,
-                    Notiz = "Stellplatz im Hinterhof"
+                    Notiz = "Stellplatz im Hinterhof",
+                    Ertragskonto = new Buchungskonto($"{garageKennung}-EK", "Garagenmietertrag", BuchungskontoTyp.Ertrag)
                 };
+                garagen.Add(garage);
 
-                var activeContract = vertraege.FirstOrDefault(v => v.Wohnung == wohnung && (v.Ende == null || v.Ende >= GlobalToday));
-                if (activeContract != null && random.NextDouble() < 0.55)
+                var activeVertrag = activeVertraege.FirstOrDefault(v => v.Wohnung == wohnung);
+                var standaloneMieter = mieter.Count > 0 ? mieter[random.Next(mieter.Count)] : null;
+                var scenario = random.NextDouble();
+
+                if (scenario < 0.10)
                 {
-                    garage.Vertraege.Add(activeContract);
+                    // Vacant — no GarageVertrag
+                    continue;
                 }
 
-                garagen.Add(garage);
+                if (scenario < 0.45 && activeVertrag != null)
+                {
+                    // Linked to active Wohnungsvertrag; Mieter inherited from Vertrag (list stays empty)
+                    var gv = MakeLinkedGarageVertrag(garage, activeVertrag, gvCounter++, random);
+                    allGarageVertraege.Add(gv);
+                    if (!linkedByVertrag.ContainsKey(activeVertrag))
+                        linkedByVertrag[activeVertrag] = [];
+                    linkedByVertrag[activeVertrag].Add(gv);
+
+                    // ~20 % chance: garage was rented by someone else before this Wohnungsvertrag started
+                    if (random.NextDouble() < 0.20)
+                    {
+                        var histEnde = gv.Beginn().AddDays(-1);
+                        if (histEnde > GlobalToday.AddYears(-6))
+                        {
+                            var histGv = MakeStandaloneHistoricalGarageVertrag(garage, standaloneMieter, histEnde, gvCounter++, random);
+                            allGarageVertraege.Add(histGv);
+                            CreateStandaloneGarageTransaktionen(ctx, histGv, random);
+                        }
+                    }
+                }
+                else if (scenario < 0.70)
+                {
+                    // Standalone active rental with own Mieter
+                    var gv = MakeStandaloneActiveGarageVertrag(garage, standaloneMieter, gvCounter++, random);
+                    allGarageVertraege.Add(gv);
+                    CreateStandaloneGarageTransaktionen(ctx, gv, random);
+                }
+                else if (scenario < 0.88)
+                {
+                    // Standalone historical (ended), optionally followed by a new renter
+                    var endDate = GlobalToday.AddMonths(-random.Next(2, 24));
+                    var gv = MakeStandaloneHistoricalGarageVertrag(garage, standaloneMieter, endDate, gvCounter++, random);
+                    allGarageVertraege.Add(gv);
+                    CreateStandaloneGarageTransaktionen(ctx, gv, random);
+
+                    // ~40 %: a new active tenant moved in after
+                    if (random.NextDouble() < 0.40 && mieter.Count > 0)
+                    {
+                        var newMieter = mieter[random.Next(mieter.Count)];
+                        var gv2 = MakeStandaloneActiveGarageVertrag(garage, newMieter, gvCounter++, random, endDate.AddDays(1));
+                        allGarageVertraege.Add(gv2);
+                        CreateStandaloneGarageTransaktionen(ctx, gv2, random);
+                    }
+                }
+                else
+                {
+                    // Succession: old standalone ended, then linked to new Wohnungsvertrag
+                    var endDate = GlobalToday.AddMonths(-random.Next(6, 18));
+                    var gvOld = MakeStandaloneHistoricalGarageVertrag(garage, standaloneMieter, endDate, gvCounter++, random);
+                    allGarageVertraege.Add(gvOld);
+                    CreateStandaloneGarageTransaktionen(ctx, gvOld, random);
+
+                    if (activeVertrag != null)
+                    {
+                        var gvNew = MakeLinkedGarageVertrag(garage, activeVertrag, gvCounter++, random, endDate.AddDays(1));
+                        allGarageVertraege.Add(gvNew);
+                        if (!linkedByVertrag.ContainsKey(activeVertrag))
+                            linkedByVertrag[activeVertrag] = [];
+                        linkedByVertrag[activeVertrag].Add(gvNew);
+                    }
+                    else if (mieter.Count > 0)
+                    {
+                        var newMieter = mieter[random.Next(mieter.Count)];
+                        var gvNew = MakeStandaloneActiveGarageVertrag(garage, newMieter, gvCounter++, random, endDate.AddDays(1));
+                        allGarageVertraege.Add(gvNew);
+                        CreateStandaloneGarageTransaktionen(ctx, gvNew, random);
+                    }
+                }
             }
 
             ctx.Garagen.AddRange(garagen);
-            Console.WriteLine($"{garagen.Count} Garagen hinzugefügt");
-            return garagen;
+            ctx.GarageVertraege.AddRange(allGarageVertraege);
+            Console.WriteLine($"{garagen.Count} Garagen, {allGarageVertraege.Count} GarageVerträge hinzugefügt");
+            return (garagen, linkedByVertrag);
+        }
+
+        private static GarageVertrag MakeLinkedGarageVertrag(
+            Garage garage,
+            Vertrag linkedVertrag,
+            int idx,
+            Random random,
+            DateOnly? forceBeginn = null)
+        {
+            var vertragBeginn = linkedVertrag.Beginn();
+            if (vertragBeginn == default) vertragBeginn = GlobalToday.AddYears(-2);
+            var beginn = forceBeginn ?? vertragBeginn.AddMonths(random.Next(0, 7));
+            var garagenMiete = Math.Round(50m + (decimal)(random.NextDouble() * 100), 0);
+            var gvIdx = $"G{idx:D5}";
+
+            var gv = new GarageVertrag
+            {
+                Garage = garage,
+                Vertrag = linkedVertrag,
+                MietBuchungskonto = new Buchungskonto($"{gvIdx}-MB", "Garagenmiete", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto($"{gvIdx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            gv.Versionen.Add(new GarageVertragVersion(beginn, garagenMiete) { GarageVertrag = gv });
+            return gv;
+        }
+
+        private static GarageVertrag MakeStandaloneActiveGarageVertrag(
+            Garage garage,
+            Kontakt? mieter,
+            int idx,
+            Random random,
+            DateOnly? forceBeginn = null)
+        {
+            var beginn = forceBeginn ?? GlobalToday.AddMonths(-random.Next(3, 48));
+            var garagenMiete = Math.Round(50m + (decimal)(random.NextDouble() * 100), 0);
+            var gvIdx = $"G{idx:D5}";
+
+            var gv = new GarageVertrag
+            {
+                Garage = garage,
+                MietBuchungskonto = new Buchungskonto($"{gvIdx}-MB", "Garagenmiete", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto($"{gvIdx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            if (mieter != null) gv.Mieter.Add(mieter);
+            gv.Versionen.Add(new GarageVertragVersion(beginn, garagenMiete) { GarageVertrag = gv });
+            return gv;
+        }
+
+        private static GarageVertrag MakeStandaloneHistoricalGarageVertrag(
+            Garage garage,
+            Kontakt? mieter,
+            DateOnly endDate,
+            int idx,
+            Random random)
+        {
+            var duration = random.Next(6, 36);
+            var beginn = endDate.AddMonths(-duration);
+            var garagenMiete = Math.Round(45m + (decimal)(random.NextDouble() * 85), 0);
+            var gvIdx = $"G{idx:D5}";
+
+            var gv = new GarageVertrag
+            {
+                Garage = garage,
+                Ende = endDate,
+                MietBuchungskonto = new Buchungskonto($"{gvIdx}-MB", "Garagenmiete", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto($"{gvIdx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            if (mieter != null) gv.Mieter.Add(mieter);
+            gv.Versionen.Add(new GarageVertragVersion(beginn, garagenMiete) { GarageVertrag = gv });
+            return gv;
+        }
+
+        private static void CreateStandaloneGarageTransaktionen(
+            SaverwalterContext ctx,
+            GarageVertrag gv,
+            Random random)
+        {
+            // ~15 % chance: no payments at all (unpaid/problematic tenant)
+            if (random.NextDouble() < 0.15) return;
+
+            var version = gv.Versionen.FirstOrDefault();
+            if (version == null) return;
+
+            var payUntil = GlobalToday.AddMonths(-1);
+            var ende = gv.Ende is { } e && e < payUntil ? e : payUntil;
+
+            var sollstellungen = new Dictionary<(int Jahr, int Monat), Buchungszeile>();
+
+            for (var monat = new DateOnly(version.Beginn.Year, version.Beginn.Month, 1);
+                 monat <= new DateOnly(ende.Year, ende.Month, 1);
+                 monat = monat.AddMonths(1))
+            {
+                // ~8 % missed payment
+                if (random.NextDouble() < 0.08) continue;
+
+                var miete = version.GaragenMiete;
+                var zahlungsdatum = DritterWerktag(monat).AddDays(random.Next(0, 7));
+
+                var transaktion = new Transaktion
+                {
+                    Zahlungsdatum = zahlungsdatum,
+                    Betrag = miete,
+                    Verwendungszweck = $"Garagenmiete {monat:MM/yyyy} | {gv.Garage.Kennung}",
+                };
+
+                // Sollstellung (once per month, deduped)
+                var sollKey = (monat.Year, monat.Month);
+                if (!sollstellungen.TryGetValue(sollKey, out var sollZeile))
+                {
+                    var sollSatz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
+                    sollZeile = new Buchungszeile(SollHaben.Soll, miete)
+                    {
+                        Buchungssatz = sollSatz,
+                        Buchungskonto = gv.MietBuchungskonto
+                    };
+                    sollSatz.Buchungszeilen.Add(sollZeile);
+                    sollSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, miete)
+                    {
+                        Buchungssatz = sollSatz,
+                        Buchungskonto = gv.Garage.Ertragskonto
+                    });
+                    ctx.Buchungssaetze.Add(sollSatz);
+                    sollstellungen[sollKey] = sollZeile;
+                }
+
+                // Payment: Soll ZahlungsKonto / Haben MietBuchungskonto
+                var zahlSatz = new Buchungssatz(zahlungsdatum, $"Garagenmietzahlung {monat:MM/yyyy} | {gv.Garage.Kennung}") { Transaktion = transaktion };
+                var zahlHaben = new Buchungszeile(SollHaben.Haben, miete)
+                {
+                    Buchungssatz = zahlSatz,
+                    Buchungskonto = gv.MietBuchungskonto
+                };
+                zahlSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, miete)
+                {
+                    Buchungssatz = zahlSatz,
+                    Buchungskonto = gv.ZahlungsKonto
+                });
+                zahlSatz.Buchungszeilen.Add(zahlHaben);
+
+                ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich { SollZeile = sollZeile, HabenZeile = zahlHaben });
+                ctx.Buchungssaetze.Add(zahlSatz);
+                ctx.Transaktionen.Add(transaktion);
+            }
         }
 
         private static List<Umlage> FillUmlagen(SaverwalterContext ctx, List<Adresse> adressen, Random random)

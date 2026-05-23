@@ -57,6 +57,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         /// <summary>
         /// Forderungsstatus für einen Monat — dient der UI zur Vorauswahl der Zahlungsbeträge.
         /// </summary>
+        public class GarageForderungsstatusEntry
+        {
+            public int GarageVertragId { get; set; }
+            public string GarageKennung { get; set; } = string.Empty;
+            public decimal GaragenMiete { get; set; }
+            public decimal Forderungsbetrag { get; set; }
+            public decimal SchonGezahlt { get; set; }
+            public decimal VerbleibendeForderung { get; set; }
+            public bool SollstellungVorhanden { get; set; }
+        }
+
         public class ForderungsstatusEntry
         {
             public DateOnly Monat { get; set; }
@@ -67,6 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public bool SollstellungVorhanden { get; set; }
             public decimal Grundmiete { get; set; }
             public DateOnly? GrundmieteSeit { get; set; }
+            public List<GarageForderungsstatusEntry> Garagen { get; set; } = [];
         }
 
         /// <summary>
@@ -204,7 +216,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet("{vertragId}/forderung/{monat}")]
         public async Task<ActionResult<ForderungsstatusEntry>> GetForderungsstatus(int vertragId, DateOnly monat)
         {
-            var vertrag = await ctx.Vertraege.FindAsync(vertragId);
+            var vertrag = await ctx.Vertraege
+                .Include(v => v.Versionen)
+                .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Versionen)
+                .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Garage)
+                .Include(v => v.GarageVertraege).ThenInclude(gv => gv.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .FirstOrDefaultAsync(v => v.VertragId == vertragId);
             if (vertrag is null) return NotFound();
 
             var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
@@ -228,6 +247,41 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(v => v.Beginn <= ersterDesMonats)
                 .MaxBy(v => v.Beginn);
 
+            var garageStatuses = vertrag.GarageVertraege
+                .Where(gv => gv.Beginn() <= ersterDesMonats && (gv.Ende == null || gv.Ende >= ersterDesMonats))
+                .Select(gv =>
+                {
+                    var gvVersion = gv.Versionen
+                        .Where(v => v.Beginn <= ersterDesMonats)
+                        .MaxBy(v => v.Beginn);
+                    if (gvVersion == null) return null;
+
+                    var gvSoll = gv.MietBuchungskonto.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Soll
+                            && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
+                            && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
+                        .Sum(z => z.Betrag);
+                    var gvHaben = gv.MietBuchungskonto.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                            && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
+                            && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
+                        .Sum(z => z.Betrag);
+
+                    return new GarageForderungsstatusEntry
+                    {
+                        GarageVertragId = gv.GarageVertragId,
+                        GarageKennung = gv.Garage.Kennung,
+                        GaragenMiete = gvVersion.GaragenMiete,
+                        Forderungsbetrag = gvSoll,
+                        SchonGezahlt = gvHaben,
+                        VerbleibendeForderung = gvSoll - gvHaben,
+                        SollstellungVorhanden = gvSoll > 0
+                    };
+                })
+                .Where(g => g != null)
+                .Cast<GarageForderungsstatusEntry>()
+                .ToList();
+
             return Ok(new ForderungsstatusEntry
             {
                 Monat = ersterDesMonats,
@@ -237,7 +291,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 NkVorauszahlung = version?.Nebenkostenvorauszahlung ?? 0,
                 SollstellungVorhanden = sollSumme > 0,
                 Grundmiete = version?.Grundmiete ?? 0,
-                GrundmieteSeit = version?.Beginn
+                GrundmieteSeit = version?.Beginn,
+                Garagen = garageStatuses
             });
         }
     }

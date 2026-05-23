@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import type { WalterTransaktionEntry, WalterVertragEntry, TransaktionsInput } from '$walter/lib';
-    import { emptyTransaktionsInput } from '$walter/lib';
+    import { emptyTransaktionsInput, emptyMietzahlungsInput } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -39,13 +39,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: buchungsInput = {
         ...emptyTransaktionsInput(),
-        mieten: [
-            {
-                kaltmiete: 0,
-                nkVorauszahlung: 0,
-                vertragId: vertrag?.id as number | undefined
-            }
-        ]
+        mieten: [emptyMietzahlungsInput(vertrag?.id as number | undefined)]
     } as TransaktionsInput;
 
     $: sortedRows = [...(rows || [])].sort((a, b) => {

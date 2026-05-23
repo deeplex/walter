@@ -111,6 +111,16 @@ export const walter_selection = {
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
     },
+    garagen(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/garagen', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
+    },
+    garageVertraege(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/garage-vertraege', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
+    },
     wohnungen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/wohnungen', fetchImpl) as Promise<
             WalterSelectionEntry[]

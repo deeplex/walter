@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export { WalterToastContent } from './WalterToastContent';
+export { WalterGarageEntry } from './WalterGarage';
+export { WalterGarageVertragEntry } from './WalterGarageVertrag';
+export { WalterGarageVertragVersionEntry } from './WalterGarageVertragVersion';
 export { WalterAccountEntry } from './WalterAccount';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
@@ -26,6 +29,7 @@ export {
     WalterMietzahlungApiURL,
     type WalterMietzahlungInput,
     type WalterForderungsstatusEntry,
+    type WalterGarageForderungsstatusEntry,
     type WalterOffenerPostenStatus
 } from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
@@ -45,11 +49,14 @@ export { WalterWohnungEntry } from './WalterWohnung';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
 export {
+    type GaragenmietInput,
+    type StandaloneGaragenmietInput,
     type MietzahlungsInput,
     type BetriebskostenEingangInput,
     type ErhaltungsaufwendungsInput,
     type SonstigerBuchungssatzInput,
     type TransaktionsInput,
+    emptyMietzahlungsInput,
     emptyTransaktionsInput
 } from './WalterTransaktion';
 export * from './WalterValidation';

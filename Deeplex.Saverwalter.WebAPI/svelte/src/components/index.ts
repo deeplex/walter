@@ -40,6 +40,9 @@ export { default as WalterTransaktion } from './details/WalterTransaktion.svelte
 export { default as WalterTransaktionRaw } from './details/WalterTransaktionRaw.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
 export { default as WalterUmlagetyp } from './details/WalterUmlagetyp.svelte';
+export { default as WalterGarage } from './details/WalterGarage.svelte';
+export { default as WalterGarageVertrag } from './details/WalterGarageVertrag.svelte';
+export { default as WalterGarageVertragVersion } from './details/WalterGarageVertragVersion.svelte';
 export { default as WalterVertrag } from './details/WalterVertrag.svelte';
 export { default as WalterVertragVersion } from './details/WalterVertragVersion.svelte';
 export { default as WalterWohnung } from './details/WalterWohnung.svelte';
@@ -51,7 +54,9 @@ export { default as WalterMiettabelleWrapper } from './details/WalterMiettabelle
 export { default as WalterError } from './elements/WalterError.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
 export { default as WalterComboBoxBankkonto } from './elements/WalterComboBoxBankkonto.svelte';
+export { default as WalterComboBoxGarage } from './elements/WalterComboBoxGarage.svelte';
 export { default as WalterComboBoxKontakt } from './elements/WalterComboBoxKontakt.svelte';
+export { default as WalterComboBoxVertrag } from './elements/WalterComboBoxVertrag.svelte';
 export { default as WalterComboBoxWohnung } from './elements/WalterComboBoxWohnung.svelte';
 export { default as WalterComboBoxUmlagetyp } from './elements/WalterComboBoxUmlagetyp.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
@@ -88,6 +93,9 @@ export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltung
 export { default as WalterBetriebskostenrechnungen } from './lists/WalterBetriebskostenrechnungen.svelte';
 export { default as WalterKontakte } from './lists/WalterKontakte.svelte';
 export { default as WalterTransaktionen } from './lists/WalterTransaktionen.svelte';
+export { default as WalterGaragen } from './lists/WalterGaragen.svelte';
+export { default as WalterGarageVertraege } from './lists/WalterGarageVertraege.svelte';
+export { default as WalterGarageVertragVersionen } from './lists/WalterGarageVertragVersionen.svelte';
 export { default as WalterVertraege } from './lists/WalterVertraege.svelte';
 export { default as WalterVertragVersionen } from './lists/WalterVertragVersionen.svelte';
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';

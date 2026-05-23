@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2025 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,33 +17,30 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Vertrag
+    public class GarageVertrag
     {
-        public int VertragId { get; set; }
+        public int GarageVertragId { get; set; }
         [Required]
-        public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-        public virtual Kontakt? Ansprechpartner { get; set; }
-        public string? Notiz { get; set; }
+        public virtual Garage Garage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        public virtual Vertrag? Vertrag { get; set; }
         public DateOnly? Ende { get; set; }
+        public string? Notiz { get; set; }
 
         public virtual Buchungskonto MietBuchungskonto { get; set; } = null!;
-        public virtual Buchungskonto NkBuchungskonto { get; set; } = null!;
-        public virtual Buchungskonto KautionsKonto { get; set; } = null!;
-        public virtual Buchungskonto BkAbrechnungsKonto { get; set; } = null!;
         public virtual Buchungskonto ZahlungsKonto { get; set; } = null!;
-        public virtual Buchungskonto MietminderungsKonto { get; set; } = null!;
-        public virtual List<VertragVersion> Versionen { get; private set; } = [];
-#pragma warning disable CS0618
-        public virtual List<Miete> Mieten { get; private set; } = [];
-#pragma warning restore CS0618
-        public virtual List<Mietminderung> Mietminderungen { get; private set; } = [];
-        public virtual List<GarageVertrag> GarageVertraege { get; private set; } = [];
+
+        public virtual List<GarageVertragVersion> Versionen { get; private set; } = [];
         public virtual List<Kontakt> Mieter { get; private set; } = [];
-        public virtual List<Abrechnungsresultat> Abrechnungsresultate { get; private set; } = [];
+
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Vertrag()
+
+        public GarageVertrag()
         {
         }
+
+        public DateOnly Beginn() => Versionen.Count > 0
+            ? Versionen.Min(v => v.Beginn)
+            : DateOnly.MinValue;
     }
 }

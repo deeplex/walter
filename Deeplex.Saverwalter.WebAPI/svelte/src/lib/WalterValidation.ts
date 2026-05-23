@@ -46,3 +46,20 @@ export const validateVertragVersion = (e: unknown): boolean => {
     const x = e as E;
     return s(x?.beginn) && n(x?.grundmiete) && n(x?.personenzahl);
 };
+export const validateGarage = (e: unknown): boolean => {
+    const x = e as E;
+    return s(x?.kennung) && id(x?.besitzer);
+};
+export const validateGarageVertrag = (e: unknown): boolean => {
+    const x = e as E;
+    return id(x?.garage);
+};
+export const validateGarageVertragQuickAdd = (e: unknown): boolean => {
+    const x = e as E;
+    const v = (x?.versionen as E[])?.[0];
+    return id(x?.garage) && s(v?.beginn) && n(v?.garagenMiete);
+};
+export const validateGarageVertragVersion = (e: unknown): boolean => {
+    const x = e as E;
+    return s(x?.beginn) && n(x?.garagenMiete);
+};

@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
@@ -92,7 +93,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
 
             public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
-            // TODO Garagen
+            public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
 
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
@@ -116,6 +117,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
                 Abrechnungsresultate = entity.Abrechnungsresultate.Select(e
                     => new AbrechnungsresultatEntry(e, permissions));
+                GarageVertraege = entity.GarageVertraege.Select(e
+                    => new GarageVertragEntryBase(e, permissions));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

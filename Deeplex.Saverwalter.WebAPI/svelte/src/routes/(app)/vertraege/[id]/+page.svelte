@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterAbrechnungsresultate,
+        WalterGarageVertraege,
         WalterKontakte,
         WalterMietminderungen,
         WalterHeaderDetail,
@@ -107,6 +108,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Betriebskostenrechnungen"
             rows={data.entry.betriebskostenrechnungen}
+        />
+
+        <WalterGarageVertraege
+            fetchImpl={data.fetchImpl}
+            title="Garagenverträge"
+            rows={data.entry.garageVertraege}
         />
 
         <WalterAbrechnungsresultate
