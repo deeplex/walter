@@ -39,6 +39,7 @@ export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltung
 export { default as WalterTransaktion } from './details/WalterTransaktion.svelte';
 export { default as WalterTransaktionRaw } from './details/WalterTransaktionRaw.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
+export { default as WalterUmlageVersion } from './details/WalterUmlageVersion.svelte';
 export { default as WalterUmlagetyp } from './details/WalterUmlagetyp.svelte';
 export { default as WalterGarage } from './details/WalterGarage.svelte';
 export { default as WalterGarageVertrag } from './details/WalterGarageVertrag.svelte';
@@ -46,6 +47,7 @@ export { default as WalterGarageVertragVersion } from './details/WalterGarageVer
 export { default as WalterVertrag } from './details/WalterVertrag.svelte';
 export { default as WalterVertragVersion } from './details/WalterVertragVersion.svelte';
 export { default as WalterWohnung } from './details/WalterWohnung.svelte';
+export { default as WalterWohnungVersion } from './details/WalterWohnungVersion.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 export { default as WalterZaehlerstand } from './details/WalterZaehlerstand.svelte';
 export { default as WalterMiettabelle } from './details/WalterMiettabelle.svelte';
@@ -82,11 +84,14 @@ export { default as WalterTextArea } from './elements/WalterTextArea.svelte';
 export { default as WalterTextInput } from './elements/WalterTextInput.svelte';
 export { default as WalterToasts } from './elements/WalterToasts.svelte';
 export { default as WalterNumberInput } from './elements/WalterNumberInput.svelte';
+export { default as WalterSlider } from './elements/WalterSlider.svelte';
 
 export { default as WalterAccounts } from './lists/WalterAccounts.svelte';
 export { default as WalterAdressen } from './lists/WalterAdressen.svelte';
 export { default as WalterBankkontos } from './lists/WalterBankkontos.svelte';
 export { default as WalterUmlagen } from './lists/WalterUmlagen.svelte';
+export { default as WalterHKVOVersionen } from './lists/WalterHKVOVersionen.svelte';
+export { default as WalterUmlageVersionen } from './lists/WalterUmlageVersionen.svelte';
 export { default as WalterUmlagetypen } from './lists/WalterUmlagetypen.svelte';
 export { default as WalterWohnungen } from './lists/WalterWohnungen.svelte';
 export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltungsaufwendungen.svelte';
@@ -98,6 +103,7 @@ export { default as WalterGarageVertraege } from './lists/WalterGarageVertraege.
 export { default as WalterGarageVertragVersionen } from './lists/WalterGarageVertragVersionen.svelte';
 export { default as WalterVertraege } from './lists/WalterVertraege.svelte';
 export { default as WalterVertragVersionen } from './lists/WalterVertragVersionen.svelte';
+export { default as WalterWohnungVersionen } from './lists/WalterWohnungVersionen.svelte';
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
 export { default as WalterMieten } from './lists/WalterMieten.svelte';

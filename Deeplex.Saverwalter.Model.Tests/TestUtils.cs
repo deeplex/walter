@@ -54,11 +54,12 @@ namespace Deeplex.Saverwalter.ModelTests
             ctx.Kontakte.Add(vermieter);
             ctx.SaveChanges();
 
-            var wohnung = new Wohnung("TestWohnung", 100, 100, 100, 1)
+            var wohnung = new Wohnung("TestWohnung")
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
                 Besitzer = vermieter
             };
+            wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
 
             var vertrag = new Vertrag()
             {
@@ -149,65 +150,72 @@ namespace Deeplex.Saverwalter.ModelTests
             var umlagen = new List<Umlage>();
             var date = new DateOnly(2021, 1, 1);
 
-            var grundsteuer = new Umlage(Umlageschluessel.NachWohnflaeche)
+            var grundsteuer = new Umlage
             {
                 Typ = new Umlagetyp("Grundsteuer"),
                 Wohnungen = wohnungen,
                 NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Grundsteuer", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1201", "Zahlung Grundsteuer", BuchungskontoTyp.Aktiv),
             };
+            grundsteuer.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = grundsteuer });
             AddBkForderung(grundsteuer, 1000, date, 2021);
             umlagen.Add(grundsteuer);
 
-            var dachrinnenreinigung = new Umlage(Umlageschluessel.NachNutzeinheit)
+            var dachrinnenreinigung = new Umlage
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung"),
                 Wohnungen = wohnungen,
                 NkVerrechnungsKonto = new Buchungskonto("7002", "NK-VK Dachrinne", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1202", "Zahlung Dachrinne", BuchungskontoTyp.Aktiv),
             };
+            dachrinnenreinigung.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachNutzeinheit) { Umlage = dachrinnenreinigung });
             AddBkForderung(dachrinnenreinigung, 500, date, 2021);
             umlagen.Add(dachrinnenreinigung);
 
-            var gartenpflege = new Umlage(Umlageschluessel.NachNutzeinheit)
+            var gartenpflege = new Umlage
             {
                 Typ = new Umlagetyp("Gartenpflege"),
                 NkVerrechnungsKonto = new Buchungskonto("7003", "NK-VK Garten", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1203", "Zahlung Garten", BuchungskontoTyp.Aktiv),
             };
+            gartenpflege.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachNutzeinheit) { Umlage = gartenpflege });
             gartenpflege.Wohnungen.Add(wohnungen.First());
             AddBkForderung(gartenpflege, 650, date, 2021);
             umlagen.Add(gartenpflege);
 
-            var allgemeinstrom = new Umlage(Umlageschluessel.NachWohnflaeche)
+            var allgemeinstrom = new Umlage
             {
                 Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
                 Wohnungen = wohnungen,
                 NkVerrechnungsKonto = new Buchungskonto("7004", "NK-VK Strom", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1204", "Zahlung Strom", BuchungskontoTyp.Aktiv),
             };
+            allgemeinstrom.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = allgemeinstrom });
             AddBkForderung(allgemeinstrom, 200, date, 2021);
             umlagen.Add(allgemeinstrom);
 
-            var muellbeseitigung = new Umlage(Umlageschluessel.NachPersonenzahl)
+            var muellbeseitigung = new Umlage
             {
                 Typ = new Umlagetyp("Müllbeseitigung"),
                 Wohnungen = wohnungen,
                 NkVerrechnungsKonto = new Buchungskonto("7005", "NK-VK Müll", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1205", "Zahlung Müll", BuchungskontoTyp.Aktiv),
             };
+            muellbeseitigung.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachPersonenzahl) { Umlage = muellbeseitigung });
             AddBkForderung(muellbeseitigung, 1000, date, 2021);
             umlagen.Add(muellbeseitigung);
 
-            var hkvo = new HKVO(0.5m, 0.5m, HKVO_P9A2.Satz_2, 0.05m) { Betriebsstrom = allgemeinstrom };
-            var heizkosten = new Umlage(Umlageschluessel.NachVerbrauch)
+            var hkvo = new HKVO(new DateOnly(2000, 1, 1), 0.5m, 0.5m, HKVO_P9A2.Satz_2, 0.05m) { Betriebsstrom = allgemeinstrom };
+            var heizkosten = new Umlage
             {
                 Typ = new Umlagetyp("Heizkosten"),
                 Wohnungen = wohnungen,
-                HKVO = hkvo,
                 NkVerrechnungsKonto = new Buchungskonto("7006", "NK-VK Heizung", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1206", "Zahlung Heizung", BuchungskontoTyp.Aktiv),
             };
+            heizkosten.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachVerbrauch) { Umlage = heizkosten });
+            hkvo.Heizkosten = heizkosten;
+            heizkosten.HeizkostenHKVOs.Add(hkvo);
             AddBkForderung(heizkosten, 2000, date, 2021);
 
             var allgemeinZaehler = new Zaehler("Allgemein_Heizung", Zaehlertyp.Gas);

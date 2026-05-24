@@ -161,10 +161,8 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         public void MietobjektTest(string strasse, string hausnummer, string bezeichnung, string result)
         {
             var adresse = new Adresse(strasse, hausnummer, "irrelevant", "irrelevant");
-            var wohnung = new Wohnung(bezeichnung, 100, 100, 100, 1)
-            {
-                Adresse = adresse
-            };
+            var wohnung = new Wohnung(bezeichnung) { Adresse = adresse };
+            wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
 
             var mietobjekt = Utils.Mietobjekt(wohnung);
 

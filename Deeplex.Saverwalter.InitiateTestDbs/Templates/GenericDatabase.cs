@@ -397,13 +397,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var bezeichnung = $"Wohnung {unit}";
 
                     var wIdx = wohnungen.Count;
-                    wohnungen.Add(new Wohnung(bezeichnung, flaeche, flaeche, flaeche, 1)
+                    var w = new Wohnung(bezeichnung)
                     {
                         Adresse = adresse,
                         Besitzer = owner,
                         MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
                         AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
-                    });
+                    };
+                    w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), flaeche, flaeche, flaeche, 1) { Wohnung = w });
+                    wohnungen.Add(w);
                 }
 
                 adresseIndex++;
@@ -548,10 +550,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 for (var i = 0; i < starts.Count; i++)
                 {
                     var raiseFactor = (decimal)(1.0 + (i * (0.02 + random.NextDouble() * 0.03)));
-                    var grundmiete = Math.Round(vertrag.Wohnung.Wohnflaeche * baseRentPerSqm * raiseFactor, 2);
+                    var grundmiete = Math.Round(vertrag.Wohnung.VersionAt(starts[i]).Wohnflaeche * baseRentPerSqm * raiseFactor, 2);
                     var personenzahl = 1 + random.Next(4);
                     var nebenkostenvorauszahlung = CalculateMonthlyNebenkostenVorauszahlung(
-                        vertrag.Wohnung.Wohnflaeche,
+                        vertrag.Wohnung.VersionAt(starts[i]).Wohnflaeche,
                         personenzahl,
                         random);
 
@@ -1347,12 +1349,14 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     || !betriebsstromByAdresse.TryGetValue(adresse, out var betriebsstrom))
                     continue;
 
-                hkvoList.Add(new HKVO(0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
+                var hkvo = new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
                 {
                     Heizkosten = heizUmlage,
                     Betriebsstrom = betriebsstrom,
                     AllgemeinWaerme = hauszaehler,
-                });
+                };
+                heizUmlage.HeizkostenHKVOs.Add(hkvo);
+                hkvoList.Add(hkvo);
             }
 
             ctx.HKVO.AddRange(hkvoList);
@@ -1399,8 +1403,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     continue;
                 }
 
-                var wohnflaeche = zaehler.Wohnung?.Wohnflaeche
-                    ?? zaehler.Adresse?.Wohnungen.Sum(w => w.Wohnflaeche)
+                var wohnflaeche = zaehler.Wohnung?.VersionAt(GlobalToday).Wohnflaeche
+                    ?? zaehler.Adresse?.Wohnungen.Sum(w => w.VersionAt(GlobalToday).Wohnflaeche)
                     ?? 65m;
                 var stand = StartingMeterStand(zaehler.Typ, random);
                 var letzterStichtag = stichtage[0].AddDays(-1);
@@ -1442,7 +1446,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 for (var year = beginn.Year; year < GlobalToday.Year; year++)
                 {
-                    var wohnflaeche = Math.Max(umlage.Wohnungen.Sum(w => w.Wohnflaeche), 40m);
+                    var abrechnungsEnde = new DateOnly(year, 12, 31);
+                    var wohnflaeche = Math.Max(umlage.Wohnungen.Sum(w => w.VersionAt(abrechnungsEnde).Wohnflaeche), 40m);
                     var basisbetrag = umlage.Typ.Bezeichnung switch
                     {
                         "Heizkosten" => wohnflaeche * (decimal)(9 + random.NextDouble() * 4),
@@ -1532,7 +1537,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
         private static Umlage AddUmlage(Adresse adresse, Umlagetyp typ, Umlageschluessel schluessel, int idx)
         {
-            return new Umlage(schluessel)
+            var umlage = new Umlage
             {
                 Typ = typ,
                 Beschreibung = $"{typ.Bezeichnung} für {adresse.Anschrift}",
@@ -1540,6 +1545,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 NkVerrechnungsKonto = new Buchungskonto($"U{idx:D5}-NR", $"NK-Verrechnung {typ.Bezeichnung}", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto($"U{idx:D5}-ZK", $"NK-Zahlung {typ.Bezeichnung}", BuchungskontoTyp.Aktiv),
             };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = umlage });
+            return umlage;
         }
 
         private static Kontakt GenerateNatuerlichePerson(int seed, Random random)

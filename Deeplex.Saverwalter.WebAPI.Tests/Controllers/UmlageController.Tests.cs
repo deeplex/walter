@@ -31,6 +31,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 {
     public class UmlageControllerTests
     {
+        private static Umlage MakeUmlage(Umlageschluessel schluessel, Umlagetyp? typ = null)
+        {
+            var u = new Umlage { Typ = typ ?? new Umlagetyp("Dachrinnenreinigung") };
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = u });
+            return u;
+        }
+
         [Fact]
         public async Task Get()
         {
@@ -66,10 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagetypen.Add(typ);
             ctx.SaveChanges();
 
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = typ
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche, typ);
             var entry = new UmlageEntry(entity, new());
 
             var result = await controller.Post(entry);

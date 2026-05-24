@@ -139,10 +139,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new ZaehlerDbService(ctx, auth);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = new Umlage { Typ = new Umlagetyp("Dachrinnenreinigung") };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
             var entity = new Zaehler("Test", Zaehlertyp.Strom);
             var entry = new ZaehlerEntry(entity, new());
             entry.Kennnummer = "Neue Kennnummer";

@@ -163,7 +163,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     $"Wohnung-ID: {wohnung.WohnungId}",
                     $"Bezeichnung: {wohnung.Bezeichnung}",
-                    $"Wohnflaeche: {wohnung.Wohnflaeche.ToString("0.00", CultureInfo.InvariantCulture)} m^2",
+                    $"Wohnflaeche: {wohnung.VersionAt(DateOnly.FromDateTime(DateTime.Today)).Wohnflaeche.ToString("0.00", CultureInfo.InvariantCulture)} m^2",
                     $"Adresse: {wohnung.Adresse?.Anschrift ?? "-"}",
                 };
                 if (await PutPdf(http, s3Provider, $"wohnungen/{wohnung.WohnungId}/Uebergabeprotokoll.pdf",

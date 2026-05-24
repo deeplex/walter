@@ -63,3 +63,11 @@ export const validateGarageVertragVersion = (e: unknown): boolean => {
     const x = e as E;
     return s(x?.beginn) && n(x?.garagenMiete);
 };
+export const validateWohnungVersion = (e: unknown): boolean => {
+    const x = e as E;
+    return s(x?.beginn) && n(x?.wohnflaeche) && n(x?.nutzflaeche) && n(x?.miteigentumsanteile) && n(x?.einheiten);
+};
+export const validateUmlageVersion = (e: unknown): boolean => {
+    const x = e as E;
+    return s(x?.beginn) && id(x?.schluessel);
+};

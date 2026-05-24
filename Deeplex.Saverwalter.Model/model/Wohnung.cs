@@ -22,20 +22,13 @@ namespace Deeplex.Saverwalter.Model
         public int WohnungId { get; set; }
         [Required]
         public string Bezeichnung { get; set; }
-        [Required]
-        public decimal Wohnflaeche { get; set; }
-        [Required]
-        public decimal Nutzflaeche { get; set; }
-        [Required]
-        public decimal Miteigentumsanteile { get; set; }
-        [Required]
-        public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
         public virtual Buchungskonto MietErtragskonto { get; set; } = null!;
         public virtual Buchungskonto AufwandsKonto { get; set; } = null!;
         public virtual Kontakt? Besitzer { get; set; }
         public virtual Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }
 
+        public virtual List<WohnungVersion> Versionen { get; private set; } = [];
         public virtual List<Vertrag> Vertraege { get; private set; } = [];
         public virtual List<Zaehler> Zaehler { get; private set; } = [];
         public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = [];
@@ -44,13 +37,10 @@ namespace Deeplex.Saverwalter.Model
 
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Wohnung(string bezeichnung, decimal wohnflaeche, decimal nutzflaeche, decimal miteigentumsanteile, int nutzeinheit)
+
+        public Wohnung(string bezeichnung)
         {
             Bezeichnung = bezeichnung;
-            Wohnflaeche = wohnflaeche;
-            Nutzflaeche = nutzflaeche;
-            Miteigentumsanteile = miteigentumsanteile;
-            Nutzeinheit = nutzeinheit;
         }
     }
 }

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,14 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import {
-        Checkbox,
-        Link,
-        Row,
-        Slider,
-        Tile
-    } from 'carbon-components-svelte';
+    import { Checkbox, Link, Row, Tile } from 'carbon-components-svelte';
+    import WalterSlider from '../elements/WalterSlider.svelte';
     import WalterComboBox from '../elements/WalterComboBox.svelte';
+    import WalterDatePicker from '../elements/WalterDatePicker.svelte';
     import {
         WalterUmlageEntry,
         WalterHKVOEntry,
@@ -33,23 +29,45 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let entry: Partial<WalterUmlageEntry> = {};
     export let selectedWohnungen: WalterSelectionEntry[] | undefined;
+    export let schluessel: WalterSelectionEntry | undefined = undefined;
     export let fetchImpl: typeof fetch;
     export let readonly = false;
     $: {
         readonly = entry?.permissions?.update === false;
     }
 
+    export let blockSave = false;
+
     let visible: boolean = false;
-    let oldHKVO: Partial<WalterHKVOEntry> = {};
+    let initialHKVO: Partial<WalterHKVOEntry> = {};
     let selectableUmlagen: Promise<WalterSelectionEntry[]> = new Promise(
         () => []
     );
+    let seitWannHkvo: string | undefined;
 
     onMount(() => {
         visible = !!entry.hkvo;
-        oldHKVO = { ...entry.hkvo };
+        initialHKVO = { ...entry.hkvo };
         updateSelectableUmlagen();
     });
+
+    $: hasHkvoChanges =
+        visible &&
+        !!entry.hkvo &&
+        !!initialHKVO.id &&
+        (entry.hkvo.hkvO_P7 !== initialHKVO.hkvO_P7 ||
+            entry.hkvo.hkvO_P8 !== initialHKVO.hkvO_P8 ||
+            (entry.hkvo.hkvO_P9?.id ?? '') !==
+                (initialHKVO.hkvO_P9?.id ?? '') ||
+            entry.hkvo.strompauschale !== initialHKVO.strompauschale ||
+            (entry.hkvo.stromrechnung?.id ?? '') !==
+                (initialHKVO.stromrechnung?.id ?? ''));
+
+    $: blockSave = hasHkvoChanges && !seitWannHkvo;
+
+    $: if (entry.hkvo && seitWannHkvo) {
+        entry.hkvo.beginn = seitWannHkvo;
+    }
 
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(fetchImpl).then((res) => {
         // TODO: Implement Satz 1 and Satz 4
@@ -93,7 +111,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 const wohnungenSet = new Set<number>(
                     umlage.selectedWohnungen.map((e) => +e.id)
                 );
-                // check that only umlagen with the same wohnungen are selectable
                 return (
                     selectedWohnungenSet.size === wohnungenSet.size &&
                     [...selectedWohnungenSet].every((id) =>
@@ -122,20 +139,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function change(e: Event, p9a2: WalterSelectionEntry[]) {
         if ((e.target as HTMLInputElement).checked) {
             entry.hkvo = {
-                id: oldHKVO.id || 0,
-                hkvO_P7: oldHKVO.hkvO_P7 || 50,
-                hkvO_P8: oldHKVO.hkvO_P8 || 50,
-                hkvO_P9: oldHKVO.hkvO_P9 || p9a2[1],
-                strompauschale: oldHKVO.strompauschale || 5,
-                stromrechnung: oldHKVO.stromrechnung || undefined
+                id: initialHKVO.id || 0,
+                hkvO_P7: initialHKVO.hkvO_P7 || 50,
+                hkvO_P8: initialHKVO.hkvO_P8 || 50,
+                hkvO_P9: initialHKVO.hkvO_P9 || p9a2[1],
+                strompauschale: initialHKVO.strompauschale || 5,
+                stromrechnung: initialHKVO.stromrechnung || undefined
             };
         } else {
             entry.hkvo = undefined;
         }
+        seitWannHkvo = undefined;
     }
 </script>
 
-{#if `${entry.schluessel?.id}` === '3'}
+{#if `${schluessel?.id}` === '3'}
     <Tile>
         <Row>
             {#await hkvo_p9a2 then p9a2}
@@ -165,7 +183,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 />
             </Row>
             <Row>
-                <Slider
+                <WalterSlider
                     disabled={readonly}
                     step={5}
                     min={50}
@@ -174,7 +192,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     labelText="HKVO §7 (in %)"
                     bind:value={entry.hkvo.hkvO_P7}
                 />
-                <Slider
+                <WalterSlider
                     disabled={readonly}
                     step={5}
                     min={50}
@@ -183,7 +201,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     labelText="HKVO §8 (in %)"
                     bind:value={entry.hkvo.hkvO_P8}
                 />
-                <Slider
+                <WalterSlider
                     disabled={readonly}
                     step={1}
                     min={0}
@@ -200,6 +218,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     titleText="HKVO §9"
                 />
             </Row>
+            {#if hasHkvoChanges}
+                <Row>
+                    <WalterDatePicker
+                        required
+                        bind:value={seitWannHkvo}
+                        labelText="HKVO-Änderung gültig ab"
+                    />
+                </Row>
+            {/if}
         {/if}
     </Tile>
 {/if}

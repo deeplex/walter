@@ -274,10 +274,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ThenInclude(r => r.Buchungssatz)
                             .ThenInclude(s => s.Buchungszeilen)
                                 .ThenInclude(z => z.Buchungskonto)
-                // HKVO-Verweis für warme Betriebskosten
-                .Include(u => u.HKVO)
-                    .ThenInclude(h => h!.AllgemeinWaerme)
+                // Versionen für Schluessel-Lookup
+                .Include(u => u.Versionen)
+                // HKVO-Verlauf für warme Betriebskosten
+                .Include(u => u.HeizkostenHKVOs)
+                    .ThenInclude(h => h.AllgemeinWaerme)
                         .ThenInclude(z => z!.Staende)
+                // Wohnungsversionen für Flächenberechnung
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Versionen)
                 // Zähler für Verbrauch-Schlüssel und HKVO-Messung
                 .Include(u => u.Zaehler)
                     .ThenInclude(z => z.Staende)
@@ -375,9 +380,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Saldo = rechnungsbetrag - (info?.Vorauszahlung ?? 0),
                         MietSaldo = info?.MietSaldo ?? 0,
                         KaltmieteSoll = kaltmieteSoll,
-                        Wohnflaeche = partei.Wohnung.Wohnflaeche,
-                        Nutzflaeche = partei.Wohnung.Nutzflaeche,
-                        Nutzeinheiten = partei.Wohnung.Nutzeinheit,
+                        Wohnflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Wohnflaeche,
+                        Nutzflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzflaeche,
+                        Nutzeinheiten = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzeinheit,
                         Mieten = mietZeilen,
                         PersonenZeitanteile = personenZeitanteile,
                         GebuchtesAbrechnungsResultat = info?.GebuchtesAbrechnungsResultat,
@@ -414,10 +419,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
                 if (!einheitenByKey.ContainsKey(einheitKey))
                 {
-                    var gWF = wohnungenInEinheit.Sum(w => w.Wohnflaeche);
-                    var gNF = wohnungenInEinheit.Sum(w => w.Nutzflaeche);
-                    var gNE = wohnungenInEinheit.Sum(w => (decimal)w.Nutzeinheit);
-                    var gMEA = wohnungenInEinheit.Sum(w => w.Miteigentumsanteile);
+                    var abrechnungsEnde = new DateOnly(einheit.Rechnungsplaene.FirstOrDefault()?.Buchungssatz.Buchungsjahr ?? DateTime.Now.Year, 12, 31);
+                    var gWF = wohnungenInEinheit.Sum(w => w.VersionAt(abrechnungsEnde).Wohnflaeche);
+                    var gNF = wohnungenInEinheit.Sum(w => w.VersionAt(abrechnungsEnde).Nutzflaeche);
+                    var gNE = wohnungenInEinheit.Sum(w => (decimal)w.VersionAt(abrechnungsEnde).Nutzeinheit);
+                    var gMEA = wohnungenInEinheit.Sum(w => w.VersionAt(abrechnungsEnde).Miteigentumsanteile);
                     einheitenByKey[einheitKey] = (einheit.Bezeichnung, [], gWF, gNF, gNE, gMEA);
                 }
 
@@ -524,7 +530,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         UmlageId = plan.Umlage.UmlageId,
                         Bezeichnung = plan.Umlage.Typ.Bezeichnung,
                         Beschreibung = plan.Umlage.Beschreibung ?? "",
-                        Schluessel = plan.Umlage.Schluessel.ToDescriptionString(),
+                        Schluessel = plan.Umlage.VersionAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31)).Schluessel.ToDescriptionString(),
                         UmlagetypId = plan.Umlage.Typ.UmlagetypId,
                         BuchungssatzId = buchungssatz.BuchungssatzId,
                         Betrag = plan.Betrag,
@@ -532,8 +538,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         IstVollstaendigGebucht = istVollstaendigGebucht,
                         Anteile = mergedAnteile,
                         Para9_2 = plan.Para9_2,
-                        P7 = plan.Umlage.HKVO?.HKVO_P7,
-                        P8 = plan.Umlage.HKVO?.HKVO_P8,
+                        P7 = plan.Umlage.HkvoAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31))?.HKVO_P7,
+                        P8 = plan.Umlage.HkvoAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31))?.HKVO_P8,
                         GesamtWaerme = plan.GesamtWaerme,
                         GesamtWW = plan.GesamtWW,
                     });

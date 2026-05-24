@@ -131,15 +131,16 @@ namespace Deeplex.Saverwalter.PrintService
                 .DistinctBy(w => w.WohnungId)
                 .ToList();
 
-            var gesamtWF = wohnungen.Sum(w => w.Wohnflaeche);
-            var gesamtNF = wohnungen.Sum(w => w.Nutzflaeche);
-            var gesamtNE = wohnungen.Sum(w => w.Nutzeinheit);
-            var gesamtMEA = wohnungen.Sum(w => w.Miteigentumsanteile);
+            var abrechnungsEnde = new DateOnly(jahr, 12, 31);
+            var gesamtWF = wohnungen.Sum(w => w.VersionAt(abrechnungsEnde).Wohnflaeche);
+            var gesamtNF = wohnungen.Sum(w => w.VersionAt(abrechnungsEnde).Nutzflaeche);
+            var gesamtNE = wohnungen.Sum(w => w.VersionAt(abrechnungsEnde).Nutzeinheit);
+            var gesamtMEA = wohnungen.Sum(w => w.VersionAt(abrechnungsEnde).Miteigentumsanteile);
 
             var rechnungen = new List<NkDruckRechnung>();
             decimal betragKalt = 0;
 
-            foreach (var umlage in einheit.Umlagen.Where(u => u.HKVO is null))
+            foreach (var umlage in einheit.Umlagen.Where(u => u.HkvoAt(abrechnungsEnde) is null))
             {
                 var plaene = einheit.Rechnungsplaene
                     .Where(p => p.Umlage.UmlageId == umlage.UmlageId)
@@ -147,7 +148,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (plaene.Count == 0) continue;
 
                 var gesamtbetrag = plaene.Sum(p => p.Betrag);
-                var anteilFaktor = partei.GetAnteil(umlage);
+                var anteilFaktor = partei.GetAnteil(umlage.VersionAt(abrechnungsEnde).Schluessel, umlage.UmlageId);
                 var meinBetrag = plaene
                     .SelectMany(p => p.Anteile)
                     .Where(a => a.Partei == partei)
@@ -158,6 +159,7 @@ namespace Deeplex.Saverwalter.PrintService
                 rechnungen.Add(new NkDruckRechnung
                 {
                     Umlage = umlage,
+                    Schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel,
                     Gesamtbetrag = gesamtbetrag,
                     AnteilFaktor = anteilFaktor,
                     MeinBetrag = meinBetrag,
@@ -192,19 +194,22 @@ namespace Deeplex.Saverwalter.PrintService
         private static IReadOnlyList<NkDruckHkvoRechnung> BuildHkvoRechnungen(
             NkEinheit einheit, NkPartei partei, List<Note> notes, int jahr)
         {
-            var hkvoUmlagen = einheit.Umlagen.Where(u => u.HKVO != null).ToList();
+            var abrechnungsEnde = new DateOnly(jahr, 12, 31);
+            var hkvoUmlagen = einheit.Umlagen
+                .Select(u => (Umlage: u, Hkvo: u.HkvoAt(abrechnungsEnde)))
+                .Where(x => x.Hkvo != null)
+                .ToList();
             if (hkvoUmlagen.Count == 0) return [];
 
             var beginn = new DateOnly(jahr, 1, 1);
-            var ende = new DateOnly(jahr, 12, 31);
             var result = new List<NkDruckHkvoRechnung>();
 
-            foreach (var umlage in hkvoUmlagen)
+            foreach (var (umlage, hkvo) in hkvoUmlagen)
             {
                 var wohnungWW = umlage.Zaehler
                     .Where(z => z.Wohnung != null && z.Typ == Zaehlertyp.Warmwasser)
                     .ToList();
-                var p9_2 = HkvoP9_2Berechnung.Compute(umlage.HKVO!, wohnungWW, jahr, notes);
+                var p9_2 = HkvoP9_2Berechnung.Compute(hkvo!, wohnungWW, jahr, notes);
                 if (p9_2 == null) continue;
 
                 var plaene = einheit.Rechnungsplaene
@@ -246,8 +251,8 @@ namespace Deeplex.Saverwalter.PrintService
                     Umlage = umlage,
                     P9_2 = p9_2,
                     Gesamtbetrag = gesamtbetrag,
-                    P7 = umlage.HKVO!.HKVO_P7,
-                    P8 = umlage.HKVO!.HKVO_P8,
+                    P7 = hkvo!.HKVO_P7,
+                    P8 = hkvo!.HKVO_P8,
                     HeizVerbrauchDiese = dieseWaerme,
                     HeizVerbrauchAlle = totalWaerme,
                     WWVerbrauchDiese = dieseWW,
@@ -336,6 +341,8 @@ namespace Deeplex.Saverwalter.PrintService
     public sealed class NkDruckRechnung
     {
         public required Umlage Umlage { get; init; }
+        /// <summary>Im Abrechnungsjahr wirksamer Umlageschlüssel (versioniert aufgelöst).</summary>
+        public required Umlageschluessel Schluessel { get; init; }
         /// <summary>Summe aller Rechnungen für diese Umlage in der Einheit.</summary>
         public required decimal Gesamtbetrag { get; init; }
         /// <summary>Anteilsfaktor dieser Partei (0–1).</summary>

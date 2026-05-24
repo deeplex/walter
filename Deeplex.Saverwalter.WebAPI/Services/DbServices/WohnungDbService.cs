@@ -91,12 +91,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entity = new Wohnung(
-                    entry.Bezeichnung,
+                var entity = new Wohnung(entry.Bezeichnung);
+                var firstVersion = entry.Versionen.FirstOrDefault();
+                var beginn = firstVersion?.Beginn ?? DateOnly.FromDateTime(DateTime.Today);
+                var version = new WohnungVersion(
+                    beginn,
                     entry.Wohnflaeche,
                     entry.Nutzflaeche,
                     entry.Miteigentumsanteile,
-                    entry.Einheiten);
+                    entry.Einheiten)
+                {
+                    Wohnung = entity
+                };
+                entity.Versionen.Add(version);
 
                 var besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer?.Id);
                 if (besitzer != null)
@@ -144,11 +151,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 }
 
                 entity.Bezeichnung = entry.Bezeichnung;
-                entity.Wohnflaeche = entry.Wohnflaeche;
-                entity.Nutzflaeche = entry.Nutzflaeche;
-                entity.Nutzeinheit = entry.Einheiten;
-                entity.Miteigentumsanteile = entry.Miteigentumsanteile;
-
                 SetOptionalValues(entity, entry);
                 Ctx.Wohnungen.Update(entity);
                 await Ctx.SaveChangesAsync();

@@ -41,11 +41,13 @@ export { WalterFileWrapper } from './WalterFileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
+export { WalterUmlageVersionEntry } from './WalterUmlageVersion';
 export { WalterUmlagetypEntry } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';
 export { WalterWohnungEntry } from './WalterWohnung';
+export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
 export {

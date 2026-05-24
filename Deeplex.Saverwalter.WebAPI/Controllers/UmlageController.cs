@@ -18,6 +18,7 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -31,6 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class HKVOEntryBase
         {
             public int Id { get; set; }
+            public DateOnly Beginn { get; set; }
 
             public int HKVO_P7 { get; set; }
             public int HKVO_P8 { get; set; }
@@ -44,6 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public HKVOEntryBase(HKVO entity, Permissions permissions)
             {
                 Id = entity.HKVOId;
+                Beginn = entity.Beginn;
 
                 HKVO_P7 = (int)(entity.HKVO_P7 * 100);
                 HKVO_P8 = (int)(entity.HKVO_P8 * 100);
@@ -52,6 +55,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Stromrechnung = new SelectionEntry(entity.Betriebsstrom.UmlageId, entity.Betriebsstrom.Typ.Bezeichnung);
 
                 Permissions = permissions;
+            }
+        }
+
+        public class UmlageVersionEntryBase
+        {
+            public int Id { get; set; }
+            public DateOnly Beginn { get; set; }
+            public SelectionEntry Schluessel { get; set; } = null!;
+            public Permissions Permissions { get; set; } = new Permissions();
+
+            public UmlageVersionEntryBase() { }
+            public UmlageVersionEntryBase(UmlageVersion entity, Permissions permissions)
+            {
+                Id = entity.UmlageVersionId;
+                Beginn = entity.Beginn;
+                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
+                Permissions = permissions;
+            }
+        }
+
+        public class UmlageVersionEntry : UmlageVersionEntryBase
+        {
+            public string? Notiz { get; set; }
+            public SelectionEntry? Umlage { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public UmlageVersionEntry() : base() { }
+            public UmlageVersionEntry(UmlageVersion entity, Permissions permissions) : base(entity, permissions)
+            {
+                Notiz = entity.Notiz;
+                Umlage = new(entity.Umlage.UmlageId, entity.Umlage.Typ.Bezeichnung);
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
@@ -96,6 +133,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
             public IEnumerable<ZaehlerEntryBase> Zaehler { get; set; } = [];
+            public IEnumerable<UmlageVersionEntryBase> Versionen { get; set; } = [];
+            public IEnumerable<HKVOEntryBase> HKVOs { get; set; } = [];
+            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
 
             public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)
@@ -104,14 +144,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Notiz = entity.Notiz;
                 Beschreibung = entity.Beschreibung;
-                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
+                var currentVersion = entity.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault();
+                if (currentVersion != null)
+                {
+                    Schluessel = new SelectionEntry((int)currentVersion.Schluessel, currentVersion.Schluessel.ToDescriptionString());
+                }
 
                 SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
 
-                if (entity.HKVO != null)
+                var currentHkvo = entity.HeizkostenHKVOs.OrderByDescending(h => h.Beginn).FirstOrDefault();
+                if (currentHkvo != null)
                 {
-                    HKVO = new HKVOEntryBase(entity.HKVO, permissions);
+                    HKVO = new HKVOEntryBase(currentHkvo, permissions);
                 }
+
+                Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new UmlageVersionEntryBase(e, permissions)).ToList();
+                HKVOs = entity.HeizkostenHKVOs.OrderBy(h => h.Beginn).Select(e => new HKVOEntryBase(e, permissions)).ToList();
+                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.OrderBy(r => r.BetreffendesJahr).Select(e => new BetriebskostenrechnungEntryBase(e, permissions)).ToList();
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

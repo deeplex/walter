@@ -32,10 +32,12 @@ export const navigation = {
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
     transaktion: (id: number) => walter_goto(`/transaktionen/${id}`),
     umlage: (id: number) => walter_goto(`/umlagen/${id}`),
+    umlageversion: (id: number) => walter_goto(`/umlageversionen/${id}`),
     umlagetyp: (id: number) => walter_goto(`/umlagetypen/${id}`),
     vertrag: (id: number) => walter_goto(`/vertraege/${id}`),
     vertragversion: (id: number) => walter_goto(`/vertragversionen/${id}`),
     wohnung: (id: number) => walter_goto(`/wohnungen/${id}`),
+    wohnungversion: (id: number) => walter_goto(`/wohnungversionen/${id}`),
     zaehler: (id: number) => walter_goto(`/zaehler/${id}`),
     zaehlerstand: (id: number) => walter_goto(`/zaehlerstaende/${id}`)
 };

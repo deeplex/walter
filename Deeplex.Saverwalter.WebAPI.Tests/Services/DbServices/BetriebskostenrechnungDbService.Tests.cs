@@ -32,6 +32,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class BetriebskostenrechnungDbServiceTests : IDisposable
     {
         public SaverwalterContext ctx;
+
+        private static Umlage MakeUmlage()
+        {
+            var u = new Umlage { Typ = new Umlagetyp("Dachrinnenreinigung") };
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = u });
+            return u;
+        }
+
         public BetriebskostenrechnungDbServiceTests()
         {
             ctx = TestUtils.GetContext();
@@ -91,10 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = MakeUmlage();
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
@@ -116,10 +121,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = MakeUmlage();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
@@ -143,10 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = MakeUmlage();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
@@ -175,10 +174,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = MakeUmlage();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage

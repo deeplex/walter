@@ -23,6 +23,8 @@ namespace Deeplex.Saverwalter.Model
         public int HKVOId { get; set; }
 
         [Required]
+        public DateOnly Beginn { get; set; }
+        [Required]
         public decimal HKVO_P7 { get; set; }
         [Required]
         public decimal HKVO_P8 { get; set; }
@@ -46,13 +48,12 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public HKVO(decimal hKVO_P7, decimal hKVO_P8, HKVO_P9A2 hKVO_P9, decimal strompauschale)
+        public HKVO(DateOnly beginn, decimal hKVO_P7, decimal hKVO_P8, HKVO_P9A2 hKVO_P9, decimal strompauschale)
         {
+            Beginn = beginn;
             HKVO_P7 = hKVO_P7;
             HKVO_P8 = hKVO_P8;
             HKVO_P9 = hKVO_P9;
-
-            // TODO this could be calculated by a zaehler, too... Then it would be different for each year...
             Strompauschale = strompauschale;
         }
     }

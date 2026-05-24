@@ -758,4 +758,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                wohnung.Verwalter.AsQueryable()
                 .Any(Utils.HasRequiredAuth(rolle, userId));
     }
+
+    public class WohnungVersionPermissionHandler : WohnungPermissionHandlerBase<WohnungVersion>
+    {
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            WohnungVersion entity)
+        {
+            return HandleWohnungSubRequirementAsync(context, requirement, entity.Wohnung);
+        }
+    }
+
+    public class UmlageVersionPermissionHandler : WohnungPermissionHandlerBase<UmlageVersion>
+    {
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            UmlageVersion entity)
+        {
+            return HandleWohnungRequirementAsync(context, requirement, entity.Umlage.Wohnungen);
+        }
+    }
 }

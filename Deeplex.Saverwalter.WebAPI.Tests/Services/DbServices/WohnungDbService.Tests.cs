@@ -30,6 +30,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class WohnungDbServiceTests : IDisposable
     {
         public SaverwalterContext ctx;
+
+        private static Wohnung MakeWohnung(string name, Kontakt? besitzer = null)
+        {
+            var w = new Wohnung(name) { Besitzer = besitzer };
+            w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = w });
+            return w;
+        }
+
         public WohnungDbServiceTests()
         {
             ctx = TestUtils.GetContext();
@@ -92,11 +100,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
-
+            var entity = MakeWohnung("Test", besitzer);
             var entry = new WohnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
@@ -116,11 +120,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
-
+            var entity = MakeWohnung("Test", besitzer);
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
@@ -144,10 +144,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = MakeWohnung("Test", besitzer);
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
             var entry = new WohnungEntry(entity, new());
@@ -161,7 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new Exception("Wohnung not found");
             }
-            updatedEntity.Wohnflaeche.Should().Be(200);
+            updatedEntity.Versionen.OrderByDescending(v => v.Beginn).First().Wohnflaeche.Should().Be(200);
         }
 
         [Fact]
@@ -172,18 +169,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new WohnungDbService(ctx, auth);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = new Umlage { Typ = new Umlagetyp("Dachrinnenreinigung") };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = MakeWohnung("Test", besitzer);
             var entry = new WohnungEntry(entity, new());
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();

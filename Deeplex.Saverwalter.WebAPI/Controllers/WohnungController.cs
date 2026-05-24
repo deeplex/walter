@@ -61,10 +61,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Besitzer = new(k.KontaktId, k.Bezeichnung);
                 }
 
-                Wohnflaeche = entity.Wohnflaeche;
-                Nutzflaeche = entity.Nutzflaeche;
-                Miteigentumsanteile = entity.Miteigentumsanteile;
-                Einheiten = entity.Nutzeinheit;
+                var current = entity.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault();
+                Wohnflaeche = current?.Wohnflaeche ?? 0;
+                Nutzflaeche = current?.Nutzflaeche ?? 0;
+                Miteigentumsanteile = current?.Miteigentumsanteile ?? 0;
+                Einheiten = current?.Nutzeinheit ?? 0;
 
                 var v = entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
@@ -72,6 +73,46 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     null;
 
                 Permissions = permissions;
+            }
+        }
+
+        public class WohnungVersionEntryBase
+        {
+            public int Id { get; set; }
+            public DateOnly Beginn { get; set; }
+            public decimal Wohnflaeche { get; set; }
+            public decimal Nutzflaeche { get; set; }
+            public decimal Miteigentumsanteile { get; set; }
+            public int Einheiten { get; set; }
+            public Permissions Permissions { get; set; } = new Permissions();
+
+            public WohnungVersionEntryBase() { }
+            public WohnungVersionEntryBase(WohnungVersion entity, Permissions permissions)
+            {
+                Id = entity.WohnungVersionId;
+                Beginn = entity.Beginn;
+                Wohnflaeche = entity.Wohnflaeche;
+                Nutzflaeche = entity.Nutzflaeche;
+                Miteigentumsanteile = entity.Miteigentumsanteile;
+                Einheiten = entity.Nutzeinheit;
+                Permissions = permissions;
+            }
+        }
+
+        public class WohnungVersionEntry : WohnungVersionEntryBase
+        {
+            public string? Notiz { get; set; }
+            public SelectionEntry? Wohnung { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public WohnungVersionEntry() : base() { }
+            public WohnungVersionEntry(WohnungVersion entity, Permissions permissions) : base(entity, permissions)
+            {
+                Notiz = entity.Notiz;
+                Wohnung = new(entity.Wohnung.WohnungId, entity.Wohnung.Bezeichnung);
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
@@ -86,6 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
             public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
+            public IEnumerable<WohnungVersionEntryBase> Versionen { get; set; } = [];
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
@@ -98,6 +140,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
                 Erhaltungsaufwendungen = entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, permissions));
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
+                Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new WohnungVersionEntryBase(e, permissions));
             }
         }
 

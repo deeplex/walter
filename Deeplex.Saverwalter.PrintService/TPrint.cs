@@ -103,7 +103,7 @@ namespace Deeplex.Saverwalter.PrintService
             var right2 = new List<string> { "Beschreibung" };
 
             bool HasSchluessel(Umlageschluessel s) =>
-                einheiten.Any(e => !e.IstDirekt && e.Rechnungen.Any(r => r.Umlage.Schluessel == s));
+                einheiten.Any(e => !e.IstDirekt && e.Rechnungen.Any(r => r.Schluessel == s));
 
             if (einheiten.Any(e => e.IstDirekt && e.Rechnungen.Count > 0))
             {
@@ -193,39 +193,39 @@ namespace Deeplex.Saverwalter.PrintService
             }
             else
             {
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachWohnflaeche))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachWohnflaeche))
                 {
                     col1.Add("nach Wohnfläche (n. WF)"); col2.Add(""); col3.Add(""); col4.Add("");
                     bold.Add(true); underlined.Add(false);
-                    col1.Add(Quadrat(d.Wohnung.Wohnflaeche) + " / " + Quadrat(einheit.GesamtWohnflaeche));
+                    col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Wohnflaeche) + " / " + Quadrat(einheit.GesamtWohnflaeche));
                     col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(einheit.WFZeitanteil));
                     bold.Add(false); underlined.Add(true);
                 }
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachNutzflaeche))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachNutzflaeche))
                 {
                     col1.Add("nach Nutzfläche (n. NF)"); col2.Add(""); col3.Add(""); col4.Add("");
                     bold.Add(true); underlined.Add(false);
-                    col1.Add(Quadrat(d.Wohnung.Nutzflaeche) + " / " + Quadrat(einheit.GesamtNutzflaeche));
+                    col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche) + " / " + Quadrat(einheit.GesamtNutzflaeche));
                     col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(einheit.NFZeitanteil));
                     bold.Add(false); underlined.Add(true);
                 }
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachMiteigentumsanteil))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachMiteigentumsanteil))
                 {
                     col1.Add("nach Miteigentumsanteilen (n. MEA)"); col2.Add(""); col3.Add(""); col4.Add("");
                     bold.Add(true); underlined.Add(false);
-                    col1.Add(d.Wohnung.Miteigentumsanteile + " / " + einheit.GesamtMiteigentumsanteile);
+                    col1.Add(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Miteigentumsanteile + " / " + einheit.GesamtMiteigentumsanteile);
                     col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(einheit.MEAZeitanteil));
                     bold.Add(false); underlined.Add(true);
                 }
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachNutzeinheit))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachNutzeinheit))
                 {
                     col1.Add("nach Nutzeinheiten (n. NE)"); col2.Add(""); col3.Add(""); col4.Add("");
                     bold.Add(true); underlined.Add(false);
-                    col1.Add(d.Wohnung.Nutzeinheit + " / " + einheit.GesamtNutzeinheiten);
+                    col1.Add(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzeinheit + " / " + einheit.GesamtNutzeinheiten);
                     col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(einheit.NEZeitanteil));
                     bold.Add(false); underlined.Add(true);
                 }
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachPersonenzahl))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachPersonenzahl))
                 {
                     col1.Add("nach Personenzahl (n. Pers.)"); col2.Add(""); col3.Add(""); col4.Add("");
                     bold.Add(true); underlined.Add(false);
@@ -242,13 +242,13 @@ namespace Deeplex.Saverwalter.PrintService
                         bold.Add(false); underlined.Add(a == anteile.Last());
                     }
                 }
-                if (einheit.Rechnungen.Any(r => r.Umlage.Schluessel == Umlageschluessel.NachVerbrauch))
+                if (einheit.Rechnungen.Any(r => r.Schluessel == Umlageschluessel.NachVerbrauch))
                 {
                     col1.Add("nach Verbrauch (n. Verb.)"); col2.Add(""); col3.Add("Zählernummer"); col4.Add("");
                     bold.Add(true); underlined.Add(false);
 
                     var verbrauchRechnungen = einheit.Rechnungen
-                        .Where(r => r.Umlage.Schluessel == Umlageschluessel.NachVerbrauch && r.VerbrauchAnteil != null);
+                        .Where(r => r.Schluessel == Umlageschluessel.NachVerbrauch && r.VerbrauchAnteil != null);
                     foreach (var rechnung in verbrauchRechnungen)
                     {
                         var va = rechnung.VerbrauchAnteil!;
@@ -298,7 +298,7 @@ namespace Deeplex.Saverwalter.PrintService
             foreach (var rechnung in einheit.Rechnungen)
             {
                 var umlage = rechnung.Umlage;
-                switch (umlage.Schluessel)
+                switch (rechnung.Schluessel)
                 {
                     case Umlageschluessel.NachWohnflaeche:
                     case Umlageschluessel.NachNutzflaeche:
@@ -306,7 +306,7 @@ namespace Deeplex.Saverwalter.PrintService
                     case Umlageschluessel.NachMiteigentumsanteil:
                     case Umlageschluessel.NachVerbrauch:
                         col1.Add(umlage.Typ.Bezeichnung);
-                        col2.Add(einheit.IstDirekt ? "Direkt" : umlage.Schluessel.ToDescriptionString());
+                        col2.Add(einheit.IstDirekt ? "Direkt" : rechnung.Schluessel.ToDescriptionString());
                         col3.Add(nutzungsIntervall);
                         col4.Add(Euro(rechnung.Gesamtbetrag));
                         col5.Add(Prozent(rechnung.AnteilFaktor));
@@ -318,7 +318,7 @@ namespace Deeplex.Saverwalter.PrintService
                         if (relevant.Count == 0)
                         {
                             col1.Add(umlage.Typ.Bezeichnung);
-                            col2.Add(umlage.Schluessel.ToDescriptionString());
+                            col2.Add(rechnung.Schluessel.ToDescriptionString());
                             col3.Add(nutzungsIntervall);
                             col4.Add(Euro(rechnung.Gesamtbetrag));
                             col5.Add(Prozent(0)); col6.Add(Euro(0));
@@ -330,7 +330,7 @@ namespace Deeplex.Saverwalter.PrintService
                             foreach (var a in relevant)
                             {
                                 col1.Add(first ? umlage.Typ.Bezeichnung : "");
-                                col2.Add(first ? umlage.Schluessel.ToDescriptionString() : "");
+                                col2.Add(first ? rechnung.Schluessel.ToDescriptionString() : "");
                                 col3.Add(Datum(a.Beginn) + " - " + Datum(a.Ende));
                                 col4.Add(first ? Euro(rechnung.Gesamtbetrag) : "");
                                 col5.Add(Prozent(a.Anteil));
@@ -381,7 +381,7 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false); underlined.Add(false);
             }
 
-            col1.Add(Quadrat(d.Wohnung.Wohnflaeche));
+            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Wohnflaeche));
             col2.Add(Prozent(1 - hr.P7) + " n.WF"); col3.Add(nutzungsIntervall);
             col4.Add(""); col5.Add(Prozent((1 - hr.P7) * hr.WFZeitanteil));
             col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.WFZeitanteil));
@@ -403,7 +403,7 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false); underlined.Add(false);
             }
 
-            col1.Add(Quadrat(d.Wohnung.Wohnflaeche));
+            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Wohnflaeche));
             col2.Add(Prozent(1 - hr.P8) + " n.WF"); col3.Add(nutzungsIntervall);
             col4.Add(""); col5.Add(Prozent((1 - hr.P8) * hr.WFZeitanteil));
             col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.WFZeitanteil));

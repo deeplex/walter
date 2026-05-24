@@ -18,6 +18,7 @@ import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnun
 import { WalterHKVOEntry } from './WalterHKVO';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
+import { WalterUmlageVersionEntry } from './WalterUmlageVersion';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
@@ -39,6 +40,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public selectedWohnungen: WalterSelectionEntry[],
         public wohnungen: WalterWohnungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
+        public versionen: WalterUmlageVersionEntry[],
+        public hkvos: WalterHKVOEntry[],
         public permissions: WalterPermissions
     ) {
         super();
@@ -54,13 +57,15 @@ export class WalterUmlageEntry extends WalterApiHandler {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
             WalterBetriebskostenrechnungEntry.fromJson
-        );
+        ) ?? [];
         const selectedZaehler = json.selectedZaehler?.map(
             WalterSelectionEntry.fromJson
         );
         const hkvo =
             json.hkvo && WalterHKVOEntry.fromJson(json.hkvo as WalterHKVOEntry);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
+        const versionen = json.versionen?.map(WalterUmlageVersionEntry.fromJson) ?? [];
+        const hkvos = json.hkvos?.map(WalterHKVOEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -79,6 +84,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
             selectedWohnungen,
             wohnungen,
             betriebskostenrechnungen,
+            versionen,
+            hkvos,
             permissions
         );
     }

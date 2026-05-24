@@ -192,7 +192,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             var list = await UmlagePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
             return Ok(list
-                .Where(e => e.Schluessel == Umlageschluessel.NachVerbrauch)
+                .Where(e => e.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault()?.Schluessel == Umlageschluessel.NachVerbrauch)
                 .Select(e => new SelectionEntry(
                     e.UmlageId,
                     e.Typ.Bezeichnung + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung())));

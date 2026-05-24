@@ -22,6 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterGrid,
         WalterWohnungen,
         WalterUmlage,
+        WalterUmlageVersionen,
+        WalterHKVOVersionen,
         WalterZaehlerList,
         WalterLinks,
         WalterLinkTile,
@@ -32,8 +34,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterFileWrapper,
         type WalterBetriebskostenrechnungEntry,
         type WalterSelectionEntry,
+        type WalterUmlageVersionEntry,
         validateUmlage
     } from '$walter/lib';
+    import { changeTracker } from '$walter/store';
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
@@ -71,6 +75,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    const umlageversionEntry: Partial<WalterUmlageVersionEntry> = {
+        umlage: {
+            id: '' + data.entry.id,
+            text: data.entry.typ?.text + ' - ' + data.entry.wohnungenBezeichnung
+        },
+        permissions: data.entry.permissions
+    };
+
+    let blockSave = false;
+    let commitVersionIfPending: () => Promise<void>;
+    $: submitDisabled =
+        $changeTracker === 0 || !validateUmlage(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail
@@ -78,13 +95,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
-    disabled={!validateUmlage(data.entry)}
+    disabled={submitDisabled}
+    beforeSave={commitVersionIfPending}
 />
 
 <WalterGrid>
-    <WalterUmlage fetchImpl={data.fetchImpl} bind:entry={data.entry} />
+    <WalterUmlage
+        fetchImpl={data.fetchImpl}
+        bind:entry={data.entry}
+        bind:blockSave
+        bind:commitVersionIfPending
+    />
 
     <WalterLinks>
+        <WalterUmlageVersionen
+            entry={umlageversionEntry}
+            title="Nachträge"
+            rows={data.entry.versionen}
+        />
+        {#if data.entry.hkvos.length > 0}
+            <WalterHKVOVersionen
+                title="HKVO-Nachträge"
+                rows={data.entry.hkvos}
+            />
+        {/if}
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
             title="Wohnungen"

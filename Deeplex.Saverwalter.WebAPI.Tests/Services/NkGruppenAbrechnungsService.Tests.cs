@@ -26,7 +26,20 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         private static int _wohnungIdCounter = 1;
         private static Wohnung MakeWohnung(string name, decimal wf = 100, decimal nf = 100,
             decimal mea = 100, int ne = 1)
-            => new(name, wf, nf, mea, ne) { WohnungId = _wohnungIdCounter++ };
+        {
+            var w = new Wohnung(name) { WohnungId = _wohnungIdCounter++ };
+            w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), wf, nf, mea, ne) { Wohnung = w });
+            return w;
+        }
+
+        private static Umlage MakeUmlage(Umlageschluessel schluessel, string typName = "Test",
+            Buchungskonto? nkKonto = null)
+        {
+            var u = new Umlage { Typ = new Umlagetyp(typName) };
+            if (nkKonto != null) u.NkVerrechnungsKonto = nkKonto;
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = u });
+            return u;
+        }
 
         private static Vertrag MakeVertrag(
             Wohnung wohnung,
@@ -59,7 +72,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             umlage.Wohnungen.Add(wohnung);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -74,7 +87,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung, start: new DateOnly(2021, 7, 1));
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             umlage.Wohnungen.Add(wohnung);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -97,7 +110,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1", wf: 100);
             var w2 = MakeWohnung("W2", wf: 200);
             MakeVertrag(w1); MakeVertrag(w2);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             umlage.Wohnungen.AddRange([w1, w2]);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -114,7 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1", ne: 1);
             var w2 = MakeWohnung("W2", ne: 3);
             MakeVertrag(w1); MakeVertrag(w2);
-            var umlage = new Umlage(Umlageschluessel.NachNutzeinheit) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachNutzeinheit);
             umlage.Wohnungen.AddRange([w1, w2]);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -132,7 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w2 = MakeWohnung("W2");
             MakeVertrag(w1, personenzahl: 2);
             MakeVertrag(w2, personenzahl: 3);
-            var umlage = new Umlage(Umlageschluessel.NachPersonenzahl) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachPersonenzahl);
             umlage.Wohnungen.AddRange([w1, w2]);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -150,7 +163,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             // No Vertrag added
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             umlage.Wohnungen.Add(wohnung);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -176,11 +189,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1");
             var w2 = MakeWohnung("W2");
             MakeVertrag(w1); MakeVertrag(w2);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Test"),
-                NkVerrechnungsKonto = new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv)
-            };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv));
             umlage.Wohnungen.AddRange([w1, w2]);
             AddBkForderung(umlage, 1001m, new DateOnly(2021, 12, 31), 2021);
 
@@ -195,11 +204,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Test"),
-                NkVerrechnungsKonto = new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv)
-            };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv));
             umlage.Wohnungen.Add(wohnung);
             AddBkForderung(umlage, 500m, new DateOnly(2021, 12, 31), 2021);
 
@@ -215,7 +220,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             umlage.Wohnungen.Add(wohnung);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
@@ -229,8 +234,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1");
             var w2 = MakeWohnung("W2");
             MakeVertrag(w1); MakeVertrag(w2);
-            var u1 = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("U1") };
-            var u2 = new Umlage(Umlageschluessel.NachNutzeinheit) { Typ = new Umlagetyp("U2") };
+            var u1 = MakeUmlage(Umlageschluessel.NachWohnflaeche, "U1");
+            var u2 = MakeUmlage(Umlageschluessel.NachNutzeinheit, "U2");
             u1.Wohnungen.AddRange([w1, w2]);
             u2.Wohnungen.AddRange([w1, w2]);
 
@@ -246,8 +251,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1");
             var w2 = MakeWohnung("W2");
             MakeVertrag(w1); MakeVertrag(w2);
-            var u1 = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("U1") };
-            var u2 = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("U2") };
+            var u1 = MakeUmlage(Umlageschluessel.NachWohnflaeche, "U1");
+            var u2 = MakeUmlage(Umlageschluessel.NachWohnflaeche, "U2");
             u1.Wohnungen.Add(w1);
             u2.Wohnungen.Add(w2);
 

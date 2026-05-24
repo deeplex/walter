@@ -154,7 +154,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             public Buchungskonto Buchungskonto => Vertrag?.NkBuchungskonto ?? Wohnung.AufwandsKonto;
 
             /// <summary>Anteil dieser Partei an einer Umlage (0–1).</summary>
-            public decimal GetAnteil(Umlage umlage) => umlage.Schluessel switch
+            public decimal GetAnteil(Umlageschluessel schluessel, int umlageId) => schluessel switch
             {
                 Umlageschluessel.NachWohnflaeche => WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => NFZeitanteil,
@@ -162,7 +162,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachMiteigentumsanteil => MEAZeitanteil,
                 Umlageschluessel.NachPersonenzahl => PersonenZeitanteile.Sum(p => p.Anteil),
                 Umlageschluessel.NachVerbrauch =>
-                    VerbrauchAnteilByUmlageId.GetValueOrDefault(umlage.UmlageId),
+                    VerbrauchAnteilByUmlageId.GetValueOrDefault(umlageId),
                 _ => 0
             };
         }
@@ -240,17 +240,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .OrderBy(w => w.WohnungId)
                 .ToList();
 
-            var gesamtWF = wohnungen.Sum(w => w.Wohnflaeche);
-            var gesamtNF = wohnungen.Sum(w => w.Nutzflaeche);
-            var gesamtNE = wohnungen.Sum(w => (decimal)w.Nutzeinheit);
-            var gesamtMEA = wohnungen.Sum(w => w.Miteigentumsanteile);
+            var gesamtWF = wohnungen.Sum(w => w.VersionAt(abrechnungsende).Wohnflaeche);
+            var gesamtNF = wohnungen.Sum(w => w.VersionAt(abrechnungsende).Nutzflaeche);
+            var gesamtNE = wohnungen.Sum(w => (decimal)w.VersionAt(abrechnungsende).Nutzeinheit);
+            var gesamtMEA = wohnungen.Sum(w => w.VersionAt(abrechnungsende).Miteigentumsanteile);
 
             var parteien = BuildParteien(
                 wohnungen, umlagenInGruppe,
                 gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
                 abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
 
-            var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr);
+            var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr, abrechnungsende);
 
             return new NkEinheit
             {
@@ -315,7 +315,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                     var notes = new List<Note>();
                     var verbrauchAnteile = umlagenInGruppe
-                        .Where(u => u.Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
+                        .Where(u => u.VersionAt(abrechnungsende).Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
                         .Select(u =>
                         {
                             // VerbrauchAnteil requires a Vertrag-based Zeitraum, which doesn't exist for Leerstand.
@@ -347,11 +347,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         Nutzungsbeginn = lsBeginn,
                         Nutzungsende = lsEnde,
                         Zeitanteil = lsZeitanteil,
-                        WFZeitanteil = gesamtWF > 0 ? lsZeitanteil * wohnung.Wohnflaeche / gesamtWF : 0,
-                        NFZeitanteil = gesamtNF > 0 ? lsZeitanteil * wohnung.Nutzflaeche / gesamtNF : 0,
-                        NEZeitanteil = gesamtNE > 0 ? lsZeitanteil * wohnung.Nutzeinheit / gesamtNE : 0,
+                        WFZeitanteil = gesamtWF > 0 ? lsZeitanteil * wohnung.VersionAt(abrechnungsende).Wohnflaeche / gesamtWF : 0,
+                        NFZeitanteil = gesamtNF > 0 ? lsZeitanteil * wohnung.VersionAt(abrechnungsende).Nutzflaeche / gesamtNF : 0,
+                        NEZeitanteil = gesamtNE > 0 ? lsZeitanteil * wohnung.VersionAt(abrechnungsende).Nutzeinheit / gesamtNE : 0,
                         MEAZeitanteil = gesamtMEA > 0
-                            ? lsZeitanteil * wohnung.Miteigentumsanteile / gesamtMEA : 0,
+                            ? lsZeitanteil * wohnung.VersionAt(abrechnungsende).Miteigentumsanteile / gesamtMEA : 0,
                         VerbrauchAnteilByUmlageId = verbrauchAnteile,
                         // PersonenZeitanteile bleibt leer → GetAnteil(Personenzahl) = 0
                     });
@@ -431,7 +431,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 vertrag, alleWohnungenDerEinheit, zeitraum);
 
             var verbrauchAnteileDetail = umlagen
-                .Where(u => u.Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
+                .Where(u => u.VersionAt(abrechnungsende).Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
                 .Select(u => new VerbrauchAnteil(u, wohnung, zeitraum, notes))
                 .Where(va => va.Anteil.Values.Sum() > 0)
                 .ToDictionary(va => va.Umlage.UmlageId, va => va);
@@ -465,10 +465,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Nutzungsbeginn = nutzungsbeginn,
                 Nutzungsende = nutzungsende,
                 Zeitanteil = zeitanteil,
-                WFZeitanteil = gesamtWF > 0 ? zeitanteil * wohnung.Wohnflaeche / gesamtWF : 0,
-                NFZeitanteil = gesamtNF > 0 ? zeitanteil * wohnung.Nutzflaeche / gesamtNF : 0,
-                NEZeitanteil = gesamtNE > 0 ? zeitanteil * wohnung.Nutzeinheit / gesamtNE : 0,
-                MEAZeitanteil = gesamtMEA > 0 ? zeitanteil * wohnung.Miteigentumsanteile / gesamtMEA : 0,
+                WFZeitanteil = gesamtWF > 0 ? zeitanteil * wohnung.VersionAt(abrechnungsende).Wohnflaeche / gesamtWF : 0,
+                NFZeitanteil = gesamtNF > 0 ? zeitanteil * wohnung.VersionAt(abrechnungsende).Nutzflaeche / gesamtNF : 0,
+                NEZeitanteil = gesamtNE > 0 ? zeitanteil * wohnung.VersionAt(abrechnungsende).Nutzeinheit / gesamtNE : 0,
+                MEAZeitanteil = gesamtMEA > 0 ? zeitanteil * wohnung.VersionAt(abrechnungsende).Miteigentumsanteile / gesamtMEA : 0,
                 PersonenZeitanteile = personenZeitanteile,
                 VerbrauchAnteilByUmlageId = verbrauchAnteile,
                 VerbrauchAnteileDetail = verbrauchAnteileDetail,
@@ -485,18 +485,21 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<NkPartei> parteien,
             DateOnly beginn,
             DateOnly ende,
-            int jahr)
+            int jahr,
+            DateOnly abrechnungsEnde)
         {
             var result = new List<NkRechnungsplan>();
 
             foreach (var umlage in umlagen)
             {
-                if (umlage.HKVO != null)
+                var hkvo = umlage.HkvoAt(abrechnungsEnde);
+                if (hkvo != null)
                 {
-                    ProcessHkvoUmlage(umlage, parteien, result, beginn, ende, jahr);
+                    ProcessHkvoUmlage(umlage, hkvo, parteien, result, beginn, ende, jahr);
                     continue;
                 }
 
+                var schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel;
                 var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Haben
                              && z.Buchungssatz.Buchungsjahr == jahr)
@@ -510,7 +513,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                     foreach (var partei in parteien)
                     {
-                        decimal anteilFaktor = partei.GetAnteil(umlage);
+                        decimal anteilFaktor = partei.GetAnteil(schluessel, umlage.UmlageId);
                         if (anteilFaktor <= 0) continue;
 
                         decimal anteil = Math.Round(betrag * anteilFaktor, 2);
@@ -552,13 +555,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         /// </summary>
         private static void ProcessHkvoUmlage(
             Umlage umlage,
+            HKVO hkvo,
             List<NkPartei> parteien,
             List<NkRechnungsplan> result,
             DateOnly beginn,
             DateOnly ende,
             int jahr)
         {
-            var hkvo = umlage.HKVO!;
             var p7 = hkvo.HKVO_P7;
             var p8 = hkvo.HKVO_P8;
             var notes = new List<Note>();

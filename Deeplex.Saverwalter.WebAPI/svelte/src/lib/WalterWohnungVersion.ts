@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,45 +17,42 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
-export class WalterHKVOEntry extends WalterApiHandler {
-    // public static ApiURL = `/api/hkvo`;
+export class WalterWohnungVersionEntry extends WalterApiHandler {
+    public static ApiURL = `/api/wohnungversionen`;
 
     constructor(
         public id: number,
         public beginn: string,
+        public wohnflaeche: number,
+        public nutzflaeche: number,
+        public miteigentumsanteile: number,
+        public einheiten: number,
         public notiz: string,
-        public hkvO_P7: number,
-        public hkvO_P8: number,
-        public hkvO_P9: WalterSelectionEntry,
-        public strompauschale: number,
-        public stromrechnung: WalterSelectionEntry,
         public createdAt: Date,
         public lastModified: Date,
+        public wohnung: WalterSelectionEntry,
         public permissions: WalterPermissions
     ) {
         super();
     }
 
-    static fromJson(json: WalterHKVOEntry) {
-        const hkvo_p9 =
-            json.hkvO_P9 && WalterSelectionEntry.fromJson(json.hkvO_P9);
-        const stromrechnung =
-            json.stromrechnung &&
-            WalterSelectionEntry.fromJson(json.stromrechnung);
+    static fromJson(json: WalterWohnungVersionEntry) {
+        const wohnung =
+            json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
-        return new WalterHKVOEntry(
+        return new WalterWohnungVersionEntry(
             json.id,
             json.beginn,
+            json.wohnflaeche,
+            json.nutzflaeche,
+            json.miteigentumsanteile,
+            json.einheiten,
             json.notiz,
-            json.hkvO_P7,
-            json.hkvO_P8,
-            hkvo_p9,
-            json.strompauschale,
-            stromrechnung,
             json.createdAt,
             json.lastModified,
+            wohnung,
             permissions
         );
     }

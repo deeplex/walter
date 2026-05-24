@@ -66,10 +66,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = new Wohnung("Test") { Besitzer = besitzer };
+            entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             var entry = new WohnungEntry(entity, new());
 
             var claims = new[]
@@ -125,10 +123,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = new Wohnung("Test") { Besitzer = besitzer };
+            entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
             var entry = new WohnungEntry(entity, new());
@@ -137,7 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.Put(entity.WohnungId, entry);
 
             result.Value.Should().NotBeNull();
-            entity.Wohnflaeche.Should().Be(200);
+            entity.Versionen.OrderByDescending(v => v.Beginn).First().Wohnflaeche.Should().Be(200);
         }
 
         [Fact]

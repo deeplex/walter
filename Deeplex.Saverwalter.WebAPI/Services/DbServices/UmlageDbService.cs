@@ -131,10 +131,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
             var schluessel = (Umlageschluessel)entry.Schluessel.Id;
             var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
-            var entity = new Umlage(schluessel)
+            var entity = new Umlage { Typ = typ };
+            var firstVersion = entry.Versionen.FirstOrDefault();
+            var beginn = firstVersion?.Beginn ?? DateOnly.FromDateTime(DateTime.Today);
+            var version = new UmlageVersion(beginn, schluessel)
             {
-                Typ = typ
+                Umlage = entity
             };
+            entity.Versionen.Add(version);
 
             SetOptionalValues(entity, entry);
             Ctx.Umlagen.Add(entity);
@@ -151,14 +155,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     throw new ArgumentException("entry has no Typ.");
                 }
-                if (entry.Schluessel == null)
-                {
-                    throw new ArgumentException("entry has no Schluessel.");
-                }
 
                 entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
-                entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
-
                 SetOptionalValues(entity, entry);
                 Ctx.Umlagen.Update(entity);
                 Ctx.SaveChanges();
@@ -200,10 +198,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 (Umlageschluessel)entry.Schluessel.Id == Umlageschluessel.NachVerbrauch &&
                 entry.HKVO is HKVOEntryBase hkvo)
             {
-                var oldHKVO = entity.HKVO;
-                if (oldHKVO == null)
+                var currentHkvo = entity.HeizkostenHKVOs.OrderByDescending(h => h.Beginn).FirstOrDefault();
+                var isNewVersion = currentHkvo == null || currentHkvo.Beginn != hkvo.Beginn;
+
+                if (isNewVersion)
                 {
                     var newHKVO = new HKVO(
+                        hkvo.Beginn,
                         (decimal)hkvo.HKVO_P7 / 100,
                         (decimal)hkvo.HKVO_P8 / 100,
                         (HKVO_P9A2)hkvo.HKVO_P9.Id,
@@ -211,22 +212,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     {
                         Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id)
                     };
-                    entity.HKVO = newHKVO;
+                    entity.HeizkostenHKVOs.Add(newHKVO);
                     Ctx.HKVO.Add(newHKVO);
                 }
                 else
                 {
-                    oldHKVO.HKVO_P7 = (decimal)hkvo.HKVO_P7 / 100;
-                    oldHKVO.HKVO_P8 = (decimal)hkvo.HKVO_P8 / 100;
-                    oldHKVO.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
-                    oldHKVO.Strompauschale = (decimal)hkvo.Strompauschale / 100;
-                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
-                    Ctx.HKVO.Update(oldHKVO);
+                    currentHkvo!.HKVO_P7 = (decimal)hkvo.HKVO_P7 / 100;
+                    currentHkvo.HKVO_P8 = (decimal)hkvo.HKVO_P8 / 100;
+                    currentHkvo.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
+                    currentHkvo.Strompauschale = (decimal)hkvo.Strompauschale / 100;
+                    currentHkvo.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
+                    Ctx.HKVO.Update(currentHkvo);
                 }
             }
             else
             {
-                entity.HKVO = null;
+                entity.HeizkostenHKVOs.Clear();
             }
 
             entity.Notiz = entry.Notiz;

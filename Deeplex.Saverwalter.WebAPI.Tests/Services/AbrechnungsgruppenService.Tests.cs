@@ -23,12 +23,17 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 {
     public class AbrechnungsgruppenServiceTests
     {
-        private static Wohnung MakeWohnung(int id) =>
-            new("W" + id, 50, 50, 100, 1) { WohnungId = id };
+        private static Wohnung MakeWohnung(int id)
+        {
+            var w = new Wohnung("W" + id) { WohnungId = id };
+            w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 50, 50, 100, 1) { Wohnung = w });
+            return w;
+        }
 
         private static Umlage MakeUmlage(params Wohnung[] wohnungen)
         {
-            var u = new Umlage(Umlageschluessel.NachWohnflaeche);
+            var u = new Umlage();
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = u });
             u.Wohnungen.AddRange(wohnungen);
             return u;
         }

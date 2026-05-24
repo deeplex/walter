@@ -33,6 +33,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<GarageVertrag> GarageVertraege { get; set; } = null!;
         public DbSet<GarageVertragVersion> GarageVertragVersionen { get; set; } = null!;
         public DbSet<HKVO> HKVO { get; set; } = null!;
+        public DbSet<UmlageVersion> UmlageVersionen { get; set; } = null!;
+        public DbSet<WohnungVersion> WohnungVersionen { get; set; } = null!;
         public DbSet<Bankkonto> Bankkontos { get; set; } = null!;
 #pragma warning disable CS0618
         [Obsolete("Mieten ist durch das Buchungssatz/Sollstellung-Modell abgelöst. Tabelle bleibt für Migration erhalten.")]
@@ -94,8 +96,8 @@ namespace Deeplex.Saverwalter.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithOne(u => u.HKVO);
-            modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.HKVOs);
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithMany(u => u.HeizkostenHKVOs).HasForeignKey(u => u.HeizkostenId);
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.BetriebsstromHKVOs);
             modelBuilder.Entity<HKVO>().HasOne(u => u.AllgemeinWaerme).WithMany().HasForeignKey(u => u.AllgemeinWaermeId);
 
             modelBuilder.Entity<Vertrag>().HasOne(u => u.Ansprechpartner).WithMany(u => u.VerwaltetVertraege);
@@ -263,6 +265,10 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Transaktion>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<UmlageVersion>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<UmlageVersion>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<WohnungVersion>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<WohnungVersion>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlagetyp>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlagetyp>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Vertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");

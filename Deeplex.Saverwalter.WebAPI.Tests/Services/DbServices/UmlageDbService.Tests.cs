@@ -28,6 +28,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 {
     public class UmlageDbServiceTests
     {
+        private static Umlage MakeUmlage(Umlageschluessel schluessel, Umlagetyp? typ = null)
+        {
+            var u = new Umlage { Typ = typ ?? new Umlagetyp("Allgemeinstrom/Hausbeleuchtung") };
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = u });
+            return u;
+        }
+
         [Fact]
         public async Task GetTest()
         {
@@ -37,12 +44,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlageDbService(ctx, auth);
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche);
 
-            var wohnung = new Wohnung("whatever", 0, 0, 0, 0);
+            var wohnung = new Wohnung("whatever");
+            wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 0, 0, 0, 1) { Wohnung = wohnung });
             entity.Wohnungen.Add(wohnung);
 
             ctx.Wohnungen.Add(wohnung);
@@ -64,10 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlageDbService(ctx, auth);
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
 
@@ -89,10 +91,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung");
             ctx.Umlagetypen.Add(typ);
             ctx.SaveChanges();
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = typ
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche, typ);
             var entry = new UmlageEntry(entity, new());
 
             var result = await service.Post(user, entry);
@@ -109,10 +108,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlageDbService(ctx, auth);
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche);
 
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
@@ -132,10 +128,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlageDbService(ctx, auth);
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche);
 
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
@@ -163,10 +156,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlageDbService(ctx, auth);
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche);
             var entry = new UmlageEntry(entity, new());
             entry.Beschreibung = "Test";
 
