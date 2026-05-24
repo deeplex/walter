@@ -40,10 +40,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let apiURL: string;
     export let fileWrapper: WalterFileWrapper | undefined = undefined;
     export let disabled = false;
+    export let beforeSave: (() => Promise<void>) | undefined = undefined;
 
     let winWidth = 0;
 
-    function click_save(): void {
+    async function click_save() {
+        if (beforeSave) await beforeSave();
         handle_save(apiURL, entry, title);
     }
 

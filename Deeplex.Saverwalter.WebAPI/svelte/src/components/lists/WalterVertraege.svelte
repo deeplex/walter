@@ -20,8 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterDataTable,
         WalterTransaktion,
-        WalterVertrag,
-        WalterVertragVersion
+        WalterVertrag
     } from '$walter/components';
     import {
         WalterVertragEntry,
@@ -39,13 +38,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterVertragEntry> | undefined = {};
+    export let entry: Partial<WalterVertragEntry> | undefined = {
+        versionen: [{} as WalterVertragVersionEntry]
+    };
     export let rows: WalterVertragEntry[] | undefined = undefined;
 
-    let entryVersion: Partial<WalterVertragVersionEntry> = {};
-    let entryVersionBeginn: string | undefined = undefined;
     let hasOverlap = false;
-    $: if (entry) entry.versionen = [entryVersion as WalterVertragVersionEntry];
     $: submitDisabled = !validateVertragQuickAdd(entry) || hasOverlap;
 
     const headers = [
@@ -136,13 +134,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterVertrag {fetchImpl} bind:entry />
-        <WalterVertragVersion
-            bind:hasOverlap
-            {fetchImpl}
-            bind:entry={entryVersion}
-            bind:vertrag={entry}
-            bind:beginn={entryVersionBeginn}
-        />
+        <WalterVertrag {fetchImpl} bind:entry bind:hasOverlap />
     {/if}
 </WalterDataTable>

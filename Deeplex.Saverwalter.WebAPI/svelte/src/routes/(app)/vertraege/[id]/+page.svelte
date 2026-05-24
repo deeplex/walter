@@ -32,11 +32,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterFileWrapper,
         type WalterMietminderungEntry,
-        type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
         WalterKontaktEntry,
         validateVertrag
     } from '$walter/lib';
+    import { changeTracker } from '$walter/store';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import WalterVertragTransaktionen from '$walter/components/lists/WalterVertragTransaktionen.svelte';
     import { fileURL } from '$walter/services/files';
@@ -45,8 +45,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
         getMietminderungEntry(data.entry);
 
-    const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-        getVertragversionEntry(data.entry);
+    $: vertragversionEntry = getVertragversionEntry(data.entry);
 
     const mieterEntry: Partial<WalterKontaktEntry> = {};
 
@@ -66,7 +65,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
 
-    $: submitDisabled = !validateVertrag(data.entry);
+    let blockSave = false;
+    let commitVersionIfPending: () => Promise<void>;
+    $: submitDisabled = $changeTracker === 0 || !validateVertrag(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail
@@ -75,10 +76,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {title}
     bind:fileWrapper
     disabled={submitDisabled}
+    beforeSave={commitVersionIfPending}
 />
 
 <WalterGrid>
-    <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
+    <WalterVertrag
+        fetchImpl={data.fetchImpl}
+        bind:entry={data.entry}
+        bind:blockSave
+        bind:commitVersionIfPending
+    />
 
     <WalterLinks>
         <WalterKontakte
@@ -121,12 +128,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.abrechnungsresultate}
         />
 
-        <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
-            name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
-            href={`/kontakte/${data.entry.ansprechpartner.id}`}
-        />
+        {#if data.entry.ansprechpartner?.id}
+            <WalterLinkTile
+                bind:fileWrapper
+                fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
+                name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
+                href={`/kontakte/${data.entry.ansprechpartner.id}`}
+            />
+        {/if}
         <WalterLinkTile
             bind:fileWrapper
             fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}

@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Vertrag Entity { get; } = null!;
 
-            public SelectionEntry Ansprechpartner { get; set; } = null!;
+            public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
             public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
             public DateTime CreatedAt { get; set; }

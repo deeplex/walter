@@ -210,7 +210,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Ende = entry.Ende;
-            entity.Ansprechpartner = await Ctx.Kontakte.FindAsync(entry.Ansprechpartner.Id)!;
+            entity.Ansprechpartner = entry.Ansprechpartner?.Id is int apId
+                ? await Ctx.Kontakte.FindAsync(apId)
+                : null;
             entity.Notiz = entry.Notiz;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
