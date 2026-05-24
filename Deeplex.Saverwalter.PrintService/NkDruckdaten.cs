@@ -146,7 +146,7 @@ namespace Deeplex.Saverwalter.PrintService
                     .ToList();
                 if (plaene.Count == 0) continue;
 
-                var gesamtbetrag = plaene.Sum(p => p.Rechnung.Betrag);
+                var gesamtbetrag = plaene.Sum(p => p.Betrag);
                 var anteilFaktor = partei.GetAnteil(umlage);
                 var meinBetrag = plaene
                     .SelectMany(p => p.Anteile)
@@ -212,7 +212,7 @@ namespace Deeplex.Saverwalter.PrintService
                     .ToList();
                 if (plaene.Count == 0) continue;
 
-                var gesamtbetrag = plaene.Sum(p => p.Rechnung.Betrag);
+                var gesamtbetrag = plaene.Sum(p => p.Betrag);
                 var meinBetrag = plaene
                     .SelectMany(p => p.Anteile)
                     .Where(a => a.Partei == partei)

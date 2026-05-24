@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         .ThenInclude(w => w.Adresse)
                 .Where(r => r.Vertrag.VertragId == VertragId &&
                             r.Buchungssatz != null &&
-                            r.Buchungssatz.Buchungsdatum.Year == jahr)
+                            r.Buchungssatz.Buchungsjahr == jahr)
                 .SingleOrDefaultAsync();
 
             if (entity == null)

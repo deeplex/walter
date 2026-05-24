@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#pragma warning disable CS0618
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
@@ -45,15 +46,17 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public async Task GetTest()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
 
-            var result = await service.Get(
-                user,
-                vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First().BetriebskostenrechnungId);
+            var result = await service.Get(user, entity.BetriebskostenrechnungId);
 
             result.Value.Should().NotBeNull();
             result.Value.Should().BeOfType<BetriebskostenrechnungEntry>();
@@ -63,16 +66,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public async Task DeleteTest()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
-            var id = vertrag.
-                Wohnung.
-                Umlagen.First().
-                Betriebskostenrechnungen.First().
-                BetriebskostenrechnungId;
+            var id = entity.BetriebskostenrechnungId;
 
             var result = await service.Delete(user, id);
 

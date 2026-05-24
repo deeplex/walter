@@ -26,9 +26,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var umlagen = await ctx.Umlagen
                 .AsSplitQuery()
                 .Include(u => u.Typ)
-                .Include(u => u.Betriebskostenrechnungen
-                    .Where(r => r.BetreffendesJahr == jahr))
-                    .ThenInclude(r => r.Buchungssatz)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                                 && z.Buchungssatz.Buchungsjahr == jahr))
+                    .ThenInclude(z => z.Buchungssatz)
                         .ThenInclude(s => s.Buchungszeilen)
                             .ThenInclude(z => z.Buchungskonto)
                 .Include(u => u.Wohnungen)
@@ -40,13 +42,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.NkBuchungskonto)
                             .ThenInclude(k => k.Buchungszeilen
-                                .Where(z => z.Buchungssatz.Buchungsdatum.Year == jahr))
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                             .ThenInclude(z => z.Buchungssatz)
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.MietBuchungskonto)
                             .ThenInclude(k => k.Buchungszeilen
-                                .Where(z => z.Buchungssatz.Buchungsdatum.Year == jahr))
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                             .ThenInclude(z => z.Buchungssatz)
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
@@ -54,7 +56,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.Abrechnungsresultate
-                            .Where(r => r.Buchungssatz.Buchungsdatum.Year == jahr))
+                            .Where(r => r.Buchungssatz.Buchungsjahr == jahr))
                         .ThenInclude(r => r.Buchungssatz)
                             .ThenInclude(s => s.Buchungszeilen)
                                 .ThenInclude(z => z.Buchungskonto)
@@ -72,8 +74,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 foreach (var plan in einheit.Rechnungsplaene)
                 {
-                    if (plan.Rechnung.Buchungssatz is null) continue;
-                    var satz = plan.Rechnung.Buchungssatz;
+                    var satz = plan.Buchungssatz;
 
                     var bereitsGebuchteKontoIds = satz.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll)

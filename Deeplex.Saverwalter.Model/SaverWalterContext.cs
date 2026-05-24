@@ -22,6 +22,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public DbSet<Abrechnungsresultat> Abrechnungsresultate { get; set; } = null!;
         public DbSet<Adresse> Adressen { get; set; } = null!;
+        [Obsolete("Betriebskostenrechnungen ist durch das Buchungssatz-Modell abgelöst. Tabelle bleibt für Migration erhalten.")]
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Buchungskonto> Buchungskonten { get; set; } = null!;
         public DbSet<Buchungssatz> Buchungssaetze { get; set; } = null!;

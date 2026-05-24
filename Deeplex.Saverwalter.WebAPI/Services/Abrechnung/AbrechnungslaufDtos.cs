@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public string Beschreibung { get; init; } = "";
         public string Schluessel { get; init; } = "";
         public int UmlagetypId { get; init; }
-        public int? BetriebskostenrechnungId { get; init; }
+        public Guid? BuchungssatzId { get; init; }
         public decimal Betrag { get; init; }
         public decimal BetragLetztesJahr { get; init; }
         public bool IstVollstaendigGebucht { get; init; }

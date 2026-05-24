@@ -42,8 +42,8 @@ namespace Deeplex.Saverwalter.Model
         /// </summary>
         public int? Buchungsnummer { get; private set; }
 
-        /// <summary>Geschäftsjahr, in dem dieser Satz gebucht wurde.</summary>
-        public int? Buchungsjahr { get; private set; }
+        /// <summary>Geschäftsjahr, in dem dieser Satz gebucht wurde. Defaults to Buchungsdatum.Year.</summary>
+        public int Buchungsjahr { get; set; }
 
         /// <summary>
         /// True nach Abschliessen(). Abgeschlossene Sätze dürfen nicht mehr
@@ -75,6 +75,7 @@ namespace Deeplex.Saverwalter.Model
         {
             Buchungsdatum = buchungsdatum;
             Beschreibung = beschreibung;
+            Buchungsjahr = buchungsdatum.Year;
         }
 
         /// <summary>

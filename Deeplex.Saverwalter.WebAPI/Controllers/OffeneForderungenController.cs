@@ -207,7 +207,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class OffeneBkForderungEntry
         {
-            public int BetriebskostenrechnungId { get; set; }
+            public Guid BuchungssatzId { get; set; }
             public string Bezeichnung { get; set; } = "";
             public decimal Betrag { get; set; }
             public decimal SchonGezahlt { get; set; }
@@ -217,28 +217,41 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet("bk/{jahr}")]
         public async Task<ActionResult<IEnumerable<OffeneBkForderungEntry>>> GetOffeneBkForderungen(int jahr)
         {
-            var rechnungen = await ctx.Betriebskostenrechnungen
+            var umlagen = await ctx.Umlagen
                 .AsSplitQuery()
-                .Include(r => r.Umlage).ThenInclude(u => u.Typ)
-                .Include(r => r.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
-                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
-                .Where(r => r.BetreffendesJahr == jahr)
+                .Include(u => u.Typ)
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                                 && (z.Buchungssatz.Buchungsjahr == jahr)))
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.AlsHabenZeile)
+                    .ThenInclude(a => a.SollZeile)
+                .Where(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Haben
+                    && (z.Buchungssatz.Buchungsjahr == jahr)))
                 .ToListAsync();
 
-            var result = rechnungen
-                .Select(r =>
-                {
-                    var habenZeile = r.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-                    var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
-                    return new { r, schonGezahlt, verbleibend = r.Betrag - schonGezahlt };
-                })
+            var result = umlagen
+                .SelectMany(u => u.NkVerrechnungsKonto.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben
+                             && (z.Buchungssatz.Buchungsjahr == jahr))
+                    .Select(z =>
+                    {
+                        var schonGezahlt = z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                        var verbleibend = z.Betrag - schonGezahlt;
+                        return new { z, u, schonGezahlt, verbleibend };
+                    }))
                 .Where(x => x.verbleibend > 0.005m)
                 .Select(x => new OffeneBkForderungEntry
                 {
-                    BetriebskostenrechnungId = x.r.BetriebskostenrechnungId,
-                    Bezeichnung = $"{x.r.Umlage.Typ.Bezeichnung} – {x.r.Umlage.GetWohnungenBezeichnung()}",
-                    Betrag = x.r.Betrag,
+                    BuchungssatzId = x.z.Buchungssatz.BuchungssatzId,
+                    Bezeichnung = $"{x.u.Typ.Bezeichnung} – {x.u.GetWohnungenBezeichnung()}",
+                    Betrag = x.z.Betrag,
                     SchonGezahlt = x.schonGezahlt,
                     Verbleibend = x.verbleibend
                 })

@@ -126,10 +126,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
         private async Task<Dictionary<int, decimal>> LadePrevYearBetraege(List<int> umlageIds, int jahr)
         {
-            return await _ctx.Betriebskostenrechnungen
-                .Where(r => r.BetreffendesJahr == jahr - 1 && umlageIds.Contains(r.Umlage.UmlageId))
-                .GroupBy(r => r.Umlage.UmlageId)
-                .Select(g => new { UmlageId = g.Key, Betrag = g.Sum(r => r.Betrag) })
+            return await _ctx.Umlagen
+                .Where(u => umlageIds.Contains(u.UmlageId))
+                .Select(u => new
+                {
+                    u.UmlageId,
+                    Betrag = u.NkVerrechnungsKonto.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                                 && z.Buchungssatz.Buchungsjahr == jahr - 1)
+                        .Sum(z => z.Betrag)
+                })
                 .ToDictionaryAsync(x => x.UmlageId, x => x.Betrag);
         }
 
@@ -197,13 +203,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             {
                 try
                 {
-                    var nkResult = await _nkAnteilBuchungsService.BucheAnteileAsync(plan.Rechnung, plan.Anteile);
+                    var nkResult = await _nkAnteilBuchungsService.BucheAnteileAsync(plan.Buchungssatz, plan.Anteile);
                     preview.Warnungen.AddRange(nkResult.Warnungen);
                 }
                 catch (Exception ex)
                 {
                     preview.Warnungen.Add(
-                        $"NK-Anteile Rechnung {plan.Rechnung.BetriebskostenrechnungId}: {ex.GetBaseException().Message}");
+                        $"NK-Anteile BS {plan.Buchungssatz.BuchungssatzId}: {ex.GetBaseException().Message}");
                 }
             }
 
@@ -221,10 +227,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         {
             return await _ctx.Umlagen
                 .Include(u => u.Typ)
-                // Rechnungen + bereits gebuchte Soll/Haben-Zeilen
-                .Include(u => u.Betriebskostenrechnungen
-                    .Where(r => r.BetreffendesJahr == jahr))
-                    .ThenInclude(r => r.Buchungssatz)
+                // BK-Forderungs-Buchungszeilen (Haben auf NkVK) für das Abrechnungsjahr
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                                 && z.Buchungssatz.Buchungsjahr == jahr))
+                    .ThenInclude(z => z.Buchungssatz)
                         .ThenInclude(s => s.Buchungszeilen)
                             .ThenInclude(z => z.Buchungskonto)
                 // Wohnungen-Stammdaten
@@ -244,7 +252,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.NkBuchungskonto)
                             .ThenInclude(k => k.Buchungszeilen
-                                .Where(z => z.Buchungssatz.Buchungsdatum.Year == jahr
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr
                                             && z.SollHaben == SollHaben.Haben))
                             .ThenInclude(z => z.Buchungssatz)
                 // Vertraege – Miet-Buchungskonto für MietSaldo
@@ -252,7 +260,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.MietBuchungskonto)
                             .ThenInclude(k => k.Buchungszeilen
-                                .Where(z => z.Buchungssatz.Buchungsdatum.Year == jahr))
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                             .ThenInclude(z => z.Buchungssatz)
                 // Vertraege – BkAbrechnungsKonto für Vergleich mit gebuchtem Betrag
                 .Include(u => u.Wohnungen)
@@ -262,7 +270,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.Abrechnungsresultate
-                            .Where(r => r.Buchungssatz.Buchungsdatum.Year == jahr))
+                            .Where(r => r.Buchungssatz.Buchungsjahr == jahr))
                         .ThenInclude(r => r.Buchungssatz)
                             .ThenInclude(s => s.Buchungszeilen)
                                 .ThenInclude(z => z.Buchungskonto)
@@ -276,7 +284,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Zaehler)
                     .ThenInclude(z => z.Wohnung)
                 .Where(u => u.Wohnungen.Any(w => groupWohnungIds.Contains(w.WohnungId)))
-                .Where(u => u.Betriebskostenrechnungen.Any(r => r.BetreffendesJahr == jahr))
+                .Where(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Haben
+                    && z.Buchungssatz.Buchungsjahr == jahr))
                 .AsSplitQuery()
                 .ToListAsync();
         }
@@ -418,11 +428,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
                 foreach (var plan in einheit.Rechnungsplaene)
                 {
-                    var rechnung = plan.Rechnung;
+                    var buchungssatz = plan.Buchungssatz;
 
                     if (plan.Warnungen.Count > 0)
                         warnungen.AddRange(plan.Warnungen.Select(
-                            w => $"Rechnung {rechnung.BetriebskostenrechnungId}: {w}"));
+                            w => $"BS {buchungssatz.BuchungssatzId}: {w}"));
 
                     // Geplante Anteile, indexiert nach Buchungskonto-Id
                     var plannedByKonto = plan.Anteile
@@ -434,11 +444,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ToDictionary(g => g.Key, g => g.ToList());
 
                     // Bereits gebuchte Soll-Zeilen
-                    var bookedByKonto = (rechnung.Buchungssatz?.Buchungszeilen
+                    var bookedByKonto = buchungssatz.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll)
                         .GroupBy(z => z.Buchungskonto.BuchungskontoId)
-                        .ToDictionary(g => g.Key, g => g.ToList()))
-                        ?? [];
+                        .ToDictionary(g => g.Key, g => g.ToList());
 
                     var mergedAnteile = new List<NkAnteilInfo>();
                     foreach (var kontoId in bookedByKonto.Keys.Union(plannedByKonto.Keys).OrderBy(k => k))
@@ -459,8 +468,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                             : "Eigenanteil";
 
                         var effectiveBetrag = plannedSum ?? bookedSum ?? 0;
-                        var anteilFaktor = rechnung.Betrag > 0
-                            ? effectiveBetrag / rechnung.Betrag
+                        var anteilFaktor = plan.Betrag > 0
+                            ? effectiveBetrag / plan.Betrag
                             : 0;
 
                         decimal? heizVerbrauchAnteil = null;
@@ -504,14 +513,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         });
                     }
 
-                    bool istVollstaendigGebucht =
-                        rechnung.Buchungssatz != null
-                        && rechnung.Buchungssatz.Buchungszeilen
-                            .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag) > 0
-                        && rechnung.Buchungssatz.Buchungszeilen
-                            .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag)
-                        == rechnung.Buchungssatz.Buchungszeilen
-                            .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
+                    var habenSum = buchungssatz.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
+                    var sollSum = buchungssatz.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
+                    bool istVollstaendigGebucht = habenSum > 0 && habenSum == sollSum;
 
                     einheitenByKey[einheitKey].Zeilen.Add(new NkZeileInfo
                     {
@@ -520,8 +526,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Beschreibung = plan.Umlage.Beschreibung ?? "",
                         Schluessel = plan.Umlage.Schluessel.ToDescriptionString(),
                         UmlagetypId = plan.Umlage.Typ.UmlagetypId,
-                        BetriebskostenrechnungId = rechnung.BetriebskostenrechnungId,
-                        Betrag = rechnung.Betrag,
+                        BuchungssatzId = buchungssatz.BuchungssatzId,
+                        Betrag = plan.Betrag,
                         BetragLetztesJahr = prevYearBetragByUmlage.GetValueOrDefault(plan.Umlage.UmlageId),
                         IstVollstaendigGebucht = istVollstaendigGebucht,
                         Anteile = mergedAnteile,

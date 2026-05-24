@@ -16,7 +16,6 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -64,8 +63,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             // For Tabelle
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
-            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
-
             public Permissions Permissions { get; set; } = new Permissions();
 
             public UmlageEntryBase() { }
@@ -76,7 +73,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Typ = new SelectionEntry(entity.Typ.UmlagetypId, entity.Typ.Bezeichnung);
                 WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
 
-                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(
                         e.WohnungId,

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -96,38 +96,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/betriebskostenrechnungen")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetBetriebskostenrechnungen()
+        [Route("api/selection/bk-forderungen/offen")]
+        public async Task<ActionResult<IEnumerable<object>>> GetOffeneBkForderungen()
         {
-            var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
-
-            return Ok(list.Select(e => new SelectionEntry(
-                e.BetriebskostenrechnungId,
-                $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}")));
-        }
-
-        [HttpGet]
-        [Route("api/selection/betriebskostenrechnungen/offen")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetBetriebskostenrechnungenOffen()
-        {
-            var list = await Ctx.Betriebskostenrechnungen
+            var umlagen = await Ctx.Umlagen
                 .AsSplitQuery()
-                .Include(e => e.Umlage).ThenInclude(u => u.Typ)
-                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Include(e => e.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
-                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .Include(u => u.Typ)
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.AlsHabenZeile)
+                    .ThenInclude(a => a.SollZeile)
                 .ToListAsync();
 
-            return Ok(list
-                .Where(e =>
-                {
-                    var habenZeile = e.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-                    var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
-                    return e.Betrag - schonGezahlt > 0.005m;
-                })
-                .Select(e => new SelectionEntry(
-                    e.BetriebskostenrechnungId,
-                    $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}")));
+            return Ok(umlagen
+                .SelectMany(u => u.NkVerrechnungsKonto?.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben)
+                    .Where(z =>
+                    {
+                        var schonGezahlt = z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                        return z.Betrag - schonGezahlt > 0.005m;
+                    })
+                    .Select(z => new
+                    {
+                        Id = z.Buchungssatz.BuchungssatzId,
+                        Text = $"{z.Buchungssatz.Buchungsjahr} - {u.Typ.Bezeichnung} - {u.GetWohnungenBezeichnung()}"
+                    }) ?? [])
+                .OrderBy(e => e.Text));
         }
 
         [HttpGet]
@@ -415,12 +413,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/zahler-bankkonto/betriebskostenrechnung/{rechnungId}")]
-        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForBkRechnung(int rechnungId)
+        [Route("api/selection/zahler-bankkonto/buchungssatz/{buchungssatzId}")]
+        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForBuchungssatz(Guid buchungssatzId)
         {
-            var umlageId = await Ctx.Betriebskostenrechnungen
-                .Where(r => r.BetriebskostenrechnungId == rechnungId)
-                .Select(r => (int?)r.Umlage.UmlageId)
+            var umlageId = await Ctx.Umlagen
+                .Where(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                    z.Buchungssatz.BuchungssatzId == buchungssatzId && z.SollHaben == SollHaben.Haben))
+                .Select(u => (int?)u.UmlageId)
                 .FirstOrDefaultAsync();
 
             if (umlageId is null) return NotFound();

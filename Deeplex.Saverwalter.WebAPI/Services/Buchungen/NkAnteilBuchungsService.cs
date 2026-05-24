@@ -53,15 +53,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         /// direkt aus dem <see cref="NkRechnungsplan"/> des Abrechnungslaufs.
         /// </summary>
         public async Task<NkAnteilBuchungsResult> BucheAnteileAsync(
-            Betriebskostenrechnung rechnung,
+            Buchungssatz satz,
             IReadOnlyList<NkRechnungsAnteil> anteile)
         {
-            if (rechnung.Buchungssatz is null)
-                throw new InvalidOperationException(
-                    $"Betriebskostenrechnung {rechnung.BetriebskostenrechnungId} hat keinen Buchungssatz.");
-
-            var satz = rechnung.Buchungssatz;
-
             var bereitsGebuchteKontoIds = satz.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Soll)
                 .Select(z => z.Buchungskonto.BuchungskontoId)

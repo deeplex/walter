@@ -18,7 +18,6 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
@@ -87,8 +86,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
             public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
-            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; } = [];
-
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
@@ -101,7 +98,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
                 Erhaltungsaufwendungen = entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, permissions));
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
-                Betriebskostenrechnungen = entity.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f, permissions)));
             }
         }
 

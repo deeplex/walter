@@ -116,7 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class BkForderungInfo
         {
-            public int BetriebskostenrechnungId { get; set; }
+            public Guid BuchungssatzId { get; set; }
             public decimal Betrag { get; set; }
             public DateOnly Datum { get; set; }
             public decimal SchonGezahlt { get; set; }
@@ -124,65 +124,79 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Gibt existierende Betriebskostenrechnungen für eine Umlage in einem Jahr zurück.
+        /// Gibt BK-Forderungs-Buchungssätze für eine Umlage in einem Jahr zurück.
         /// </summary>
         [HttpGet("bk/check-forderung")]
         public async Task<ActionResult<IEnumerable<BkForderungInfo>>> CheckForderung([FromQuery] int umlageId, [FromQuery] int year)
         {
-            var umlage = await ctx.Umlagen.FindAsync(umlageId);
+            var umlage = await ctx.Umlagen
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben
+                                 && (z.Buchungssatz.Buchungsjahr == year)))
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.AlsHabenZeile)
+                    .ThenInclude(a => a.SollZeile)
+                .FirstOrDefaultAsync(u => u.UmlageId == umlageId);
+
             if (umlage is null) return NotFound();
             var authRx = await auth.AuthorizeAsync(User, umlage, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var rechnungen = await ctx.Betriebskostenrechnungen
-                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
-                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
-                .Where(r => r.Umlage.UmlageId == umlageId && r.BetreffendesJahr == year)
-                .ToListAsync();
+            var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben
+                         && (z.Buchungssatz.Buchungsjahr == year))
+                .ToList() ?? [];
 
-            return Ok(rechnungen.Select(r =>
+            return Ok(habenZeilen.Select(z =>
             {
-                var habenZeile = r.Buchungssatz?.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-                var schonGezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0m;
+                var schonGezahlt = z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
                 return new BkForderungInfo
                 {
-                    BetriebskostenrechnungId = r.BetriebskostenrechnungId,
-                    Betrag = r.Betrag,
-                    Datum = r.Datum,
+                    BuchungssatzId = z.Buchungssatz.BuchungssatzId,
+                    Betrag = z.Betrag,
+                    Datum = z.Buchungssatz.Buchungsdatum,
                     SchonGezahlt = schonGezahlt,
-                    Verbleibend = r.Betrag - schonGezahlt
+                    Verbleibend = z.Betrag - schonGezahlt
                 };
             }));
         }
 
         /// <summary>
-        /// Offener Posten einer Betriebskostenrechnung — Rechnungsbetrag minus bereits gebuchte Zahlungen.
+        /// Offener Posten eines BK-Forderungs-Buchungssatzes — Rechnungsbetrag minus bereits gebuchte Zahlungen.
         /// </summary>
-        [HttpGet("bk/{betriebskostenrechnungId}/offenerposten")]
-        public async Task<ActionResult<OffenerPostenStatus>> GetBkOffenerPosten(int betriebskostenrechnungId)
+        [HttpGet("bk/{buchungssatzId}/offenerposten")]
+        public async Task<ActionResult<OffenerPostenStatus>> GetBkOffenerPosten(Guid buchungssatzId)
         {
-            var rechnung = await ctx.Betriebskostenrechnungen
-                .Include(b => b.Umlage)
-                .Include(b => b.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+            var forderungsSatz = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen)
                     .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
-                .FirstOrDefaultAsync(b => b.BetriebskostenrechnungId == betriebskostenrechnungId);
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .FirstOrDefaultAsync(s => s.BuchungssatzId == buchungssatzId);
 
-            if (rechnung is null) return NotFound();
+            if (forderungsSatz is null) return NotFound();
 
-            var authRx = await auth.AuthorizeAsync(User, rechnung.Umlage, [Operations.Read]);
+            var habenZeile = forderungsSatz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+            if (habenZeile is null) return NotFound();
+
+            var umlage = await ctx.Umlagen
+                .FirstOrDefaultAsync(u => u.NkVerrechnungsKonto.BuchungskontoId == habenZeile.Buchungskonto.BuchungskontoId);
+            if (umlage is null) return NotFound();
+
+            var authRx = await auth.AuthorizeAsync(User, umlage, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var forderungsHabenZeile = rechnung.Buchungssatz?.Buchungszeilen
-                .FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-
-            var schonGezahlt = forderungsHabenZeile?.AlsHabenZeile
-                .Sum(a => a.SollZeile.Betrag) ?? 0m;
+            var schonGezahlt = habenZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
 
             return Ok(new OffenerPostenStatus
             {
-                Rechnungsbetrag = rechnung.Betrag,
+                Rechnungsbetrag = habenZeile.Betrag,
                 SchonGezahlt = schonGezahlt,
-                VerbleibenderBetrag = rechnung.Betrag - schonGezahlt
+                VerbleibenderBetrag = habenZeile.Betrag - schonGezahlt
             });
         }
 

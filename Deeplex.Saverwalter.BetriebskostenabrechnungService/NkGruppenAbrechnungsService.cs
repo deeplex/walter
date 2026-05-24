@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     ///   Zaehler   → Staende
     ///   Zaehler   → Wohnung
     ///   HKVO      (für warme Betriebskosten §7/§8/§9)
-    ///   Betriebskostenrechnungen → Buchungssatz → Buchungszeilen → Buchungskonto
+    ///   NkVerrechnungsKonto → Buchungszeilen (Haben) → Buchungssatz → Buchungszeilen → Buchungskonto
     /// </summary>
     public static class NkGruppenAbrechnungsService
     {
@@ -167,10 +167,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             };
         }
 
-        /// <summary>Berechnete Anteilverteilung für eine Betriebskostenrechnung.</summary>
+        /// <summary>Berechnete Anteilverteilung für einen BK-Forderungs-Buchungssatz.</summary>
         public sealed class NkRechnungsplan
         {
-            public Betriebskostenrechnung Rechnung { get; init; } = null!;
+            public Buchungssatz Buchungssatz { get; init; } = null!;
+            public decimal Betrag { get; init; }
             public Umlage Umlage { get; init; } = null!;
             public IReadOnlyList<NkRechnungsAnteil> Anteile { get; init; } = [];
             public IReadOnlyList<string> Warnungen { get; init; } = [];
@@ -249,7 +250,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
                 abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
 
-            var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende);
+            var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr);
 
             return new NkEinheit
             {
@@ -440,7 +441,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             // Buchungszeilen sind durch den Include bereits auf das Abrechnungsjahr gefiltert.
             var existing = vertrag.Abrechnungsresultate
-                .FirstOrDefault(r => r.Buchungssatz.Buchungsdatum.Year == jahr);
+                .FirstOrDefault(r => r.Buchungssatz.Buchungsjahr == jahr);
             var gebuchtesResultat = existing?.Buchungssatz.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Haben
                             && z.Buchungskonto.BuchungskontoId == vertrag.BkAbrechnungsKonto.BuchungskontoId)
@@ -483,7 +484,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<Umlage> umlagen,
             List<NkPartei> parteien,
             DateOnly beginn,
-            DateOnly ende)
+            DateOnly ende,
+            int jahr)
         {
             var result = new List<NkRechnungsplan>();
 
@@ -491,31 +493,38 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 if (umlage.HKVO != null)
                 {
-                    ProcessHkvoUmlage(umlage, parteien, result, beginn, ende);
+                    ProcessHkvoUmlage(umlage, parteien, result, beginn, ende, jahr);
                     continue;
                 }
 
-                foreach (var rechnung in umlage.Betriebskostenrechnungen)
+                var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben
+                             && z.Buchungssatz.Buchungsjahr == jahr)
+                    .ToList() ?? [];
+
+                foreach (var zeile in habenZeilen)
                 {
                     var warnungen = new List<string>();
                     var anteile = new List<NkRechnungsAnteil>();
+                    var betrag = zeile.Betrag;
 
                     foreach (var partei in parteien)
                     {
                         decimal anteilFaktor = partei.GetAnteil(umlage);
                         if (anteilFaktor <= 0) continue;
 
-                        decimal betrag = Math.Round(rechnung.Betrag * anteilFaktor, 2);
-                        if (betrag <= 0) continue;
+                        decimal anteil = Math.Round(betrag * anteilFaktor, 2);
+                        if (anteil <= 0) continue;
 
-                        anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = betrag });
+                        anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = anteil });
                     }
 
-                    ApplyRundungskorrektur(rechnung.Betrag, anteile);
+                    ApplyRundungskorrektur(betrag, anteile);
 
                     result.Add(new NkRechnungsplan
                     {
-                        Rechnung = rechnung,
+                        Buchungssatz = zeile.Buchungssatz,
+                        Betrag = betrag,
                         Umlage = umlage,
                         Anteile = anteile,
                         Warnungen = warnungen
@@ -546,7 +555,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<NkPartei> parteien,
             List<NkRechnungsplan> result,
             DateOnly beginn,
-            DateOnly ende)
+            DateOnly ende,
+            int jahr)
         {
             var hkvo = umlage.HKVO!;
             var p7 = hkvo.HKVO_P7;
@@ -605,10 +615,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         WwZaehler:   wwZaehlerByPartei[p]);
                 });
 
-            foreach (var rechnung in umlage.Betriebskostenrechnungen)
+            var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben
+                         && (z.Buchungssatz.Buchungsjahr == jahr
+                             || z.Buchungssatz.Buchungsdatum.Year == jahr))
+                .ToList() ?? [];
+
+            foreach (var zeile in habenZeilen)
             {
-                var betragHZ = rechnung.Betrag * (1 - para9_2);
-                var betragWW = rechnung.Betrag * para9_2;
+                var betrag = zeile.Betrag;
+                var betragHZ = betrag * (1 - para9_2);
+                var betragWW = betrag * para9_2;
                 var anteile = new List<NkRechnungsAnteil>();
 
                 foreach (var partei in parteien)
@@ -629,11 +646,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = meinBetrag });
                 }
 
-                ApplyRundungskorrektur(rechnung.Betrag, anteile);
+                ApplyRundungskorrektur(betrag, anteile);
 
                 result.Add(new NkRechnungsplan
                 {
-                    Rechnung = rechnung,
+                    Buchungssatz = zeile.Buchungssatz,
+                    Betrag = betrag,
                     Umlage = umlage,
                     Anteile = anteile,
                     Warnungen = [],

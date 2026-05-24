@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#pragma warning disable CS0618
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
@@ -61,7 +62,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
                 Name = requirementName
             };
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
 
             if (rolle is VerwalterRolle r)
             {

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#pragma warning disable CS0618
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
@@ -67,18 +68,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public async Task GetId()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
             var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
-
-            var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
-            if (entity == null)
-            {
-                throw new NullReferenceException("Betriebskostenrechnung is null");
-            }
 
             var result = await controller.Get(entity.BetriebskostenrechnungId);
 
@@ -89,18 +88,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public async Task Put()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
             var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
-
-            var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
-            if (entity == null)
-            {
-                throw new NullReferenceException("Betriebskostenrechnung is null");
-            }
             var entry = new BetriebskostenrechnungEntry(entity, new());
             entry.Betrag = 2000;
 
@@ -114,18 +111,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public async Task Delete()
         {
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var umlage = vertrag.Wohnung.Umlagen.First();
+            var entity = new Betriebskostenrechnung(1000m, new DateOnly(2021, 1, 1), 2021) { Umlage = umlage };
+            ctx.Betriebskostenrechnungen.Add(entity);
+            ctx.SaveChanges();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth, new BetriebskostenrechnungBuchungsService(ctx));
             var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
-
-            var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
-            if (entity == null)
-            {
-                throw new NullReferenceException("Entity is null");
-            }
             var id = entity.BetriebskostenrechnungId;
 
             var result = await controller.Delete(id);

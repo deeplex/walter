@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task GetBetriebskostenrechnungen()
+        public async Task GetOffeneBkForderungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
             A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = await controller.GetBetriebskostenrechnungen();
+            var result = await controller.GetOffeneBkForderungen();
 
             result.Result.Should().BeOfType<OkObjectResult>();
         }

@@ -20,6 +20,7 @@ namespace Deeplex.Saverwalter.Model
     // JOIN_TABLE
     // A Betriebskostenrechnung may be issued to one Vertrag only, if e.g. extra costs and the Mieter is to blame.
 
+    [Obsolete("VertragsBetriebskostenrechnung ist durch das Buchungssatz-Modell abgelöst.")]
     public class VertragsBetriebskostenrechnung
     {
         public int VertragsBetriebskostenrechnungId { get; set; }

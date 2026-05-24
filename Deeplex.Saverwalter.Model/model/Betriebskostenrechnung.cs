@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
+    [Obsolete("Betriebskostenrechnung ist durch das Buchungssatz-Modell abgelöst. Nicht mehr für neue Einträge verwenden — BK-Zahlungen direkt als Buchungssatz mit Buchungsjahr auf dem NkVerrechnungsKonto der Umlage buchen.")]
     public class Betriebskostenrechnung
     {
         public int BetriebskostenrechnungId { get; set; }

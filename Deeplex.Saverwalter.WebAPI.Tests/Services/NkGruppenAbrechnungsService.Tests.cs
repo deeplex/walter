@@ -160,6 +160,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             partei.WFZeitanteil.Should().Be(1.0m);
         }
 
+        private static void AddBkForderung(Umlage umlage, decimal betrag, DateOnly datum, int jahr)
+        {
+            var satz = new Buchungssatz(datum, $"BK-Forderung {umlage.Typ?.Bezeichnung} {jahr}") { Buchungsjahr = jahr };
+            var zeile = new Buchungszeile(SollHaben.Haben, betrag) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            satz.Buchungszeilen.Add(zeile);
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(zeile);
+        }
+
         // ── Rechnungsplaene ───────────────────────────────────────────────────
 
         [Fact]
@@ -168,10 +176,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var w1 = MakeWohnung("W1");
             var w2 = MakeWohnung("W2");
             MakeVertrag(w1); MakeVertrag(w2);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Test"),
+                NkVerrechnungsKonto = new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv)
+            };
             umlage.Wohnungen.AddRange([w1, w2]);
-            var rechnung = new Betriebskostenrechnung(1001m, new DateOnly(2021, 12, 31), 2021) { Umlage = umlage };
-            umlage.Betriebskostenrechnungen.Add(rechnung);
+            AddBkForderung(umlage, 1001m, new DateOnly(2021, 12, 31), 2021);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
             var plan = einheiten.Single().Rechnungsplaene.Single();
@@ -184,10 +195,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche) { Typ = new Umlagetyp("Test") };
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Test"),
+                NkVerrechnungsKonto = new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv)
+            };
             umlage.Wohnungen.Add(wohnung);
-            var rechnung = new Betriebskostenrechnung(500m, new DateOnly(2021, 12, 31), 2021) { Umlage = umlage };
-            umlage.Betriebskostenrechnungen.Add(rechnung);
+            AddBkForderung(umlage, 500m, new DateOnly(2021, 12, 31), 2021);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
             var plan = einheiten.Single().Rechnungsplaene.Single();
