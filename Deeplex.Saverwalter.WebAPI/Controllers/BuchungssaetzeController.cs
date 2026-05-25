@@ -63,7 +63,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             .Where(v =>
                                 v.MietBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
                                 v.NkBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
-                                v.KautionsKonto.BuchungskontoId == k.BuchungskontoId ||
                                 v.ZahlungsKonto.BuchungskontoId == k.BuchungskontoId)
                             .Select(v => v.Wohnung))
                     .FirstOrDefaultAsync();

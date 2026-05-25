@@ -167,11 +167,6 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey("NkBuchungskontoId")
                 .IsRequired();
             modelBuilder.Entity<Vertrag>()
-                .HasOne(v => v.KautionsKonto)
-                .WithMany()
-                .HasForeignKey("KautionsKontoId")
-                .IsRequired();
-            modelBuilder.Entity<Vertrag>()
                 .HasOne(v => v.BkAbrechnungsKonto)
                 .WithMany()
                 .HasForeignKey("BkAbrechnungsKontoId")

@@ -205,6 +205,78 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.VertragBezeichnung));
         }
 
+        public class GuthabenEntry
+        {
+            public int VertragId { get; set; }
+            public string VertragBezeichnung { get; set; } = "";
+            public string Monat { get; set; } = "";
+            public decimal Guthaben { get; set; }
+        }
+
+        /// <summary>
+        /// Gibt alle Monate zurück, in denen ein Mieter mehr gezahlt hat als gefordert wurde
+        /// (negativer OPOS-Saldo auf MietBuchungskonto). Erstellt keine neuen Sollstellungen.
+        /// </summary>
+        [HttpGet("guthaben/{jahr}")]
+        public async Task<ActionResult<IEnumerable<GuthabenEntry>>> GetGuthaben(int jahr)
+        {
+            var startOfYear = new DateOnly(jahr, 1, 1);
+            var endOfYear = new DateOnly(jahr, 12, 31);
+
+            var vertraege = await ctx.Vertraege
+                .Include(v => v.Versionen)
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungssatz)
+                .Where(v => v.Versionen.Any(ver => ver.Beginn <= endOfYear)
+                         && (v.Ende == null || v.Ende >= startOfYear))
+                .ToListAsync();
+
+            var sollZeileIds = vertraege
+                .SelectMany(v => v.MietBuchungskonto?.Buchungszeilen ?? [])
+                .Where(z => z.SollHaben == SollHaben.Soll
+                         && z.Buchungssatz.Buchungsjahr == jahr)
+                .Select(z => z.BuchungszeileId)
+                .ToHashSet();
+
+            var oposBySollZeile = (await ctx.OffenePostenAusgleiche
+                .Include(o => o.HabenZeile)
+                .Include(o => o.SollZeile)
+                .Where(o => sollZeileIds.Contains(o.SollZeile.BuchungszeileId))
+                .ToListAsync())
+                .GroupBy(o => o.SollZeile.BuchungszeileId)
+                .ToDictionary(g => g.Key, g => g.Sum(o => o.HabenZeile.Betrag));
+
+            var result = new List<GuthabenEntry>();
+
+            foreach (var vertrag in vertraege)
+            {
+                var sollZeilenImJahr = vertrag.MietBuchungskonto.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr == jahr)
+                    .ToList();
+
+                foreach (var sollZeile in sollZeilenImJahr)
+                {
+                    var gezahlt = oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                    var offen = sollZeile.Betrag - gezahlt;
+
+                    if (offen < -0.005m)
+                    {
+                        result.Add(new GuthabenEntry
+                        {
+                            VertragId = vertrag.VertragId,
+                            VertragBezeichnung = BuildBezeichnung(vertrag),
+                            Monat = new DateOnly(sollZeile.Buchungssatz.Buchungsdatum.Year, sollZeile.Buchungssatz.Buchungsdatum.Month, 1).ToString("yyyy-MM-dd"),
+                            Guthaben = -offen
+                        });
+                    }
+                }
+            }
+
+            return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.VertragBezeichnung));
+        }
+
         public class OffeneBkForderungEntry
         {
             public Guid BuchungssatzId { get; set; }
@@ -417,19 +489,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return $"{wohnung} | {mieter}";
         }
 
-        // §556b Abs. 1 BGB: Miete fällig am 3. Werktag (Samstag = Werktag, Feiertage ignoriert).
-        private static DateOnly DritterWerktag(DateOnly monat)
-        {
-            var tag = new DateOnly(monat.Year, monat.Month, 1);
-            int werktage = 0;
-            while (werktage < 3)
-            {
-                if (tag.DayOfWeek != DayOfWeek.Sunday)
-                    werktage++;
-                if (werktage < 3)
-                    tag = tag.AddDays(1);
-            }
-            return tag;
-        }
+        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
     }
 }

@@ -28,8 +28,12 @@ namespace Deeplex.Saverwalter.Model
 
         public virtual Buchungskonto MietBuchungskonto { get; set; } = null!;
         public virtual Buchungskonto NkBuchungskonto { get; set; } = null!;
-        public virtual Buchungskonto KautionsKonto { get; set; } = null!;
         public virtual Buchungskonto BkAbrechnungsKonto { get; set; } = null!;
+
+        public decimal? KautionBetrag { get; set; }
+        public DateOnly? KautionEingangsdatum { get; set; }
+        public DateOnly? KautionRueckgabedatum { get; set; }
+        public string? KautionArt { get; set; }
         public virtual Buchungskonto ZahlungsKonto { get; set; } = null!;
         public virtual Buchungskonto MietminderungsKonto { get; set; } = null!;
         public virtual List<VertragVersion> Versionen { get; private set; } = [];

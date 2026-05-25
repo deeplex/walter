@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Checkbox,
         ClickableTile,
         DataTable,
+        InlineNotification,
         Row,
         Tile,
         Toolbar,
@@ -35,7 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let readonly = false;
     $: {
-        readonly = entry?.permissions?.update === false;
+        readonly = entry?.permissions?.update === false || entry?.abgesendet === true;
     }
 
     const abgesendet = (e: Event) => {
@@ -43,6 +44,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 </script>
 
+{#if entry.abgesendet}
+    <Row>
+        <InlineNotification
+            kind="info"
+            title="Abgesendet:"
+            subtitle="Diese Abrechnung wurde versendet und ist gesperrt. Zum Ändern bitte zuerst stornieren."
+            hideCloseButton
+        />
+    </Row>
+{/if}
 <Row>
     <WalterNumberInput required readonly value={entry.jahr} label="Jahr" />
     <WalterNumberInput
@@ -54,6 +65,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     <Tile light style="margin: 1.5em">
         <Checkbox
+            disabled={readonly}
             labelText="Ist diese Abrechnung an den Mieter versendet?"
             bind:checked={entry.abgesendet}
             on:change={abgesendet}

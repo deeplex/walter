@@ -93,6 +93,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
 
+            public decimal? KautionBetrag { get; set; }
+            public DateOnly? KautionEingangsdatum { get; set; }
+            public DateOnly? KautionRueckgabedatum { get; set; }
+            public string? KautionArt { get; set; }
+
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
             {
@@ -103,6 +108,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
                 }
                 Notiz = entity.Notiz;
+                KautionBetrag = entity.KautionBetrag;
+                KautionEingangsdatum = entity.KautionEingangsdatum;
+                KautionRueckgabedatum = entity.KautionRueckgabedatum;
+                KautionArt = entity.KautionArt;
 
                 SelectedMieter = entity.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
@@ -217,6 +226,53 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .ToListAsync();
 
             var result = transaktionen.Select(t => new TransaktionEntry(t, permissions));
+            return Ok(result);
+        }
+
+        public class MietOposMonat
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+            public decimal Soll { get; set; }
+            public decimal Ausgeglichen { get; set; }
+            public decimal Offen => Soll - Ausgeglichen;
+        }
+
+        /// <summary>
+        /// Gibt den Miet-OPOS (offene Posten Kaltmiete) pro Monat zurück.
+        /// Soll = gebuchte Mietforderung, Ausgeglichen = per OffenerPostenAusgleich beglichener Anteil.
+        /// </summary>
+        [HttpGet("{id}/miet-opos")]
+        public async Task<ActionResult<IEnumerable<MietOposMonat>>> GetMietOpos(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+
+            var sollZeilen = await _ctx.Buchungszeilen
+                .Where(z =>
+                    z.Buchungskonto.BuchungskontoId == mietKontoId &&
+                    z.SollHaben == SollHaben.Soll)
+                .Include(z => z.Buchungssatz)
+                .Include(z => z.AlsSollZeile)
+                    .ThenInclude(a => a.HabenZeile)
+                .ToListAsync();
+
+            var result = sollZeilen
+                .GroupBy(z => new { z.Buchungssatz.Buchungsjahr, z.Buchungssatz.Buchungsdatum.Month })
+                .Select(g => new MietOposMonat
+                {
+                    Jahr = g.Key.Buchungsjahr,
+                    Monat = g.Key.Month,
+                    Soll = g.Sum(z => z.Betrag),
+                    Ausgeglichen = g.Sum(z => z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag))
+                })
+                .OrderBy(m => m.Jahr).ThenBy(m => m.Monat);
+
             return Ok(result);
         }
     }

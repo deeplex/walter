@@ -168,6 +168,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 throw new InvalidOperationException(
                     "Bereits gebuchte NK-Anteile widersprechen der aktuellen Berechnung.");
 
+            // Verträge mit bereits abgesendetem Resultat: explizit warnen und überspringen.
+            foreach (var partei in einheiten
+                .SelectMany(e => e.Parteien)
+                .Where(p => p.Vertrag is not null && p.VertragInfo?.ExistingResultat?.Abgesendet == true))
+            {
+                var bezeichnung = partei.Vertrag!.Mieter.Any()
+                    ? string.Join(", ", partei.Vertrag.Mieter.Select(m => m.Bezeichnung))
+                    : $"Vertrag {partei.Vertrag.VertragId}";
+                preview.Warnungen.Add(
+                    $"Vertrag {partei.Vertrag.VertragId} ({bezeichnung}): Abrechnung wurde bereits versendet und wird übersprungen.");
+            }
+
             // Verträge ohne bestehendes Resultat: Abrechnungsresultat buchen.
             // Quelle: NkPartei (Vertrag + VertragInfo) aus den berechneten Einheiten —
             // kein erneuter DB-Trip notwendig.

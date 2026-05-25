@@ -65,6 +65,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         zahlungsempfaengerId?: number;
     }
 
+    interface GuthabenEntry {
+        vertragId: number;
+        vertragBezeichnung: string;
+        monat: string;
+        guthaben: number;
+    }
+
     export let fetchImpl: typeof fetch;
 
     let umlagen: WalterUmlageEntryType[] = [];
@@ -110,6 +117,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         garageForderungenReady = true;
     }
 
+    // ── Miet-Guthaben (Überzahlungen) ──────────────────────────────────────
+    let guthaben: GuthabenEntry[] = [];
+    let guthabenReady = false;
+
+    async function ladeGuthaben(jahr: number) {
+        guthabenReady = false;
+        try {
+            const resp = await walter_get(
+                `/api/offene-forderungen/guthaben/${jahr}`,
+                fetchImpl
+            );
+            guthaben = (resp as GuthabenEntry[]) ?? [];
+        } catch (e) {
+            console.error('Konnte Guthaben nicht laden:', e);
+            guthaben = [];
+        }
+        guthabenReady = true;
+    }
+
     // ── Offene BK-Forderungen ───────────────────────────────────────────────
     let offeneBkForderungen: OffeneBkForderungEntry[] = [];
     let bkForderungenReady = false;
@@ -133,7 +159,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         await Promise.all([
             ladeOffeneMietForderungen(selectedYear),
             ladeOffeneGarageForderungen(selectedYear),
-            ladeOffeneBkForderungen(selectedYear)
+            ladeOffeneBkForderungen(selectedYear),
+            ladeGuthaben(selectedYear)
         ]);
         try {
             const [umlPaged, zaehlerPaged] = await Promise.all([
@@ -172,6 +199,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ladeOffeneMietForderungen(selectedYear);
         ladeOffeneGarageForderungen(selectedYear);
         ladeOffeneBkForderungen(selectedYear);
+        ladeGuthaben(selectedYear);
     }
 
     // ── Rent payment QuickAdd ───────────────────────────────────────────────
@@ -465,6 +493,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         wohnungen: (u.selectedWohnungen || []).map((w) => w.text).join(', '),
         button: (e: CustomEvent) => openBillingQuickAdd(e, u)
     }));
+
+    // ── Guthaben (Überzahlungen) ────────────────────────────────────────────
+    const guthabenHeaders = [
+        { key: 'monat', value: 'Monat' },
+        { key: 'vertrag', value: 'Vertrag' },
+        { key: 'guthaben', value: 'Guthaben (€)' }
+    ];
+
+    $: guthabenTableRows = guthaben.map((g) => ({
+        id: `guthaben-${g.vertragId}-${g.monat}`,
+        monat: new Date(g.monat + 'T00:00:00').toLocaleDateString('de-DE', {
+            month: 'long',
+            year: 'numeric'
+        }),
+        vertrag: g.vertragBezeichnung,
+        guthaben: g.guthaben.toFixed(2)
+    }));
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -594,6 +639,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             initialOpen={bkForderungTableRows.length > 0}
             rows={bkForderungTableRows}
             headers={bkForderungHeaders}
+        />
+    {:else}
+        <SkeletonText style="margin: 0; height: 42px;" />
+        <div style="height: 2px;" />
+    {/if}
+
+    {#if guthabenReady}
+        <WalterDataTable
+            layout="accordion"
+            accordionTitle="Miet-Guthaben (Überzahlungen)"
+            initialOpen={guthabenTableRows.length > 0}
+            rows={guthabenTableRows}
+            headers={guthabenHeaders}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />

@@ -110,4 +110,5 @@ export { default as WalterMieten } from './lists/WalterMieten.svelte';
 export { default as WalterVertragTransaktionen } from './lists/WalterVertragTransaktionen.svelte';
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
 export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';
+export { default as WalterMietOpos } from './lists/WalterMietOpos.svelte';
 export { default as WalterSimpleList } from './lists/WalterSimpleList.svelte';

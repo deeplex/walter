@@ -108,6 +108,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                if (entity.Abgesendet)
+                    return new ConflictObjectResult("Abgesendete Abrechnungen können nicht gelöscht werden.");
+
                 Ctx.Abrechnungsresultate.Remove(entity);
                 await Ctx.SaveChangesAsync();
 
@@ -129,6 +132,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new NotFoundResult();
             }
+
+            if (resultat.Abgesendet)
+                return new ConflictObjectResult("Abgesendete Abrechnungen können nicht mehr geändert werden. Bitte zuerst stornieren.");
 
             var authRx = await Auth.AuthorizeAsync(user, resultat.Vertrag, Operations.Read);
             if (!authRx.Succeeded)

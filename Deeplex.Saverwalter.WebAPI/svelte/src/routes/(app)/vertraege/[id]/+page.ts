@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterTransaktionEntry, WalterVertragEntry } from '$walter/lib';
+import type { MietOposMonat } from '$walter/components/lists/WalterMietOpos.svelte';
 import { fileURL } from '$walter/services/files';
 import { walter_get } from '$walter/services/requests';
 import type { PageLoad } from './$types';
@@ -29,12 +30,20 @@ export const load: PageLoad = async ({ params, fetch }) => {
         ) as Promise<WalterTransaktionEntry[]>
     ).catch(() => [] as WalterTransaktionEntry[]);
 
+    const mietOposPromise = (
+        walter_get(
+            `${WalterVertragEntry.ApiURL}/${params.id}/miet-opos`,
+            fetch
+        ) as Promise<MietOposMonat[]>
+    ).catch(() => [] as MietOposMonat[]);
+
     return {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
         fileURL: fileUrl,
         entry: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch),
-        transaktionen: transaktionenPromise
+        transaktionen: transaktionenPromise,
+        mietOpos: mietOposPromise
     };
 };

@@ -807,19 +807,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return transaktionen;
         }
 
-        private static DateOnly DritterWerktag(DateOnly monat)
-        {
-            var tag = new DateOnly(monat.Year, monat.Month, 1);
-            int werktage = 0;
-            while (werktage < 3)
-            {
-                if (tag.DayOfWeek != DayOfWeek.Sunday)
-                    werktage++;
-                if (werktage < 3)
-                    tag = tag.AddDays(1);
-            }
-            return tag;
-        }
+        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 
         private static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(
             SaverwalterContext ctx,

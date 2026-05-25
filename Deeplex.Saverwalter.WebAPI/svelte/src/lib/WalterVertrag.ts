@@ -45,7 +45,11 @@ export class WalterVertragEntry extends WalterApiHandler {
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public garageVertraege: WalterGarageVertragEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public kautionBetrag: number | undefined,
+        public kautionEingangsdatum: string | undefined,
+        public kautionRueckgabedatum: string | undefined,
+        public kautionArt: string | undefined
     ) {
         super();
     }
@@ -96,7 +100,11 @@ export class WalterVertragEntry extends WalterApiHandler {
             betriebskostenrechnungen,
             abrechnungsresultate,
             garageVertraege,
-            permissions
+            permissions,
+            json.kautionBetrag,
+            json.kautionEingangsdatum,
+            json.kautionRueckgabedatum,
+            json.kautionArt
         );
     }
 }

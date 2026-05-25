@@ -471,23 +471,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
         }
 
-        /// <summary>
-        /// §556b Abs. 1 BGB: Miete ist spätestens am 3. Werktag fällig.
-        /// Samstag gilt als Werktag. Feiertage werden nicht berücksichtigt (bundeslandabhängig).
-        /// </summary>
-        private static DateOnly DritterWerktag(DateOnly monat)
-        {
-            var tag = new DateOnly(monat.Year, monat.Month, 1);
-            int werktage = 0;
-            while (werktage < 3)
-            {
-                if (tag.DayOfWeek != DayOfWeek.Sunday)
-                    werktage++;
-                if (werktage < 3)
-                    tag = tag.AddDays(1);
-            }
-            return tag;
-        }
+        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 
         private static void AddZeile(Buchungssatz satz, SollHaben sollHaben, decimal betrag, Buchungskonto konto)
         {

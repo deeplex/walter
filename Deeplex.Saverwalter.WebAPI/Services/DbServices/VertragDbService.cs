@@ -122,7 +122,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 Wohnung = wohnung!,
                 MietBuchungskonto = new Buchungskonto($"{idx}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
                 NkBuchungskonto = new Buchungskonto($"{idx}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
-                KautionsKonto = new Buchungskonto($"{idx}-KA", "Kaution", BuchungskontoTyp.Aktiv),
                 BkAbrechnungsKonto = new Buchungskonto($"{idx}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                 ZahlungsKonto = new Buchungskonto($"{idx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto($"{idx}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
@@ -214,6 +213,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? await Ctx.Kontakte.FindAsync(apId)
                 : null;
             entity.Notiz = entry.Notiz;
+            entity.KautionBetrag = entry.KautionBetrag;
+            entity.KautionEingangsdatum = entry.KautionEingangsdatum;
+            entity.KautionRueckgabedatum = entry.KautionRueckgabedatum;
+            entity.KautionArt = entry.KautionArt;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
             {

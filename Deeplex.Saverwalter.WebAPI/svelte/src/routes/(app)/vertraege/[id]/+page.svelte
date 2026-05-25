@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterGarageVertraege,
         WalterKontakte,
         WalterMietminderungen,
+        WalterMietOpos,
         WalterHeaderDetail,
         WalterGrid,
         WalterVertrag,
@@ -122,6 +123,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Garagenverträge"
             rows={data.entry.garageVertraege}
+        />
+
+        <WalterMietOpos
+            title="Miet-OPOS"
+            rows={data.mietOpos}
         />
 
         <WalterAbrechnungsresultate
