@@ -121,12 +121,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<PagedResult<BetriebskostenrechnungEntryBase>> Get([FromQuery] PagedQuery query)
             => DbService.GetList(User!, query);
 
-        [HttpPost]
-        public Task<ActionResult<BetriebskostenrechnungEntry>> Post([FromBody] BetriebskostenrechnungEntry entry) => DbService.Post(User!, entry);
         [HttpGet("{id}")]
         public Task<ActionResult<BetriebskostenrechnungEntry>> Get(int id) => DbService.Get(User!, id);
-        [HttpPut("{id}")]
-        public Task<ActionResult<BetriebskostenrechnungEntry>> Put(int id, BetriebskostenrechnungEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

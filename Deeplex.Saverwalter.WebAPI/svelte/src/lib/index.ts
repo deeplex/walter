@@ -42,7 +42,7 @@ export { WalterSelectionEntry } from './WalterSelection';
 export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlageVersionEntry } from './WalterUmlageVersion';
-export { WalterUmlagetypEntry } from './WalterUmlagetyp';
+export { WalterUmlagetypEntry, BETRK_V_NUMMERN } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';

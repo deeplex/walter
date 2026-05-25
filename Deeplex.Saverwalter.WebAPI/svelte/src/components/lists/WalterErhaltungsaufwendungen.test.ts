@@ -47,6 +47,7 @@ function createEntryMocks(entries: number) {
                 new Date(),
                 { id: 1, text: 'Testwohnung' },
                 { id: 2, text: 'Testaussteller' },
+                [],
                 new WalterPermissions(true, true, true)
             )
         );

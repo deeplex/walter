@@ -16,15 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { WalterTextArea } from '$walter/components';
-    import { Row } from 'carbon-components-svelte';
+    import { Row, Select, SelectItem } from 'carbon-components-svelte';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
     import type { WalterUmlagetypEntry } from '$walter/lib';
+    import { BETRK_V_NUMMERN } from '$walter/lib';
 
     export let entry: Partial<WalterUmlagetypEntry> = {};
     export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
     export let readonly = false;
     $: {
         readonly = entry?.permissions?.update === false;
+    }
+
+    function onBetrKVChange(e: Event) {
+        const val = (e.target as HTMLSelectElement).value;
+        entry.betrKVNummer = val ? parseInt(val) : null;
     }
 </script>
 
@@ -34,6 +40,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         required
         bind:value={entry.bezeichnung}
     />
+</Row>
+
+<Row>
+    <Select
+        labelText="BetrKV §2 Kategorie"
+        disabled={readonly}
+        selected={entry.betrKVNummer != null ? String(entry.betrKVNummer) : ''}
+        on:change={onBetrKVChange}
+    >
+        <SelectItem value="" text="— nicht klassifiziert —" />
+        {#each BETRK_V_NUMMERN as opt}
+            <SelectItem value={String(opt.id)} text={opt.text} />
+        {/each}
+    </Select>
 </Row>
 
 <Row>

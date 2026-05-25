@@ -17,6 +17,12 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
+export interface EABuchungszeileInfo {
+    konto: string;
+    sollHaben: string;
+    betrag: number;
+}
+
 export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
     public static ApiURL = `/api/erhaltungsaufwendungen`;
     public static ApiURLId(id: number) {
@@ -33,6 +39,7 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
         public lastModified: Date,
         public wohnung: WalterSelectionEntry,
         public aussteller: WalterSelectionEntry,
+        public buchungszeilen: EABuchungszeileInfo[],
         public permissions: WalterPermissions
     ) {
         super();
@@ -56,6 +63,7 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
             json.lastModified,
             wohnung,
             aussteller,
+            json.buchungszeilen ?? [],
             permissions
         );
     }

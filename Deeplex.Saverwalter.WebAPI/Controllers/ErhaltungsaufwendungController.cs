@@ -55,12 +55,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
         }
 
+        public class BuchungszeileInfo
+        {
+            public string Konto { get; set; } = "";
+            public string SollHaben { get; set; } = "";
+            public decimal Betrag { get; set; }
+        }
+
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public SelectionEntry Wohnung { get; set; } = null!;
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public string? Notiz { get; set; }
+            public List<BuchungszeileInfo> Buchungszeilen { get; set; } = [];
 
             public ErhaltungsaufwendungEntry() { }
             public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, Permissions permissions) : base(entity, permissions)
@@ -71,6 +79,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+
+                if (entity.Buchungssatz is { } satz)
+                {
+                    Buchungszeilen = satz.Buchungszeilen.Select(z => new BuchungszeileInfo
+                    {
+                        Konto = z.Buchungskonto.Bezeichnung,
+                        SollHaben = z.SollHaben == Model.SollHaben.Soll ? "Soll" : "Haben",
+                        Betrag = z.Betrag
+                    }).ToList();
+                }
             }
         }
 
@@ -89,8 +107,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet("{id}")]
         public Task<ActionResult<ErhaltungsaufwendungEntry>> Get(int id) => DbService.Get(User!, id);
-        [HttpPut("{id}")]
-        public Task<ActionResult<ErhaltungsaufwendungEntry>> Put(int id, [FromBody] ErhaltungsaufwendungEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

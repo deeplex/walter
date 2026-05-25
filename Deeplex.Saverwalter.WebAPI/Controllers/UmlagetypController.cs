@@ -31,6 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Umlagetyp? Entity { get; }
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
+            public int? BetrKVNummer { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -41,6 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Id = entity.UmlagetypId;
                 Bezeichnung = entity.Bezeichnung;
+                BetrKVNummer = (int?)entity.BetrKVNummer;
 
                 Permissions = permissions;
             }

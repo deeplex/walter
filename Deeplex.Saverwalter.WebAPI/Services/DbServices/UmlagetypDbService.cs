@@ -114,6 +114,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private static void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
         {
             entity.Notiz = entry.Notiz;
+            entity.BetrKVNummer = entry.BetrKVNummer.HasValue
+                ? (BetrKVNummer)entry.BetrKVNummer.Value
+                : null;
         }
     }
 }

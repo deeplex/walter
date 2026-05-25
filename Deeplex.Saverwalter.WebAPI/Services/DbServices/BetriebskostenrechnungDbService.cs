@@ -44,8 +44,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var userId = user.IsInRole("Admin") ? (Guid?)null : user.GetUserId();
 
-            // Resolve write-access up front so the closure in toEntry is cheap.
-            var adminPerms = new Utils.Permissions { Read = true, Update = true, Remove = true };
+            // Update is always false — Betriebskostenrechnung is created via Transaktion, not directly.
+            var adminPerms = new Utils.Permissions { Read = true, Update = false, Remove = true };
             HashSet<int>? writableIds = null;
             if (userId.HasValue)
             {
@@ -98,13 +98,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                             Update = e.Umlage.Wohnungen.Any(w => writableIds.Contains(w.WohnungId)),
                             Remove = e.Umlage.Wohnungen.Any(w => writableIds.Contains(w.WohnungId))
                         };
+                    perms.Update = false;
                     return new BetriebskostenrechnungEntryBase(e, perms);
                 });
         }
 
         public override async Task<ActionResult<Betriebskostenrechnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
+            var entity = await Ctx.Betriebskostenrechnungen
+                .Include(e => e.Buchungssatz)
+                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen)
+                .FirstOrDefaultAsync(e => e.BetriebskostenrechnungId == id);
             return await GetEntity(user, entity, op);
         }
 
@@ -129,6 +133,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                if (entity.Buchungssatz != null)
+                    return new ConflictObjectResult(
+                        "Diese Betriebskostenrechnung hat einen verknüpften Buchungssatz. Bitte zuerst den Buchungssatz stornieren.");
+
                 Ctx.Betriebskostenrechnungen.Remove(entity);
                 await Ctx.SaveChangesAsync();
 

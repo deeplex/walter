@@ -292,6 +292,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         private Buchungszeile FindeOderErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, GarageVertragVersion version)
         {
+            if (gv.Ende.HasValue && monat > new DateOnly(gv.Ende.Value.Year, gv.Ende.Value.Month, 1))
+                throw new InvalidOperationException(
+                    $"GarageVertrag {gv.GarageVertragId} endete am {gv.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
+
             var vorhandene = gv.MietBuchungskonto.Buchungszeilen
                 .FirstOrDefault(z =>
                     z.SollHaben == SollHaben.Soll
@@ -456,6 +460,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         private Buchungszeile FindeOderErstelleSollstellung(Vertrag vertrag, DateOnly monat, VertragVersion version)
         {
+            if (vertrag.Ende.HasValue && monat > new DateOnly(vertrag.Ende.Value.Year, vertrag.Ende.Value.Month, 1))
+                throw new InvalidOperationException(
+                    $"Vertrag {vertrag.VertragId} endete am {vertrag.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
+
             var vorhandene = vertrag.MietBuchungskonto.Buchungszeilen
                 .FirstOrDefault(z =>
                     z.SollHaben == SollHaben.Soll
