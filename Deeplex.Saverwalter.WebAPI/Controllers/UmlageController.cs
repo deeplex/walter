@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.ComponentModel.DataAnnotations;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public DateOnly Beginn { get; set; }
 
+            [Range(50, 70, ErrorMessage = "HKVO §7: Verbrauchsanteil muss zwischen 50% und 70% liegen.")]
             public int HKVO_P7 { get; set; }
+            [Range(50, 70, ErrorMessage = "HKVO §8: Verbrauchsanteil muss zwischen 50% und 70% liegen.")]
             public int HKVO_P8 { get; set; }
             public SelectionEntry HKVO_P9 { get; set; } = null!;
             public int Strompauschale { get; set; }

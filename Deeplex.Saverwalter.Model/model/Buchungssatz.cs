@@ -19,14 +19,7 @@ namespace Deeplex.Saverwalter.Model
 {
     /// <summary>
     /// Doppelter Buchungssatz nach GoB / § 239 HGB.
-    ///
-    /// Lifecycle:
-    ///   1. Entwurf  — IsAbgeschlossen = false, Buchungsnummer = null
-    ///   2. Abschliessen(nr, jahr) aufrufen — setzt IsAbgeschlossen = true
-    ///   3. Korrekturen nur noch per Stornobuchung (StornoVon gesetzt)
-    ///
-    /// Invariante: Soll-Summe == Haben-Summe der Buchungszeilen wird auf
-    /// Application-Level vor dem Abschließen validiert.
+    /// Korrekturen nur per Stornobuchung (StornoVon gesetzt).
     /// </summary>
     public class Buchungssatz
     {
@@ -38,20 +31,16 @@ namespace Deeplex.Saverwalter.Model
 
         /// <summary>
         /// Lückenlose fortlaufende Nummer innerhalb des Buchungsjahres (§ 239 HGB).
-        /// Null solange der Satz noch im Entwurf ist.
+        /// Buchungsnummer wird beim Speichern automatisch aus der DB-Sequence zugewiesen.
         /// </summary>
-        public int? Buchungsnummer { get; private set; }
-
-        /// <summary>Geschäftsjahr, in dem dieser Satz gebucht wurde. Defaults to Buchungsdatum.Year.</summary>
-        public int Buchungsjahr { get; set; }
+        public int Buchungsnummer { get; private set; }
 
         /// <summary>
-        /// True nach Abschliessen(). Abgeschlossene Sätze dürfen nicht mehr
-        /// geändert werden — Fehler werden per Stornobuchung korrigiert.
+        /// Wirtschaftsjahr, für das dieser Satz gilt. Kann vom Buchungsdatum abweichen,
         /// </summary>
-        public bool IsAbgeschlossen { get; private set; }
+        public int Buchungsjahr { get; set; }
 
-        /// <summary>S3-Pfad zum Originalbeleg. Pflichtfeld für abgeschlossene Sätze.</summary>
+        /// <summary>S3-Pfad zum Originalbeleg.</summary>
         public string? Belegpfad { get; set; }
 
         /// <summary>
@@ -76,20 +65,6 @@ namespace Deeplex.Saverwalter.Model
             Buchungsdatum = buchungsdatum;
             Beschreibung = beschreibung;
             Buchungsjahr = buchungsdatum.Year;
-        }
-
-        /// <summary>
-        /// Schließt den Buchungssatz ab. Muss von der Service-Schicht aufgerufen
-        /// werden, nachdem Soll == Haben der Buchungszeilen validiert wurde.
-        /// </summary>
-        public void Abschliessen(int buchungsnummer, int buchungsjahr)
-        {
-            if (IsAbgeschlossen)
-                throw new InvalidOperationException(
-                    $"Buchungssatz {BuchungssatzId} ist bereits abgeschlossen.");
-            Buchungsnummer = buchungsnummer;
-            Buchungsjahr = buchungsjahr;
-            IsAbgeschlossen = true;
         }
     }
 }

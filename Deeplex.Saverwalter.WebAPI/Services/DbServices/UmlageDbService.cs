@@ -199,6 +199,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entry.HKVO is HKVOEntryBase hkvo)
             {
                 var currentHkvo = entity.HeizkostenHKVOs.OrderByDescending(h => h.Beginn).FirstOrDefault();
+                if (hkvo.HKVO_P7 < 50 || hkvo.HKVO_P7 > 70)
+                    throw new ArgumentException($"HKVO §7: Verbrauchsanteil {hkvo.HKVO_P7}% liegt außerhalb des gesetzlichen Bereichs (50–70%).");
+                if (hkvo.HKVO_P8 < 50 || hkvo.HKVO_P8 > 70)
+                    throw new ArgumentException($"HKVO §8: Verbrauchsanteil {hkvo.HKVO_P8}% liegt außerhalb des gesetzlichen Bereichs (50–70%).");
+
                 var isNewVersion = currentHkvo == null || currentHkvo.Beginn != hkvo.Beginn;
 
                 if (isNewVersion)

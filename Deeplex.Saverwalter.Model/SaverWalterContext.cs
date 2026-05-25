@@ -95,6 +95,12 @@ namespace Deeplex.Saverwalter.Model
         // Careful postgres only:
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasSequence<long>("buchungsnummer_seq").StartsAt(1).IncrementsBy(1);
+            modelBuilder.Entity<Buchungssatz>()
+                .Property(b => b.Buchungsnummer)
+                .HasDefaultValueSql("nextval('buchungsnummer_seq')")
+                .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithMany(u => u.HeizkostenHKVOs).HasForeignKey(u => u.HeizkostenId);
             modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.BetriebsstromHKVOs);
@@ -148,8 +154,7 @@ namespace Deeplex.Saverwalter.Model
                 .IsRequired(false);
             modelBuilder.Entity<Buchungssatz>()
                 .HasIndex(b => new { b.Buchungsjahr, b.Buchungsnummer })
-                .IsUnique()
-                .HasFilter("buchungsnummer IS NOT NULL");
+                .IsUnique();
 
             modelBuilder.Entity<Vertrag>()
                 .HasOne(v => v.MietBuchungskonto)
