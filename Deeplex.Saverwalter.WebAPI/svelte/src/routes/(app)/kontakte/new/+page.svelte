@@ -33,7 +33,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 </script>
 
-<WalterHeaderNew apiURL={WalterKontaktEntry.ApiURL} {title} {entry} disabled={!validateKontakt(entry)} />
+<WalterHeaderNew
+    apiURL={WalterKontaktEntry.ApiURL}
+    {title}
+    {entry}
+    disabled={!validateKontakt(entry)}
+/>
 
 <WalterGrid>
     <WalterKontakt bind:entry fetchImpl={data.fetchImpl} />

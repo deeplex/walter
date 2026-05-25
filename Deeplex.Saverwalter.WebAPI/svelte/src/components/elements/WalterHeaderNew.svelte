@@ -37,6 +37,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterHeader {title}>
     <slot />
     <HeaderUtilities>
-        <HeaderGlobalAction disabled={disabled} on:click={click_post} icon={Save} />
+        <HeaderGlobalAction {disabled} on:click={click_post} icon={Save} />
     </HeaderUtilities>
 </WalterHeader>

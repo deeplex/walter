@@ -19,7 +19,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { ComponentType } from 'svelte';
     import { WalterDataTable } from '$walter/components';
 
-    export let entityClass: { ApiURL: string; GetPaged: Function };
+    type PagedParams = {
+        search?: string;
+        sortBy?: string;
+        sortDir?: 'asc' | 'desc';
+        skip?: number;
+        take?: number;
+    };
+    type PagedResult = { items: DataTableRow[]; totalCount: number };
+
+    export let entityClass: {
+        ApiURL: string;
+        GetPaged: (
+            fetchImpl: typeof fetch,
+            params?: PagedParams
+        ) => Promise<PagedResult>;
+    };
     export let validate: (e: unknown) => boolean = () => true;
     export let headers: { key: string; value: string }[];
     export let navFn: (id: number) => void;
@@ -30,9 +45,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch | undefined = undefined;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    export let entry: any = {};
-    export let rows: unknown[] | undefined = undefined;
+    export let entry: object = {};
+    export let rows: DataTableRow[] | undefined = undefined;
     export let readonly = false;
 
     const on_click_row = (e: CustomEvent<DataTableRow>) => navFn(e.detail.id);

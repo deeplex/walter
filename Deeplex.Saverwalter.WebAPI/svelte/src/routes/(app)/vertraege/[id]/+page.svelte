@@ -67,7 +67,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let blockSave = false;
     let commitVersionIfPending: () => Promise<void>;
-    $: submitDisabled = $changeTracker === 0 || !validateVertrag(data.entry) || blockSave;
+    $: submitDisabled =
+        $changeTracker === 0 || !validateVertrag(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail

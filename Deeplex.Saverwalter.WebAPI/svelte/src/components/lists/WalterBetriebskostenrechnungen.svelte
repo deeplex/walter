@@ -21,14 +21,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterBetriebskostenrechnung,
         WalterDataTable
     } from '$walter/components';
-    import { WalterBetriebskostenrechnungEntry, validateBetriebskostenrechnung } from '$walter/lib';
+    import {
+        WalterBetriebskostenrechnungEntry,
+        validateBetriebskostenrechnung
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let rows: WalterBetriebskostenrechnungEntry[] | undefined = undefined;
-    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined = {};
+    export let rows: WalterBetriebskostenrechnungEntry[] | undefined =
+        undefined;
+    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
+        {};
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -51,33 +56,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const transformRow = (row: DataTableRow) =>
         enrich(row as WalterBetriebskostenrechnungEntry);
 
-    const fetchData = rows === undefined
-        ? (p: Parameters<typeof WalterBetriebskostenrechnungEntry.GetPaged>[1]) =>
-              WalterBetriebskostenrechnungEntry.GetPaged<WalterBetriebskostenrechnungEntry>(fetchImpl, p)
-        : undefined;
+    const fetchData =
+        rows === undefined
+            ? (
+                  p: Parameters<
+                      typeof WalterBetriebskostenrechnungEntry.GetPaged
+                  >[1]
+              ) =>
+                  WalterBetriebskostenrechnungEntry.GetPaged<WalterBetriebskostenrechnungEntry>(
+                      fetchImpl,
+                      p
+                  )
+            : undefined;
 
     $: submitDisabled = !validateBetriebskostenrechnung(entry);
 
     $: enrichedRows = rows
-        ? [...rows]
-              .map(enrich)
-              .sort((a, b) => {
-                  const yearA = a.betreffendesJahr || 0;
-                  const yearB = b.betreffendesJahr || 0;
-                  if (yearA !== yearB) return yearB - yearA;
-                  const dateA = new Date(a.datum).getTime();
-                  const dateB = new Date(b.datum).getTime();
-                  if (!Number.isNaN(dateA) && !Number.isNaN(dateB))
-                      return dateB - dateA;
-                  return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
-              })
+        ? [...rows].map(enrich).sort((a, b) => {
+              const yearA = a.betreffendesJahr || 0;
+              const yearB = b.betreffendesJahr || 0;
+              if (yearA !== yearB) return yearB - yearA;
+              const dateA = new Date(a.datum).getTime();
+              const dateB = new Date(b.datum).getTime();
+              if (!Number.isNaN(dateA) && !Number.isNaN(dateB))
+                  return dateB - dateA;
+              return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
+          })
         : undefined;
 </script>
 
 <WalterDataTable
     addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     addEntry={entry}
-    submitDisabled={submitDisabled}
+    {submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}

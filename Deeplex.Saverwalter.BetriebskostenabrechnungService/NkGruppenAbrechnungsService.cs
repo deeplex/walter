@@ -199,7 +199,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             IReadOnlyList<(Zaehler Zaehler, decimal Verbrauch)> WwZaehler)
         {
             public decimal HeizVerbrauchGesamt => HeizZaehler.Sum(x => x.Verbrauch);
-            public decimal WwVerbrauchGesamt   => WwZaehler.Sum(x => x.Verbrauch);
+            public decimal WwVerbrauchGesamt => WwZaehler.Sum(x => x.Verbrauch);
         }
 
         /// <summary>Anteil einer Partei an einer Rechnung.</summary>
@@ -602,7 +602,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     .ToList());
 
             var totalWaerme = waermeZaehlerByPartei.Values.SelectMany(x => x).Sum(x => x.Item2);
-            var totalWW     = wwZaehlerByPartei.Values.SelectMany(x => x).Sum(x => x.Item2);
+            var totalWW = wwZaehlerByPartei.Values.SelectMany(x => x).Sum(x => x.Item2);
 
             // Individuelle Verbrauchsanteile und Zähler-Einzelwerte je Partei
             var hkvoVerbrauchAnteile = parteien.ToDictionary(
@@ -610,12 +610,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 p =>
                 {
                     var heizGesamt = waermeZaehlerByPartei[p].Sum(x => x.Item2);
-                    var wwGesamt   = wwZaehlerByPartei[p].Sum(x => x.Item2);
+                    var wwGesamt = wwZaehlerByPartei[p].Sum(x => x.Item2);
                     return new NkHkvoParteiVerbrauch(
-                        HeizAnteil:  totalWaerme > 0 ? heizGesamt / totalWaerme : 0m,
-                        WWAnteil:    totalWW    > 0 ? wwGesamt   / totalWW    : 0m,
+                        HeizAnteil: totalWaerme > 0 ? heizGesamt / totalWaerme : 0m,
+                        WWAnteil: totalWW > 0 ? wwGesamt / totalWW : 0m,
                         HeizZaehler: waermeZaehlerByPartei[p],
-                        WwZaehler:   wwZaehlerByPartei[p]);
+                        WwZaehler: wwZaehlerByPartei[p]);
                 });
 
             var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen

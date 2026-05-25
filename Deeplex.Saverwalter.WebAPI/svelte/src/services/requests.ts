@@ -20,9 +20,10 @@ import { walter_goto } from './utils';
 
 export const walter_selection = {
     abrechnungsgruppen(fetchImpl: typeof fetch) {
-        return walter_get('/api/selection/abrechnungsgruppen', fetchImpl) as Promise<
-            WalterSelectionEntry[]
-        >;
+        return walter_get(
+            '/api/selection/abrechnungsgruppen',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
     },
     adressen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/adressen', fetchImpl) as Promise<
@@ -117,9 +118,10 @@ export const walter_selection = {
         >;
     },
     garageVertraege(fetchImpl: typeof fetch) {
-        return walter_get('/api/selection/garage-vertraege', fetchImpl) as Promise<
-            WalterSelectionEntry[]
-        >;
+        return walter_get(
+            '/api/selection/garage-vertraege',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
     },
     wohnungen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/wohnungen', fetchImpl) as Promise<
@@ -166,9 +168,10 @@ export const walter_selection = {
         >;
     },
     buchungskonten(fetchImpl: typeof fetch) {
-        return walter_get('/api/selection/buchungskonten', fetchImpl) as Promise<
-            WalterSelectionEntry[]
-        >;
+        return walter_get(
+            '/api/selection/buchungskonten',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
     },
     bankkontos(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/bankkontos', fetchImpl) as Promise<

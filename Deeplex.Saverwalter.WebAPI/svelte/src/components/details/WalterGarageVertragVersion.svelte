@@ -15,10 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import {
-        WalterDatePicker,
-        WalterNumberInput
-    } from '$walter/components';
+    import { WalterDatePicker, WalterNumberInput } from '$walter/components';
     import type {
         WalterGarageVertragEntry,
         WalterGarageVertragVersionEntry
@@ -81,7 +78,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         required
     />
     <WalterNumberInput
-        disabled={readonly}
+        {readonly}
         bind:value={entry.garagenMiete}
         label="Garagenmiete (€)"
         required

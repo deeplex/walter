@@ -21,7 +21,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
-    import { WalterZaehlerEntry, WalterZaehlerstandEntry, validateZaehler } from '$walter/lib';
+    import {
+        WalterZaehlerEntry,
+        WalterZaehlerstandEntry,
+        validateZaehler
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [
@@ -62,7 +66,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return {
             ...zaehler,
             button:
-                zaehler.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum)
+                zaehler.lastZaehlerstand?.datum ===
+                convertDateCanadian(ablesedatum)
                     ? 'disabled'
                     : (e: CustomEvent) => add(e, zaehler)
         };

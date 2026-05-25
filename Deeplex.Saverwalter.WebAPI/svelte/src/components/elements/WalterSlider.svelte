@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/services/utils';
     import { onMount } from 'svelte';
 
-    export let value: number;
+    export let value: number | undefined = undefined;
     export let min: number = 0;
     export let max: number = 100;
     export let step: number = 1;
@@ -30,15 +30,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let labelText: string = '';
     export let disabled: boolean = false;
 
-    let lastSavedValue: number;
-    // Tracks the value before the current change (Carbon Slider updates
-    // the bound value before dispatching "change", so we can't use `value`
-    // as the old_value in walter_update_value).
-    let committed: number = value;
+    let lastSavedValue: number = value ?? 0;
+    let committed: number = value ?? 0;
+    let _internal: number = value ?? 0;
+    $: _internal = value ?? 0;
 
     function updateLastSavedValue() {
-        lastSavedValue = value;
-        committed = value;
+        lastSavedValue = value ?? 0;
+        committed = value ?? 0;
     }
 
     onMount(() => {
@@ -59,6 +58,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullWidth}
     {labelText}
     {disabled}
-    bind:value
+    bind:value={_internal}
     on:change={change}
 />

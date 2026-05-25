@@ -57,7 +57,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 (m.nkVorauszahlung || 0),
             0
         ) +
-        (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) || 0) +
+        (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) ||
+            0) +
         buchung.betriebskostenEingaenge.reduce(
             (s, b) => s + (b.betrag || 0),
             0
@@ -106,7 +107,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         buchung.betriebskostenEingaenge = [
             ...buchung.betriebskostenEingaenge,
-            { betrag: available, betreffendesJahr: now.getFullYear() - 1, rechnungsDatum: today }
+            {
+                betrag: available,
+                betreffendesJahr: now.getFullYear() - 1,
+                rechnungsDatum: today
+            }
         ];
     }
 
@@ -144,12 +149,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const monat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
         buchung.garagenEingaenge = [
             ...(buchung.garagenEingaenge ?? []),
-            { garageVertragId: 0, garageKennung: '', betreffenderMonat: monat, betrag: available }
+            {
+                garageVertragId: 0,
+                garageKennung: '',
+                betreffenderMonat: monat,
+                betrag: available
+            }
         ];
     }
 
     function removeGarage(i: number) {
-        buchung.garagenEingaenge = buchung.garagenEingaenge.filter((_, idx) => idx !== i);
+        buchung.garagenEingaenge = buchung.garagenEingaenge.filter(
+            (_, idx) => idx !== i
+        );
     }
 
     function removeSonstiges(i: number) {
@@ -166,7 +178,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onZahlungsempfaengerChange(e: CustomEvent) {
-        buchung.zahlungsempfaengerId = e.detail ? +e.detail.id || undefined : undefined;
+        buchung.zahlungsempfaengerId = e.detail
+            ? +e.detail.id || undefined
+            : undefined;
     }
 </script>
 
@@ -203,7 +217,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <div>
                 <strong>Mietzahlung</strong>
                 {#if mieteStatusTexts[i]}
-                    <span style="margin-left: 0.75rem; font-size: 0.8rem; opacity: 0.7">{mieteStatusTexts[i]}</span>
+                    <span
+                        style="margin-left: 0.75rem; font-size: 0.8rem; opacity: 0.7"
+                        >{mieteStatusTexts[i]}</span
+                    >
                 {/if}
             </div>
             <Button
@@ -326,10 +343,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <Row style="margin-bottom: 1.5rem">
     <Column>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-            <Button kind="tertiary" size="small" icon={Add} on:click={addWohnungsmiete}>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addWohnungsmiete}
+            >
                 Wohnungsmiete
             </Button>
-            <Button kind="tertiary" size="small" icon={Add} on:click={addGarage}>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addGarage}
+            >
                 Garagenmiete
             </Button>
             <Button kind="tertiary" size="small" icon={Add} on:click={addBK}>
@@ -338,7 +365,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Button kind="tertiary" size="small" icon={Add} on:click={addEA}>
                 Erhaltungsaufwendung
             </Button>
-            <Button kind="tertiary" size="small" icon={Add} on:click={addSonstiges}>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addSonstiges}
+            >
                 Sonstiges
             </Button>
         </div>

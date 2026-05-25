@@ -16,7 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-    import { WalterDataTable, WalterGarageVertrag, WalterGarageVertragVersion } from '$walter/components';
+    import {
+        WalterDataTable,
+        WalterGarageVertrag,
+        WalterGarageVertragVersion
+    } from '$walter/components';
     import {
         WalterGarageVertragEntry,
         type WalterGarageVertragVersionEntry,
@@ -33,7 +37,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let entryVersion: Partial<WalterGarageVertragVersionEntry> = {};
     let entryVersionBeginn: string | undefined = undefined;
     let hasOverlap = false;
-    $: if (entry) entry.versionen = [entryVersion as WalterGarageVertragVersionEntry];
+    $: if (entry)
+        entry.versionen = [entryVersion as WalterGarageVertragVersionEntry];
     $: submitDisabled = !validateGarageVertragQuickAdd(entry) || hasOverlap;
 
     const headers = [
@@ -51,7 +56,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const fetchData =
         rows === undefined
             ? (p: Parameters<typeof WalterGarageVertragEntry.GetPaged>[1]) =>
-                  WalterGarageVertragEntry.GetPaged<WalterGarageVertragEntry>(fetchImpl, p)
+                  WalterGarageVertragEntry.GetPaged<WalterGarageVertragEntry>(
+                      fetchImpl,
+                      p
+                  )
             : undefined;
 </script>
 

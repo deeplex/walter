@@ -15,7 +15,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { AbrechnungsresultatInfo, AbrechnungslaufGruppeResult, NkZeileInfo } from './AbrechnungslaufTypes';
+    import type {
+        AbrechnungsresultatInfo,
+        AbrechnungslaufGruppeResult,
+        NkZeileInfo
+    } from './AbrechnungslaufTypes';
     import { hkvoKosten } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufEinheit from './WalterAbrechnungslaufEinheit.svelte';
     import WalterAbrechnungslaufResultat from './WalterAbrechnungslaufResultat.svelte';
@@ -45,17 +49,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         downloadLoading = true;
         downloadError = '';
         try {
-            const response = await walter_post(`/api/abrechnungslauf/print/${format}`, {
-                wohnungIds: gruppe.wohnungIds,
-                jahr,
-                vertragId: resultat.vertragId
-            });
+            const response = await walter_post(
+                `/api/abrechnungslauf/print/${format}`,
+                {
+                    wohnungIds: gruppe.wohnungIds,
+                    jahr,
+                    vertragId: resultat.vertragId
+                }
+            );
             if (!response.ok) {
                 downloadError = await response.text();
                 return;
             }
-            const disposition = response.headers.get('content-disposition') ?? '';
-            const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            const disposition =
+                response.headers.get('content-disposition') ?? '';
+            const match = disposition.match(
+                /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+            );
             const fileName = match
                 ? match[1].replace(/['"]/g, '')
                 : `NK_${jahr}_Abrechnung.${format}`;
@@ -71,20 +81,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
-    $: wohnungName = resultat.wohnungBezeichnung.split(' – ').slice(1).join(' – ');
+    $: wohnungName = resultat.wohnungBezeichnung
+        .split(' – ')
+        .slice(1)
+        .join(' – ');
     $: result = resultat.vorauszahlung - resultat.rechnungsbetrag;
-    $: resultLabel = result > 0 ? 'bekommt der Mieter' : 'bekommt der Vermieter';
+    $: resultLabel =
+        result > 0 ? 'bekommt der Mieter' : 'bekommt der Vermieter';
     $: nutzungVonDisplay =
-        resultat.nutzungVon === `${jahr}-01-01` ? 'Jahresbeginn' : formatDate(resultat.nutzungVon);
+        resultat.nutzungVon === `${jahr}-01-01`
+            ? 'Jahresbeginn'
+            : formatDate(resultat.nutzungVon);
 
     $: vertragsEinheiten = gruppe.abrechnungseinheiten.filter((e) =>
-        e.nkZeilen.some((z) => z.anteile.some((a) => a.vertragId === resultat.vertragId))
+        e.nkZeilen.some((z) =>
+            z.anteile.some((a) => a.vertragId === resultat.vertragId)
+        )
     );
 
     $: nkNachEinheit = vertragsEinheiten.map((einheit) => {
         const vid = resultat.vertragId;
-        const zeilen = einheit.nkZeilen.filter((z) => z.anteile.some((a) => a.vertragId === vid));
-        const anteil = (z: NkZeileInfo) => z.anteile.find((a) => a.vertragId === vid)!;
+        const zeilen = einheit.nkZeilen.filter((z) =>
+            z.anteile.some((a) => a.vertragId === vid)
+        );
+        const anteil = (z: NkZeileInfo) =>
+            z.anteile.find((a) => a.vertragId === vid)!;
         const kalt = zeilen
             .filter((z) => z.para9_2 == null)
             .reduce((s, z) => s + z.betrag * anteil(z).anteilFaktor, 0);

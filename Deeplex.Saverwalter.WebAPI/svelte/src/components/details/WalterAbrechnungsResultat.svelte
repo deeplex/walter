@@ -62,8 +62,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </Row>
 
 {#if entry.nkKontoZeilen?.length > 0}
-    {@const sollSumme = entry.nkKontoZeilen.filter(z => z.istSoll).reduce((s, z) => s + z.betrag, 0)}
-    {@const habenSumme = entry.nkKontoZeilen.filter(z => !z.istSoll).reduce((s, z) => s + z.betrag, 0)}
+    {@const sollSumme = entry.nkKontoZeilen
+        .filter((z) => z.istSoll)
+        .reduce((s, z) => s + z.betrag, 0)}
+    {@const habenSumme = entry.nkKontoZeilen
+        .filter((z) => !z.istSoll)
+        .reduce((s, z) => s + z.betrag, 0)}
     <Row>
         <DataTable
             title="Nebenkostenkonto {entry.jahr}"

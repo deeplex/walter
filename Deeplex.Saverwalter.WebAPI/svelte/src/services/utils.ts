@@ -71,8 +71,7 @@ export function convertFixed2(value: number | undefined): string | undefined {
 let walter_goto_tracker = 0;
 changeTracker.subscribe((val) => (walter_goto_tracker = val));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function walter_goto(url: string, opts: any = undefined) {
+export function walter_goto(url: string, opts?: Parameters<typeof goto>[1]) {
     if (walter_goto_tracker > 0) {
         const content = `Bist du sicher, dass du diese Seite verlassen möchtest? Es gibt noch ungespeicherte Änderungen.`;
 

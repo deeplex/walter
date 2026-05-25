@@ -42,7 +42,9 @@ export class WalterGarageEntry extends WalterApiHandler {
             json.besitzer && WalterSelectionEntry.fromJson(json.besitzer);
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
-        const vertraege = json.vertraege?.map(WalterGarageVertragEntry.fromJson);
+        const vertraege = json.vertraege?.map(
+            WalterGarageVertragEntry.fromJson
+        );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 

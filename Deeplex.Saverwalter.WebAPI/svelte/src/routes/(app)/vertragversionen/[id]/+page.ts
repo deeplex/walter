@@ -25,7 +25,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
         params.id,
         fetch
     );
-    const vertrag = WalterVertragEntry.GetOne<WalterVertragEntry>(`${(await entry).vertrag.id}`, fetch);
+    const vertrag = WalterVertragEntry.GetOne<WalterVertragEntry>(
+        `${(await entry).vertrag.id}`,
+        fetch
+    );
 
     return {
         fetchImpl: fetch,

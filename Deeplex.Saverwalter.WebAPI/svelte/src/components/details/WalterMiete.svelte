@@ -39,11 +39,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let gesamtbetrag = 0;
 
     // Reactive display values — always current, independent of user edits.
-    $: forderungsbetrag = getGrundmiete(vertrag, entry.betreffenderMonat)
-        || +(entry.kaltmieteZahlung ?? 0);
+    $: forderungsbetrag =
+        getGrundmiete(vertrag, entry.betreffenderMonat) ||
+        +(entry.kaltmieteZahlung ?? 0);
     $: schonGezahlt = getSchonGezahlt(mietzahlungen, entry.betreffenderMonat);
-    $: verbleibendeVorZahlung = +Math.max(0, forderungsbetrag - schonGezahlt).toFixed(2);
-    $: nachZahlungVerbleibend = +Math.max(0, verbleibendeVorZahlung - kaltmiete).toFixed(2);
+    $: verbleibendeVorZahlung = +Math.max(
+        0,
+        forderungsbetrag - schonGezahlt
+    ).toFixed(2);
+    $: nachZahlungVerbleibend = +Math.max(
+        0,
+        verbleibendeVorZahlung - kaltmiete
+    ).toFixed(2);
 
     // Reinit input fields only when the context (vertrag + month) changes.
     // Changes to mietzahlungen or kaltmiete do not retrigger this.
@@ -58,7 +65,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (key === _lastKey) return;
         _lastKey = key;
 
-        const grundmiete = getGrundmiete(vertrag, monat) || +(entry.kaltmieteZahlung ?? 0);
+        const grundmiete =
+            getGrundmiete(vertrag, monat) || +(entry.kaltmieteZahlung ?? 0);
         const schon = getSchonGezahlt(mietzahlungen, monat);
         kaltmiete = +Math.max(0, grundmiete - schon).toFixed(2);
         nk = +(entry.nkZahlung ?? 0).toFixed(2);
@@ -74,7 +82,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const monatDate = new Date(monat);
         const version = [...(v.versionen || [])]
             .filter((ver) => new Date(ver.beginn) <= monatDate)
-            .sort((a, b) => new Date(b.beginn).getTime() - new Date(a.beginn).getTime())[0];
+            .sort(
+                (a, b) =>
+                    new Date(b.beginn).getTime() - new Date(a.beginn).getTime()
+            )[0];
         return version?.grundmiete ?? 0;
     }
 
@@ -148,12 +159,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </Row>
 {#if forderungsbetrag > 0}
     <Row>
-        <WalterNumberInput readonly label="Forderung Kaltmiete" value={forderungsbetrag} />
+        <WalterNumberInput
+            readonly
+            label="Forderung Kaltmiete"
+            value={forderungsbetrag}
+        />
         {#if schonGezahlt > 0}
-            <WalterNumberInput readonly label="Davon bereits gezahlt" value={schonGezahlt} />
-            <WalterNumberInput readonly label="Noch offen" value={verbleibendeVorZahlung} />
+            <WalterNumberInput
+                readonly
+                label="Davon bereits gezahlt"
+                value={schonGezahlt}
+            />
+            <WalterNumberInput
+                readonly
+                label="Noch offen"
+                value={verbleibendeVorZahlung}
+            />
         {/if}
-        <WalterNumberInput readonly label="Nach Zahlung noch offen" value={nachZahlungVerbleibend} />
+        <WalterNumberInput
+            readonly
+            label="Nach Zahlung noch offen"
+            value={nachZahlungVerbleibend}
+        />
     </Row>
 {/if}
 

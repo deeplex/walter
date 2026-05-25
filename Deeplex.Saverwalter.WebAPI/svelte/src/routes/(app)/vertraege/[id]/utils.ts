@@ -38,4 +38,3 @@ export function getVertragversionEntry(vertrag: WalterVertragEntry) {
         permissions: vertrag.permissions
     };
 }
-

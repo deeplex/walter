@@ -25,7 +25,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
-    import { Row, TextInput, InlineNotification } from 'carbon-components-svelte';
+    import {
+        Row,
+        TextInput,
+        InlineNotification
+    } from 'carbon-components-svelte';
     import { convertDateGerman } from '$walter/services/utils';
     import { walter_fetch, walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
@@ -40,7 +44,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: isNew = !entry.id;
 
     // versionen[0] reference for new mode (same object — binds write straight through)
-    $: newVersion = (entry.versionen?.[0] ?? {}) as Partial<WalterVertragVersionEntry>;
+    $: newVersion = (entry.versionen?.[0] ??
+        {}) as Partial<WalterVertragVersionEntry>;
 
     $: sortedVersionen = [...(entry.versionen ?? [])].sort((a, b) =>
         a.beginn.localeCompare(b.beginn)
@@ -67,11 +72,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             hasOverlap = false;
             return;
         }
-        const params = new URLSearchParams({ wohnungId: String(wohnungId), beginn });
+        const params = new URLSearchParams({
+            wohnungId: String(wohnungId),
+            beginn
+        });
         if (ende) params.set('ende', ende);
         if (excludeId) params.set('excludeId', String(excludeId));
         try {
-            const r = await walter_fetch(fetchImpl, `/api/vertraege/check-overlap?${params}`);
+            const r = await walter_fetch(
+                fetchImpl,
+                `/api/vertraege/check-overlap?${params}`
+            );
             overlapConflict = await r.json();
         } catch {
             overlapConflict = null;
@@ -79,7 +90,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         hasOverlap = !!overlapConflict;
     }
 
-    $: if (isNew) checkOverlap(entry.wohnung?.id, newVersion.beginn, entry.ende, entry.id);
+    $: if (isNew)
+        checkOverlap(
+            entry.wohnung?.id,
+            newVersion.beginn,
+            entry.ende,
+            entry.id
+        );
 
     // Unified display object for version fields.
     // New mode:  assigned = newVersion (same object reference → binds write into versionen[0]).
@@ -113,7 +130,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: blockSave = hasVersionChanges && !seitWann;
 
     const eur = (v: number | undefined) =>
-        v != null ? v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }) : '?';
+        v != null
+            ? v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+            : '?';
 
     $: versionChanges = [
         displayVersion.grundmiete !== latestVersion?.grundmiete && {
@@ -134,7 +153,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     ].filter(Boolean) as { label: string; from: string; to: string }[];
 
-    export let commitVersionIfPending: () => Promise<void>;
+    export let commitVersionIfPending: () => Promise<void> = async () => {};
     $: commitVersionIfPending = async () => {
         if (hasVersionChanges && seitWann) await createNewVersion();
     };
@@ -183,7 +202,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             required
             readonly
             labelText="Beginn"
-            value={firstVersion?.beginn && convertDateGerman(new Date(firstVersion.beginn))}
+            value={firstVersion?.beginn &&
+                convertDateGerman(new Date(firstVersion.beginn))}
         />
     {/if}
     <WalterDatePicker
@@ -194,7 +214,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 <Row>
-    <WalterComboBoxWohnung {fetchImpl} required {readonly} bind:value={entry.wohnung} />
+    <WalterComboBoxWohnung
+        {fetchImpl}
+        required
+        {readonly}
+        bind:value={entry.wohnung}
+    />
     <TextInput labelText="Vermieter" readonly value={entry.wohnung?.filter} />
     <WalterComboBoxKontakt
         {fetchImpl}
@@ -234,7 +259,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </Row>
 {#if hasVersionChanges}
     <Row>
-        <WalterDatePicker required bind:value={seitWann} labelText="Zeitpunkt der Änderung" />
+        <WalterDatePicker
+            required
+            bind:value={seitWann}
+            labelText="Zeitpunkt der Änderung"
+        />
     </Row>
 {/if}
 {#if overlapConflict}

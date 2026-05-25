@@ -30,18 +30,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         loading = true;
         errorMsg = '';
         try {
-            const response = await walter_post('/api/abrechnungslauf/print/pdf', {
-                wohnungIds: [wohnungId],
-                jahr
-            });
+            const response = await walter_post(
+                '/api/abrechnungslauf/print/pdf',
+                {
+                    wohnungIds: [wohnungId],
+                    jahr
+                }
+            );
             if (!response.ok) {
                 const text = await response.text();
                 errorMsg = text || `Fehler ${response.status}`;
                 return;
             }
-            const disposition = response.headers.get('content-disposition') ?? '';
-            const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-            const fileName = match ? match[1].replace(/['"]/g, '') : `NK_${jahr}_Abrechnung.pdf`;
+            const disposition =
+                response.headers.get('content-disposition') ?? '';
+            const match = disposition.match(
+                /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+            );
+            const fileName = match
+                ? match[1].replace(/['"]/g, '')
+                : `NK_${jahr}_Abrechnung.pdf`;
             const blob = await response.blob();
             download_file_blob(blob, fileName);
         } finally {
@@ -50,7 +58,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<Tile light style="padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+<Tile
+    light
+    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;"
+>
     <strong>Betriebskostenabrechnung drucken</strong>
     <NumberInput
         label="Abrechnungsjahr"

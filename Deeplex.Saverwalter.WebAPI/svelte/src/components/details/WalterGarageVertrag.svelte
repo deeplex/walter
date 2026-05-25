@@ -58,11 +58,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {readonly}
         bind:value={entry.garage}
     />
-    <WalterComboBoxVertrag
-        {fetchImpl}
-        {readonly}
-        bind:value={entry.vertrag}
-    />
+    <WalterComboBoxVertrag {fetchImpl} {readonly} bind:value={entry.vertrag} />
 </Row>
 <Row>
     <WalterMultiSelectKontakt

@@ -14,10 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using BetriebskostenabrechnungService = Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using FluentAssertions;
 using Xunit;
+using BetriebskostenabrechnungService = Deeplex.Saverwalter.BetriebskostenabrechnungService;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {

@@ -17,7 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import WalterWohnungVersion from '../details/WalterWohnungVersion.svelte';
     import WalterSimpleList from './WalterSimpleList.svelte';
-    import { WalterWohnungVersionEntry, validateWohnungVersion } from '$walter/lib';
+    import {
+        WalterWohnungVersionEntry,
+        validateWohnungVersion
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [

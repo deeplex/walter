@@ -37,7 +37,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: readonly = entry?.permissions?.update === false;
     $: isNew = !entry.id;
 
-    $: newVersion = (entry.versionen?.[0] ?? {}) as Partial<WalterWohnungVersionEntry>;
+    $: newVersion = (entry.versionen?.[0] ??
+        {}) as Partial<WalterWohnungVersionEntry>;
 
     $: sortedVersionen = [...(entry.versionen ?? [])].sort((a, b) =>
         a.beginn.localeCompare(b.beginn)
@@ -68,7 +69,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         initialized &&
         (displayVersion.wohnflaeche !== latestVersion?.wohnflaeche ||
             displayVersion.nutzflaeche !== latestVersion?.nutzflaeche ||
-            displayVersion.miteigentumsanteile !== latestVersion?.miteigentumsanteile ||
+            displayVersion.miteigentumsanteile !==
+                latestVersion?.miteigentumsanteile ||
             displayVersion.einheiten !== latestVersion?.einheiten);
 
     $: blockSave = hasVersionChanges && !seitWann;
@@ -161,7 +163,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </Row>
 {#if hasVersionChanges}
     <Row>
-        <WalterDatePicker required bind:value={seitWann} labelText="Zeitpunkt der Änderung" />
+        <WalterDatePicker
+            required
+            bind:value={seitWann}
+            labelText="Zeitpunkt der Änderung"
+        />
     </Row>
 {/if}
 <Row>

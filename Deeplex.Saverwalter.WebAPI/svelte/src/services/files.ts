@@ -53,13 +53,15 @@ export const fileURL = {
     kontakt: (id: string) => `${WalterKontaktEntry.ApiURL}/${id}/files`,
     transaktion: (id: string) => `${WalterTransaktionEntry.ApiURL}/${id}/files`,
     umlage: (id: string) => `${WalterUmlageEntry.ApiURL}/${id}/files`,
-    umlageversion: (id: string) => `${WalterUmlageVersionEntry.ApiURL}/${id}/files`,
+    umlageversion: (id: string) =>
+        `${WalterUmlageVersionEntry.ApiURL}/${id}/files`,
     umlagetyp: (id: string) => `${WalterUmlagetypEntry.ApiURL}/${id}/files`,
     vertrag: (id: string) => `${WalterVertragEntry.ApiURL}/${id}/files`,
     vertragversion: (id: string) =>
         `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
     wohnung: (id: string) => `${WalterWohnungEntry.ApiURL}/${id}/files`,
-    wohnungversion: (id: string) => `${WalterWohnungVersionEntry.ApiURL}/${id}/files`,
+    wohnungversion: (id: string) =>
+        `${WalterWohnungVersionEntry.ApiURL}/${id}/files`,
     zaehler: (id: string) => `${WalterZaehlerEntry.ApiURL}/${id}/files`,
     zaehlerstand: (id: string) =>
         `${WalterZaehlerstandEntry.ApiURL}/${id}/files`,

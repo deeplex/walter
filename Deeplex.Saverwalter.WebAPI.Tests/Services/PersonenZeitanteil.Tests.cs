@@ -30,9 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         // year = Abrechnungsjahr
         [Theory]
         [InlineData(1, 1, 2020, 31, 12, 2020, 1, 1, 2019, 1, 4, 2020, 0.25)]
-        [InlineData(1, 1, 2020,  1,  7, 2020, 1, 1, 2019, 1, 4, 2020, 0.125)]
-        [InlineData(1, 1, 2020,  1,  7, 2020, 1, 1, 2019, 0, 2, 2020, 0.0)]
-        [InlineData(1, 1, 2020,  1,  7, 2020, 1, 1, 2019, 0, 0, 2020, 0.0)]
+        [InlineData(1, 1, 2020, 1, 7, 2020, 1, 1, 2019, 1, 4, 2020, 0.125)]
+        [InlineData(1, 1, 2020, 1, 7, 2020, 1, 1, 2019, 0, 2, 2020, 0.0)]
+        [InlineData(1, 1, 2020, 1, 7, 2020, 1, 1, 2019, 0, 0, 2020, 0.0)]
         public void PersonenZeitanteilTest(
             int bDay, int bMonth, int bYear,
             int eDay, int eMonth, int eYear,

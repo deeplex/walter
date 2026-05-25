@@ -18,7 +18,6 @@ import { walter_get } from '$walter/services/requests';
 export abstract class WalterApiHandler {
     protected static ApiURL: string;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static fromJson(_json: unknown) {
         throw new Error('WalterApiHandler.fromJson not implemented.');
     }
@@ -61,12 +60,16 @@ export abstract class WalterApiHandler {
             !('items' in response) ||
             !('totalCount' in response)
         ) {
-            throw new Error('Expected paged response with items and totalCount.');
+            throw new Error(
+                'Expected paged response with items and totalCount.'
+            );
         }
 
         const paged = response as { items: unknown[]; totalCount: number };
         return {
-            items: paged.items.map((json) => this.fromJson(json) as unknown as T),
+            items: paged.items.map(
+                (json) => this.fromJson(json) as unknown as T
+            ),
             totalCount: paged.totalCount
         };
     }

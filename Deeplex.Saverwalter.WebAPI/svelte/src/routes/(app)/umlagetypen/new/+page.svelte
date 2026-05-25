@@ -29,7 +29,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let data: PageData;
 </script>
 
-<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} disabled={!validateUmlagetyp(entry)} />
+<WalterHeaderNew
+    apiURL={data.apiURL}
+    {entry}
+    title={data.title}
+    disabled={!validateUmlagetyp(entry)}
+/>
 
 <WalterGrid>
     <WalterUmlagetyp fetchImpl={data.fetchImpl} bind:entry />

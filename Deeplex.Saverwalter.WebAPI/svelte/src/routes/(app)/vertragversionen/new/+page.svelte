@@ -29,7 +29,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let entry: Partial<WalterMieteEntry> = {};
 </script>
 
-<WalterHeaderNew {apiURL} {entry} {title} disabled={!validateVertragVersion(entry)} />
+<WalterHeaderNew
+    {apiURL}
+    {entry}
+    {title}
+    disabled={!validateVertragVersion(entry)}
+/>
 
 <WalterGrid>
     <WalterVertragVersion bind:entry />

@@ -63,7 +63,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             buchungsInput = {
                 ...emptyTransaktionsInput(),
                 mieten: [
-                    { kaltmiete: 0, garagen: [], nkVorauszahlung: 0, vertragId: +vertragId }
+                    {
+                        kaltmiete: 0,
+                        garagen: [],
+                        nkVorauszahlung: 0,
+                        vertragId: +vertragId
+                    }
                 ]
             };
             addModalOpen = true;

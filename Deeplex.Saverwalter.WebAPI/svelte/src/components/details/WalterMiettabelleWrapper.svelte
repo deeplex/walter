@@ -97,8 +97,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     async function ladeOffeneGarageForderungen(jahr: number) {
         garageForderungenReady = false;
         try {
-            const resp = await walter_get(`/api/offene-forderungen/garagen/${jahr}`, fetchImpl);
-            offeneGarageForderungen = (resp as OffeneGarageForderungEntry[]) ?? [];
+            const resp = await walter_get(
+                `/api/offene-forderungen/garagen/${jahr}`,
+                fetchImpl
+            );
+            offeneGarageForderungen =
+                (resp as OffeneGarageForderungEntry[]) ?? [];
         } catch (e) {
             console.error('Konnte offene Garagenforderungen nicht laden:', e);
             offeneGarageForderungen = [];
@@ -217,7 +221,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let garageBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
     let garageBuchungsInputValid = false;
 
-    function openGarageQuickAdd(e: CustomEvent, forderung: OffeneGarageForderungEntry) {
+    function openGarageQuickAdd(
+        e: CustomEvent,
+        forderung: OffeneGarageForderungEntry
+    ) {
         e.stopPropagation();
         garageModalTitle = forderung.bezeichnung;
         garageBuchungsInput = {

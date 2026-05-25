@@ -28,20 +28,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let zeilen: NkZeileInfo[];
 
-    const nWF  = zeilen.some((z) => z.schluessel === 'n. WF');
-    const nNF  = zeilen.some((z) => z.schluessel === 'n. NF');
-    const nNE  = zeilen.some((z) => z.schluessel === 'n. NE');
+    const nWF = zeilen.some((z) => z.schluessel === 'n. WF');
+    const nNF = zeilen.some((z) => z.schluessel === 'n. NF');
+    const nNE = zeilen.some((z) => z.schluessel === 'n. NE');
     const nMEA = zeilen.some((z) => z.schluessel === 'n. MEA');
-    const nPs  = zeilen.some((z) => z.schluessel === 'n. Pers.');
-    const nVb  = zeilen.some((z) => z.schluessel === 'n. Verb.');
+    const nPs = zeilen.some((z) => z.schluessel === 'n. Pers.');
+    const nVb = zeilen.some((z) => z.schluessel === 'n. Verb.');
 </script>
 
 <Accordion>
-    <AccordionItem title="Genutzte Umlageschlüssel in dieser Abrechnung" style="border-top: 0px">
+    <AccordionItem
+        title="Genutzte Umlageschlüssel in dieser Abrechnung"
+        style="border-top: 0px"
+    >
         <StructuredList condensed>
             <StructuredListHead>
                 <StructuredListRow>
-                    <StructuredListCell head>Umlageschlüssel</StructuredListCell>
+                    <StructuredListCell head>Umlageschlüssel</StructuredListCell
+                    >
                     <StructuredListCell head>Bedeutung</StructuredListCell>
                 </StructuredListRow>
             </StructuredListHead>
@@ -49,31 +53,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {#if nWF}
                     <StructuredListRow>
                         <StructuredListCell>n. WF</StructuredListCell>
-                        <StructuredListCell>nach Wohnfläche in m²</StructuredListCell>
+                        <StructuredListCell
+                            >nach Wohnfläche in m²</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/if}
                 {#if nNF}
                     <StructuredListRow>
                         <StructuredListCell>n. NF</StructuredListCell>
-                        <StructuredListCell>nach Nutzfläche in m²</StructuredListCell>
+                        <StructuredListCell
+                            >nach Nutzfläche in m²</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/if}
                 {#if nMEA}
                     <StructuredListRow>
                         <StructuredListCell>n. MEA</StructuredListCell>
-                        <StructuredListCell>nach Miteigentumsanteilen</StructuredListCell>
+                        <StructuredListCell
+                            >nach Miteigentumsanteilen</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/if}
                 {#if nNE}
                     <StructuredListRow>
                         <StructuredListCell>n. NE</StructuredListCell>
-                        <StructuredListCell>nach Anzahl der Wohn-/Nutzeinheiten</StructuredListCell>
+                        <StructuredListCell
+                            >nach Anzahl der Wohn-/Nutzeinheiten</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/if}
                 {#if nPs}
                     <StructuredListRow>
                         <StructuredListCell>n. Pers.</StructuredListCell>
-                        <StructuredListCell>nach Personenzahl/Anzahl der Bewohner</StructuredListCell>
+                        <StructuredListCell
+                            >nach Personenzahl/Anzahl der Bewohner</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/if}
                 {#if nVb}
@@ -89,7 +103,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <StructuredList condensed>
             <StructuredListHead>
                 <StructuredListRow>
-                    <StructuredListCell head>Betriebskostentyp</StructuredListCell>
+                    <StructuredListCell head
+                        >Betriebskostentyp</StructuredListCell
+                    >
                     <StructuredListCell head>Beschreibung</StructuredListCell>
                 </StructuredListRow>
             </StructuredListHead>
@@ -99,7 +115,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <StructuredListCell>
                             <a href="/umlagen/{z.umlageId}">{z.bezeichnung}</a>
                         </StructuredListCell>
-                        <StructuredListCell>{z.beschreibung}</StructuredListCell>
+                        <StructuredListCell>{z.beschreibung}</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/each}
             </StructuredListBody>

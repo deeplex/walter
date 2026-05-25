@@ -45,7 +45,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             const bW = splitWohnungBezeichnung(b.wohnungBezeichnung);
             const adressCompare = aW.adresse.localeCompare(bW.adresse, 'de-DE');
             if (adressCompare !== 0) return adressCompare;
-            const wohnungCompare = aW.wohnung.localeCompare(bW.wohnung, 'de-DE');
+            const wohnungCompare = aW.wohnung.localeCompare(
+                bW.wohnung,
+                'de-DE'
+            );
             if (wohnungCompare !== 0) return wohnungCompare;
             const nutzungVonCompare = a.nutzungVon.localeCompare(b.nutzungVon);
             if (nutzungVonCompare !== 0) return nutzungVonCompare;
@@ -54,7 +57,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             return aBis.localeCompare(bBis);
         });
 
-    $: hasNkZeilen = gruppe.abrechnungseinheiten.flatMap((e) => e.nkZeilen).length > 0;
+    $: hasNkZeilen =
+        gruppe.abrechnungseinheiten.flatMap((e) => e.nkZeilen).length > 0;
 </script>
 
 <WalterAbrechnungslaufUebersicht {gruppe} {jahr} />

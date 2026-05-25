@@ -38,30 +38,44 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <StructuredListHead>
             <StructuredListRow head>
                 <StructuredListCell head>Teil</StructuredListCell>
-                <StructuredListCell head style="text-align:right">Betrag</StructuredListCell>
+                <StructuredListCell head style="text-align:right"
+                    >Betrag</StructuredListCell
+                >
             </StructuredListRow>
         </StructuredListHead>
         <StructuredListBody>
             {#if kalteNk.length > 0}
                 <StructuredListRow>
-                    <StructuredListCell head>Kalte Betriebskosten</StructuredListCell>
-                    <StructuredListCell head style="text-align:right"></StructuredListCell>
+                    <StructuredListCell head
+                        >Kalte Betriebskosten</StructuredListCell
+                    >
+                    <StructuredListCell head style="text-align:right"
+                    ></StructuredListCell>
                 </StructuredListRow>
                 {#each kalteNk as e}
                     <StructuredListRow>
-                        <StructuredListCell style="padding-left: 1.5rem">{e.bezeichnung}:</StructuredListCell>
-                        <StructuredListCell style="text-align:right">{convertEuro(e.betrag)}</StructuredListCell>
+                        <StructuredListCell style="padding-left: 1.5rem"
+                            >{e.bezeichnung}:</StructuredListCell
+                        >
+                        <StructuredListCell style="text-align:right"
+                            >{convertEuro(e.betrag)}</StructuredListCell
+                        >
                     </StructuredListRow>
                 {/each}
             {/if}
             {#if warmeNk.length > 0}
                 <StructuredListRow>
-                    <StructuredListCell head>Warme Betriebskosten (HKVO)</StructuredListCell>
-                    <StructuredListCell head style="text-align:right"></StructuredListCell>
+                    <StructuredListCell head
+                        >Warme Betriebskosten (HKVO)</StructuredListCell
+                    >
+                    <StructuredListCell head style="text-align:right"
+                    ></StructuredListCell>
                 </StructuredListRow>
                 {#each warmeNk as e}
                     <StructuredListRow>
-                        <StructuredListCell style="padding-left: 1.5rem">{e.bezeichnung}:</StructuredListCell>
+                        <StructuredListCell style="padding-left: 1.5rem"
+                            >{e.bezeichnung}:</StructuredListCell
+                        >
                         <StructuredListCell style="text-align:right">
                             {convertEuro(e.betrag)}
                         </StructuredListCell>
@@ -69,7 +83,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {/each}
             {/if}
             <StructuredListRow>
-                <StructuredListCell head>Nebenkosten gesamt:</StructuredListCell>
+                <StructuredListCell head>Nebenkosten gesamt:</StructuredListCell
+                >
                 <StructuredListCell head style="text-align:right">
                     {convertEuro(resultat.rechnungsbetrag)}
                 </StructuredListCell>
@@ -81,7 +96,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 </StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>
-                <StructuredListCell head>Ergebnis der Abrechnung:</StructuredListCell>
+                <StructuredListCell head
+                    >Ergebnis der Abrechnung:</StructuredListCell
+                >
                 <StructuredListCell head style="text-align:right">
                     {convertEuro(result)}
                 </StructuredListCell>

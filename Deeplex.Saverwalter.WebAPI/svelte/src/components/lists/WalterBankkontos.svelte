@@ -43,7 +43,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const fetchData =
         rows === undefined
             ? (p: Parameters<typeof WalterBankkontoEntry.GetPaged>[1]) =>
-                  WalterBankkontoEntry.GetPaged<WalterBankkontoEntry>(fetchImpl, p)
+                  WalterBankkontoEntry.GetPaged<WalterBankkontoEntry>(
+                      fetchImpl,
+                      p
+                  )
             : undefined;
 </script>
 

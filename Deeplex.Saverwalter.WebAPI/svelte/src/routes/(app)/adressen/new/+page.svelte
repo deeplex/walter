@@ -29,7 +29,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let entry: Partial<WalterAdresseEntry> = {};
 </script>
 
-<WalterHeaderNew apiURL={WalterAdresseEntry.ApiURL} {entry} {title} disabled={!validateAdresse(entry)} />
+<WalterHeaderNew
+    apiURL={WalterAdresseEntry.ApiURL}
+    {entry}
+    {title}
+    disabled={!validateAdresse(entry)}
+/>
 
 <WalterGrid>
     <WalterAdresse bind:entry />

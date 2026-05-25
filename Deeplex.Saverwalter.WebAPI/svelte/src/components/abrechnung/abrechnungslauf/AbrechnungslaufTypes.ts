@@ -108,7 +108,8 @@ export type AbrechnungslaufGruppeResult = {
 export function hkvoKosten(z: NkZeileInfo, a: NkAnteilInfo): number {
     const heizBetrag = z.betrag * (1 - z.para9_2!);
     const wwBetrag = z.betrag * z.para9_2!;
-    const vbHeiz = a.heizVerbrauchAnteil != null ? z.p7! * a.heizVerbrauchAnteil : 0;
+    const vbHeiz =
+        a.heizVerbrauchAnteil != null ? z.p7! * a.heizVerbrauchAnteil : 0;
     const wfHeiz = (1 - z.p7!) * a.anteilFaktor;
     const vbWW = a.wwVerbrauchAnteil != null ? z.p8! * a.wwVerbrauchAnteil : 0;
     const wfWW = (1 - z.p8!) * a.anteilFaktor;

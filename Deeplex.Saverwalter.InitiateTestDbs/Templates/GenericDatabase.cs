@@ -1279,7 +1279,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var key = (w, t);
                 if (!wohnungszaehler.TryGetValue(key, out var existing))
                 {
-                    var kennung = $"{t switch {
+                    var kennung = $"{t switch
+                    {
                         Zaehlertyp.Kaltwasser => "KW",
                         Zaehlertyp.Warmwasser => "WW",
                         Zaehlertyp.Gas => "HZ",

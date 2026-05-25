@@ -17,8 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
-    import type { WalterTransaktionEntry, WalterVertragEntry, TransaktionsInput } from '$walter/lib';
-    import { emptyTransaktionsInput, emptyMietzahlungsInput } from '$walter/lib';
+    import type {
+        WalterTransaktionEntry,
+        WalterVertragEntry,
+        TransaktionsInput
+    } from '$walter/lib';
+    import {
+        emptyTransaktionsInput,
+        emptyMietzahlungsInput
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 

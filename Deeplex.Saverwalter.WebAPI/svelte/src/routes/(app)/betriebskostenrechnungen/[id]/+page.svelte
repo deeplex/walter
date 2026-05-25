@@ -26,7 +26,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile
     } from '$walter/components';
-    import { WalterFileWrapper, validateBetriebskostenrechnung } from '$walter/lib';
+    import {
+        WalterFileWrapper,
+        validateBetriebskostenrechnung
+    } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;

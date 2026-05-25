@@ -48,7 +48,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 <Row>
-    <WalterAdresse {readonly} bind:adresse={entry.adresse} />
+    <WalterAdresse {readonly} bind:entry={entry.adresse} />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

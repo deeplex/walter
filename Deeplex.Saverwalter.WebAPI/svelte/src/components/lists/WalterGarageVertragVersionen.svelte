@@ -43,7 +43,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     navFn={noNav}
     routeBase="garage-vertrag-versionen"
     formComponent={WalterGarageVertragVersion}
-    formProps={{ fetchImpl }}
+    {fetchImpl}
     {entry}
     {rows}
     {title}

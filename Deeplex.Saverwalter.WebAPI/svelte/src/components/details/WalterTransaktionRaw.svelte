@@ -24,7 +24,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
 
     import { Row } from 'carbon-components-svelte';
-    import type { WalterSelectionEntry, WalterTransaktionEntry } from '$walter/lib';
+    import type {
+        WalterSelectionEntry,
+        WalterTransaktionEntry
+    } from '$walter/lib';
 
     export let entry: Partial<WalterTransaktionEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -59,20 +62,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:value={entry.zahlungsempfaenger}
         title="Zahlungsempfänger"
         initialId={initialZahlungsempfaengerId}
-        on:select={(e) => dispatch('zahlungsempfaengerChange', e.detail.selectedItem)}
+        on:select={(e) =>
+            dispatch('zahlungsempfaengerChange', e.detail.selectedItem)}
     />
 </Row>
 
 <Row>
     {#if betrag !== undefined}
-        <WalterNumberInput required {readonly} bind:value={betrag} label="Betrag" />
+        <WalterNumberInput
+            required
+            {readonly}
+            bind:value={betrag}
+            label="Betrag"
+        />
     {:else}
-        <WalterNumberInput required {readonly} bind:value={entry.betrag} label="Betrag" />
+        <WalterNumberInput
+            required
+            {readonly}
+            bind:value={entry.betrag}
+            label="Betrag"
+        />
     {/if}
     {#if zahlungsdatum !== undefined}
-        <WalterDatePicker required disabled={readonly} bind:value={zahlungsdatum} labelText="Zahlungsdatum" />
+        <WalterDatePicker
+            required
+            disabled={readonly}
+            bind:value={zahlungsdatum}
+            labelText="Zahlungsdatum"
+        />
     {:else}
-        <WalterDatePicker required disabled={readonly} bind:value={entry.zahlungsdatum} labelText="Zahlungsdatum" />
+        <WalterDatePicker
+            required
+            disabled={readonly}
+            bind:value={entry.zahlungsdatum}
+            labelText="Zahlungsdatum"
+        />
     {/if}
 </Row>
 <Row>

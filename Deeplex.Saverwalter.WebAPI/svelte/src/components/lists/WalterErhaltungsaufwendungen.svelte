@@ -17,7 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import WalterErhaltungsaufwendung from '../details/WalterErhaltungsaufwendung.svelte';
     import WalterSimpleList from './WalterSimpleList.svelte';
-    import { WalterErhaltungsaufwendungEntry, validateErhaltungsaufwendung } from '$walter/lib';
+    import {
+        WalterErhaltungsaufwendungEntry,
+        validateErhaltungsaufwendung
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [

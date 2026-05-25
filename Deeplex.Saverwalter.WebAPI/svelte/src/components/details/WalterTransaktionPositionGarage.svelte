@@ -15,8 +15,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column, InlineNotification, InlineLoading, Tag } from 'carbon-components-svelte';
-    import { WalterComboBox, WalterMonthPicker, WalterNumberInput } from '$walter/components';
+    import {
+        Row,
+        Column,
+        InlineNotification,
+        InlineLoading,
+        Tag
+    } from 'carbon-components-svelte';
+    import {
+        WalterComboBox,
+        WalterMonthPicker,
+        WalterNumberInput
+    } from '$walter/components';
     import { walter_selection, walter_get } from '$walter/services/requests';
     import type { WalterSelectionEntry } from '$walter/lib';
     import type { StandaloneGaragenmietInput } from '$walter/lib';
@@ -42,8 +52,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const garageVertraege = walter_selection.garageVertraege(fetchImpl);
 
     const now = new Date();
-    let betreffenderMonat: string = garage.betreffenderMonat
-        || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    let betreffenderMonat: string =
+        garage.betreffenderMonat ||
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     garage.betreffenderMonat = betreffenderMonat;
 
     $: invalid = !garage.garageVertragId;
@@ -83,7 +94,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function onGarageVertragSelect(e: CustomEvent) {
         garageVertrag = e.detail?.selectedItem;
-        garage.garageVertragId = garageVertrag?.id as number ?? 0;
+        garage.garageVertragId = (garageVertrag?.id as number) ?? 0;
         garage.garageKennung = garageVertrag?.text ?? '';
         forderungsstatus = undefined;
         ladeForderungsstatus();

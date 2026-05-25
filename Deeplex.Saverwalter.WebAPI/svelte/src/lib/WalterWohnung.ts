@@ -69,7 +69,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
             WalterErhaltungsaufwendungEntry.fromJson
         );
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
-        const versionen = json.versionen?.map(WalterWohnungVersionEntry.fromJson) ?? [];
+        const versionen =
+            json.versionen?.map(WalterWohnungVersionEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 

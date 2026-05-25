@@ -30,9 +30,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Row>
     <Column>
-        <WalterNumberInput required label="Betrag (€)" bind:value={sonstiger.betrag} />
+        <WalterNumberInput
+            required
+            label="Betrag (€)"
+            bind:value={sonstiger.betrag}
+        />
     </Column>
     <Column>
-        <WalterTextInput labelText="Beschreibung" bind:value={sonstiger.beschreibung} />
+        <WalterTextInput
+            labelText="Beschreibung"
+            bind:value={sonstiger.beschreibung}
+        />
     </Column>
 </Row>

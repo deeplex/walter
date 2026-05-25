@@ -34,7 +34,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 {#if currentAuthState && ($currentAuthState?.role === UserRole.Owner || $currentAuthState?.role === UserRole.Admin)}
-    <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} disabled={!validateWohnung(entry)} />
+    <WalterHeaderNew
+        apiURL={data.apiURL}
+        {entry}
+        title={data.title}
+        disabled={!validateWohnung(entry)}
+    />
 
     <WalterGrid>
         <WalterWohnung fetchImpl={data.fetchImpl} bind:entry />

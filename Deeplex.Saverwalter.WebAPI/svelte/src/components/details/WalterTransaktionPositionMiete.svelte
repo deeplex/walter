@@ -66,7 +66,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: invalid =
         !miete.vertragId ||
-        !!(kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005);
+        !!(
+            kaltmieteMax !== undefined && miete.kaltmiete > kaltmieteMax + 0.005
+        );
 
     $: verteile(availableBetrag);
 
@@ -146,8 +148,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ladeForderungsstatus();
     }
 
-    function garageLabel(g: { garageKennung: string; garageVertragId: number }, status: WalterForderungsstatusEntry | undefined) {
-        const gst = status?.garagen?.find((s) => s.garageVertragId === g.garageVertragId);
+    function garageLabel(
+        g: { garageKennung: string; garageVertragId: number },
+        status: WalterForderungsstatusEntry | undefined
+    ) {
+        const gst = status?.garagen?.find(
+            (s) => s.garageVertragId === g.garageVertragId
+        );
         if (!gst) return `Garagenmiete ${g.garageKennung} (€)`;
         const hint = gst.sollstellungVorhanden
             ? `Grundmiete: ${gst.garagenMiete.toFixed(2)} € | Verbleibend: ${gst.verbleibendeForderung.toFixed(2)} €`
@@ -225,7 +232,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <InlineNotification
                     kind="warning"
                     title="Betrag liegt unter geforderter Kaltmiete:"
-                    subtitle="Erwartet {forderungsstatus.verbleibendeForderung.toFixed(2)} €"
+                    subtitle="Erwartet {forderungsstatus.verbleibendeForderung.toFixed(
+                        2
+                    )} €"
                     hideCloseButton
                 />
             {:else if !forderungsstatus.sollstellungVorhanden && invalid}

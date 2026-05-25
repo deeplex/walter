@@ -50,11 +50,17 @@ export class WalterGarageVertragEntry extends WalterApiHandler {
     }
 
     static fromJson(json: WalterGarageVertragEntry) {
-        const garage = json.garage && WalterSelectionEntry.fromJson(json.garage);
-        const vertrag = json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
-        const selectedMieter = json.selectedMieter?.map(WalterSelectionEntry.fromJson);
+        const garage =
+            json.garage && WalterSelectionEntry.fromJson(json.garage);
+        const vertrag =
+            json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
+        const selectedMieter = json.selectedMieter?.map(
+            WalterSelectionEntry.fromJson
+        );
         const mieter = json.mieter?.map(WalterKontaktEntry.fromJson);
-        const versionen = json.versionen?.map(WalterGarageVertragVersionEntry.fromJson);
+        const versionen = json.versionen?.map(
+            WalterGarageVertragVersionEntry.fromJson
+        );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 

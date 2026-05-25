@@ -15,8 +15,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { AbrechnungslaufGruppeResult, NkAnteilInfo } from './AbrechnungslaufTypes';
-    import { Accordion, AccordionItem, DataTable, Toolbar, ToolbarContent } from 'carbon-components-svelte';
+    import type {
+        AbrechnungslaufGruppeResult,
+        NkAnteilInfo
+    } from './AbrechnungslaufTypes';
+    import {
+        Accordion,
+        AccordionItem,
+        DataTable,
+        Toolbar,
+        ToolbarContent
+    } from 'carbon-components-svelte';
 
     export let gruppe: AbrechnungslaufGruppeResult;
 
@@ -29,8 +38,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Math.abs(a.geplanterBetrag - a.gebuchterBetrag) > 0.005;
 
     const nkAnteilStatus = (a: NkAnteilInfo) => {
-        if (nkAnteilMismatch(a)) return `Gebucht: ${euro(a.gebuchterBetrag ?? 0)}`;
-        if (a.geplanterBetrag != null && a.gebuchterBetrag != null) return 'Gebucht';
+        if (nkAnteilMismatch(a))
+            return `Gebucht: ${euro(a.gebuchterBetrag ?? 0)}`;
+        if (a.geplanterBetrag != null && a.gebuchterBetrag != null)
+            return 'Gebucht';
         return 'Nicht gebucht';
     };
 
@@ -69,9 +80,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 const currentLineId = lineId++;
                 return z.anteile.length > 0
                     ? z.anteile.map<BkZeile>((a) => {
-                          const r = a.vertragId != null ? resultatByVertrag.get(a.vertragId) : undefined;
+                          const r =
+                              a.vertragId != null
+                                  ? resultatByVertrag.get(a.vertragId)
+                                  : undefined;
                           const wohnungNamen = r
-                              ? r.wohnungBezeichnung.split(' – ').slice(1).join(' – ')
+                              ? r.wohnungBezeichnung
+                                    .split(' – ')
+                                    .slice(1)
+                                    .join(' – ')
                               : einheit.wohnungNamen;
                           return {
                               id: `bk-${i++}`,
@@ -86,7 +103,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                               empfaengerName: a.bezeichnung,
                               vertragId: a.vertragId,
                               hatVerteilung: true,
-                              istGebucht: z.betriebskostenrechnungId != null && a.gebuchterBetrag != null,
+                              istGebucht:
+                                  z.betriebskostenrechnungId != null &&
+                                  a.gebuchterBetrag != null,
                               anteilBetrag: {
                                   value: nkAnteilDisplayBetrag(a),
                                   formatted: euro(nkAnteilDisplayBetrag(a))
@@ -129,7 +148,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return [...grouped.entries()]
             .sort(([a], [b]) => a.localeCompare(b, 'de-DE'))
             .map(([bezeichnung, list]) => {
-                const lineSums = new Map<number, { rechnungsBetrag: number; verteilt: number; hatVerteilung: boolean }>();
+                const lineSums = new Map<
+                    number,
+                    {
+                        rechnungsBetrag: number;
+                        verteilt: number;
+                        hatVerteilung: boolean;
+                    }
+                >();
                 for (const row of list) {
                     const existing = lineSums.get(row.lineId) ?? {
                         rechnungsBetrag: row.rechnungsBetrag,
@@ -137,23 +163,49 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         hatVerteilung: false
                     };
                     existing.rechnungsBetrag = row.rechnungsBetrag;
-                    existing.hatVerteilung = existing.hatVerteilung || row.hatVerteilung;
-                    if (row.hatVerteilung) existing.verteilt += row.anteilBetrag.value;
+                    existing.hatVerteilung =
+                        existing.hatVerteilung || row.hatVerteilung;
+                    if (row.hatVerteilung)
+                        existing.verteilt += row.anteilBetrag.value;
                     lineSums.set(row.lineId, existing);
                 }
                 const lineValues = [...lineSums.values()];
-                const rechnungsbetrag = lineValues.reduce((s, l) => s + l.rechnungsBetrag, 0);
+                const rechnungsbetrag = lineValues.reduce(
+                    (s, l) => s + l.rechnungsBetrag,
+                    0
+                );
                 const verteilt = lineValues.reduce((s, l) => s + l.verteilt, 0);
-                const hasAusstehend = list.some((row) => !row.hatVerteilung || !row.istGebucht);
+                const hasAusstehend = list.some(
+                    (row) => !row.hatVerteilung || !row.istGebucht
+                );
                 const hasRowMismatch = list.some((row) => row.betragAbweichend);
-                const hasMismatch = hasRowMismatch || (!hasAusstehend && Math.abs(verteilt - rechnungsbetrag) > 0.005);
-                const statusText = hasAusstehend ? 'Nicht gebucht' : hasMismatch ? `Gebucht: ${euro(verteilt)}` : 'Gebucht';
+                const hasMismatch =
+                    hasRowMismatch ||
+                    (!hasAusstehend &&
+                        Math.abs(verteilt - rechnungsbetrag) > 0.005);
+                const statusText = hasAusstehend
+                    ? 'Nicht gebucht'
+                    : hasMismatch
+                      ? `Gebucht: ${euro(verteilt)}`
+                      : 'Gebucht';
                 return {
                     title: `${bezeichnung} - Rechnung: ${euro(rechnungsbetrag)} - ${statusText}`,
-                    statusKind: hasMismatch ? 'mismatch' : hasAusstehend ? 'pending' : 'booked',
+                    statusKind: hasMismatch
+                        ? 'mismatch'
+                        : hasAusstehend
+                          ? 'pending'
+                          : 'booked',
                     rows: list.sort((a, b) => {
-                        const wc = a.wohnungNamen.localeCompare(b.wohnungNamen, 'de-DE');
-                        return wc !== 0 ? wc : a.empfaengerName.localeCompare(b.empfaengerName, 'de-DE');
+                        const wc = a.wohnungNamen.localeCompare(
+                            b.wohnungNamen,
+                            'de-DE'
+                        );
+                        return wc !== 0
+                            ? wc
+                            : a.empfaengerName.localeCompare(
+                                  b.empfaengerName,
+                                  'de-DE'
+                              );
                     })
                 };
             });
@@ -175,10 +227,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </span>
             <DataTable
                 headers={[
-                    { key: 'wohnungNamen',  value: 'Wohnung' },
+                    { key: 'wohnungNamen', value: 'Wohnung' },
                     { key: 'empfaengerName', value: 'Mieter / Eigenanteil' },
-                    { key: 'anteilBetrag',  value: 'Anteil' },
-                    { key: 'status',        value: 'Status' }
+                    { key: 'anteilBetrag', value: 'Anteil' },
+                    { key: 'status', value: 'Status' }
                 ]}
                 rows={typGruppe.rows}
                 size="short"
@@ -190,27 +242,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         {#if row.wohnungId != null}
                             <a
                                 href="/wohnungen/{row.wohnungId}"
-                                style={row.rechnungId == null ? 'color: var(--cds-support-error);' : ''}
-                            >{cell.value}</a>
+                                style={row.rechnungId == null
+                                    ? 'color: var(--cds-support-error);'
+                                    : ''}>{cell.value}</a
+                            >
                         {:else}
-                            <span style={row.rechnungId == null ? 'color: var(--cds-support-error);' : ''}>
+                            <span
+                                style={row.rechnungId == null
+                                    ? 'color: var(--cds-support-error);'
+                                    : ''}
+                            >
                                 {cell.value}
                             </span>
                         {/if}
                     {:else if cell.key === 'empfaengerName'}
                         {#if row.vertragId != null}
-                            <a href="/vertraege/{row.vertragId}">{cell.value}</a>
+                            <a href="/vertraege/{row.vertragId}">{cell.value}</a
+                            >
                         {:else}
-                            <span style={row.rechnungId == null ? 'color: var(--cds-support-error);' : ''}>
+                            <span
+                                style={row.rechnungId == null
+                                    ? 'color: var(--cds-support-error);'
+                                    : ''}
+                            >
                                 {cell.value}
                             </span>
                         {/if}
                     {:else if cell.key === 'anteilBetrag'}
-                        <span style={row.betragAbweichend ? 'color: var(--cds-support-error); font-weight: 600;' : ''}>
+                        <span
+                            style={row.betragAbweichend
+                                ? 'color: var(--cds-support-error); font-weight: 600;'
+                                : ''}
+                        >
                             {cell.value.formatted}
                         </span>
                     {:else if cell.key === 'status'}
-                        <span style={row.betragAbweichend ? 'color: var(--cds-support-error); font-weight: 600;' : ''}>
+                        <span
+                            style={row.betragAbweichend
+                                ? 'color: var(--cds-support-error); font-weight: 600;'
+                                : ''}
+                        >
                             {cell.value}
                         </span>
                     {:else}

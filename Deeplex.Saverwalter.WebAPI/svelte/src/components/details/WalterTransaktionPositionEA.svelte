@@ -15,7 +15,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { Row, Column, Button, Tag, InlineNotification } from 'carbon-components-svelte';
+    import {
+        Row,
+        Column,
+        Button,
+        Tag,
+        InlineNotification
+    } from 'carbon-components-svelte';
     import {
         WalterComboBox,
         WalterComboBoxWohnung,
@@ -45,7 +51,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: ea.wohnungId = wohnung?.id as number | undefined;
     $: ea.existingErhaltungsaufwendungId = existingEa?.id as number | undefined;
-    $: invalid = modeExisting ? !ea.existingErhaltungsaufwendungId : !ea.wohnungId;
+    $: invalid = modeExisting
+        ? !ea.existingErhaltungsaufwendungId
+        : !ea.wohnungId;
     $: if (isSinglePosition && availableBetrag > 0) {
         ea.betrag = availableBetrag;
     }
@@ -142,7 +150,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <InlineNotification
                     kind="warning"
                     title="Teilzahlung:"
-                    subtitle="Noch {(eaInfo.verbleibenderBetrag - ea.betrag).toFixed(2)} € offen nach dieser Zahlung"
+                    subtitle="Noch {(
+                        eaInfo.verbleibenderBetrag - ea.betrag
+                    ).toFixed(2)} € offen nach dieser Zahlung"
                     hideCloseButton
                 />
             </Column>

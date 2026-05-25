@@ -29,7 +29,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let entry: Partial<WalterZaehlerEntry> = {};
 </script>
 
-<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} disabled={!validateZaehler(entry)} />
+<WalterHeaderNew
+    apiURL={data.apiURL}
+    {entry}
+    title={data.title}
+    disabled={!validateZaehler(entry)}
+/>
 
 <WalterGrid>
     <WalterZaehler fetchImpl={data.fetchImpl} bind:entry />

@@ -15,7 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { NkZeileInfo, ZaehlerVerbrauchInfo } from './AbrechnungslaufTypes';
+    import type {
+        NkZeileInfo,
+        ZaehlerVerbrauchInfo
+    } from './AbrechnungslaufTypes';
     import { hkvoKosten } from './AbrechnungslaufTypes';
     import { convertEuro, convertPercent } from '$walter/services/utils';
     import {
@@ -70,7 +73,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 wwVerbrauchAnteil: anteil?.wwVerbrauchAnteil ?? null,
                 heizZaehler: anteil?.heizZaehler ?? [],
                 wwZaehler: anteil?.wwZaehler ?? [],
-                wfZeitanteil,
+                wfZeitanteil
             };
         });
 
@@ -78,7 +81,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const gezeigteUmlageIds = new Set<number>();
 
     const betragWarm = hkvoZeilen.reduce(
-        (s, hz) => s + hkvoKosten(hz.zeile, hz.zeile.anteile.find((a) => a.vertragId === vertragId)!),
+        (s, hz) =>
+            s +
+            hkvoKosten(
+                hz.zeile,
+                hz.zeile.anteile.find((a) => a.vertragId === vertragId)!
+            ),
         0
     );
 </script>
@@ -92,21 +100,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if showP9}
         {@const _add = gezeigteUmlageIds.add(hz.zeile.umlageId)}
         <p style="padding: 0.5rem 1rem;">
-            <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil:
-            2,5 × V/Q × (t<sub>w</sub> − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
+            <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil: 2,5 × V/Q × (t<sub
+                >w</sub
+            >
+            − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
         </p>
     {/if}
 
     <!-- §7 Heizkosten -->
     {@const heizBetrag = hz.gesamtbetrag * (1 - hz.para9_2)}
     {@const wfHeizAnteil = (1 - hz.p7) * hz.wfZeitanteil}
-    {@const vbHeizAnteil = hz.heizVerbrauchAnteil != null ? hz.p7 * hz.heizVerbrauchAnteil : 0}
+    {@const vbHeizAnteil =
+        hz.heizVerbrauchAnteil != null ? hz.p7 * hz.heizVerbrauchAnteil : 0}
 
     <StructuredList condensed>
         <StructuredListHead>
             <StructuredListRow>
                 <StructuredListCell head>
-                    §7 Heizung ({convertPercent(1 - hz.para9_2)} von {convertEuro(hz.gesamtbetrag)})
+                    §7 Heizung ({convertPercent(1 - hz.para9_2)} von {convertEuro(
+                        hz.gesamtbetrag
+                    )})
                 </StructuredListCell>
                 <StructuredListCell head>Anteil</StructuredListCell>
                 <StructuredListCell head>Nutzungsintervall</StructuredListCell>
@@ -118,41 +131,69 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </StructuredListHead>
         <StructuredListBody>
             {#if hz.heizZaehler.length > 0}
-                {@const heizGesamt = hz.heizZaehler.reduce((s, z) => s + z.verbrauch, 0)}
+                {@const heizGesamt = hz.heizZaehler.reduce(
+                    (s, z) => s + z.verbrauch,
+                    0
+                )}
                 <StructuredListRow>
                     <StructuredListCell>nach Verbrauch</StructuredListCell>
-                    <StructuredListCell>{convertPercent(hz.p7)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertPercent(hz.p7)}</StructuredListCell
+                    >
                     <StructuredListCell>{nutzungsIntervall}</StructuredListCell>
-                    <StructuredListCell>{convertEuro(heizBetrag * hz.p7)}</StructuredListCell>
-                    <StructuredListCell>{convertPercent(vbHeizAnteil)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertEuro(heizBetrag * hz.p7)}</StructuredListCell
+                    >
+                    <StructuredListCell
+                        >{convertPercent(vbHeizAnteil)}</StructuredListCell
+                    >
                     <StructuredListCell>
                         {heizGesamt.toFixed(2)} kWh
                         {#if hz.zeile.gesamtWaerme != null}
                             / {hz.zeile.gesamtWaerme.toFixed(2)} kWh
                         {/if}
                     </StructuredListCell>
-                    <StructuredListCell>{convertEuro(heizBetrag * vbHeizAnteil)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertEuro(
+                            heizBetrag * vbHeizAnteil
+                        )}</StructuredListCell
+                    >
                 </StructuredListRow>
                 {#each hz.heizZaehler as z}
                     <StructuredListRow>
-                        <StructuredListCell style="padding-left: 2rem">Zähler {z.kennnummer}</StructuredListCell>
+                        <StructuredListCell style="padding-left: 2rem"
+                            >Zähler {z.kennnummer}</StructuredListCell
+                        >
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
-                        <StructuredListCell>{z.verbrauch.toFixed(2)} {z.einheit}</StructuredListCell>
+                        <StructuredListCell
+                            >{z.verbrauch.toFixed(2)}
+                            {z.einheit}</StructuredListCell
+                        >
                         <StructuredListCell></StructuredListCell>
                     </StructuredListRow>
                 {/each}
             {/if}
             <StructuredListRow>
                 <StructuredListCell>nach Wohnfläche</StructuredListCell>
-                <StructuredListCell>{convertPercent(1 - hz.p7)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertPercent(1 - hz.p7)}</StructuredListCell
+                >
                 <StructuredListCell>{nutzungsIntervall}</StructuredListCell>
-                <StructuredListCell>{convertEuro(heizBetrag * (1 - hz.p7))}</StructuredListCell>
-                <StructuredListCell>{convertPercent(wfHeizAnteil)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertEuro(heizBetrag * (1 - hz.p7))}</StructuredListCell
+                >
+                <StructuredListCell
+                    >{convertPercent(wfHeizAnteil)}</StructuredListCell
+                >
                 <StructuredListCell></StructuredListCell>
-                <StructuredListCell>{convertEuro(heizBetrag * wfHeizAnteil)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertEuro(
+                        heizBetrag * wfHeizAnteil
+                    )}</StructuredListCell
+                >
             </StructuredListRow>
         </StructuredListBody>
     </StructuredList>
@@ -160,13 +201,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- §8 Warmwasser -->
     {@const wwBetrag = hz.gesamtbetrag * hz.para9_2}
     {@const wfWWAnteil = (1 - hz.p8) * hz.wfZeitanteil}
-    {@const vbWWAnteil = hz.wwVerbrauchAnteil != null ? hz.p8 * hz.wwVerbrauchAnteil : 0}
+    {@const vbWWAnteil =
+        hz.wwVerbrauchAnteil != null ? hz.p8 * hz.wwVerbrauchAnteil : 0}
 
     <StructuredList condensed>
         <StructuredListHead>
             <StructuredListRow>
                 <StructuredListCell head>
-                    §8 Warmwasser ({convertPercent(hz.para9_2)} von {convertEuro(hz.gesamtbetrag)})
+                    §8 Warmwasser ({convertPercent(hz.para9_2)} von {convertEuro(
+                        hz.gesamtbetrag
+                    )})
                 </StructuredListCell>
                 <StructuredListCell head>Anteil</StructuredListCell>
                 <StructuredListCell head>Nutzungsintervall</StructuredListCell>
@@ -178,48 +222,76 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </StructuredListHead>
         <StructuredListBody>
             {#if hz.wwZaehler.length > 0}
-                {@const wwGesamt = hz.wwZaehler.reduce((s, z) => s + z.verbrauch, 0)}
+                {@const wwGesamt = hz.wwZaehler.reduce(
+                    (s, z) => s + z.verbrauch,
+                    0
+                )}
                 <StructuredListRow>
                     <StructuredListCell>nach Verbrauch</StructuredListCell>
-                    <StructuredListCell>{convertPercent(hz.p8)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertPercent(hz.p8)}</StructuredListCell
+                    >
                     <StructuredListCell>{nutzungsIntervall}</StructuredListCell>
-                    <StructuredListCell>{convertEuro(wwBetrag * hz.p8)}</StructuredListCell>
-                    <StructuredListCell>{convertPercent(vbWWAnteil)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertEuro(wwBetrag * hz.p8)}</StructuredListCell
+                    >
+                    <StructuredListCell
+                        >{convertPercent(vbWWAnteil)}</StructuredListCell
+                    >
                     <StructuredListCell>
                         {wwGesamt.toFixed(2)} m³
                         {#if hz.zeile.gesamtWW != null}
                             / {hz.zeile.gesamtWW.toFixed(2)} m³
                         {/if}
                     </StructuredListCell>
-                    <StructuredListCell>{convertEuro(wwBetrag * vbWWAnteil)}</StructuredListCell>
+                    <StructuredListCell
+                        >{convertEuro(
+                            wwBetrag * vbWWAnteil
+                        )}</StructuredListCell
+                    >
                 </StructuredListRow>
                 {#each hz.wwZaehler as z}
                     <StructuredListRow>
-                        <StructuredListCell style="padding-left: 2rem">Zähler {z.kennnummer}</StructuredListCell>
+                        <StructuredListCell style="padding-left: 2rem"
+                            >Zähler {z.kennnummer}</StructuredListCell
+                        >
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
-                        <StructuredListCell>{z.verbrauch.toFixed(2)} {z.einheit}</StructuredListCell>
+                        <StructuredListCell
+                            >{z.verbrauch.toFixed(2)}
+                            {z.einheit}</StructuredListCell
+                        >
                         <StructuredListCell></StructuredListCell>
                     </StructuredListRow>
                 {/each}
             {/if}
             <StructuredListRow>
                 <StructuredListCell>nach Wohnfläche</StructuredListCell>
-                <StructuredListCell>{convertPercent(1 - hz.p8)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertPercent(1 - hz.p8)}</StructuredListCell
+                >
                 <StructuredListCell>{nutzungsIntervall}</StructuredListCell>
-                <StructuredListCell>{convertEuro(wwBetrag * (1 - hz.p8))}</StructuredListCell>
-                <StructuredListCell>{convertPercent(wfWWAnteil)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertEuro(wwBetrag * (1 - hz.p8))}</StructuredListCell
+                >
+                <StructuredListCell
+                    >{convertPercent(wfWWAnteil)}</StructuredListCell
+                >
                 <StructuredListCell></StructuredListCell>
-                <StructuredListCell>{convertEuro(wwBetrag * wfWWAnteil)}</StructuredListCell>
+                <StructuredListCell
+                    >{convertEuro(wwBetrag * wfWWAnteil)}</StructuredListCell
+                >
             </StructuredListRow>
         </StructuredListBody>
     </StructuredList>
 
     <p style="padding: 0.5rem 1rem;">
         <strong>{hz.zeile.bezeichnung}:</strong>
-        {convertEuro(hz.gesamtbetrag)} gesamt · Ihr Anteil: {convertEuro(hz.meinBetrag)}
+        {convertEuro(hz.gesamtbetrag)} gesamt · Ihr Anteil: {convertEuro(
+            hz.meinBetrag
+        )}
     </p>
 {/each}
 

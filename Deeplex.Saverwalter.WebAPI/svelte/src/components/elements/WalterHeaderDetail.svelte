@@ -84,7 +84,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </HeaderAction>
         {:else}
             {#if entry?.permissions?.update}
-                <HeaderGlobalAction disabled={disabled} on:click={click_save} icon={Save} />
+                <HeaderGlobalAction
+                    {disabled}
+                    on:click={click_save}
+                    icon={Save}
+                />
             {/if}
             {#if entry?.permissions?.remove}
                 <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />

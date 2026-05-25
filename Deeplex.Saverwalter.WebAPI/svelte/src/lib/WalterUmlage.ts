@@ -55,16 +55,18 @@ export class WalterUmlageEntry extends WalterApiHandler {
             WalterSelectionEntry.fromJson
         );
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
-        const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
-            WalterBetriebskostenrechnungEntry.fromJson
-        ) ?? [];
+        const betriebskostenrechnungen =
+            json.betriebskostenrechnungen?.map(
+                WalterBetriebskostenrechnungEntry.fromJson
+            ) ?? [];
         const selectedZaehler = json.selectedZaehler?.map(
             WalterSelectionEntry.fromJson
         );
         const hkvo =
             json.hkvo && WalterHKVOEntry.fromJson(json.hkvo as WalterHKVOEntry);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
-        const versionen = json.versionen?.map(WalterUmlageVersionEntry.fromJson) ?? [];
+        const versionen =
+            json.versionen?.map(WalterUmlageVersionEntry.fromJson) ?? [];
         const hkvos = json.hkvos?.map(WalterHKVOEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);

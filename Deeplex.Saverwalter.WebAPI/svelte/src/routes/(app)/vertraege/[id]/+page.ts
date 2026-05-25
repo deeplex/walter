@@ -23,9 +23,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const fileUrl = fileURL.vertrag(params.id);
 
     const transaktionenPromise = (
-        walter_get(`${WalterVertragEntry.ApiURL}/${params.id}/transaktionen`, fetch) as Promise<
-            WalterTransaktionEntry[]
-        >
+        walter_get(
+            `${WalterVertragEntry.ApiURL}/${params.id}/transaktionen`,
+            fetch
+        ) as Promise<WalterTransaktionEntry[]>
     ).catch(() => [] as WalterTransaktionEntry[]);
 
     return {

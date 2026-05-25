@@ -68,7 +68,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     `/api/selection/zahler-bankkonto/betriebskostenrechnung/${bk.existingBetriebskostenrechnungId}`,
                     fetchImpl
                 );
-                dispatch('zahlerResolved', (resp as WalterSelectionEntry | null)?.id as number | undefined);
+                dispatch(
+                    'zahlerResolved',
+                    (resp as WalterSelectionEntry | null)?.id as
+                        | number
+                        | undefined
+                );
             } catch {
                 dispatch('zahlerResolved', undefined);
             }
@@ -128,22 +133,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
-    type BkForderungInfo = { betriebskostenrechnungId: number; betrag: number; datum: string; schonGezahlt: number; verbleibend: number };
+    type BkForderungInfo = {
+        betriebskostenrechnungId: number;
+        betrag: number;
+        datum: string;
+        schonGezahlt: number;
+        verbleibend: number;
+    };
     let existingeForderungen: BkForderungInfo[] = [];
     $: if (!modeExisting && bk.umlageId && bk.betreffendesJahr) {
         walter_get(
             `/api/mietzahlungen/bk/check-forderung?umlageId=${bk.umlageId}&year=${bk.betreffendesJahr}`,
             fetchImpl
         )
-            .then((r) => { existingeForderungen = (r as BkForderungInfo[]) ?? []; })
-            .catch(() => { existingeForderungen = []; });
+            .then((r) => {
+                existingeForderungen = (r as BkForderungInfo[]) ?? [];
+            })
+            .catch(() => {
+                existingeForderungen = [];
+            });
     } else if (modeExisting) {
         existingeForderungen = [];
     }
 
     function forderungStatus(f: BkForderungInfo): string {
         if (f.verbleibend <= 0) return 'vollständig bezahlt';
-        if (f.schonGezahlt > 0) return `${f.schonGezahlt.toFixed(2)} € bereits gezahlt, ${f.verbleibend.toFixed(2)} € offen`;
+        if (f.schonGezahlt > 0)
+            return `${f.schonGezahlt.toFixed(2)} € bereits gezahlt, ${f.verbleibend.toFixed(2)} € offen`;
         return 'noch nicht bezahlt';
     }
 
@@ -173,7 +189,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             if (resp && typeof resp === 'object' && 'rechnungsbetrag' in resp) {
                 offenerPosten = resp as WalterOffenerPostenStatus;
                 if (isSinglePosition && offenerPosten.verbleibenderBetrag > 0) {
-                    bk.betrag = Math.min(offenerPosten.verbleibenderBetrag, availableBetrag);
+                    bk.betrag = Math.min(
+                        offenerPosten.verbleibenderBetrag,
+                        availableBetrag
+                    );
                 }
             }
         } catch {
@@ -193,15 +212,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         modeExisting = true;
         if (first && !bk.existingBetriebskostenrechnungId) {
             autoSelectBkId = first.betriebskostenrechnungId;
-            bk.existingBetriebskostenrechnungId = first.betriebskostenrechnungId;
+            bk.existingBetriebskostenrechnungId =
+                first.betriebskostenrechnungId;
             ladeOffenerPosten(first.betriebskostenrechnungId);
             try {
                 const resp = await walter_get(
                     `/api/selection/zahler-bankkonto/betriebskostenrechnung/${first.betriebskostenrechnungId}`,
                     fetchImpl
                 );
-                dispatch('zahlerResolved', (resp as WalterSelectionEntry | null)?.id as number | undefined);
-            } catch { dispatch('zahlerResolved', undefined); }
+                dispatch(
+                    'zahlerResolved',
+                    (resp as WalterSelectionEntry | null)?.id as
+                        | number
+                        | undefined
+                );
+            } catch {
+                dispatch('zahlerResolved', undefined);
+            }
         }
     }
 </script>
@@ -280,21 +307,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <InlineNotification
                             kind="error"
                             title="Betrag zu hoch:"
-                            subtitle="Maximal {offenerPosten.verbleibenderBetrag.toFixed(2)} € offen"
+                            subtitle="Maximal {offenerPosten.verbleibenderBetrag.toFixed(
+                                2
+                            )} € offen"
                             hideCloseButton
                         />
                     {:else if bk.betrag > availableBetrag + 0.005}
                         <InlineNotification
                             kind="error"
                             title="Betrag übersteigt Transaktionsbetrag:"
-                            subtitle="Maximal {availableBetrag.toFixed(2)} € verfügbar"
+                            subtitle="Maximal {availableBetrag.toFixed(
+                                2
+                            )} € verfügbar"
                             hideCloseButton
                         />
                     {:else if bk.betrag < offenerPosten.verbleibenderBetrag - 0.005}
                         <InlineNotification
                             kind="warning"
                             title="Teilzahlung:"
-                            subtitle="Noch {(offenerPosten.verbleibenderBetrag - bk.betrag).toFixed(2)} € offen nach dieser Zahlung"
+                            subtitle="Noch {(
+                                offenerPosten.verbleibenderBetrag - bk.betrag
+                            ).toFixed(2)} € offen nach dieser Zahlung"
                             hideCloseButton
                         />
                     {/if}
@@ -344,8 +377,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Column>
                 <InlineNotification
                     kind="warning"
-                    title="Bereits {existingeForderungen.length} Forderung{existingeForderungen.length > 1 ? 'en' : ''} für dieses Jahr vorhanden"
-                    subtitle={existingeForderungen.map(f => `${f.betrag.toFixed(2)} € vom ${new Date(f.datum).toLocaleDateString('de-DE')} (${forderungStatus(f)})`).join(' | ')}
+                    title="Bereits {existingeForderungen.length} Forderung{existingeForderungen.length >
+                    1
+                        ? 'en'
+                        : ''} für dieses Jahr vorhanden"
+                    subtitle={existingeForderungen
+                        .map(
+                            (f) =>
+                                `${f.betrag.toFixed(2)} € vom ${new Date(f.datum).toLocaleDateString('de-DE')} (${forderungStatus(f)})`
+                        )
+                        .join(' | ')}
                     hideCloseButton
                 />
             </Column>

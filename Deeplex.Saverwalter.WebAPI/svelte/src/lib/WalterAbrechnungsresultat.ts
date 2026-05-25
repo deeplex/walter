@@ -65,4 +65,4 @@ export type NkKontoZeileInfo = {
     beschreibung: string;
     istSoll: boolean;
     betrag: number;
-}
+};

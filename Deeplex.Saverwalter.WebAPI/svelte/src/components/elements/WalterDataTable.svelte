@@ -100,7 +100,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let addModalOpen = false;
 
     $: newPageUrl = addUrl
-        ? addUrl.replace(/^\/api/, '').split('/').slice(0, 2).join('/') + '/new'
+        ? addUrl
+              .replace(/^\/api/, '')
+              .split('/')
+              .slice(0, 2)
+              .join('/') + '/new'
         : undefined;
 
     const searchParams: URLSearchParams | null = $page
@@ -467,7 +471,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 <Button
                                     style="right: -1em; position: sticky;"
                                     href={newPageUrl}
-                                    on:click={(e) => { e.preventDefault(); (onAdd ?? handleAddClick)(); }}
+                                    on:click={(e) => {
+                                        e.preventDefault();
+                                        (onAdd ?? handleAddClick)();
+                                    }}
                                     iconDescription="Eintrag hinzufügen"
                                     icon={Add}
                                 >
