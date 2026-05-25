@@ -17,7 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterAdresse,
-        WalterComboBoxKontakt,
         WalterDatePicker,
         WalterNumberInput,
         WalterTextArea,
@@ -112,14 +111,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<Row>
-    <WalterComboBoxKontakt
-        {fetchImpl}
-        {readonly}
-        bind:value={entry.besitzer}
-        title="Besitzer"
-    />
-</Row>
 <WalterAdresse required {readonly} bind:entry={entry.adresse} />
 <Row>
     <WalterTextInput

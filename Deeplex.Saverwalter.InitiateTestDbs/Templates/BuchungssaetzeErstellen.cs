@@ -26,8 +26,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
     {
         public static async Task BucheHistorischAsync(SaverwalterContext ctx)
         {
-            // Skip if the database was already seeded with Transaktionen directly
-            // (i.e., new GenericDatabase which creates Transaktionen instead of legacy Mieten)
+#pragma warning disable CS0618
+            var hasMieten = await ctx.Mieten.AnyAsync();
+#pragma warning restore CS0618
+            if (!hasMieten)
+            {
+                Console.WriteLine("Keine Legacy-Mieten vorhanden – überspringe historische Buchung.");
+                return;
+            }
+
             var hasTransaktionen = await ctx.Transaktionen.AnyAsync();
             if (hasTransaktionen)
             {
@@ -76,7 +83,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(v => v.MietBuchungskonto)
                 .Include(v => v.Mieter)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Besitzer)
+                    .ThenInclude(w => w.Eigentuemer).ThenInclude(e => e.Kontakt)
                 .ToListAsync();
 
             foreach (var vertrag in vertraege)
@@ -144,7 +151,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(v => v.Mieten)
                 .Include(v => v.Mieter)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Besitzer)
+                    .ThenInclude(w => w.Eigentuemer).ThenInclude(e => e.Kontakt)
                 .ToListAsync();
 #pragma warning restore CS0618
 
@@ -153,7 +160,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var zahlerBankkonto = vertrag.Mieter
                     .Select(m => bankkontoByKontaktId.GetValueOrDefault(m.KontaktId))
                     .FirstOrDefault(b => b != null);
-                var empfaengerBankkonto = vertrag.Wohnung.Besitzer is { } besitzer
+                var besitzer = vertrag.Wohnung.Eigentuemer.FirstOrDefault()?.Kontakt;
+                var empfaengerBankkonto = besitzer != null
                     ? bankkontoByKontaktId.GetValueOrDefault(besitzer.KontaktId)
                     : null;
 
@@ -273,13 +281,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 .Include(u => u.ZahlungsKonto)
                 .Include(u => u.Typ)
                 .Include(u => u.Betriebskostenrechnungen)
-                .Include(u => u.Wohnungen).ThenInclude(w => w.Besitzer)
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Eigentuemer).ThenInclude(e => e.Kontakt)
                 .ToListAsync();
 
             foreach (var umlage in umlagen)
             {
                 var zahlerBankkonto = umlage.Wohnungen
-                    .Select(w => w.Besitzer != null ? bankkontoByKontaktId.GetValueOrDefault(w.Besitzer.KontaktId) : null)
+                    .Select(w => {
+                        var b = w.Eigentuemer.FirstOrDefault()?.Kontakt;
+                        return b != null ? bankkontoByKontaktId.GetValueOrDefault(b.KontaktId) : null;
+                    })
                     .FirstOrDefault(b => b != null);
 
                 foreach (var rechnung in umlage.Betriebskostenrechnungen)

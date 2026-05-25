@@ -172,10 +172,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var wohnung = new Wohnung(bezeichnung)
                     {
                         Adresse = adresse,
-                        Besitzer = besitzer,
                         MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
                         AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     };
+                    wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = besitzer });
                     wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), flaeche, flaeche, flaeche, 1) { Wohnung = wohnung });
                     wohnungen.Add(wohnung);
                 }
@@ -242,12 +242,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var vIdx = vertraege.Count;
                 var vertrag = new Vertrag()
                 {
-                    Ansprechpartner = wohnung.Besitzer, // TODO add some variation. Maybe a chance to add a new person
+                    Ansprechpartner = wohnung.Eigentuemer.FirstOrDefault()?.Kontakt, // TODO add some variation. Maybe a chance to add a new person
                     Ende = ende,
                     Wohnung = wohnung,
                     MietBuchungskonto = new Buchungskonto($"V{vIdx:D5}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
                     NkBuchungskonto = new Buchungskonto($"V{vIdx:D5}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
-                    KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Aktiv),
                     BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                     ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                     MietminderungsKonto = new Buchungskonto($"V{vIdx:D5}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),

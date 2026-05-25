@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BankkontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktMitgliedschaftController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
@@ -78,13 +79,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime LastModified { get; set; }
 
             public IEnumerable<SelectionEntry>? SelectedJuristischePersonen
-                => Entity?.JuristischePersonen.Select(e => new SelectionEntry(e.KontaktId, e.Name));
+                => Entity?.AlsMitglied
+                    .Where(m => m.Bis == null)
+                    .Select(m => new SelectionEntry(m.JuristischePerson.KontaktId, m.JuristischePerson.Bezeichnung));
 
             public IEnumerable<SelectionEntry>? SelectedMitglieder
-                => Entity?.Mitglieder.Select(e => new SelectionEntry(e.KontaktId, e.Name));
+                => Entity?.AlsJuristischePerson
+                    .Where(m => m.Bis == null)
+                    .Select(m => new SelectionEntry(m.Mitglied.KontaktId, m.Mitglied.Bezeichnung));
 
             public IEnumerable<KontaktEntryBase> JuristischePersonen { get; set; } = [];
             public IEnumerable<KontaktEntryBase> Mitglieder { get; set; } = [];
+            public IEnumerable<KontaktMitgliedschaftEntry> MitgliedschaftenAlsMitglied { get; set; } = [];
+            public IEnumerable<KontaktMitgliedschaftEntry> MitgliedschaftenAlsJuristischePerson { get; set; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
             public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];

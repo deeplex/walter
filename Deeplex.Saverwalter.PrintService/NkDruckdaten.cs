@@ -64,7 +64,11 @@ namespace Deeplex.Saverwalter.PrintService
                 throw new ArgumentException("targetPartei must be a Mieter-Partei (Vertrag != null).");
 
             var vertrag = targetPartei.Vertrag;
-            var vermieter = vertrag.Wohnung.Besitzer
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var vermieter = vertrag.Wohnung.Eigentuemer
+                .Where(e => e.Bis == null || e.Bis >= today)
+                .Select(e => e.Kontakt)
+                .FirstOrDefault()
                 ?? throw new InvalidOperationException(
                     $"Wohnung {vertrag.Wohnung.WohnungId} hat keinen Besitzer.");
             var ansprechpartner = vertrag.Ansprechpartner ?? vermieter;
@@ -327,13 +331,13 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (Q == 0 || V == 0) return null;
 
-            const decimal tw = 60m;
+            const decimal WarmwassertemperaturGrad = 60m; // §9 Abs. 2 HKVO
             return new HkvoP9_2Berechnung
             {
                 V = V,
                 Q = Q,
-                Tw = tw,
-                Para9_2 = 2.5m * (V / Q) * (tw - 10m),
+                Tw = WarmwassertemperaturGrad,
+                Para9_2 = 2.5m * (V / Q) * (WarmwassertemperaturGrad - 10m),
             };
         }
     }

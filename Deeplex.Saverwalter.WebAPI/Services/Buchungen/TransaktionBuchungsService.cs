@@ -443,11 +443,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (umlageId is null) return null;
 
+            var today = DateOnly.FromDateTime(DateTime.Today);
             var besitzerIds = await _ctx.Umlagen
                 .Where(u => u.UmlageId == umlageId)
                 .SelectMany(u => u.Wohnungen)
-                .Where(w => w.Besitzer != null)
-                .Select(w => w.Besitzer!.KontaktId)
+                .SelectMany(w => w.Eigentuemer)
+                .Where(e => e.Bis == null || e.Bis >= today)
+                .Select(e => e.Kontakt.KontaktId)
                 .Distinct()
                 .ToListAsync();
 

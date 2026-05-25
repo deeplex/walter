@@ -87,7 +87,7 @@ describe('lib entity mappers batch', () => {
             notiz: 'Wohnung',
             createdAt: new Date('2026-01-01T10:00:00Z'),
             lastModified: new Date('2026-01-01T11:00:00Z'),
-            besitzer: { id: 1, text: 'Besitzer' },
+            eigentuemer: [{ id: 1, kontakt: { id: 1, text: 'Besitzer' }, von: '2020-01-01', bis: undefined, anteil: undefined }],
             haus: [],
             zaehler: [zaehler],
             vertraege: [],

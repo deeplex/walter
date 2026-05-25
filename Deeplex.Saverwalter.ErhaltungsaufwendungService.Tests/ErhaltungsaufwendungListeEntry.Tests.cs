@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = new Erhaltungsaufwendung(1000, "Test", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
 

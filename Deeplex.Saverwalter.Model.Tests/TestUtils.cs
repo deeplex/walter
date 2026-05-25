@@ -57,8 +57,8 @@ namespace Deeplex.Saverwalter.ModelTests
             var wohnung = new Wohnung("TestWohnung")
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
-                Besitzer = vermieter
             };
+            wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = vermieter });
             wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
 
             var vertrag = new Vertrag()
@@ -67,7 +67,6 @@ namespace Deeplex.Saverwalter.ModelTests
                 Wohnung = wohnung,
                 MietBuchungskonto = new Buchungskonto("1000", "Miete", BuchungskontoTyp.Ertrag),
                 NkBuchungskonto = new Buchungskonto("1001", "Nebenkosten-Vorauszahlung", BuchungskontoTyp.Ertrag),
-                KautionsKonto = new Buchungskonto("1002", "Kaution", BuchungskontoTyp.Passiv),
                 BkAbrechnungsKonto = new Buchungskonto("1003", "NK-Abrechnung", BuchungskontoTyp.Ertrag),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),

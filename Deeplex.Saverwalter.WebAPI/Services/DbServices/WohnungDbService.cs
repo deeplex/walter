@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         e.Adresse.Strasse.ToLower().Contains(t) ||
                         e.Adresse.Hausnummer.ToLower().Contains(t) ||
                         e.Adresse.Stadt.ToLower().Contains(t))) ||
-                    (e.Besitzer != null && e.Besitzer.Name.ToLower().Contains(t)),
+                    e.Eigentuemer.Any(ei => ei.Kontakt.Name.ToLower().Contains(t)),
                 applySort: (q, sortBy, dir) => sortBy switch
                 {
                     "bezeichnung" => q.SortBy(e => e.Bezeichnung, dir),
@@ -105,12 +105,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 };
                 entity.Versionen.Add(version);
 
-                var besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer?.Id);
-                if (besitzer != null)
-                {
-                    entity.Besitzer = besitzer;
-                }
-
                 SetOptionalValues(entity, entry);
                 Ctx.Wohnungen.Add(entity);
 
@@ -141,15 +135,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                if (entry.Besitzer != null)
-                {
-                    entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer.Id);
-                }
-                else
-                {
-                    entity.Besitzer = null;
-                }
-
                 entity.Bezeichnung = entry.Bezeichnung;
                 SetOptionalValues(entity, entry);
                 Ctx.Wohnungen.Update(entity);

@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterUmlagen,
         WalterHeaderDetail,
         WalterWohnung,
+        WalterWohnungEigentuemer,
         WalterWohnungVersionen,
         WalterLinks,
         WalterLinkTile
@@ -33,6 +34,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
+        WalterWohnungEigentuemerEntry,
         type WalterErhaltungsaufwendungEntry,
         type WalterUmlageEntry,
         type WalterWohnungVersionEntry,
@@ -97,6 +99,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         permissions: data.entry.permissions
     };
 
+    const eigentuemerEntry: Partial<WalterWohnungEigentuemerEntry> = {
+        wohnung: {
+            id: '' + data.entry.id,
+            text: data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung
+        },
+        permissions: data.entry.permissions
+    };
+    const eigentuemerRows =
+        data.entry.eigentuemer as unknown as WalterWohnungEigentuemerEntry[];
+
     let blockSave = false;
     let commitVersionIfPending: () => Promise<void>;
     $: submitDisabled =
@@ -125,6 +137,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             entry={wohnungversionEntry}
             title="Versionen"
             rows={data.entry.versionen}
+        />
+        <WalterWohnungEigentuemer
+            fetchImpl={data.fetchImpl}
+            entry={eigentuemerEntry}
+            title="Eigentümer"
+            rows={eigentuemerRows}
         />
         <WalterWohnungen
             fetchImpl={data.fetchImpl}

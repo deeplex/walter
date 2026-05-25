@@ -29,17 +29,17 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity1 = new Erhaltungsaufwendung(1000, "Test", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
             var entity2 = new Erhaltungsaufwendung(2000, "Test2", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
             var entity3 = new Erhaltungsaufwendung(3000, "Test3", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
 
@@ -64,17 +64,17 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity1 = new Erhaltungsaufwendung(1000, "Test", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
             var entity2 = new Erhaltungsaufwendung(2000, "Test2", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
             var entity3 = new Erhaltungsaufwendung(3000, "Test3", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = vertrag.Wohnung
             };
 
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
             };
             var entity5 = new Erhaltungsaufwendung(3000, "Test5", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer!,
+                Aussteller = vertrag.Wohnung.Eigentuemer.FirstOrDefault()!.Kontakt!,
                 Wohnung = wohnung
             };
 

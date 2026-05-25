@@ -24,6 +24,14 @@ import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
+export interface WalterEigentuemerEntry {
+    id: number;
+    kontakt: WalterSelectionEntry;
+    von: string;
+    bis: string | undefined;
+    anteil: number | undefined;
+}
+
 export class WalterWohnungEntry extends WalterApiHandler {
     public static ApiURL = `/api/wohnungen`;
 
@@ -38,7 +46,7 @@ export class WalterWohnungEntry extends WalterApiHandler {
         public notiz: string,
         public createdAt: Date,
         public lastModified: Date,
-        public besitzer: WalterSelectionEntry | undefined,
+        public eigentuemer: WalterEigentuemerEntry[],
         public haus: WalterWohnungEntry[],
         public zaehler: WalterZaehlerEntry[],
         public vertraege: WalterVertragEntry[],
@@ -52,11 +60,23 @@ export class WalterWohnungEntry extends WalterApiHandler {
         super();
     }
 
+    get currentEigentuemer(): string {
+        const active = this.eigentuemer.filter((e) => e.bis == null);
+        return active.map((e) => e.kontakt.text).join(', ');
+    }
+
     static fromJson(json: WalterWohnungEntry) {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
-        const besitzer =
-            json.besitzer && WalterSelectionEntry.fromJson(json.besitzer);
+        const eigentuemer: WalterEigentuemerEntry[] = json.eigentuemer?.map(
+            (e) => ({
+                id: e.id,
+                kontakt: WalterSelectionEntry.fromJson(e.kontakt),
+                von: e.von,
+                bis: e.bis ?? undefined,
+                anteil: e.anteil ?? undefined
+            })
+        ) ?? [];
         const haus: WalterWohnungEntry[] = json.haus?.map(
             WalterWohnungEntry.fromJson
         );
@@ -85,7 +105,7 @@ export class WalterWohnungEntry extends WalterApiHandler {
             json.notiz,
             json.createdAt,
             json.lastModified,
-            besitzer,
+            eigentuemer,
             haus,
             zaehler,
             vertraege,

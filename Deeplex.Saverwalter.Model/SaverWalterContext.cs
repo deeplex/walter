@@ -29,6 +29,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Buchungszeile> Buchungszeilen { get; set; } = null!;
         public DbSet<OffenerPostenAusgleich> OffenePostenAusgleiche { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
+        public DbSet<KontaktMitgliedschaft> KontaktMitgliedschaften { get; set; } = null!;
+        public DbSet<WohnungEigentuemer> WohnungEigentuemer { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<GarageVertrag> GarageVertraege { get; set; } = null!;
         public DbSet<GarageVertragVersion> GarageVertragVersionen { get; set; } = null!;
@@ -189,6 +191,28 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey("VerbindlichkeitsKontoId")
                 .IsRequired(false);
 
+            modelBuilder.Entity<KontaktMitgliedschaft>()
+                .HasOne(m => m.JuristischePerson)
+                .WithMany(k => k.AlsJuristischePerson)
+                .HasForeignKey("JuristischePersonId")
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<KontaktMitgliedschaft>()
+                .HasOne(m => m.Mitglied)
+                .WithMany(k => k.AlsMitglied)
+                .HasForeignKey("MitgliedId")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WohnungEigentuemer>()
+                .HasOne(e => e.Wohnung)
+                .WithMany(w => w.Eigentuemer)
+                .HasForeignKey("WohnungId")
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<WohnungEigentuemer>()
+                .HasOne(e => e.Kontakt)
+                .WithMany(k => k.EigentuemerIn)
+                .HasForeignKey("KontaktId")
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Umlage>()
                 .HasOne(u => u.NkVerrechnungsKonto)
                 .WithMany()
@@ -292,6 +316,10 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Buchungssatz>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Buchungszeile>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Buchungszeile>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<KontaktMitgliedschaft>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<KontaktMitgliedschaft>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<WohnungEigentuemer>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<WohnungEigentuemer>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 
             modelBuilder.Entity<UserAccount>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<UserAccount>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");

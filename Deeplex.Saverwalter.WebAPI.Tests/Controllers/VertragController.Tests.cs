@@ -65,14 +65,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var wohnung = new Wohnung("Test") { Besitzer = besitzer };
+            var wohnung = new Wohnung("Test");
+            wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = besitzer });
             wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
             ctx.Wohnungen.Add(wohnung);
             ctx.SaveChanges();
 
             var entity = new Vertrag()
             {
-                Ansprechpartner = wohnung.Besitzer,
+                Ansprechpartner = besitzer,
                 Wohnung = wohnung
             };
             var entry = new VertragEntry(entity, new());

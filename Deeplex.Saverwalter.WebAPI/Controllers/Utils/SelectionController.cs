@@ -258,7 +258,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             return Ok(list.Select(e => new SelectionEntry(
                 e.WohnungId,
                 $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
-                e.Besitzer?.Bezeichnung)));
+                e.Eigentuemer.FirstOrDefault(ei => ei.Bis == null)?.Kontakt.Bezeichnung)));
         }
 
         [HttpGet]
@@ -431,11 +431,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/zahler-bankkonto/umlage/{umlageId}")]
         public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForUmlage(int umlageId)
         {
+            var today = DateOnly.FromDateTime(DateTime.Today);
             var besitzerIds = await Ctx.Umlagen
                 .Where(u => u.UmlageId == umlageId)
                 .SelectMany(u => u.Wohnungen)
-                .Where(w => w.Besitzer != null)
-                .Select(w => w.Besitzer!.KontaktId)
+                .SelectMany(w => w.Eigentuemer)
+                .Where(e => e.Bis == null || e.Bis >= today)
+                .Select(e => e.Kontakt.KontaktId)
                 .Distinct()
                 .ToListAsync();
 

@@ -66,7 +66,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test") { Besitzer = besitzer };
+            var entity = new Wohnung("Test");
+            entity.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = entity, Kontakt = besitzer });
             entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             var entry = new WohnungEntry(entity, new());
 
@@ -123,7 +124,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test") { Besitzer = besitzer };
+            var entity = new Wohnung("Test");
+            entity.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = entity, Kontakt = besitzer });
             entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();

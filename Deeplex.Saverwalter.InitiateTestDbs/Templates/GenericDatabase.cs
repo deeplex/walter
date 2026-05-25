@@ -400,10 +400,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var w = new Wohnung(bezeichnung)
                     {
                         Adresse = adresse,
-                        Besitzer = owner,
                         MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
                         AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
                     };
+                    w.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = w, Kontakt = owner });
                     w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), flaeche, flaeche, flaeche, 1) { Wohnung = w });
                     wohnungen.Add(w);
                 }
@@ -504,13 +504,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     var vIdx = vertraege.Count;
                     var vertrag = new Vertrag
                     {
-                        Ansprechpartner = wohnung.Besitzer,
+                        Ansprechpartner = wohnung.Eigentuemer.FirstOrDefault()?.Kontakt,
                         Ende = isActive ? null : contractEnd,
                         Wohnung = wohnung,
                         Notiz = $"Laufzeit: {contractStart:yyyy-MM} bis {(isActive ? "offen" : contractEnd.ToString("yyyy-MM", CultureInfo.InvariantCulture))}",
                         MietBuchungskonto = new Buchungskonto($"V{vIdx:D5}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
                         NkBuchungskonto = new Buchungskonto($"V{vIdx:D5}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
-                        KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Aktiv),
                         BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                         ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                         MietminderungsKonto = new Buchungskonto($"V{vIdx:D5}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
@@ -929,7 +928,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             foreach (var vertrag in vertraege)
             {
                 var idx = bankkontos.Count;
-                var besitzer = vertrag.Wohnung.Besitzer;
+                var besitzer = vertrag.Wohnung.Eigentuemer.FirstOrDefault()?.Kontakt;
                 var bk = new Bankkonto
                 {
                     Bank = banken[random.Next(banken.Length)],
@@ -971,7 +970,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var garageKennung = $"G-{wohnung.WohnungId:0000}";
                 var garage = new Garage(garageKennung)
                 {
-                    Besitzer = wohnung.Besitzer!,
+                    Besitzer = wohnung.Eigentuemer.FirstOrDefault()?.Kontakt!,
                     Adresse = wohnung.Adresse,
                     Notiz = "Stellplatz im Hinterhof",
                     Ertragskonto = new Buchungskonto($"{garageKennung}-EK", "Garagenmietertrag", BuchungskontoTyp.Ertrag)
@@ -1426,7 +1425,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             foreach (var umlage in umlagen)
             {
                 var zahlerBankkonto = umlage.Wohnungen
-                    .Select(w => w.Besitzer != null ? eigentuemerBankkontos.GetValueOrDefault(w.Besitzer) : null)
+                    .Select(w => {
+                        var b = w.Eigentuemer.FirstOrDefault()?.Kontakt;
+                        return b != null ? eigentuemerBankkontos.GetValueOrDefault(b) : null;
+                    })
                     .FirstOrDefault(b => b != null);
 
                 var beginn = GetEarliestDate(umlage.Wohnungen.ToList());

@@ -33,7 +33,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
         private static Wohnung MakeWohnung(string name, Kontakt? besitzer = null)
         {
-            var w = new Wohnung(name) { Besitzer = besitzer };
+            var w = new Wohnung(name);
+            if (besitzer != null)
+                w.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = w, Kontakt = besitzer });
             w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = w });
             return w;
         }

@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Wohnung = new(
                         wohnung.WohnungId,
                         $"{anschrift} - {wohnung.Bezeichnung}",
-                        wohnung.Besitzer?.Bezeichnung);
+                        wohnung.Eigentuemer.FirstOrDefault(e => e.Bis == null)?.Kontakt.Bezeichnung);
                 }
                 else
                 {

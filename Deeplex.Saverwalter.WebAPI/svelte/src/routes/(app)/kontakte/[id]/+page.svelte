@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterGrid,
         WalterBankkontos,
-        WalterKontakte,
+        WalterKontaktMitgliedschaft,
         WalterWohnungen,
         WalterVertraege,
         WalterHeaderDetail,
@@ -29,6 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import {
         WalterFileWrapper,
+        WalterKontaktMitgliedschaftEntry,
         WalterTransaktionEntry,
         validateKontakt
     } from '$walter/lib';
@@ -50,6 +51,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         permissions: data.entry.permissions
     };
 
+    const mitgliedEntry: Partial<WalterKontaktMitgliedschaftEntry> = {
+        mitglied: { id: data.entry.id, text: data.entry.bezeichnung }
+    };
+    const juristischePersonEntry: Partial<WalterKontaktMitgliedschaftEntry> = {
+        juristischePerson: { id: data.entry.id, text: data.entry.bezeichnung }
+    };
+
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
@@ -67,16 +75,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
 
     <WalterLinks>
-        <WalterKontakte
+        <WalterKontaktMitgliedschaft
             fetchImpl={data.fetchImpl}
-            title="Juristische Personen"
-            rows={data.entry.juristischePersonen}
+            title="Mitgliedschaften"
+            rows={data.entry.mitgliedschaftenAlsMitglied}
+            entry={mitgliedEntry}
+            mode="alsMitglied"
         />
         {#if data.entry.rechtsform.id !== 0}
-            <WalterKontakte
+            <WalterKontaktMitgliedschaft
                 fetchImpl={data.fetchImpl}
                 title="Mitglieder"
-                rows={data.entry.mitglieder}
+                rows={data.entry.mitgliedschaftenAlsJuristischePerson}
+                entry={juristischePersonEntry}
+                mode="alsJuristischePerson"
             />
         {/if}
         <WalterWohnungen

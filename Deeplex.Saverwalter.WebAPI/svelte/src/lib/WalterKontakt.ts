@@ -22,6 +22,15 @@ import { WalterTransaktionEntry } from './WalterTransaktion';
 import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungEntry } from './WalterWohnung';
 
+export interface WalterMitgliedschaftEntry {
+    id: number;
+    juristischePerson: WalterSelectionEntry;
+    mitglied: WalterSelectionEntry;
+    von: string;
+    bis: string | undefined;
+    anteil: number | undefined;
+}
+
 export class WalterKontaktEntry extends WalterApiHandler {
     public static ApiURL = `/api/kontakte`;
 
@@ -48,6 +57,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public mitglieder: WalterKontaktEntry[],
         public transaktionen: WalterTransaktionEntry[] = [],
         public bankkontos: WalterBankkontoEntry[] = [],
+        public mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] = [],
+        public mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] = [],
         public permissions: WalterPermissions
     ) {
         super();
@@ -79,6 +90,25 @@ export class WalterKontaktEntry extends WalterApiHandler {
             WalterSelectionEntry.fromJson
         );
 
+        const mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] =
+            json.mitgliedschaftenAlsMitglied?.map((m) => ({
+                id: m.id,
+                juristischePerson: WalterSelectionEntry.fromJson(m.juristischePerson),
+                mitglied: WalterSelectionEntry.fromJson(m.mitglied),
+                von: m.von,
+                bis: m.bis ?? undefined,
+                anteil: m.anteil ?? undefined
+            })) ?? [];
+        const mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] =
+            json.mitgliedschaftenAlsJuristischePerson?.map((m) => ({
+                id: m.id,
+                juristischePerson: WalterSelectionEntry.fromJson(m.juristischePerson),
+                mitglied: WalterSelectionEntry.fromJson(m.mitglied),
+                von: m.von,
+                bis: m.bis ?? undefined,
+                anteil: m.anteil ?? undefined
+            })) ?? [];
+
         return new WalterKontaktEntry(
             json.id,
             json.email,
@@ -102,6 +132,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
             mitglieder,
             transaktionen,
             bankkontos,
+            mitgliedschaftenAlsMitglied,
+            mitgliedschaftenAlsJuristischePerson,
             permissions
         );
     }

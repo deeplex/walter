@@ -25,7 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
         { key: 'bezeichnung', value: 'Bezeichnung' },
-        { key: 'besitzer.text', value: 'Besitzer' },
+        { key: 'currentEigentuemer', value: 'Eigentümer' },
         { key: 'bewohner', value: 'Bewohner' }
     ];
 

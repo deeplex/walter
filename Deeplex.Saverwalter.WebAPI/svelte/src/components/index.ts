@@ -94,9 +94,11 @@ export { default as WalterHKVOVersionen } from './lists/WalterHKVOVersionen.svel
 export { default as WalterUmlageVersionen } from './lists/WalterUmlageVersionen.svelte';
 export { default as WalterUmlagetypen } from './lists/WalterUmlagetypen.svelte';
 export { default as WalterWohnungen } from './lists/WalterWohnungen.svelte';
+export { default as WalterWohnungEigentuemer } from './lists/WalterWohnungEigentuemer.svelte';
 export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltungsaufwendungen.svelte';
 export { default as WalterBetriebskostenrechnungen } from './lists/WalterBetriebskostenrechnungen.svelte';
 export { default as WalterKontakte } from './lists/WalterKontakte.svelte';
+export { default as WalterKontaktMitgliedschaft } from './lists/WalterKontaktMitgliedschaft.svelte';
 export { default as WalterTransaktionen } from './lists/WalterTransaktionen.svelte';
 export { default as WalterGaragen } from './lists/WalterGaragen.svelte';
 export { default as WalterGarageVertraege } from './lists/WalterGarageVertraege.svelte';

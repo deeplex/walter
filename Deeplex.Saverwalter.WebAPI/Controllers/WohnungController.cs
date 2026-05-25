@@ -32,6 +32,27 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/wohnungen")]
     public class WohnungController : FileControllerBase<WohnungEntry, int, Wohnung>
     {
+        public class EigentuemerEntryBase
+        {
+            public int Id { get; set; }
+            public SelectionEntry Kontakt { get; set; } = null!;
+            public DateOnly Von { get; set; }
+            public DateOnly? Bis { get; set; }
+            public decimal? Anteil { get; set; }
+            public Permissions Permissions { get; set; } = new();
+
+            public EigentuemerEntryBase() { }
+            public EigentuemerEntryBase(WohnungEigentuemer entity, Permissions permissions)
+            {
+                Id = entity.WohnungEigentuemerId;
+                Kontakt = new(entity.Kontakt.KontaktId, entity.Kontakt.Bezeichnung);
+                Von = entity.Von;
+                Bis = entity.Bis;
+                Anteil = entity.Anteil;
+                Permissions = permissions;
+            }
+        }
+
         public class WohnungEntryBase
         {
             protected Wohnung? Entity { get; }
@@ -39,7 +60,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
             public AdresseEntryBase? Adresse { get; set; }
-            public SelectionEntry? Besitzer { get; set; }
+            public IEnumerable<EigentuemerEntryBase> Eigentuemer { get; set; } = [];
             public string? Bewohner { get; set; }
             public decimal Wohnflaeche { get; set; }
             public decimal Nutzflaeche { get; set; }
@@ -56,10 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = entity.WohnungId;
                 Bezeichnung = entity.Bezeichnung;
                 Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
-                if (entity.Besitzer is Kontakt k)
-                {
-                    Besitzer = new(k.KontaktId, k.Bezeichnung);
-                }
+                Eigentuemer = entity.Eigentuemer.Select(e => new EigentuemerEntryBase(e, permissions));
 
                 var current = entity.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault();
                 Wohnflaeche = current?.Wohnflaeche ?? 0;

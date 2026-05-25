@@ -24,10 +24,10 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; set; }
         public virtual Buchungskonto MietErtragskonto { get; set; } = null!;
         public virtual Buchungskonto AufwandsKonto { get; set; } = null!;
-        public virtual Kontakt? Besitzer { get; set; }
         public virtual Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }
 
+        public virtual List<WohnungEigentuemer> Eigentuemer { get; private set; } = [];
         public virtual List<WohnungVersion> Versionen { get; private set; } = [];
         public virtual List<Vertrag> Vertraege { get; private set; } = [];
         public virtual List<Zaehler> Zaehler { get; private set; } = [];

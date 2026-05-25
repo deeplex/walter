@@ -30,8 +30,9 @@ namespace Deeplex.Saverwalter.Model
         public decimal Grundmiete { get; set; }
         /// <summary>
         /// Vereinbarte monatliche NK-Vorauszahlung laut Mietvertrag (Planwert).
-        /// Dient nur zur Information und Dokumentation gegenüber dem Mieter.
-        /// Die buchhalterische NK-VZ-Komponente ergibt sich immer aus: Zahlung − Grundmiete.
+        /// Dient der Dokumentation und wird als Vorgabewert im Buchungsdialog angezeigt.
+        /// Die tatsächlich gebuchte NK-VZ ergibt sich aus dem MieteInput und landet als
+        /// eigenständiger Buchungssatz auf NkBuchungskonto (nicht aus Zahlung − Grundmiete).
         /// </summary>
         public decimal Nebenkostenvorauszahlung { get; set; }
         public string? Notiz { get; set; }
