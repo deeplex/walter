@@ -18,9 +18,9 @@ import type {
     WalterUmlageEntry,
     WalterVertragEntry,
     WalterZaehlerEntry,
-    WalterMieteEntry,
     WalterZaehlerstandEntry
 } from '$walter/lib';
+import type { WalterMietzahlungListEntry } from '$walter/lib/WalterMietzahlung';
 
 const defaultPermissions = { read: true, update: true, remove: true };
 
@@ -29,7 +29,7 @@ const createMockVertrag = (
     id: number,
     beginn: string,
     ende?: string,
-    mieten: WalterMieteEntry[] = [],
+    mietzahlungen: WalterMietzahlungListEntry[] = [],
     permissions = defaultPermissions,
     mieterAuflistung = 'Mieter A, Mieter B'
 ): WalterVertragEntry =>
@@ -37,7 +37,7 @@ const createMockVertrag = (
         id,
         beginn,
         ende,
-        mieten,
+        mietzahlungen,
         mieterAuflistung,
         permissions,
         versionen: [
@@ -118,12 +118,12 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
         });
 
         it('should skip months that already have miete entries', () => {
-            const mieten: WalterMieteEntry[] = [
+            const mieten: WalterMietzahlungListEntry[] = [
                 {
                     id: 1,
                     betreffenderMonat: '2024-01-01',
-                    zahlungsdatum: '2024-01-15',
-                    betrag: 1000
+                    buchungsdatum: '2024-01-15',
+                    kaltmieteZahlung: 1000
                 } as any
             ];
             const vertraege = [
@@ -153,12 +153,12 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
         });
 
         it('should use latest miete betrag or grundmiete for amount', () => {
-            const mieten: WalterMieteEntry[] = [
+            const mieten: WalterMietzahlungListEntry[] = [
                 {
                     id: 1,
                     betreffenderMonat: '2023-12-01',
-                    zahlungsdatum: '2023-12-15',
-                    betrag: 1200
+                    buchungsdatum: '2023-12-15',
+                    kaltmieteZahlung: 1200
                 } as any
             ];
             const vertraege = [
@@ -377,8 +377,8 @@ function buildRentTasks(
     function getLatestMieteBefore(
         vertrag: WalterVertragEntry,
         date: Date
-    ): WalterMieteEntry | undefined {
-        return [...(vertrag.mieten || [])]
+    ): WalterMietzahlungListEntry | undefined {
+        return [...(vertrag.mietzahlungen || [])]
             .filter(
                 (miete) =>
                     new Date(miete.betreffenderMonat).getTime() < date.getTime()
@@ -431,7 +431,7 @@ function buildRentTasks(
             }
 
             const existingMonths = new Set(
-                (vertrag.mieten || [])
+                (vertrag.mietzahlungen || [])
                     .filter(
                         (miete) =>
                             new Date(miete.betreffenderMonat).getFullYear() ===
@@ -460,7 +460,7 @@ function buildRentTasks(
                 const monthDate = new Date(year, monthIndex, 1);
                 const latestMiete = getLatestMieteBefore(vertrag, monthDate);
                 const amount =
-                    latestMiete?.betrag ||
+                    latestMiete?.kaltmieteZahlung ||
                     getGrundmieteForDate(vertrag, monthDate);
                 const mieterAuflistung =
                     vertrag.mieterAuflistung || 'Keine Mieter';

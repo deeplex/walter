@@ -31,7 +31,6 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<WohnungVersion> Versionen { get; private set; } = [];
         public virtual List<Vertrag> Vertraege { get; private set; } = [];
         public virtual List<Zaehler> Zaehler { get; private set; } = [];
-        public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = [];
         public virtual List<Umlage> Umlagen { get; private set; } = [];
         public virtual List<Verwalter> Verwalter { get; private set; } = [];
 

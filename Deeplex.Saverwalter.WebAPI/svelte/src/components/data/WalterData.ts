@@ -16,11 +16,11 @@
 import type {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
-    WalterMieteEntry,
     WalterUmlageEntry,
     WalterVertragEntry,
     WalterWohnungEntry
 } from '$walter/lib';
+import type { WalterMietzahlungListEntry } from '$walter/lib/WalterMietzahlung';
 
 const baseOptions = {
     legend: { enabled: false },
@@ -74,7 +74,7 @@ export function walter_data_aufwendungen(
     };
 
     const data = aufwendungen.map((aufwendung) => ({
-        group: `${aufwendung.aussteller.text}`,
+        group: `${aufwendung.aussteller?.text ?? 'Unbekannt'}`,
         date: aufwendung.datum,
         value: aufwendung.betrag
     }));
@@ -111,8 +111,8 @@ export const months = [
     'Dezember'
 ];
 
-export function walter_data_mieten(title: string, mieten: WalterMieteEntry[]) {
-    const sortedMieten = mieten.sort((a, b) => a.betrag - b.betrag);
+export function walter_data_mieten(title: string, mieten: WalterMietzahlungListEntry[]) {
+    const sortedMieten = mieten.sort((a, b) => a.kaltmieteZahlung - b.kaltmieteZahlung);
 
     const options = {
         ...baseOptions,
@@ -120,8 +120,8 @@ export function walter_data_mieten(title: string, mieten: WalterMieteEntry[]) {
         axes: {
             left: {
                 domain: [
-                    sortedMieten[0].betrag,
-                    sortedMieten[sortedMieten.length - 1].betrag
+                    sortedMieten[0].kaltmieteZahlung,
+                    sortedMieten[sortedMieten.length - 1].kaltmieteZahlung
                 ],
                 mapsTo: 'value',
                 scaleType: 'linear'
@@ -131,7 +131,7 @@ export function walter_data_mieten(title: string, mieten: WalterMieteEntry[]) {
     };
 
     const data = mieten.map((miete) => ({
-        value: miete.betrag,
+        value: miete.kaltmieteZahlung,
         date: miete.betreffenderMonat
     }));
 
@@ -279,7 +279,7 @@ function fillDataWithMieten(
     data: WalterDataType,
     year: number
 ) {
-    const mietenInThisYear = vertrag.mieten.filter(
+    const mietenInThisYear = vertrag.mietzahlungen.filter(
         (miete) => new Date(miete.betreffenderMonat).getFullYear() === year
     );
 
@@ -298,7 +298,7 @@ function fillDataWithMieten(
             return;
         }
 
-        previous.value = ((previous.value as number) || 0) + miete.betrag;
+        previous.value = ((previous.value as number) || 0) + miete.kaltmieteZahlung;
     }
 }
 

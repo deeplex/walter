@@ -28,7 +28,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
     public static ApiURL = `/api/betriebskostenrechnungen`;
 
     constructor(
-        public id: number,
+        public id: string,
         public betrag: number,
         public betreffendesJahr: number,
         public datum: string,

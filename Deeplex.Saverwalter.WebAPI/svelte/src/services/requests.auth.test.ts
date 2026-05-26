@@ -109,7 +109,6 @@ describe('requests auth behavior', () => {
             ['erhaltungsaufwendungen', '/api/selection/erhaltungsaufwendungen'],
             ['hkvo_p9a2', '/api/selection/hkvo_p9a2'],
             ['juristischePersonen', '/api/selection/juristischepersonen'],
-            ['mieten', '/api/selection/mieten'],
             ['mietminderungen', '/api/selection/mietminderungen'],
             ['rechtsformen', '/api/selection/rechtsformen'],
             ['umlagen', '/api/selection/umlagen'],

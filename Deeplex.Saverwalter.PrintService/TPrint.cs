@@ -518,41 +518,5 @@ namespace Deeplex.Saverwalter.PrintService
 
             return printImpl.body;
         }
-
-        public static T Print(IErhaltungsaufwendungWohnung erhaltungsaufwendungen, IPrint<T> printImpl)
-        {
-            var anschrift = erhaltungsaufwendungen.Wohnung.Adresse!.Anschrift;
-            printImpl.Heading($"{anschrift}, {erhaltungsaufwendungen.Wohnung.Bezeichnung}");
-
-            var widths = new int[] { 40, 15, 31, 13 };
-            var col1 = new List<string> { "Aussteller" };
-            var col2 = new List<string> { "Datum" };
-            var col3 = new List<string> { "Bezeichnung" };
-            var col4 = new List<string> { "Betrag" };
-            var bold = new List<bool> { true };
-            var underlined = new List<bool> { true };
-
-            foreach (var a in erhaltungsaufwendungen.Liste)
-            {
-                col1.Add(a.Aussteller.Bezeichnung);
-                col2.Add(a.Datum.ToString("dd.MM.yyyy"));
-                col3.Add(a.Bezeichnung);
-                col4.Add(Euro(a.Betrag));
-                bold.Add(false);
-                underlined.Add(false);
-            }
-
-            col1.Add("");
-            col2.Add("");
-            col3.Add("Summe:");
-            col4.Add(Euro(erhaltungsaufwendungen.Summe));
-
-            var justification = new int[] { 0, 1, 1, 2 };
-            var cols = new List<List<string>> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
-
-            printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
-
-            return printImpl.body;
-        }
     }
 }

@@ -33,12 +33,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterFileWrapper,
         type WalterMietminderungEntry,
-        WalterBetriebskostenrechnungEntry,
         WalterKontaktEntry,
         validateVertrag
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import WalterVertragTransaktionen from '$walter/components/lists/WalterVertragTransaktionen.svelte';
     import { fileURL } from '$walter/services/files';
     export let data: PageData;
@@ -49,9 +47,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: vertragversionEntry = getVertragversionEntry(data.entry);
 
     const mieterEntry: Partial<WalterKontaktEntry> = {};
-
-    const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
-        {};
 
     let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
@@ -112,13 +107,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Mietminderungen"
             rows={data.entry.mietminderungen}
         />
-        <WalterBetriebskostenrechnungen
-            entry={betriebskostenrechnungEntry}
-            fetchImpl={data.fetchImpl}
-            title="Betriebskostenrechnungen"
-            rows={data.entry.betriebskostenrechnungen}
-        />
-
         <WalterGarageVertraege
             fetchImpl={data.fetchImpl}
             title="Garagenverträge"

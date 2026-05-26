@@ -95,40 +95,6 @@ namespace Deeplex.Saverwalter.ModelTests
             return vertrag;
         }
 
-        public static List<Miete> Add12Mieten(Vertrag vertrag, double grundmiete)
-        {
-            var mieten = new List<Miete>();
-            for (int month = 1; month <= 12; month++)
-            {
-                mieten.Add(new Miete(
-                    new DateOnly(2021, month, 1),
-                    new DateOnly(2021, month, 1),
-                    grundmiete)
-                {
-                    Vertrag = vertrag,
-                });
-            }
-
-            return mieten;
-        }
-
-        public static List<Miete> Add6Mieten(Vertrag vertrag, double grundmiete)
-        {
-            var mieten = new List<Miete>();
-            for (int month = 1; month <= 6; month++)
-            {
-                mieten.Add(new Miete(
-                    new DateOnly(2021, month, 1),
-                    new DateOnly(2021, month, 1),
-                    grundmiete)
-                {
-                    Vertrag = vertrag,
-                });
-            }
-
-            return mieten;
-        }
-
         private static void AddBkForderung(Umlage umlage, decimal betrag, DateOnly datum, int jahr)
         {
             var satz = new Buchungssatz(datum, $"BK-Forderung {umlage.Typ?.Bezeichnung} {jahr}")

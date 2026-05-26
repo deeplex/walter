@@ -8,7 +8,6 @@ const selectionMock = {
     betriebskostenrechnungen: vi.fn().mockResolvedValue([]),
     erhaltungsaufwendungen: vi.fn().mockResolvedValue([]),
     kontakte: vi.fn().mockResolvedValue([]),
-    mieten: vi.fn().mockResolvedValue([]),
     mietminderungen: vi.fn().mockResolvedValue([]),
     umlagen: vi.fn().mockResolvedValue([]),
     umlagetypen: vi.fn().mockResolvedValue([]),
@@ -30,7 +29,6 @@ vi.mock('$walter/services/files', () => ({
         erhaltungsaufwendung: (id: string) =>
             `/api/erhaltungsaufwendungen/${id}/files`,
         kontakt: (id: string) => `/api/kontakte/${id}/files`,
-        miete: (id: string) => `/api/mieten/${id}/files`,
         mietminderung: (id: string) => `/api/mietminderungen/${id}/files`,
         umlage: (id: string) => `/api/umlagen/${id}/files`,
         umlagetyp: (id: string) => `/api/umlagetypen/${id}/files`,
@@ -64,7 +62,6 @@ vi.mock('$walter/lib', () => {
             ApiURL: '/api/erhaltungsaufwendungen'
         },
         WalterKontaktEntry: { ApiURL: '/api/kontakte' },
-        WalterMieteEntry: { ApiURL: '/api/mieten' },
         WalterMietminderungEntry: { ApiURL: '/api/mietminderungen' },
         WalterUmlageEntry: { ApiURL: '/api/umlagen' },
         WalterUmlagetypEntry: { ApiURL: '/api/umlagetypen' },
@@ -80,7 +77,6 @@ vi.mock('..', () => ({
     WalterBetriebskostenrechnung: { name: 'WalterBetriebskostenrechnung' },
     WalterErhaltungsaufwendung: { name: 'WalterErhaltungsaufwendung' },
     WalterKontakt: { name: 'WalterKontakt' },
-    WalterMiete: { name: 'WalterMiete' },
     WalterMietminderung: { name: 'WalterMietminderung' },
     WalterUmlage: { name: 'WalterUmlage' },
     WalterUmlagetyp: { name: 'WalterUmlagetyp' },

@@ -23,9 +23,9 @@ export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnun
 export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 export { WalterHKVOEntry } from './WalterHKVO';
-export { WalterMieteEntry } from './WalterMiete';
 export {
     WalterMietzahlungListEntry,
+    WalterMietzahlungDetailEntry,
     WalterMietzahlungApiURL,
     type WalterMietzahlungInput,
     type WalterForderungsstatusEntry,

@@ -83,9 +83,9 @@ describe('WalterData helpers', () => {
 
     it('builds mieten chart with sorted min/max domain', () => {
         const config = walter_data_mieten('Mieten', [
-            { betrag: 900, betreffenderMonat: '2026-03-01' },
-            { betrag: 700, betreffenderMonat: '2026-01-01' },
-            { betrag: 800, betreffenderMonat: '2026-02-01' }
+            { kaltmieteZahlung: 900, betreffenderMonat: '2026-03-01' },
+            { kaltmieteZahlung: 700, betreffenderMonat: '2026-01-01' },
+            { kaltmieteZahlung: 800, betreffenderMonat: '2026-02-01' }
         ] as never);
 
         expect(config.options.axes?.left).toMatchObject({
@@ -155,9 +155,9 @@ describe('WalterData helpers', () => {
                     ende: undefined,
                     wohnung: { id: 201, text: 'W1' },
                     versionen: [{ grundmiete: 700 }],
-                    mieten: [
-                        { betreffenderMonat: '2026-01-15', betrag: 700 },
-                        { betreffenderMonat: '2026-02-15', betrag: 710 }
+                    mietzahlungen: [
+                        { betreffenderMonat: '2026-01-15', kaltmieteZahlung: 700 },
+                        { betreffenderMonat: '2026-02-15', kaltmieteZahlung: 710 }
                     ]
                 },
                 {
@@ -166,7 +166,7 @@ describe('WalterData helpers', () => {
                     ende: '2025-12-01',
                     wohnung: { id: 202, text: 'W2' },
                     versionen: [{ grundmiete: 700 }],
-                    mieten: [{ betreffenderMonat: '2026-01-15', betrag: 999 }]
+                    mietzahlungen: [{ betreffenderMonat: '2026-01-15', kaltmieteZahlung: 999 }]
                 },
                 {
                     id: 3,
@@ -174,7 +174,7 @@ describe('WalterData helpers', () => {
                     ende: undefined,
                     wohnung: { id: 203, text: 'W3' },
                     versionen: [{ grundmiete: 0 }],
-                    mieten: [{ betreffenderMonat: '2026-01-15', betrag: 999 }]
+                    mietzahlungen: [{ betreffenderMonat: '2026-01-15', kaltmieteZahlung: 999 }]
                 }
             ] as never,
             2026

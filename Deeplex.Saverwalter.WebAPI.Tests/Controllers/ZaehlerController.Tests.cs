@@ -46,9 +46,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
             A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = await controller.Get();
+            var result = await controller.Get(new PagedQuery());
 
-            result.Value.Should().NotBeNull();
+            result.Should().NotBeNull();
         }
 
         [Fact]

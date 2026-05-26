@@ -37,7 +37,7 @@ function createEntryMocks(entries: number) {
     for (let seed = 0; seed < entries; seed++) {
         mocks.push(
             new WalterBetriebskostenrechnungEntry(
-                seed,
+                seed.toString(),
                 seed * 100,
                 2021,
                 `2021-${(seed % 12) + 1}-${(seed % 28) + 1}`,

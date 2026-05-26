@@ -19,6 +19,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -131,13 +132,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             var umlage = await ctx.Umlagen
                 .Include(u => u.NkVerrechnungsKonto)
-                    .ThenInclude(k => k.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben
-                                 && (z.Buchungssatz.Buchungsjahr == year)))
+                    .ThenInclude(k => k.Buchungszeilen)
                     .ThenInclude(z => z.Buchungssatz)
                 .Include(u => u.NkVerrechnungsKonto)
-                    .ThenInclude(k => k.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(k => k.Buchungszeilen)
                     .ThenInclude(z => z.AlsHabenZeile)
                     .ThenInclude(a => a.SollZeile)
                 .FirstOrDefaultAsync(u => u.UmlageId == umlageId);
@@ -147,8 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             if (!authRx.Succeeded) return Forbid();
 
             var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben
-                         && (z.Buchungssatz.Buchungsjahr == year))
+                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr == year)
                 .ToList() ?? [];
 
             return Ok(habenZeilen.Select(z =>
@@ -201,25 +198,87 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Info zu einer Erhaltungsaufwendung — Rechnungsbetrag für die UI-Vorauswahl.
+        /// Info zu einer Erhaltungsaufwendung — Verbindlichkeit minus bereits gebuchte Zahlungen.
         /// </summary>
-        [HttpGet("ea/{erhaltungsaufwendungId}/info")]
-        public async Task<ActionResult<OffenerPostenStatus>> GetEaInfo(int erhaltungsaufwendungId)
+        [HttpGet("ea/{buchungssatzId}/info")]
+        public async Task<ActionResult<OffenerPostenStatus>> GetEaInfo(Guid buchungssatzId)
         {
-            var ea = await ctx.Erhaltungsaufwendungen
-                .Include(e => e.Wohnung)
-                .FirstOrDefaultAsync(e => e.ErhaltungsaufwendungId == erhaltungsaufwendungId);
+            var satz = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .FirstOrDefaultAsync(s => s.BuchungssatzId == buchungssatzId);
 
-            if (ea is null) return NotFound();
+            if (satz is null) return NotFound();
 
-            var authRx = await auth.AuthorizeAsync(User, ea.Wohnung, [Operations.Read]);
+            var sollZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Soll);
+            var habenZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+            if (sollZeile is null || habenZeile is null) return NotFound();
+
+            var wohnung = await ctx.Wohnungen
+                .Include(w => w.Verwalter)
+                .FirstOrDefaultAsync(w => w.AufwandsKonto.BuchungskontoId == sollZeile.Buchungskonto.BuchungskontoId);
+            if (wohnung is null) return NotFound();
+
+            var authRx = await auth.AuthorizeAsync(User, wohnung, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
+
+            var schonGezahlt = habenZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
 
             return Ok(new OffenerPostenStatus
             {
-                Rechnungsbetrag = ea.Betrag,
-                SchonGezahlt = 0,
-                VerbleibenderBetrag = ea.Betrag
+                Rechnungsbetrag = habenZeile.Betrag,
+                SchonGezahlt = schonGezahlt,
+                VerbleibenderBetrag = habenZeile.Betrag - schonGezahlt
+            });
+        }
+
+        public class MietzahlungDetailEntry
+        {
+            public Guid Id { get; set; }
+            public DateOnly Buchungsdatum { get; set; }
+            public string BetreffenderMonat { get; set; } = string.Empty;
+            public decimal Betrag { get; set; }
+            public SelectionEntry Vertrag { get; set; } = null!;
+            public Permissions Permissions { get; set; } = new Permissions();
+        }
+
+        /// <summary>
+        /// Gibt Details eines einzelnen Mietzahlungs-Buchungssatzes zurück.
+        /// </summary>
+        [HttpGet("satz/{buchungssatzId}")]
+        public async Task<ActionResult<MietzahlungDetailEntry>> GetBySatz(Guid buchungssatzId)
+        {
+            var satz = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .FirstOrDefaultAsync(s => s.BuchungssatzId == buchungssatzId);
+
+            if (satz is null) return NotFound();
+
+            var habenZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+            if (habenZeile is null) return NotFound();
+
+            var vertrag = await ctx.Vertraege
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .FirstOrDefaultAsync(v => v.MietBuchungskonto.BuchungskontoId == habenZeile.Buchungskonto.BuchungskontoId);
+
+            if (vertrag is null) return NotFound();
+
+            var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var permissions = await GetPermissions(User, vertrag, auth);
+            var wohnungText = (vertrag.Wohnung.Adresse?.Anschrift ?? "?") + " - " + vertrag.Wohnung.Bezeichnung;
+
+            return Ok(new MietzahlungDetailEntry
+            {
+                Id = satz.BuchungssatzId,
+                Buchungsdatum = satz.Buchungsdatum,
+                BetreffenderMonat = new DateOnly(satz.Buchungsdatum.Year, satz.Buchungsdatum.Month, 1).ToString("yyyy-MM-01"),
+                Betrag = habenZeile.Betrag,
+                Vertrag = new SelectionEntry(vertrag.VertragId, wohnungText),
+                Permissions = permissions
             });
         }
 

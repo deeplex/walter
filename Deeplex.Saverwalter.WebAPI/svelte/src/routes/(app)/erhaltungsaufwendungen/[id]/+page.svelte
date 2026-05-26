@@ -62,11 +62,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
-        <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.aussteller.id}`)}
-            name={`Aussteller: ${data.entry.aussteller.text}`}
-            href={`/kontakte/${data.entry.aussteller.id}`}
-        />
+        {#if data.entry.aussteller}
+            <WalterLinkTile
+                bind:fileWrapper
+                fileref={fileURL.kontakt(`${data.entry.aussteller.id}`)}
+                name={`Aussteller: ${data.entry.aussteller.text}`}
+                href={`/kontakte/${data.entry.aussteller.id}`}
+            />
+        {/if}
     </WalterLinks>
 </WalterGrid>

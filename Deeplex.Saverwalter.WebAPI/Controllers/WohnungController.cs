@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<WohnungEntryBase> Haus { get; set; } = [];
             public IEnumerable<ZaehlerEntryBase> Zaehler { get; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
-            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; } = [];
+            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; set; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
             public IEnumerable<WohnungVersionEntryBase> Versionen { get; set; } = [];
             public WohnungEntry() : base() { }
@@ -156,7 +156,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Zaehler = entity.Zaehler.Select(e => new ZaehlerEntryBase(e, permissions));
                 Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
-                Erhaltungsaufwendungen = entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, permissions));
+                Erhaltungsaufwendungen = [];
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
                 Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new WohnungVersionEntryBase(e, permissions));
             }

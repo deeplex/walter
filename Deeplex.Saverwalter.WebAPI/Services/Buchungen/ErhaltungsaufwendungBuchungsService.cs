@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// </summary>
     public class ErhaltungsaufwendungBuchungsService(SaverwalterContext ctx)
     {
-        public async Task<Erhaltungsaufwendung> BucheErhaltungsaufwendungAsync(
+        public async Task<Buchungssatz> BucheErhaltungsaufwendungAsync(
             Wohnung wohnung,
             Kontakt aussteller,
             decimal betrag,
@@ -46,17 +46,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(buchungssatz, SollHaben.Soll, betrag, wohnung.AufwandsKonto);
             AddZeile(buchungssatz, SollHaben.Haben, betrag, verbindlichkeitsKonto);
             ctx.Buchungssaetze.Add(buchungssatz);
-
-            var entity = new Erhaltungsaufwendung(betrag, bezeichnung, datum)
-            {
-                Wohnung = wohnung,
-                Aussteller = aussteller,
-                Buchungssatz = buchungssatz,
-                Notiz = notiz
-            };
-            ctx.Erhaltungsaufwendungen.Add(entity);
             await ctx.SaveChangesAsync();
-            return entity;
+            return buchungssatz;
         }
 
         private async Task<Buchungskonto> EnsureVerbindlichkeitsKontoAsync(Kontakt aussteller)

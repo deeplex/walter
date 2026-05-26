@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx = ctx;
         }
 
-        public async Task<Betriebskostenrechnung> BucheRechnungAsync(
+        public async Task<Buchungssatz> BucheRechnungAsync(
             Umlage umlage,
             decimal betrag,
             DateOnly datum,
@@ -50,20 +50,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(buchungssatz, SollHaben.Haben, betrag, umlage.NkVerrechnungsKonto);
             buchungssatz.Notiz = notiz;
             _ctx.Buchungssaetze.Add(buchungssatz);
-
-            var rechnung = new Betriebskostenrechnung(betrag, datum, betreffendesJahr)
-            {
-                Umlage = umlage,
-                Buchungssatz = buchungssatz,
-                Notiz = notiz
-            };
-            _ctx.Betriebskostenrechnungen.Add(rechnung);
             await _ctx.SaveChangesAsync();
-            return rechnung;
+            return buchungssatz;
         }
 
         public async Task AktualisiereBuchungssatzAsync(
-            Betriebskostenrechnung rechnung,
+            Buchungssatz satz,
             Umlage neueUmlage,
             decimal neuerBetrag,
             DateOnly neuesDatum,
@@ -73,7 +65,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             if (neuerBetrag <= 0)
                 throw new InvalidOperationException($"Rechnungsbetrag muss größer als 0 sein (aktueller Wert: {neuerBetrag:C}).");
 
-            var satz = rechnung.Buchungssatz;
             satz.Buchungsdatum = neuesDatum;
             satz.Beschreibung = $"Betriebskosten {neueUmlage.Typ.Bezeichnung} {neuesJahr}";
             satz.Notiz = neueNotiz;

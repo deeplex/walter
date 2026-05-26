@@ -15,11 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type {
-        WalterVertragEntry,
-        WalterMieteEntry,
-        TransaktionsInput
-    } from '$walter/lib';
+    import type { WalterVertragEntry, TransaktionsInput } from '$walter/lib';
+    import type { WalterMietzahlungListEntry } from '$walter/lib/WalterMietzahlung';
     import { emptyTransaktionsInput } from '$walter/lib';
     import {
         months,
@@ -35,7 +32,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
     export let year: number;
-    export let mieten: WalterMieteEntry[];
+    export let mieten: WalterMietzahlungListEntry[];
     export let fetchImpl: typeof fetch;
 
     let addModalOpen = false;

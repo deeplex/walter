@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         public class ErhaltungsaufwendungsInput
         {
-            public int? ExistingErhaltungsaufwendungId { get; set; }
+            public Guid? ExistingBuchungssatzId { get; set; }
             public int WohnungId { get; set; }
             public decimal Betrag { get; set; }
             public string? Beschreibung { get; set; }
@@ -392,25 +392,46 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private async Task<Buchungssatz> ErstelleErhaltungsaufwendungAsync(
             ErhaltungsaufwendungsInput ea, DateOnly zahlungsdatum, Transaktion transaktion)
         {
-            Wohnung wohnung;
-            if (ea.ExistingErhaltungsaufwendungId.HasValue)
+            if (ea.ExistingBuchungssatzId.HasValue)
             {
-                var existingEa = await _ctx.Erhaltungsaufwendungen
-                    .Include(e => e.Wohnung).ThenInclude(w => w.AufwandsKonto)
-                    .FirstOrDefaultAsync(e => e.ErhaltungsaufwendungId == ea.ExistingErhaltungsaufwendungId.Value)
-                    ?? throw new ArgumentException($"Erhaltungsaufwendung {ea.ExistingErhaltungsaufwendungId} nicht gefunden.");
-                wohnung = existingEa.Wohnung;
-            }
-            else
-            {
-                wohnung = await _ctx.Wohnungen
-                    .Include(w => w.AufwandsKonto)
-                    .FirstOrDefaultAsync(w => w.WohnungId == ea.WohnungId)
-                    ?? throw new ArgumentException($"Wohnung {ea.WohnungId} nicht gefunden.");
+                var existingSatz = await _ctx.Buchungssaetze
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                    .FirstOrDefaultAsync(s => s.BuchungssatzId == ea.ExistingBuchungssatzId.Value)
+                    ?? throw new ArgumentException($"Buchungssatz {ea.ExistingBuchungssatzId} nicht gefunden.");
+
+                var habenZeile = existingSatz.Buchungszeilen
+                    .First(z => z.SollHaben == SollHaben.Haben);
+                var schonGezahlt = habenZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                var verbleibend = habenZeile.Betrag - schonGezahlt;
+                if (ea.Betrag > verbleibend + 0.005m)
+                    throw new InvalidOperationException(
+                        $"Zahlungsbetrag ({ea.Betrag:C}) übersteigt verbleibende Verbindlichkeit ({verbleibend:C}).");
+
+                var verbindlichkeitsKonto = habenZeile.Buchungskonto;
+                var zahlungsSatz = new Buchungssatz(zahlungsdatum,
+                    ea.Beschreibung is { Length: > 0 } b
+                        ? $"Zahlung Erhaltungsaufwendung {b}"
+                        : $"Zahlung {existingSatz.Beschreibung}");
+                AddZeile(zahlungsSatz, SollHaben.Soll, ea.Betrag, verbindlichkeitsKonto);
+                AddZeile(zahlungsSatz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
+
+                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                {
+                    SollZeile = zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
+                    HabenZeile = habenZeile
+                });
+
+                return zahlungsSatz;
             }
 
-            var beschreibung = ea.Beschreibung is { Length: > 0 } b
-                ? $"Erhaltungsaufwendung {b}"
+            var wohnung = await _ctx.Wohnungen
+                .Include(w => w.AufwandsKonto)
+                .FirstOrDefaultAsync(w => w.WohnungId == ea.WohnungId)
+                ?? throw new ArgumentException($"Wohnung {ea.WohnungId} nicht gefunden.");
+
+            var beschreibung = ea.Beschreibung is { Length: > 0 } desc
+                ? $"Erhaltungsaufwendung {desc}"
                 : $"Erhaltungsaufwendung {wohnung.Bezeichnung}";
 
             var satz = new Buchungssatz(zahlungsdatum, beschreibung);

@@ -34,7 +34,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { onMount } from 'svelte';
 
     interface OffeneBkForderungEntry {
-        betriebskostenrechnungId: number;
+        buchungssatzId: string;
         bezeichnung: string;
         betrag: number;
         schonGezahlt: number;
@@ -454,8 +454,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             betriebskostenEingaenge: [
                 {
                     betrag: forderung.verbleibend,
-                    existingBetriebskostenrechnungId:
-                        forderung.betriebskostenrechnungId
+                    existingBuchungssatzId: forderung.buchungssatzId
                 }
             ]
         };
@@ -473,7 +472,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     ];
 
     $: bkForderungTableRows = offeneBkForderungen.map((f) => ({
-        id: `bk-${f.betriebskostenrechnungId}`,
+        id: `bk-${f.buchungssatzId}`,
         bezeichnung: f.bezeichnung,
         verbleibend: f.verbleibend.toFixed(2),
         button: (e: CustomEvent) => openBkPaymentQuickAdd(e, f)

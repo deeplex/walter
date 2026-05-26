@@ -29,9 +29,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var printAccess = args.Contains("--print-access", StringComparer.OrdinalIgnoreCase);
             var ensureDevUsers = args.Contains("--ensure-dev-users", StringComparer.OrdinalIgnoreCase);
             var seedFiles = args.Contains("--seed-files", StringComparer.OrdinalIgnoreCase);
-            var bucheHistorisch = args.Contains("--buche-historisch", StringComparer.OrdinalIgnoreCase);
             var bucheAbrechnungArg = GetArgValue(args, "--buche-abrechnung");
-            var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles && !bucheHistorisch
+            var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles
                 && bucheAbrechnungArg is null;
 
             var targetDb = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "walter_dev_generic_db";
@@ -87,12 +86,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             if (printAccess)
             {
                 await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, targetDb, databaseUser, databasePass, databasePass);
-            }
-
-            if (bucheHistorisch)
-            {
-                await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, targetDb, databaseUser, databasePass);
-                await BuchungssaetzeErstellen.BucheHistorischAsync(ctx);
             }
 
             if (seedFiles)

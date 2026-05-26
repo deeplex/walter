@@ -53,7 +53,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 MietBuchungskonto = new Buchungskonto("1000", "Miete", BuchungskontoTyp.Ertrag),
                 NkBuchungskonto = new Buchungskonto("1001", "NK", BuchungskontoTyp.Ertrag),
                 BkAbrechnungsKonto = new Buchungskonto("1003", "NK-Abr", BuchungskontoTyp.Ertrag),
-                KautionsKonto = new Buchungskonto("1002", "Kaution", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Minderung", BuchungskontoTyp.Aufwand),
             };

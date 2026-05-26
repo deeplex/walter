@@ -123,36 +123,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class BetriebskostenrechnungPermissionHandler : WohnungPermissionHandlerBase<Betriebskostenrechnung>
-    {
-        public static async Task<List<Betriebskostenrechnung>> GetList(
-            SaverwalterContext ctx,
-            ClaimsPrincipal user,
-            VerwalterRolle rolle)
-        {
-            return await (user.IsInRole("Admin")
-                ? ctx.Betriebskostenrechnungen.ToListAsync()
-                : GetEntriesForUser(user.GetUserId()));
-
-            Task<List<Betriebskostenrechnung>> GetEntriesForUser(Guid guid) => ctx.Betriebskostenrechnungen
-                .AsSplitQuery()
-                .Include(e => e.Umlage).ThenInclude(u => u.Typ)
-                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Where(e => e.Umlage.Wohnungen.Any(w =>
-                    w.Verwalter.Count > 0 &&
-                    w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
-                .ToListAsync();
-        }
-
-        protected override Task HandleRequirementAsync(
-           AuthorizationHandlerContext context,
-           OperationAuthorizationRequirement requirement,
-           Betriebskostenrechnung entity)
-        {
-            return HandleWohnungRequirementAsync(context, requirement, entity.Umlage.Wohnungen);
-        }
-    }
-
     public class AbrechnungsresultatPermissionHandler : WohnungPermissionHandlerBase<Abrechnungsresultat>
     {
         public static async Task<List<Abrechnungsresultat>> GetList(
@@ -222,43 +192,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class ErhaltungsaufwendungPermissionHandler : WohnungPermissionHandlerBase<Erhaltungsaufwendung>
-    {
-        public static IQueryable<Erhaltungsaufwendung> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
-        {
-            if (user.IsInRole("Admin"))
-                return ctx.Erhaltungsaufwendungen;
-            var guid = user.GetUserId();
-            return ctx.Erhaltungsaufwendungen
-                .Where(e =>
-                    e.Wohnung.Verwalter.Count != 0 &&
-                    e.Wohnung.Verwalter.AsQueryable()
-                        .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, guid)));
-        }
-
-        public static async Task<List<Erhaltungsaufwendung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
-        {
-            return await (user.IsInRole("Admin")
-                ? ctx.Erhaltungsaufwendungen.ToListAsync()
-                : GetEntriesForUser(user.GetUserId()));
-
-            Task<List<Erhaltungsaufwendung>> GetEntriesForUser(Guid guid) => ctx.Erhaltungsaufwendungen
-                .Where(e =>
-                    e.Wohnung.Verwalter.Count != 0 &&
-                    e.Wohnung.Verwalter.AsQueryable()
-                        .Any(Utils.HasRequiredAuth(rolle, guid)))
-                .ToListAsync();
-        }
-
-        protected override Task HandleRequirementAsync(
-           AuthorizationHandlerContext context,
-           OperationAuthorizationRequirement requirement,
-           Erhaltungsaufwendung entity)
-        {
-            return HandleWohnungSubRequirementAsync(context, requirement, entity.Wohnung);
-        }
-    }
-
     public class KontaktPermissionHandler : WohnungPermissionHandlerBase<Kontakt>
     {
         public static IQueryable<Kontakt> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
@@ -285,31 +218,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         {
             context.Succeed(requirement);
             return Task.CompletedTask;
-        }
-    }
-
-    public class MietePermissionHandler : WohnungPermissionHandlerBase<Miete>
-    {
-        public static async Task<List<Miete>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
-        {
-            return await (user.IsInRole("Admin")
-                ? ctx.Mieten.ToListAsync()
-                : GetEntriesForUser(user.GetUserId()));
-
-            Task<List<Miete>> GetEntriesForUser(Guid guid) => ctx.Mieten
-                .Where(e =>
-                    e.Vertrag.Wohnung.Verwalter.Count != 0 &&
-                    e.Vertrag.Wohnung.Verwalter.AsQueryable()
-                        .Any(Utils.HasRequiredAuth(rolle, guid)))
-                .ToListAsync();
-        }
-
-        protected override Task HandleRequirementAsync(
-           AuthorizationHandlerContext context,
-           OperationAuthorizationRequirement requirement,
-           Miete entity)
-        {
-            return HandleWohnungSubRequirementAsync(context, requirement, entity.Vertrag.Wohnung);
         }
     }
 

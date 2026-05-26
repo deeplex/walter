@@ -79,23 +79,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task GetMieten()
-        {
-            var ctx = TestUtils.GetContext();
-            TestUtils.GetVertragForAbrechnung(ctx);
-            var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx, new Deeplex.Saverwalter.WebAPI.Services.Abrechnung.AbrechnungsgruppenService(ctx));
-            controller.ControllerContext = A.Fake<ControllerContext>();
-            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
-            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
-            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
-
-            var result = await controller.GetMieten();
-
-            result.Result.Should().BeOfType<OkObjectResult>();
-        }
-
-        [Fact]
         public async Task GetMietminderungen()
         {
             var ctx = TestUtils.GetContext();

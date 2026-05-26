@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -66,6 +68,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 var entry = new WohnungEntry(entity, permissions);
                 entry.Haus = await Task.WhenAll(entity.Adresse?
                     .Wohnungen.Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))) ?? []);
+
+                var aufwandsKontoId = entity.AufwandsKonto.BuchungskontoId;
+                var verbindlichkeitsMap = await Ctx.Kontakte
+                    .Where(k => k.VerbindlichkeitsKonto != null)
+                    .Include(k => k.VerbindlichkeitsKonto)
+                    .ToDictionaryAsync(k => k.VerbindlichkeitsKonto!.BuchungskontoId, k => k);
+                var eaSaetze = await Ctx.Buchungssaetze
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                    .Where(s => s.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Soll &&
+                        z.Buchungskonto.BuchungskontoId == aufwandsKontoId))
+                    .ToListAsync();
+                entry.Erhaltungsaufwendungen = eaSaetze.Select(s =>
+                {
+                    var habenKontoId = s.Buchungszeilen
+                        .FirstOrDefault(z => z.SollHaben == SollHaben.Haben)
+                        ?.Buchungskonto.BuchungskontoId;
+                    var aussteller = habenKontoId.HasValue && verbindlichkeitsMap.TryGetValue(habenKontoId.Value, out var k) ? k : null;
+                    return new ErhaltungsaufwendungEntryBase(s, new SelectionEntry(entity.WohnungId, entity.Bezeichnung), aussteller, permissions);
+                }).ToList();
 
                 return entry;
             });

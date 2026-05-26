@@ -34,7 +34,6 @@ namespace Deeplex.Saverwalter.Model
 
         public virtual List<UmlageVersion> Versionen { get; private set; } = [];
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
-        public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
 
         public DateTime CreatedAt { get; private set; }

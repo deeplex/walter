@@ -20,13 +20,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderNew,
         WalterVertragVersion
     } from '$walter/components';
-    import type { WalterMieteEntry } from '$walter/lib';
     import { validateVertragVersion } from '$walter/lib';
+    import type { WalterVertragVersionEntry } from '$walter/lib';
 
     const apiURL = `/api/vertragversionen`;
     const title = 'Vertragsänderung';
 
-    let entry: Partial<WalterMieteEntry> = {};
+    let entry: Partial<WalterVertragVersionEntry> = {};
 </script>
 
 <WalterHeaderNew

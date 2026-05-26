@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -77,6 +78,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
                 entry.Zaehler = await Task.WhenAll(entity.Zaehler
                     .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
+                var nkKontoId = entity.NkVerrechnungsKonto.BuchungskontoId;
+                var bkSaetze = await Ctx.Buchungssaetze
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                    .Where(s => s.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Haben &&
+                        z.Buchungskonto.BuchungskontoId == nkKontoId))
+                    .ToListAsync();
+                entry.Betriebskostenrechnungen = bkSaetze
+                    .OrderBy(s => s.Buchungsjahr)
+                    .ThenBy(s => s.Buchungsdatum)
+                    .Select(s => new BetriebskostenrechnungEntryBase(s, entity, permissions))
+                    .ToList();
 
                 return entry;
             });

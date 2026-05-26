@@ -59,13 +59,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     onMount(async () => {
-        if (bk.existingBetriebskostenrechnungId) {
+        if (bk.existingBuchungssatzId) {
             modeExisting = true;
-            autoSelectBkId = bk.existingBetriebskostenrechnungId;
-            await ladeOffenerPosten(bk.existingBetriebskostenrechnungId);
+            autoSelectBkId = bk.existingBuchungssatzId;
+            await ladeOffenerPosten(bk.existingBuchungssatzId);
             try {
                 const resp = await walter_get(
-                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${bk.existingBetriebskostenrechnungId}`,
+                    `/api/selection/zahler-bankkonto/buchungssatz/${bk.existingBuchungssatzId}`,
                     fetchImpl
                 );
                 dispatch(
@@ -109,14 +109,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     async function onExistingBkSelect(e: CustomEvent) {
         existingBk = e.detail?.selectedItem;
-        bk.existingBetriebskostenrechnungId = existingBk?.id as
-            | number
-            | undefined;
-        ladeOffenerPosten(existingBk?.id as number | undefined);
+        bk.existingBuchungssatzId = existingBk?.id as string | undefined;
+        ladeOffenerPosten(existingBk?.id as string | undefined);
         if (existingBk?.id) {
             try {
                 const resp = await walter_get(
-                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${existingBk.id}`,
+                    `/api/selection/zahler-bankkonto/buchungssatz/${existingBk.id}`,
                     fetchImpl
                 );
                 dispatch(
@@ -134,7 +132,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     type BkForderungInfo = {
-        betriebskostenrechnungId: number;
+        buchungssatzId: string;
         betrag: number;
         datum: string;
         schonGezahlt: number;
@@ -164,7 +162,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     $: invalid = modeExisting
-        ? !bk.existingBetriebskostenrechnungId ||
+        ? !bk.existingBuchungssatzId ||
           !!(
               (offenerPosten &&
                   bk.betrag > offenerPosten.verbleibenderBetrag + 0.005) ||
@@ -176,7 +174,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bk.betrag = availableBetrag;
     }
 
-    async function ladeOffenerPosten(id: number | undefined) {
+    async function ladeOffenerPosten(id: string | undefined) {
         if (!id) {
             offenerPosten = undefined;
             return;
@@ -200,24 +198,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
-    let autoSelectBkId: number | undefined = undefined;
+    let autoSelectBkId: string | undefined = undefined;
 
     function switchToNew() {
         modeExisting = false;
-        bk.existingBetriebskostenrechnungId = undefined;
+        bk.existingBuchungssatzId = undefined;
     }
 
     async function switchToExisting() {
         const first = existingeForderungen[0];
         modeExisting = true;
-        if (first && !bk.existingBetriebskostenrechnungId) {
-            autoSelectBkId = first.betriebskostenrechnungId;
-            bk.existingBetriebskostenrechnungId =
-                first.betriebskostenrechnungId;
-            ladeOffenerPosten(first.betriebskostenrechnungId);
+        if (first && !bk.existingBuchungssatzId) {
+            autoSelectBkId = first.buchungssatzId;
+            bk.existingBuchungssatzId = first.buchungssatzId;
+            ladeOffenerPosten(first.buchungssatzId);
             try {
                 const resp = await walter_get(
-                    `/api/selection/zahler-bankkonto/betriebskostenrechnung/${first.betriebskostenrechnungId}`,
+                    `/api/selection/zahler-bankkonto/buchungssatz/${first.buchungssatzId}`,
                     fetchImpl
                 );
                 dispatch(

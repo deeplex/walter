@@ -32,7 +32,6 @@ export { default as WalterAccount } from './details/WalterAccount.svelte';
 export { default as WalterAdresse } from './details/WalterAdresse.svelte';
 export { default as WalterBankkonto } from './details/WalterBankkonto.svelte';
 export { default as WalterKontakt } from './details/WalterKontakt.svelte';
-export { default as WalterMiete } from './details/WalterMiete.svelte';
 export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
@@ -108,7 +107,6 @@ export { default as WalterVertragVersionen } from './lists/WalterVertragVersione
 export { default as WalterWohnungVersionen } from './lists/WalterWohnungVersionen.svelte';
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
-export { default as WalterMieten } from './lists/WalterMieten.svelte';
 export { default as WalterVertragTransaktionen } from './lists/WalterVertragTransaktionen.svelte';
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
 export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';

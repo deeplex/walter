@@ -160,10 +160,7 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddSingleton<IAuthorizationHandler, GarageVertragPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, BetriebskostenrechnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ErhaltungsaufwendungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, KontaktPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, MietePermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, TransaktionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
@@ -191,7 +188,6 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwendungBuchungsService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);
-            container.Register<MieteDbService>(Lifestyle.Scoped);
             container.Register<MietminderungDbService>(Lifestyle.Scoped);
             container.Register<BankkontoDbService>(Lifestyle.Scoped);
             container.Register<KontaktDbService>(Lifestyle.Scoped);

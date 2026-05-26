@@ -22,7 +22,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterVertraege,
         WalterZaehlerList,
         WalterErhaltungsaufwendungen,
-        WalterBetriebskostenrechnungen,
         WalterUmlagen,
         WalterHeaderDetail,
         WalterWohnung,
@@ -165,11 +164,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             entry={umlageEntry}
             title="Umlagen"
             rows={data.entry.umlagen}
-        />
-        <WalterBetriebskostenrechnungen
-            fetchImpl={data.fetchImpl}
-            title="Betriebskostenrechnungen"
-            rows={data.entry.betriebskostenrechnungen}
         />
         <WalterErhaltungsaufwendungen
             fetchImpl={data.fetchImpl}

@@ -48,7 +48,6 @@ vi.mock('$walter/lib', () => ({
     },
     WalterErhaltungsaufwendungEntry: { ApiURL: '/api/erhaltungsaufwendungen' },
     WalterKontaktEntry: { ApiURL: '/api/kontakte' },
-    WalterMieteEntry: { ApiURL: '/api/mieten' },
     WalterMietminderungEntry: { ApiURL: '/api/mietminderungen' },
     WalterTransaktionEntry: { ApiURL: '/api/transaktionen' },
     WalterUmlageEntry: { ApiURL: '/api/umlagen' },
@@ -94,7 +93,6 @@ describe('files service', () => {
         expect(fileURL.erhaltungsaufwendung('7')).toBe(
             '/api/erhaltungsaufwendungen/7/files'
         );
-        expect(fileURL.miete('4')).toBe('/api/mieten/4/files');
         expect(fileURL.mietminderung('6')).toBe('/api/mietminderungen/6/files');
         expect(fileURL.kontakt('3')).toBe('/api/kontakte/3/files');
         expect(fileURL.transaktion('13')).toBe('/api/transaktionen/13/files');

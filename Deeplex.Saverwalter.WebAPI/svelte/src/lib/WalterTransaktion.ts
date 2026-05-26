@@ -81,7 +81,7 @@ export interface MietzahlungsInput {
 }
 
 export interface BetriebskostenEingangInput {
-    existingBetriebskostenrechnungId?: number;
+    existingBuchungssatzId?: string;
     umlageId?: number;
     betreffendesJahr?: number;
     rechnungsDatum?: string;
@@ -90,7 +90,7 @@ export interface BetriebskostenEingangInput {
 }
 
 export interface ErhaltungsaufwendungsInput {
-    existingErhaltungsaufwendungId?: number;
+    existingBuchungssatzId?: string;
     wohnungId?: number;
     betrag: number;
     beschreibung?: string;

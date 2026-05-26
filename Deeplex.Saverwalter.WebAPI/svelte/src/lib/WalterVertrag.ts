@@ -15,10 +15,9 @@
 
 import type { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
-import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterKontaktEntry } from './WalterKontakt';
-import { WalterMieteEntry } from './WalterMiete';
+import { WalterMietzahlungListEntry } from './WalterMietzahlung';
 import { WalterMietminderungEntry } from './WalterMietminderung';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
@@ -40,9 +39,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         public selectedMieter: WalterSelectionEntry[],
         public versionen: WalterVertragVersionEntry[],
         public mieter: WalterKontaktEntry[],
-        public mieten: WalterMieteEntry[],
+        public mietzahlungen: WalterMietzahlungListEntry[],
         public mietminderungen: WalterMietminderungEntry[],
-        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public garageVertraege: WalterGarageVertragEntry[],
         public permissions: WalterPermissions,
@@ -67,12 +65,11 @@ export class WalterVertragEntry extends WalterApiHandler {
             WalterVertragVersionEntry.fromJson
         );
         const mieter = json.mieter?.map(WalterKontaktEntry.fromJson);
-        const mieten = json.mieten?.map(WalterMieteEntry.fromJson);
+        const mietzahlungen = (json.mietzahlungen ?? []).map(
+            WalterMietzahlungListEntry.fromJson
+        );
         const mietminderungen = json.mietminderungen?.map(
             WalterMietminderungEntry.fromJson
-        );
-        const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
-            WalterBetriebskostenrechnungEntry.fromJson
         );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
@@ -95,9 +92,8 @@ export class WalterVertragEntry extends WalterApiHandler {
             selectedMieter,
             versionen,
             mieter,
-            mieten,
+            mietzahlungen,
             mietminderungen,
-            betriebskostenrechnungen,
             abrechnungsresultate,
             garageVertraege,
             permissions,

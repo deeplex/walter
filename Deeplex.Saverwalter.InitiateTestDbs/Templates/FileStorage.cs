@@ -50,7 +50,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             uploaded += await SeedVertragsFiles(ctx, http, s3Provider, random);
             uploaded += await SeedWohnungsFiles(ctx, http, s3Provider, random);
-            uploaded += await SeedErhaltungsaufwendungsFiles(ctx, http, s3Provider, random);
             uploaded += await SeedAdressFiles(ctx, http, s3Provider, random);
             uploaded += await SeedKontaktFiles(ctx, http, s3Provider, random);
 
@@ -186,40 +185,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     {
                         count++;
                     }
-                }
-            }
-
-            return count;
-        }
-
-        private static async Task<int> SeedErhaltungsaufwendungsFiles(
-            SaverwalterContext ctx,
-            HttpClient http,
-            string s3Provider,
-            Random random)
-        {
-            var aufwendungen = await ctx.Erhaltungsaufwendungen
-                .OrderBy(e => e.ErhaltungsaufwendungId)
-                .Take(20)
-                .ToListAsync();
-
-            var count = 0;
-            foreach (var aufwendung in aufwendungen)
-            {
-                var lines = new[]
-                {
-                    $"Rechnungsnummer: R-{aufwendung.ErhaltungsaufwendungId:D5}",
-                    $"Bezeichnung: {aufwendung.Bezeichnung}",
-                    $"Datum: {aufwendung.Datum:yyyy-MM-dd}",
-                    $"Betrag: {aufwendung.Betrag.ToString("0.00", CultureInfo.InvariantCulture)} EUR",
-                    "Position 1: Material",
-                    "Position 2: Arbeitsleistung",
-                    "Zahlungsziel 14 Tage netto",
-                };
-                if (await PutPdf(http, s3Provider, $"erhaltungsaufwendungen/{aufwendung.ErhaltungsaufwendungId}/Rechnung.pdf",
-                    $"Handwerkerrechnung - {aufwendung.Bezeichnung}", lines))
-                {
-                    count++;
                 }
             }
 

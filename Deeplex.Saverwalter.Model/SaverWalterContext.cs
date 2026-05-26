@@ -22,13 +22,10 @@ namespace Deeplex.Saverwalter.Model
     {
         public DbSet<Abrechnungsresultat> Abrechnungsresultate { get; set; } = null!;
         public DbSet<Adresse> Adressen { get; set; } = null!;
-        [Obsolete("Betriebskostenrechnungen ist durch das Buchungssatz-Modell abgelöst. Tabelle bleibt für Migration erhalten.")]
-        public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Buchungskonto> Buchungskonten { get; set; } = null!;
         public DbSet<Buchungssatz> Buchungssaetze { get; set; } = null!;
         public DbSet<Buchungszeile> Buchungszeilen { get; set; } = null!;
         public DbSet<OffenerPostenAusgleich> OffenePostenAusgleiche { get; set; } = null!;
-        public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<KontaktMitgliedschaft> KontaktMitgliedschaften { get; set; } = null!;
         public DbSet<WohnungEigentuemer> WohnungEigentuemer { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
@@ -38,10 +35,6 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<UmlageVersion> UmlageVersionen { get; set; } = null!;
         public DbSet<WohnungVersion> WohnungVersionen { get; set; } = null!;
         public DbSet<Bankkonto> Bankkontos { get; set; } = null!;
-#pragma warning disable CS0618
-        [Obsolete("Mieten ist durch das Buchungssatz/Sollstellung-Modell abgelöst. Tabelle bleibt für Migration erhalten.")]
-        public DbSet<Miete> Mieten { get; set; } = null!;
-#pragma warning restore CS0618
         public DbSet<Mietminderung> Mietminderungen { get; set; } = null!;
         public DbSet<Kontakt> Kontakte { get; set; } = null!;
         public DbSet<Transaktion> Transaktionen { get; set; } = null!;
@@ -263,10 +256,6 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<GarageVertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -279,10 +268,6 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Kontakt>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Bankkonto>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Bankkonto>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-#pragma warning disable CS0618
-            modelBuilder.Entity<Miete>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<Miete>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-#pragma warning restore CS0618
             modelBuilder.Entity<Mietminderung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Mietminderung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Transaktion>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -299,10 +284,6 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Vertrag>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Verwalter>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Verwalter>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<VertragsBetriebskostenrechnung>()
-                .Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
-            modelBuilder.Entity<VertragsBetriebskostenrechnung>()
-                .Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Wohnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Wohnung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Zaehler>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");

@@ -50,16 +50,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_selection.erhaltungsaufwendungen(fetchImpl);
 
     $: ea.wohnungId = wohnung?.id as number | undefined;
-    $: ea.existingErhaltungsaufwendungId = existingEa?.id as number | undefined;
+    $: ea.existingBuchungssatzId = existingEa?.id as string | undefined;
     $: invalid = modeExisting
-        ? !ea.existingErhaltungsaufwendungId
+        ? !ea.existingBuchungssatzId
         : !ea.wohnungId;
     $: if (isSinglePosition && availableBetrag > 0) {
         ea.betrag = availableBetrag;
     }
-    $: ladeEaInfo(existingEa?.id as number | undefined);
+    $: ladeEaInfo(existingEa?.id as string | undefined);
 
-    async function ladeEaInfo(id: number | undefined) {
+    async function ladeEaInfo(id: string | undefined) {
         if (!id) {
             eaInfo = undefined;
             return;
@@ -71,8 +71,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
             if (resp && typeof resp === 'object' && 'rechnungsbetrag' in resp) {
                 eaInfo = resp as WalterOffenerPostenStatus;
-                if (isSinglePosition && eaInfo.rechnungsbetrag > 0) {
-                    ea.betrag = eaInfo.rechnungsbetrag;
+                if (isSinglePosition && eaInfo.verbleibenderBetrag > 0) {
+                    ea.betrag = Math.min(
+                        eaInfo.verbleibenderBetrag,
+                        availableBetrag
+                    );
                 }
             }
         } catch {
@@ -82,7 +85,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function switchToNew() {
         modeExisting = false;
-        ea.existingErhaltungsaufwendungId = undefined;
+        ea.existingBuchungssatzId = undefined;
         existingEa = undefined;
         eaInfo = undefined;
     }
@@ -129,9 +132,45 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if eaInfo}
         <Row>
             <Column>
-                <Tag type="blue">
-                    Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} €
-                </Tag>
+                {#if eaInfo.verbleibenderBetrag <= 0}
+                    <InlineNotification
+                        kind="warning"
+                        title="Bereits vollständig bezahlt"
+                        subtitle="Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} €, bereits gezahlt: {eaInfo.schonGezahlt.toFixed(2)} €"
+                        hideCloseButton
+                    />
+                {:else}
+                    <Tag type="blue">
+                        Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} € — noch offen: {eaInfo.verbleibenderBetrag.toFixed(2)} €
+                    </Tag>
+                    {#if eaInfo.schonGezahlt > 0}
+                        <Tag type="green">
+                            Bereits gezahlt: {eaInfo.schonGezahlt.toFixed(2)} €
+                        </Tag>
+                    {/if}
+                    {#if ea.betrag > eaInfo.verbleibenderBetrag + 0.005}
+                        <InlineNotification
+                            kind="error"
+                            title="Betrag zu hoch:"
+                            subtitle="Maximal {eaInfo.verbleibenderBetrag.toFixed(2)} € offen"
+                            hideCloseButton
+                        />
+                    {:else if ea.betrag > availableBetrag + 0.005}
+                        <InlineNotification
+                            kind="error"
+                            title="Betrag übersteigt Transaktionsbetrag:"
+                            subtitle="Maximal {availableBetrag.toFixed(2)} € verfügbar"
+                            hideCloseButton
+                        />
+                    {:else if ea.betrag < eaInfo.verbleibenderBetrag - 0.005}
+                        <InlineNotification
+                            kind="warning"
+                            title="Teilzahlung:"
+                            subtitle="Noch {(eaInfo.verbleibenderBetrag - ea.betrag).toFixed(2)} € offen nach dieser Zahlung"
+                            hideCloseButton
+                        />
+                    {/if}
+                {/if}
             </Column>
         </Row>
     {/if}
@@ -144,20 +183,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </Column>
     </Row>
-    {#if eaInfo && ea.betrag < eaInfo.verbleibenderBetrag - 0.005}
-        <Row>
-            <Column>
-                <InlineNotification
-                    kind="warning"
-                    title="Teilzahlung:"
-                    subtitle="Noch {(
-                        eaInfo.verbleibenderBetrag - ea.betrag
-                    ).toFixed(2)} € offen nach dieser Zahlung"
-                    hideCloseButton
-                />
-            </Column>
-        </Row>
-    {/if}
 {:else}
     <Row>
         <Column>

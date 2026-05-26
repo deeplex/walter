@@ -20,7 +20,6 @@ import {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
     WalterKontaktEntry,
-    WalterMieteEntry,
     WalterMietminderungEntry,
     WalterUmlageEntry,
     WalterUmlagetypEntry,
@@ -41,7 +40,6 @@ import {
     WalterBetriebskostenrechnung,
     WalterErhaltungsaufwendung,
     WalterKontakt,
-    WalterMiete,
     WalterMietminderung,
     WalterUmlage,
     WalterUmlagetyp,
@@ -239,14 +237,6 @@ export const tables: WalterPreviewCopyTable[] = [
         ApiURL: WalterKontaktEntry.ApiURL,
         fileURL: (id: string) => fileURL.kontakt(id),
         newPage: () => WalterKontakt
-    },
-    {
-        value: 'Mieten',
-        key: 'mieten',
-        fetch: walter_selection.mieten,
-        ApiURL: WalterMieteEntry.ApiURL,
-        fileURL: (id: string) => fileURL.miete(id),
-        newPage: () => WalterMiete
     },
     {
         value: 'Mietminderungen',

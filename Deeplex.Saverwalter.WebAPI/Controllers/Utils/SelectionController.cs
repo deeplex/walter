@@ -130,24 +130,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/erhaltungsaufwendungen")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetErhaltungsaufwendungen()
+        public async Task<ActionResult<IEnumerable<object>>> GetErhaltungsaufwendungen()
         {
-            var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var wohnungen = await WohnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var aufwandsKontoIds = wohnungen.Select(w => w.AufwandsKonto.BuchungskontoId).ToHashSet();
 
-            return Ok(list.Select(e => new SelectionEntry(
-                e.ErhaltungsaufwendungId,
-                $"{e.Bezeichnung} - {e.Aussteller.Bezeichnung}")));
-        }
+            var kontakte = await Ctx.Kontakte
+                .Where(k => k.VerbindlichkeitsKonto != null)
+                .Include(k => k.VerbindlichkeitsKonto)
+                .ToListAsync();
+            var verbindlichkeitsMap = kontakte
+                .ToDictionary(k => k.VerbindlichkeitsKonto!.BuchungskontoId, k => k.Bezeichnung);
 
-        [HttpGet]
-        [Route("api/selection/mieten")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetMieten()
-        {
-            var list = await MietePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var saetze = await Ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Where(s => s.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Soll &&
+                    aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
+                .ToListAsync();
 
-            return Ok(list.Select(e => new SelectionEntry(
-                e.MieteId,
-                $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.BetreffenderMonat.ToString("MM.yyyy")}")));
+            return Ok(saetze.Select(s =>
+            {
+                var habenKontoId = s.Buchungszeilen
+                    .FirstOrDefault(z => z.SollHaben == SollHaben.Haben)
+                    ?.Buchungskonto.BuchungskontoId;
+                var ausstellerName = habenKontoId.HasValue && verbindlichkeitsMap.TryGetValue(habenKontoId.Value, out var n)
+                    ? n : null;
+                var bezeichnung = s.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
+                    ? s.Beschreibung["Erhaltungsaufwendung: ".Length..]
+                    : s.Beschreibung;
+                var text = ausstellerName != null
+                    ? $"{bezeichnung} - {ausstellerName}"
+                    : bezeichnung;
+                return new { Id = s.BuchungssatzId, Text = text };
+            }).OrderBy(e => e.Text));
         }
 
         [HttpGet]

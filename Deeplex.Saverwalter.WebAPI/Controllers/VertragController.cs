@@ -22,8 +22,8 @@ using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MietzahlungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? MieterAuflistung { get; set; }
 
             // For Tabelle
-            public IEnumerable<MieteEntryBase>? Mieten { get; set; }
+            public IEnumerable<MietzahlungListEntry>? Mietzahlungen { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -69,7 +69,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Wohnung = new(0, "Unbekannte Wohnung");
                 }
 
-                Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e, permissions));
+                Mietzahlungen = entity.MietBuchungskonto.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben)
+                    .Select(z => new MietzahlungListEntry(z.Buchungssatz, z.Betrag, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
                 MieterAuflistung = string.Join(", ", entity.Mieter.Select(a => a.Bezeichnung));
 

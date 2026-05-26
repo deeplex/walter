@@ -163,7 +163,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new UmlageVersionEntryBase(e, permissions)).ToList();
                 HKVOs = entity.HeizkostenHKVOs.OrderBy(h => h.Beginn).Select(e => new HKVOEntryBase(e, permissions)).ToList();
-                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.OrderBy(r => r.BetreffendesJahr).Select(e => new BetriebskostenrechnungEntryBase(e, permissions)).ToList();
+                Betriebskostenrechnungen = [];
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

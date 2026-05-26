@@ -36,9 +36,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var wohnungen = FillWohnungen(ctx, adressen);
             var vertraege = FillVertraege(ctx, wohnungen);
             var vertragVersionen = FillVertragversionen(ctx, vertraege);
-            var mieten = FillMieten(ctx, vertraege);
-            var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen);
-
+            FillMieten(ctx, vertraege);
+            FillErhaltungsaufwendungen(ctx, wohnungen);
             // Still empty
             var mietminderungen = FillMietminderungen(ctx);
             var bankkontos = FillBankkontos(ctx);
@@ -49,7 +48,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var (zaehlerSet, hauszaehlerHeizung) = FillZaehlerSet(ctx, umlagen);
             var zaehlerstaende = FillZaehlerstaende(ctx, zaehlerSet, vertraege);
             FillHKVO(ctx, umlagen, hauszaehlerHeizung);
-            var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx, umlagen);
+            FillBetriebskostenrechnungen(ctx, umlagen);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
             await ctx.SaveChangesAsync();
@@ -188,37 +187,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return wohnungen;
         }
 
-        static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen)
-        {
-            Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
-
-            var erhaltungsaufwendungen = new List<Erhaltungsaufwendung> { };
-            // TODO only one aussteller...
-            var aussteller = generateJuristischePerson(11);
-
-            for (var i = 0; i < 3000; i++)
-            {
-                var betrag = 100;
-                var bezeichnung = $"Rechnungsnr. {i}";
-                var jahr = 2020 + i % 5;
-                var monat = 1 + i % 12;
-                var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
-                var datum = new DateOnly(jahr, monat, tag);
-                var wohnung = wohnungen[i % wohnungen.Count];
-
-                erhaltungsaufwendungen.Add(new Erhaltungsaufwendung(betrag, bezeichnung, datum)
-                {
-                    Aussteller = aussteller,
-                    Wohnung = wohnung
-                });
-            }
-
-            ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
-            Console.WriteLine($"{erhaltungsaufwendungen.Count} Erhaltungsaufwendungen hinzugefügt");
-
-            return erhaltungsaufwendungen;
-        }
-
         static List<Vertrag> FillVertraege(
            SaverwalterContext ctx,
            List<Wohnung> wohnungen)
@@ -292,11 +260,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return vertragVersionen;
         }
 
-        static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
+        static void FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
-            Console.Write("Füge Mieten hinzu: ");
-
-            var mieten = new List<Miete> { };
+            Console.Write("Füge Miet-Buchungssätze hinzu: ");
+            var count = 0;
 
             foreach (var vertrag in vertraege)
             {
@@ -304,20 +271,91 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     var ende = version.Ende() ?? globalToday;
 
-                    for (DateOnly date = version.Beginn; date <= ende; date = date.AddMonths(1))
+                    for (var monat = new DateOnly(version.Beginn.Year, version.Beginn.Month, 1);
+                         monat <= new DateOnly(ende.Year, ende.Month, 1);
+                         monat = monat.AddMonths(1))
                     {
-                        mieten.Add(new Miete(date, date, (double)(version.Grundmiete + 200 + (date.Day % 3) * 50))
+                        var betrag = version.Grundmiete + 200 + (monat.Day % 3) * 50;
+
+                        // Sollstellung: Soll MietBuchungskonto / Haben Wohnung.MietErtragskonto
+                        var sollSatz = new Buchungssatz(monat, $"Mietsoll {monat:MM/yyyy}");
+                        var sollZeile = new Buchungszeile(SollHaben.Soll, betrag)
                         {
-                            Vertrag = vertrag
+                            Buchungssatz = sollSatz,
+                            Buchungskonto = vertrag.MietBuchungskonto
+                        };
+                        sollSatz.Buchungszeilen.Add(sollZeile);
+                        sollSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                        {
+                            Buchungssatz = sollSatz,
+                            Buchungskonto = vertrag.Wohnung.MietErtragskonto
                         });
+                        ctx.Buchungssaetze.Add(sollSatz);
+
+                        // Zahlung: Soll ZahlungsKonto / Haben MietBuchungskonto
+                        var zahlSatz = new Buchungssatz(monat, $"Mietzahlung {monat:MM/yyyy}");
+                        var zahlHaben = new Buchungszeile(SollHaben.Haben, betrag)
+                        {
+                            Buchungssatz = zahlSatz,
+                            Buchungskonto = vertrag.MietBuchungskonto
+                        };
+                        zahlSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                        {
+                            Buchungssatz = zahlSatz,
+                            Buchungskonto = vertrag.ZahlungsKonto
+                        });
+                        zahlSatz.Buchungszeilen.Add(zahlHaben);
+                        ctx.Buchungssaetze.Add(zahlSatz);
+
+                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                        {
+                            SollZeile = sollZeile,
+                            HabenZeile = zahlHaben
+                        });
+
+                        count++;
                     }
                 }
             }
 
-            ctx.Mieten.AddRange(mieten);
-            Console.WriteLine($"{mieten.Count} Mieten hinzugefügt");
+            Console.WriteLine($"{count} Miet-Buchungssätze hinzugefügt");
+        }
 
-            return mieten;
+        static void FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen)
+        {
+            Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
+
+            var aussteller = generateJuristischePerson(11);
+            aussteller.VerbindlichkeitsKonto = new Buchungskonto("DL000-V", $"Verbindlichkeiten {aussteller.Name}", BuchungskontoTyp.Passiv);
+            ctx.Kontakte.Add(aussteller);
+
+            var count = 0;
+            for (var i = 0; i < 3000; i++)
+            {
+                decimal betrag = 100;
+                var bezeichnung = $"Rechnungsnr. {i}";
+                var jahr = 2020 + i % 5;
+                var monat = 1 + i % 12;
+                var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
+                var datum = new DateOnly(jahr, monat, tag);
+                var wohnung = wohnungen[i % wohnungen.Count];
+
+                var satz = new Buchungssatz(datum, bezeichnung);
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                {
+                    Buchungssatz = satz,
+                    Buchungskonto = wohnung.AufwandsKonto
+                });
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                {
+                    Buchungssatz = satz,
+                    Buchungskonto = aussteller.VerbindlichkeitsKonto
+                });
+                ctx.Buchungssaetze.Add(satz);
+                count++;
+            }
+
+            Console.WriteLine($"{count} Erhaltungsaufwendungen hinzugefügt");
         }
 
         static List<Garage> FillGaragen(SaverwalterContext ctx)
@@ -380,13 +418,13 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return earliest;
         }
 
-        private static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(
+        private static void FillBetriebskostenrechnungen(
             SaverwalterContext ctx,
             List<Umlage> umlagen)
         {
-            Console.Write("Füge Betriebskostenrechnung hinzu: ");
+            Console.Write("Füge Betriebskostenrechnungen hinzu: ");
 
-            var betriebskostenrechnungen = new List<Betriebskostenrechnung> { };
+            var count = 0;
 
             foreach (var umlage in umlagen)
             {
@@ -416,19 +454,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Buchungssatz = satz,
                         Buchungskonto = umlage.NkVerrechnungsKonto
                     });
-
-                    betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
-                    {
-                        Umlage = umlage,
-                        Buchungssatz = satz
-                    });
+                    ctx.Buchungssaetze.Add(satz);
+                    count++;
                 }
             }
 
-            ctx.Betriebskostenrechnungen.AddRange(betriebskostenrechnungen);
-            Console.WriteLine($"{betriebskostenrechnungen.Count} Betriebskostenrechnungen hinzugefügt");
-
-            return betriebskostenrechnungen;
+            Console.WriteLine($"{count} Betriebskostenrechnungen hinzugefügt");
         }
 
         private static Umlage addUmlage(

@@ -70,7 +70,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {@const selected =
         value ??
         (initialId != null
-            ? resolvedEntries?.find((e) => +e.id === +initialId)
+            ? resolvedEntries?.find((e) => String(e.id) === String(initialId))
             : undefined)}
     <ComboBox
         invalid={required && !selected}

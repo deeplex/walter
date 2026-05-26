@@ -142,9 +142,8 @@ describe('lib entity mappers batch', () => {
             selectedMieter: [],
             versionen: [version],
             mieter: [],
-            mieten: [],
+            mietzahlungen: [],
             mietminderungen: [mietminderung],
-            betriebskostenrechnungen: [],
             abrechnungsresultate: [],
             permissions: { read: true, update: true, remove: false }
         } as never);
@@ -179,7 +178,7 @@ describe('lib entity mappers batch', () => {
     it('maps utility and accounting entities', () => {
         const betriebskostenrechnung =
             WalterBetriebskostenrechnungEntry.fromJson({
-                id: 10,
+                id: '10',
                 betrag: 120,
                 betreffendesJahr: 2026,
                 datum: '2026-02-01',
@@ -222,7 +221,7 @@ describe('lib entity mappers batch', () => {
         } as never);
 
         const erhaltungsaufwendung = WalterErhaltungsaufwendungEntry.fromJson({
-            id: 13,
+            id: '13',
             betrag: 300,
             datum: '2026-03-01',
             notiz: 'Erhaltung',
@@ -234,13 +233,13 @@ describe('lib entity mappers batch', () => {
             permissions: { read: true, update: false, remove: false }
         } as never);
 
-        expect(WalterErhaltungsaufwendungEntry.ApiURLId(13)).toBe(
+        expect(WalterErhaltungsaufwendungEntry.ApiURLId('13')).toBe(
             '/api/erhaltungsaufwendungen/13'
         );
         expect(betriebskostenrechnung.typ.text).toBe('Wasser');
-        expect(umlage.betriebskostenrechnungen[0].id).toBe(10);
+        expect(umlage.betriebskostenrechnungen[0].id).toBe('10');
         expect(umlagetyp.umlagen[0].id).toBe(11);
-        expect(erhaltungsaufwendung.aussteller.text).toBe('Firma A');
+        expect(erhaltungsaufwendung.aussteller?.text).toBe('Firma A');
     });
 
     it('maps transaction and meter reading entities', () => {
