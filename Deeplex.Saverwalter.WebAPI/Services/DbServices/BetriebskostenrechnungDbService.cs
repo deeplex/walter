@@ -44,6 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             => await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
                 .Where(s => s.Buchungszeilen.Any(z =>
                     z.SollHaben == SollHaben.Haben &&
                     nkKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
@@ -140,6 +141,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var satz = await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
                 .FirstOrDefaultAsync(s => s.BuchungssatzId == id);
 
             if (satz is null) return new NotFoundResult();
@@ -167,6 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var relatedSaetze = await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
                 .Where(s => s.BuchungssatzId != id &&
                     s.Buchungszeilen.Any(z =>
                         z.SollHaben == SollHaben.Haben &&
@@ -239,7 +242,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         public async Task<ActionResult<BetriebskostenrechnungEntry>> Put(ClaimsPrincipal user, Guid id, BetriebskostenrechnungEntry entry)
         {
             var satz = await ctx.Buchungssaetze
+                .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
                 .FirstOrDefaultAsync(s => s.BuchungssatzId == id);
 
             if (satz is null) return new NotFoundResult();

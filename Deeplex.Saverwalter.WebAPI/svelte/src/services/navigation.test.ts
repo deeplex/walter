@@ -21,8 +21,6 @@ describe('navigation service', () => {
             ['abrechnungsresultat', 'abc', '/abrechnungsresultate/abc'],
             ['account', 1, '/accounts/1'],
             ['adresse', 2, '/adressen/2'],
-            ['betriebskostenrechnung', 3, '/betriebskostenrechnungen/3'],
-            ['erhaltungsaufwendung', 4, '/erhaltungsaufwendungen/4'],
             ['kontakt', 5, '/kontakte/5'],
             ['miete', 6, '/mieten/6'],
             ['mietminderung', 7, '/mietminderungen/7'],

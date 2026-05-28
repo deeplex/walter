@@ -25,7 +25,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterBetriebskostenrechnungEntry,
         validateBetriebskostenrechnung
     } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -43,11 +42,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'datum', value: 'Datum' },
         { key: 'ausgeglichen', value: '⚖' }
     ];
-
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.betriebskostenrechnung(e.detail.id);
-    const rowHref = (row: DataTableRow) =>
-        `/betriebskostenrechnungen/${row.id}`;
 
     function enrich(r: WalterBetriebskostenrechnungEntry) {
         return { ...r, ausgeglichen: r.isBalanced ? '✓' : '✗' };
@@ -92,8 +86,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
     rows={enrichedRows}
     {fetchData}
     {transformRow}

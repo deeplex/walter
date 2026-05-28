@@ -23,10 +23,6 @@ export const navigation = {
         walter_goto(`/abrechnungsresultate/${id}`),
     account: (id: number) => walter_goto(`/accounts/${id}`),
     adresse: (id: number) => walter_goto(`/adressen/${id}`),
-    betriebskostenrechnung: (id: number) =>
-        walter_goto(`/betriebskostenrechnungen/${id}`),
-    erhaltungsaufwendung: (id: number) =>
-        walter_goto(`/erhaltungsaufwendungen/${id}`),
     kontakt: (id: number) => walter_goto(`/kontakte/${id}`),
     miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),

@@ -372,9 +372,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <svelte:fragment slot="cell" let:cell let:row>
         {#if cell.key === 'typ'}
             {#if row.rechnungId}
-                <a href="/betriebskostenrechnungen/{row.rechnungId}"
-                    >{cell.value}</a
-                >
+                <a href="/umlagen/{row.umlageId}">{cell.value}</a>
             {:else}
                 <button
                     style="color: var(--cds-support-error); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"

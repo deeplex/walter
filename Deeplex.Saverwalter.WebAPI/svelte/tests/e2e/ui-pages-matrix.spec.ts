@@ -14,13 +14,8 @@ const mainRoutes: RouteExpectation[] = [
     { path: '/wohnungen', expectedText: 'Wohnungen' },
     { path: '/vertraege', expectedText: 'Verträge' },
     { path: '/transaktionen', expectedText: 'Transaktionen' },
-    {
-        path: '/betriebskostenrechnungen',
-        expectedText: 'Betriebskostenrechnung'
-    },
     { path: '/umlagen', expectedText: 'Umlagen' },
     { path: '/umlagetypen', expectedText: 'Umlagetypen' },
-    { path: '/erhaltungsaufwendungen', expectedText: 'Erhaltungsaufwendungen' },
     { path: '/zaehler', expectedText: 'Zähler' },
     { path: '/adressen', expectedText: 'Adressen' },
     { path: '/stack', expectedText: 'Ablagestapel' },

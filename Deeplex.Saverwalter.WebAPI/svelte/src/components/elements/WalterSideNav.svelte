@@ -36,9 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Location,
         Logout,
         Meter,
-        Money,
         NetworkAdminControl,
-        Tools,
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
@@ -92,11 +90,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     href="/transaktionen"
                 />
                 <WalterSideNavLink
-                    icon={Money}
-                    text="Betriebskostenrechnungen"
-                    href="/betriebskostenrechnungen"
-                />
-                <WalterSideNavLink
                     icon={ChartRelationship}
                     text="Umlagen"
                     href="/umlagen"
@@ -105,11 +98,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     icon={IbmDataReplication}
                     text="Umlagetypen"
                     href="/umlagetypen"
-                />
-                <WalterSideNavLink
-                    icon={Tools}
-                    text="Erhaltungsaufwendungen"
-                    href="/erhaltungsaufwendungen"
                 />
                 <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
                 <WalterSideNavLink

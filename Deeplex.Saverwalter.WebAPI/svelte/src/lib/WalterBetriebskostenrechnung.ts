@@ -30,6 +30,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
     constructor(
         public id: string,
         public betrag: number,
+        public verteilt: number,
         public betreffendesJahr: number,
         public datum: string,
         public notiz: string,
@@ -41,6 +42,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public permissions: WalterPermissions,
         public isBalanced: boolean = false,
+        public isBezahlt: boolean = false,
         public buchungszeilen: WalterBuchungszeileInfo[] = []
     ) {
         super();
@@ -62,6 +64,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         return new WalterBetriebskostenrechnungEntry(
             json.id,
             json.betrag,
+            json.verteilt ?? 0,
             json.betreffendesJahr,
             json.datum,
             json.notiz,
@@ -73,6 +76,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
             betriebskostenrechnungen,
             permissions,
             json.isBalanced ?? false,
+            json.isBezahlt ?? false,
             json.buchungszeilen ?? []
         );
     }

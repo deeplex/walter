@@ -21,7 +21,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterErhaltungsaufwendungEntry,
         validateErhaltungsaufwendung
     } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },
@@ -42,8 +41,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     entityClass={WalterErhaltungsaufwendungEntry}
     validate={validateErhaltungsaufwendung}
     {headers}
-    navFn={navigation.erhaltungsaufwendung}
-    routeBase="erhaltungsaufwendungen"
     formComponent={WalterErhaltungsaufwendung}
     {fetchImpl}
     {entry}

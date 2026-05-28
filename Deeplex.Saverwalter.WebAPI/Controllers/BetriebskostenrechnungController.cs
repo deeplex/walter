@@ -39,11 +39,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public Guid Id { get; set; }
             public decimal Betrag { get; set; }
+            public decimal Verteilt { get; set; }
             public int BetreffendesJahr { get; set; }
             public DateOnly Datum { get; set; }
             public SelectionEntry? Typ { get; set; }
             public SelectionEntry? Umlage { get; set; }
             public bool IsBalanced { get; set; }
+            public bool IsBezahlt { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
 
             public BetriebskostenrechnungEntryBase() { }
@@ -53,15 +55,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 BetreffendesJahr = satz.Buchungsjahr;
                 Datum = satz.Buchungsdatum;
                 Betrag = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
+                Verteilt = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
                 Typ = new SelectionEntry(umlage.Typ.UmlagetypId, umlage.Typ.Bezeichnung);
                 Umlage = new SelectionEntry(
                     umlage.UmlageId,
                     umlage.GetWohnungenBezeichnung(),
                     umlage.Typ.UmlagetypId.ToString());
                 Permissions = permissions;
-                var soll = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-                var haben = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
-                IsBalanced = Math.Abs(soll - haben) <= 0.005m;
+                IsBalanced = Math.Abs(Verteilt - Betrag) <= 0.005m;
+                var habenZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+                var bezahlt = habenZeile?.AlsHabenZeile.Sum(a => a.SollZeile.Betrag) ?? 0;
+                IsBezahlt = Betrag > 0 && bezahlt >= Betrag - 0.005m;
             }
         }
 

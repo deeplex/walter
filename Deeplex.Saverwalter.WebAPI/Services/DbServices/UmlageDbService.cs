@@ -81,7 +81,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 var nkKontoId = entity.NkVerrechnungsKonto.BuchungskontoId;
                 var bkSaetze = await Ctx.Buchungssaetze
+                    .AsSplitQuery()
                     .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
                     .Where(s => s.Buchungszeilen.Any(z =>
                         z.SollHaben == SollHaben.Haben &&
                         z.Buchungskonto.BuchungskontoId == nkKontoId))

@@ -37,8 +37,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
     export let validate: (e: unknown) => boolean = () => true;
     export let headers: { key: string; value: string }[];
-    export let navFn: (id: number) => void;
-    export let routeBase: string;
+    export let navFn: ((id: number) => void) | undefined = undefined;
+    export let routeBase: string | undefined = undefined;
     export let formComponent: ComponentType;
     export let initialSortBy: string | undefined = undefined;
     export let initialSortDir: 'asc' | 'desc' = 'asc';
@@ -49,8 +49,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let rows: DataTableRow[] | undefined = undefined;
     export let readonly = false;
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) => navFn(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/${routeBase}/${row.id}`;
+    const on_click_row = navFn
+        ? (e: CustomEvent<DataTableRow>) => navFn(e.detail.id)
+        : () => {};
+    const rowHref = routeBase
+        ? (row: DataTableRow) => `/${routeBase}/${row.id}`
+        : undefined;
 
     $: fetchData =
         rows === undefined && fetchImpl !== undefined
