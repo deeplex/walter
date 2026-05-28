@@ -28,9 +28,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
+<!-- At least one of IBAN or Bank must be filled -->
 <Row>
-    <WalterTextInput {readonly} bind:value={entry.iban} labelText="IBAN" />
-    <WalterTextInput {readonly} bind:value={entry.bank} labelText="Bank" />
+    <WalterTextInput required={!entry.iban && !entry.bank} {readonly} bind:value={entry.iban} labelText="IBAN" />
+    <WalterTextInput required={!entry.iban && !entry.bank} {readonly} bind:value={entry.bank} labelText="Bank" />
 </Row>
 <Row>
     <WalterMultiSelectKontakt

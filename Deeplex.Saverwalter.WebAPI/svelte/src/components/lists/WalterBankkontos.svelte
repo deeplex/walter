@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataTable } from '$walter/components';
-    import { WalterBankkontoEntry } from '$walter/lib';
+    import { WalterBankkontoEntry, validateBankkonto } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterBankkonto from '../details/WalterBankkonto.svelte';
 
@@ -40,6 +40,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         navigation.bankkonto(e.detail.id);
     const rowHref = (row: DataTableRow) => `/bankkontos/${row.id}`;
 
+    $: submitDisabled = !validateBankkonto(entry);
+
     const fetchData =
         rows === undefined
             ? (p: Parameters<typeof WalterBankkontoEntry.GetPaged>[1]) =>
@@ -53,6 +55,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataTable
     addUrl={WalterBankkontoEntry.ApiURL}
     addEntry={entry}
+    {submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}

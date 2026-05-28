@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterBankkontoEntry, WalterSelectionEntry } from '$walter/lib';
+    import { WalterBankkontoEntry, WalterSelectionEntry, validateBankkonto } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { WalterComboBox } from '..';
     import WalterBankkonto from '../details/WalterBankkonto.svelte';
@@ -34,6 +34,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     let addEntry: Partial<WalterBankkontoEntry> = {};
+    $: submitDisabled = !validateBankkonto(addEntry);
 </script>
 
 <div
@@ -58,6 +59,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             bind:addEntry
             addUrl={WalterBankkontoEntry.ApiURL}
             {onSubmit}
+            {submitDisabled}
         >
             <WalterBankkonto entry={addEntry} {fetchImpl} />
         </WalterQuickAddButton>

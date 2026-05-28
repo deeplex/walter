@@ -42,6 +42,8 @@ export const validateBetriebskostenrechnung = (e: unknown): boolean => {
         id(x?.umlage)
     );
 };
+export const validateBankkonto = (e: unknown): boolean =>
+    s((e as E)?.iban) || s((e as E)?.bank);
 export const validateUmlage = (e: unknown): boolean => {
     const x = e as E;
     return id(x?.typ) && id(x?.schluessel);

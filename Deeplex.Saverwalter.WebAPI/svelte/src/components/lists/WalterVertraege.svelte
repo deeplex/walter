@@ -38,9 +38,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let entry: Partial<WalterVertragEntry> | undefined = {
-        versionen: [{} as WalterVertragVersionEntry]
-    };
+    export let entry: Partial<WalterVertragEntry> | undefined = undefined;
     export let rows: WalterVertragEntry[] | undefined = undefined;
 
     let hasOverlap = false;
@@ -117,7 +115,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </WalterDataWrapperQuickAdd>
 
 <WalterDataTable
-    addUrl={WalterVertragEntry.ApiURL}
+    addUrl={entry !== undefined ? WalterVertragEntry.ApiURL : undefined}
     addEntry={entry}
     {submitDisabled}
     layout={title !== undefined ? 'accordion' : 'inline'}

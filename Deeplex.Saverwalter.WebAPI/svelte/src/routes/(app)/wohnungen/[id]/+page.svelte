@@ -34,8 +34,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterFileWrapper,
         WalterWohnungEigentuemerEntry,
+        WalterVertragVersionEntry,
         type WalterErhaltungsaufwendungEntry,
         type WalterUmlageEntry,
+        type WalterVertragEntry,
         type WalterWohnungVersionEntry,
         type WalterZaehlerEntry,
         validateWohnung
@@ -98,6 +100,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         permissions: data.entry.permissions
     };
 
+    const vertragEntry: Partial<WalterVertragEntry> = {
+        wohnung: {
+            id: '' + data.entry.id,
+            text: data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung
+        },
+        versionen: [{} as WalterVertragVersionEntry],
+        permissions: data.entry.permissions
+    };
+
     const eigentuemerEntry: Partial<WalterWohnungEigentuemerEntry> = {
         wohnung: {
             id: '' + data.entry.id,
@@ -157,6 +168,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterVertraege
             fetchImpl={data.fetchImpl}
             title="Verträge"
+            entry={vertragEntry}
             rows={data.entry.vertraege}
         />
         <WalterUmlagen
@@ -168,7 +180,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterErhaltungsaufwendungen
             fetchImpl={data.fetchImpl}
             entry={erhaltungsaufwendungEntry}
-            title="Erhaltungsaufwendungen"
+            title="Aufwandsposten"
             rows={data.entry.erhaltungsaufwendungen}
         />
 

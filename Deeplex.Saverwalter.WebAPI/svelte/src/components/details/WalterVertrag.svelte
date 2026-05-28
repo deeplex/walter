@@ -26,10 +26,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
+        Accordion,
+        AccordionItem,
         Row,
         TextInput,
-        InlineNotification,
-        Tile
+        InlineNotification
     } from 'carbon-components-svelte';
     import { convertDateGerman } from '$walter/services/utils';
     import { walter_fetch, walter_post } from '$walter/services/requests';
@@ -285,32 +286,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>
 
-<Tile style="margin-bottom: 1rem;">
-    <p style="font-weight: 600; margin-bottom: 0.75rem;">Kaution</p>
-    <Row>
-        <WalterNumberInput
-            {readonly}
-            hideSteppers
-            bind:value={entry.kautionBetrag}
-            label="Betrag (€)"
-        />
-        <TextInput
-            disabled={readonly}
-            labelText="Art"
-            placeholder="z.B. Sparbuch, Überweisung, Bürgschaft"
-            bind:value={entry.kautionArt}
-        />
-    </Row>
-    <Row>
-        <WalterDatePicker
-            disabled={readonly}
-            bind:value={entry.kautionEingangsdatum}
-            labelText="Eingang"
-        />
-        <WalterDatePicker
-            disabled={readonly}
-            bind:value={entry.kautionRueckgabedatum}
-            labelText="Rückgabe"
-        />
-    </Row>
-</Tile>
+<Accordion style="margin-bottom: 1rem;">
+    <AccordionItem title="Kaution">
+        <Row>
+            <WalterNumberInput
+                {readonly}
+                hideSteppers
+                bind:value={entry.kautionBetrag}
+                label="Betrag (€)"
+            />
+            <TextInput
+                disabled={readonly}
+                labelText="Art"
+                placeholder="z.B. Sparbuch, Überweisung, Bürgschaft"
+                bind:value={entry.kautionArt}
+            />
+        </Row>
+        <Row>
+            <WalterDatePicker
+                disabled={readonly}
+                bind:value={entry.kautionEingangsdatum}
+                labelText="Eingang"
+            />
+            <WalterDatePicker
+                disabled={readonly}
+                bind:value={entry.kautionRueckgabedatum}
+                labelText="Rückgabe"
+            />
+        </Row>
+    </AccordionItem>
+</Accordion>
