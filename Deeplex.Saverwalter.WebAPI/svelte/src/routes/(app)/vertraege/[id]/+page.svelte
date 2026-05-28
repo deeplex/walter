@@ -113,10 +113,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.garageVertraege}
         />
 
-        <WalterMietOpos
-            title="Miet-OPOS"
-            rows={data.mietOpos}
-        />
+        <WalterMietOpos title="Mieten" rows={data.mietOpos} />
 
         <WalterAbrechnungsresultate
             title="Abrechnungsresultate"

@@ -82,15 +82,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         };
     };
 
-    const getKaltmieteHinweis = (resultate: AbrechnungsresultatInfo[]) => {
-        const abweichungen = resultate.filter(
-            (r) => Math.abs(r.mietSaldo) > 0.005
-        ).length;
-        return abweichungen === 0
-            ? 'Kaltmiete: OK'
-            : `Kaltmiete: ${abweichungen} Abweichung${abweichungen === 1 ? '' : 'en'}`;
-    };
-
     const sortResultate = (resultate: AbrechnungsresultatInfo[]) =>
         [...resultate].sort((a, b) => {
             const aW = splitWohnungBezeichnung(a.wohnungBezeichnung);
@@ -140,11 +131,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </h4>
 
 {#each groupResultateByAdresse(vertragResultate) as adressGruppe, adressIndex}
-    <p
-        style="margin: 0 0 0.25rem; color: var(--cds-support-error); font-weight: 600;"
-    >
-        {getKaltmieteHinweis(adressGruppe.resultate)}
-    </p>
     <DataTable
         title={`Verträge - ${adressGruppe.adresse}`}
         description="NK-Abrechnung für {jahr}"

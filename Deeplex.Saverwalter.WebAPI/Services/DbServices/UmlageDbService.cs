@@ -251,6 +251,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entity.HeizkostenHKVOs.Clear();
             }
 
+            entity.Ende = entry.Ende;
             entity.Notiz = entry.Notiz;
         }
     }

@@ -36,6 +36,8 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
 
+        public DateOnly? Ende { get; set; }
+
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 

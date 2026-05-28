@@ -100,6 +100,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public SelectionEntry? Typ { get; set; }
             public string? WohnungenBezeichnung { get; set; }
+            public DateOnly? Ende { get; set; }
+            public IEnumerable<int> BetriebskostenrechnungsJahre { get; set; } = [];
 
             // For Tabelle
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
@@ -112,6 +114,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Typ = new SelectionEntry(entity.Typ.UmlagetypId, entity.Typ.Bezeichnung);
                 WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
+                Ende = entity.Ende;
+                BetriebskostenrechnungsJahre = entity.NkVerrechnungsKonto?.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben)
+                    .Select(z => z.Buchungssatz.Buchungsjahr)
+                    .Distinct()
+                    .ToList() ?? [];
 
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(

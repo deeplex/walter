@@ -42,7 +42,9 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public versionen: WalterUmlageVersionEntry[],
         public hkvos: WalterHKVOEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public ende: string | undefined = undefined,
+        public betriebskostenrechnungsJahre: number[] = []
     ) {
         super();
     }
@@ -88,7 +90,9 @@ export class WalterUmlageEntry extends WalterApiHandler {
             betriebskostenrechnungen,
             versionen,
             hkvos,
-            permissions
+            permissions,
+            json.ende ?? undefined,
+            json.betriebskostenrechnungsJahre ?? []
         );
     }
 }

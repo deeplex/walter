@@ -23,6 +23,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { hkvoKosten } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufEinheit from './WalterAbrechnungslaufEinheit.svelte';
     import WalterAbrechnungslaufResultat from './WalterAbrechnungslaufResultat.svelte';
+    import WalterMietOpos from '$walter/components/lists/WalterMietOpos.svelte';
+    import type { MietOposMonat } from '$walter/components/lists/WalterMietOpos.svelte';
     import { convertEuro } from '$walter/services/utils';
     import {
         ClickableTile,
@@ -89,7 +91,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: resultLabel =
         result > 0 ? 'bekommt der Mieter' : 'bekommt der Vermieter';
     $: nutzungVonDisplay =
-        resultat.nutzungVon === `${jahr}-01-01`
+        resultat.nutzungVon <= `${jahr}-01-01`
             ? 'Jahresbeginn'
             : formatDate(resultat.nutzungVon);
 
@@ -122,8 +124,34 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: warmeNk = nkNachEinheit
         .filter((e) => e.warm > 0)
         .map(({ bezeichnung, warm }) => ({ bezeichnung, betrag: warm }));
+
+    $: mietOposRows = (() => {
+        const byMonth = new Map<string, { soll: number; haben: number }>();
+        for (const m of resultat.mieten ?? []) {
+            if (!m.buchungsdatum.startsWith(String(jahr))) continue;
+            const d = new Date(m.buchungsdatum);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const cur = byMonth.get(key) ?? { soll: 0, haben: 0 };
+            if (m.istSoll) cur.soll += m.betrag;
+            else cur.haben += m.betrag;
+            byMonth.set(key, cur);
+        }
+        return [...byMonth.entries()]
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([key, { soll, haben }]): MietOposMonat => {
+                const [y, mo] = key.split('-');
+                return {
+                    jahr: Number(y),
+                    monat: Number(mo),
+                    soll,
+                    ausgeglichen: haben,
+                    offen: soll - haben
+                };
+            });
+    })();
 </script>
 
+<hr />
 <!-- Buchungsstatus + Download -->
 <div
     style="display: flex; align-items: stretch; gap: 0.5rem; margin-bottom: 0.5rem;"
@@ -144,7 +172,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Tile>Bisher keine Abrechnung erstellt</Tile>
         {/if}
     </div>
-
     <div style="display: flex; align-items: center;">
         <OverflowMenu
             icon={Download}
@@ -171,11 +198,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </p>
 {/if}
 
-<hr />
-
 <Row>
     <Column>
-        <Tile>
+        <Tile light>
             <div style="display: flex; align-items: baseline; gap: 0.5ch;">
                 <a href="/vertraege/{resultat.vertragId}">
                     <h4>{wohnungName} – {resultat.mieterBezeichnung}</h4>
@@ -185,7 +210,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </Tile>
     </Column>
     <Column sm={1}>
-        <Tile>
+        <Tile light>
             <h4>Resultat: {convertEuro(Math.abs(result))}</h4>
             <p>{resultLabel}</p>
         </Tile>
@@ -206,6 +231,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         value={formatDate(resultat.nutzungBis)}
     />
 </Row>
+
+<WalterMietOpos rows={mietOposRows} title="Mieten {jahr}" />
 
 {#each vertragsEinheiten as einheit}
     <Tile style="margin-bottom: 1rem; padding: 0;">

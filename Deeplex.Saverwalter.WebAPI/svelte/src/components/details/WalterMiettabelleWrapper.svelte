@@ -17,10 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterUmlageEntry,
-        WalterZaehlerEntry,
         WalterZaehlerstandEntry,
         type WalterUmlageEntry as WalterUmlageEntryType,
-        type WalterZaehlerEntry as WalterZaehlerEntryType,
         type TransaktionsInput
     } from '$walter/lib';
     import { emptyTransaktionsInput } from '$walter/lib';
@@ -72,10 +70,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         guthaben: number;
     }
 
+    interface ZaehlerstandFaelligEntry {
+        id: number;
+        kennnummer: string;
+        typText: string;
+        lastStand?: number;
+        lastEinheit?: string;
+    }
+
     export let fetchImpl: typeof fetch;
 
     let umlagen: WalterUmlageEntryType[] = [];
-    let zaehler: WalterZaehlerEntryType[] = [];
+    let zaehlerFaellig: ZaehlerstandFaelligEntry[] = [];
     let umlagenReady = false;
 
     // ── Offene Mietforderungen ──────────────────────────────────────────────
@@ -155,26 +161,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bkForderungenReady = true;
     }
 
+    async function ladeZaehlerFaellig(jahr: number) {
+        try {
+            const resp = await walter_get(
+                `/api/offene-forderungen/zaehlerstaende-faellig/${jahr}`,
+                fetchImpl
+            );
+            zaehlerFaellig = (resp as ZaehlerstandFaelligEntry[]) ?? [];
+        } catch (e) {
+            console.error('Konnte fällige Zählerstände nicht laden:', e);
+            zaehlerFaellig = [];
+        }
+    }
+
     onMount(async () => {
         await Promise.all([
             ladeOffeneMietForderungen(selectedYear),
             ladeOffeneGarageForderungen(selectedYear),
             ladeOffeneBkForderungen(selectedYear),
-            ladeGuthaben(selectedYear)
+            ladeGuthaben(selectedYear),
+            ladeZaehlerFaellig(selectedYear)
         ]);
         try {
-            const [umlPaged, zaehlerPaged] = await Promise.all([
-                WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(fetchImpl, {
-                    take: 10000
-                }),
-                WalterZaehlerEntry.GetPaged<WalterZaehlerEntryType>(fetchImpl, {
-                    take: 10000
-                })
-            ]);
-            umlagen = umlPaged.items;
-            zaehler = zaehlerPaged.items;
+            const paged = await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
+                fetchImpl,
+                { take: 10000 }
+            );
+            umlagen = paged.items;
         } catch (e) {
-            console.error('Konnte Umlagen/Zähler nicht laden:', e);
+            console.error('Konnte Umlagen nicht laden:', e);
         }
         umlagenReady = true;
     });
@@ -200,6 +215,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ladeOffeneGarageForderungen(selectedYear);
         ladeOffeneBkForderungen(selectedYear);
         ladeGuthaben(selectedYear);
+        ladeZaehlerFaellig(selectedYear);
     }
 
     // ── Rent payment QuickAdd ───────────────────────────────────────────────
@@ -208,11 +224,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let rentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
     let rentBuchungsInputValid = false;
 
-    function openRentQuickAdd(
-        e: CustomEvent,
-        forderung: OffeneMietForderungEntry
-    ) {
-        e.stopPropagation();
+    function openRentQuickAdd(forderung: OffeneMietForderungEntry) {
         rentModalTitle = forderung.vertragBezeichnung;
         rentBuchungsInput = {
             ...emptyTransaktionsInput(),
@@ -249,11 +261,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let garageBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
     let garageBuchungsInputValid = false;
 
-    function openGarageQuickAdd(
-        e: CustomEvent,
-        forderung: OffeneGarageForderungEntry
-    ) {
-        e.stopPropagation();
+    function openGarageQuickAdd(forderung: OffeneGarageForderungEntry) {
         garageModalTitle = forderung.bezeichnung;
         garageBuchungsInput = {
             ...emptyTransaktionsInput(),
@@ -278,15 +286,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const forderungHeaders = [
         { key: 'monat', value: 'Monat' },
         { key: 'vertrag', value: 'Vertrag' },
-        { key: 'offen', value: 'Offen (€)' },
-        { key: 'button', value: '' }
+        { key: 'offen', value: 'Offen (€)' }
     ];
 
     const garageForderungHeaders = [
         { key: 'monat', value: 'Monat' },
         { key: 'bezeichnung', value: 'Garage' },
-        { key: 'offen', value: 'Offen (€)' },
-        { key: 'button', value: '' }
+        { key: 'offen', value: 'Offen (€)' }
     ];
 
     $: garageForderungTableRows = offeneGarageForderungen.map((f) => ({
@@ -297,7 +303,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }),
         bezeichnung: f.bezeichnung,
         offen: f.offen.toFixed(2),
-        button: (e: CustomEvent) => openGarageQuickAdd(e, f)
+        button: () => openGarageQuickAdd(f)
     }));
 
     $: forderungTableRows = offeneMietForderungen.map((f) => ({
@@ -308,94 +314,48 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }),
         vertrag: f.vertragBezeichnung,
         offen: f.offen.toFixed(2),
-        button: (e: CustomEvent) => openRentQuickAdd(e, f)
+        button: () => openRentQuickAdd(f)
     }));
 
     // ── Meter reading tasks ─────────────────────────────────────────────────
-    type MeterTask = { zaehler: WalterZaehlerEntryType };
-
-    function hasMeterReadingForYear(z: WalterZaehlerEntryType, year: number) {
-        const inList = (z.staende || []).some(
-            (s) => new Date(s.datum).getFullYear() === year
-        );
-        const lastYear = z.lastZaehlerstand
-            ? new Date(z.lastZaehlerstand.datum).getFullYear()
-            : undefined;
-        return inList || lastYear === year;
-    }
-
-    function buildMeterTasks(year: number): MeterTask[] {
-        return zaehler
-            .filter((z) => !!z.permissions?.update)
-            .filter((z) => !z.ende || new Date(z.ende).getFullYear() >= year)
-            .filter((z) => !hasMeterReadingForYear(z, year))
-            .sort((a, b) => `${a.kennnummer}`.localeCompare(`${b.kennnummer}`))
-            .map((z) => ({ zaehler: z }));
-    }
-
-    let meterTasks: MeterTask[] = [];
-    $: {
-        zaehler;
-        meterTasks = buildMeterTasks(selectedYear);
-    }
-
     const meterHeaders = [
         { key: 'kennnummer', value: 'Kennnummer' },
-        { key: 'type', value: 'Typ' },
-        { key: 'button', value: '' }
+        { key: 'type', value: 'Typ' }
     ];
 
-    $: meterTableRows = meterTasks.map((task) => ({
-        id: `meter-${task.zaehler.id}`,
-        kennnummer: task.zaehler.kennnummer,
-        type: task.zaehler.typ?.text || 'Zähler',
-        button: (e: CustomEvent) => {
-            e.stopPropagation();
-            openMeterQuickAdd(task);
-        }
+    $: meterTableRows = zaehlerFaellig.map((z) => ({
+        id: `meter-${z.id}`,
+        kennnummer: z.kennnummer,
+        type: z.typText || 'Zähler',
+        button: () => openMeterQuickAdd(z)
     }));
 
     let addZaehlerstandOpen = false;
     let addZaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {};
 
-    function openMeterQuickAdd(task: MeterTask) {
+    function openMeterQuickAdd(z: ZaehlerstandFaelligEntry) {
         addZaehlerstandEntry = {
             datum:
                 selectedYear === currentYear
                     ? convertDateCanadian(new Date())
                     : convertDateCanadian(new Date(selectedYear, 11, 31)),
-            stand: task.zaehler.lastZaehlerstand?.stand,
-            einheit: task.zaehler.lastZaehlerstand?.einheit,
-            zaehler: { id: `${task.zaehler.id}`, text: task.zaehler.kennnummer }
+            stand: z.lastStand,
+            einheit: z.lastEinheit,
+            zaehler: { id: `${z.id}`, text: z.kennnummer }
         };
         addZaehlerstandOpen = true;
     }
 
-    function onSubmitZaehlerstand(newValue: unknown) {
-        const value = {
-            ...(newValue as WalterZaehlerstandEntry),
-            zaehler:
-                (newValue as WalterZaehlerstandEntry).zaehler ||
-                addZaehlerstandEntry.zaehler
-        } as WalterZaehlerstandEntry;
-
-        zaehler.forEach((z) => {
-            if (z.id === +value.zaehler?.id) {
-                z.staende = [...(z.staende || []), value];
-                z.lastZaehlerstand = value;
-            }
-        });
-        zaehler = [...zaehler];
-        meterTasks = buildMeterTasks(selectedYear);
+    async function onSubmitZaehlerstand() {
         addZaehlerstandOpen = false;
         addZaehlerstandEntry = {};
+        await ladeZaehlerFaellig(selectedYear);
     }
 
     // ── Missing billing tasks ───────────────────────────────────────────────
     const billingHeaders = [
         { key: 'typ', value: 'Kostenart' },
-        { key: 'wohnungen', value: 'Wohnungen' },
-        { key: 'button', value: '' }
+        { key: 'wohnungen', value: 'Wohnungen' }
     ];
 
     let addBillingOpen = false;
@@ -403,11 +363,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
     let buchungsInputValid = false;
 
-    function openBillingQuickAdd(
-        e: CustomEvent,
-        umlage: WalterUmlageEntryType
-    ) {
-        e.stopPropagation();
+    function openBillingQuickAdd(umlage: WalterUmlageEntryType) {
         billingModalTitle = umlage.typ?.text || 'Betriebskostenrechnung';
         buchungsInput = {
             ...emptyTransaktionsInput(),
@@ -442,11 +398,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let bkPaymentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
     let bkPaymentBuchungsInputValid = false;
 
-    function openBkPaymentQuickAdd(
-        e: CustomEvent,
-        forderung: OffeneBkForderungEntry
-    ) {
-        e.stopPropagation();
+    function openBkPaymentQuickAdd(forderung: OffeneBkForderungEntry) {
         bkPaymentModalTitle = forderung.bezeichnung;
         bkPaymentBuchungsInput = {
             ...emptyTransaktionsInput(),
@@ -467,30 +419,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const bkForderungHeaders = [
         { key: 'bezeichnung', value: 'Betriebskostenrechnung' },
-        { key: 'verbleibend', value: 'Offen (€)' },
-        { key: 'button', value: '' }
+        { key: 'verbleibend', value: 'Offen (€)' }
     ];
 
     $: bkForderungTableRows = offeneBkForderungen.map((f) => ({
         id: `bk-${f.buchungssatzId}`,
         bezeichnung: f.bezeichnung,
         verbleibend: f.verbleibend.toFixed(2),
-        button: (e: CustomEvent) => openBkPaymentQuickAdd(e, f)
+        button: () => openBkPaymentQuickAdd(f)
     }));
 
     $: billingTasks = umlagen.filter(
         (u) =>
             (u.selectedWohnungen || []).length > 0 &&
-            !(u.betriebskostenrechnungen || []).some(
-                (r) => r.betreffendesJahr === selectedYear
-            )
+            (!u.ende || new Date(u.ende).getFullYear() >= selectedYear) &&
+            !(u.betriebskostenrechnungsJahre || []).includes(selectedYear)
     );
 
     $: billingTableRows = billingTasks.map((u) => ({
         id: `billing-${u.id}`,
         typ: u.typ?.text || '—',
         wohnungen: (u.selectedWohnungen || []).map((w) => w.text).join(', '),
-        button: (e: CustomEvent) => openBillingQuickAdd(e, u)
+        button: () => openBillingQuickAdd(u)
     }));
 
     // ── Guthaben (Überzahlungen) ────────────────────────────────────────────
@@ -531,7 +481,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addEntry={addZaehlerstandEntry}
     addUrl={WalterZaehlerstandEntry.ApiURL}
     bind:addModalOpen={addZaehlerstandOpen}
-    onSubmit={onSubmitZaehlerstand}
+    onSubmit={() => onSubmitZaehlerstand()}
 >
     <WalterZaehlerstand {fetchImpl} entry={addZaehlerstandEntry} />
 </WalterDataWrapperQuickAdd>
@@ -599,6 +549,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             initialOpen={forderungTableRows.length > 0}
             rows={forderungTableRows}
             headers={forderungHeaders}
+            on_click_row={(e) => {
+                const row = forderungTableRows.find((r) => r.id === e.detail.id);
+                if (row?.button) row.button();
+            }}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -612,6 +566,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             initialOpen={garageForderungTableRows.length > 0}
             rows={garageForderungTableRows}
             headers={garageForderungHeaders}
+            on_click_row={(e) => {
+                const row = garageForderungTableRows.find(
+                    (r) => r.id === e.detail.id
+                );
+                if (row?.button) row.button();
+            }}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -625,6 +585,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             initialOpen={billingTableRows.length > 0}
             rows={billingTableRows}
             headers={billingHeaders}
+            on_click_row={(e) => {
+                const row = billingTableRows.find((r) => r.id === e.detail.id);
+                if (row?.button) row.button();
+            }}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -638,6 +602,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             initialOpen={bkForderungTableRows.length > 0}
             rows={bkForderungTableRows}
             headers={bkForderungHeaders}
+            on_click_row={(e) => {
+                const row = bkForderungTableRows.find(
+                    (r) => r.id === e.detail.id
+                );
+                if (row?.button) row.button();
+            }}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -662,6 +632,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         accordionTitle="Zählerstände fällig"
         rows={meterTableRows}
         headers={meterHeaders}
+        on_click_row={(e) => {
+            const row = meterTableRows.find((r) => r.id === e.detail.id);
+            if (row?.button) row.button();
+        }}
     />
 </Tile>
 

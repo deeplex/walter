@@ -137,7 +137,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         'Buchungen erfolgreich erstellt',
         'Buchungen konnten nicht erstellt werden',
         (vertraege: unknown) =>
-            `Die Buchung ist auf ${Number(vertraege ?? 0)} Vertraegen erfolgt.`,
+            `Die Buchung ist auf ${Number(vertraege ?? 0)} Verträgen erfolgt.`,
         (error: unknown) =>
             typeof error === 'string' && error.length > 0
                 ? error

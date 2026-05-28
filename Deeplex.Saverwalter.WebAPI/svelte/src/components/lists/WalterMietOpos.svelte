@@ -25,15 +25,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <script lang="ts">
-    import { Accordion, AccordionItem, DataTable, Tag, Tile, Toolbar, ToolbarContent } from 'carbon-components-svelte';
+    import {
+        Accordion,
+        AccordionItem,
+        DataTable,
+        Tag,
+        Tile,
+        Toolbar,
+        ToolbarContent
+    } from 'carbon-components-svelte';
     import { convertEuro } from '$walter/services/utils';
 
     export let rows: MietOposMonat[] = [];
-    export let title = 'Miet-OPOS';
+    export let title = 'Mieten';
 
     const MONAT = [
-        'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+        'Jan',
+        'Feb',
+        'Mär',
+        'Apr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Dez'
     ];
 
     $: offeneGesamt = rows.reduce((s, r) => s + r.offen, 0);
@@ -59,7 +77,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <svelte:fragment slot="title">
             {title} ({rows.length})
             {#if offeneGesamt > 0.005}
-                <Tag type="red" style="margin-left: 0.5rem;">{convertEuro(offeneGesamt)} offen</Tag>
+                <Tag type="red" style="margin-left: 0.5rem;"
+                    >{convertEuro(offeneGesamt)} offen</Tag
+                >
+            {:else if offeneGesamt < -0.005}
+                <Tag type="blue" style="margin-left: 0.5rem;"
+                    >{convertEuro(Math.abs(offeneGesamt))} Guthaben</Tag
+                >
             {/if}
         </svelte:fragment>
         <Tile style="overflow: auto">
@@ -75,7 +99,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <Toolbar><ToolbarContent /></Toolbar>
                     <svelte:fragment slot="cell" let:row let:cell>
                         {#if cell.key === 'offenFormatted'}
-                            <span style={row.offen > 0.005 ? 'color: var(--cds-support-error)' : ''}>
+                            <span
+                                style={row.offen > 0.005
+                                    ? 'color: var(--cds-support-error)'
+                                    : row.offen < -0.005
+                                      ? 'color: var(--cds-link-primary)'
+                                      : ''}
+                            >
                                 {cell.value}
                             </span>
                         {:else}

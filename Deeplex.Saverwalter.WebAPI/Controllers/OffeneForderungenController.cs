@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -490,5 +491,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
+
+        public class ZaehlerstandFaelligEntry
+        {
+            public int Id { get; set; }
+            public string Kennnummer { get; set; } = "";
+            public string TypText { get; set; } = "";
+            public decimal? LastStand { get; set; }
+            public string? LastEinheit { get; set; }
+        }
+
+        [HttpGet("zaehlerstaende-faellig/{jahr}")]
+        public async Task<ActionResult<IEnumerable<ZaehlerstandFaelligEntry>>> GetZaehlerstaendeFaellig(int jahr)
+        {
+            var zaehler = await ZaehlerPermissionHandler.GetQueryable(ctx, User)
+                .Include(z => z.Staende)
+                .Where(z => z.Ende == null || z.Ende.Value.Year >= jahr)
+                .Where(z => !z.Staende.Any(s => s.Datum.Year == jahr))
+                .ToListAsync();
+
+            return Ok(zaehler
+                .OrderBy(z => z.Kennnummer)
+                .Select(z =>
+                {
+                    var last = z.Staende.OrderBy(s => s.Datum).LastOrDefault();
+                    return new ZaehlerstandFaelligEntry
+                    {
+                        Id = z.ZaehlerId,
+                        Kennnummer = z.Kennnummer,
+                        TypText = z.Typ.ToString(),
+                        LastStand = last?.Stand,
+                        LastEinheit = last != null ? z.Typ.ToUnitString() : null
+                    };
+                }));
+        }
     }
 }

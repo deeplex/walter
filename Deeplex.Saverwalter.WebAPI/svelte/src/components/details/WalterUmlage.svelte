@@ -161,6 +161,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/if}
 
 <Row>
+    <WalterDatePicker
+        disabled={readonly}
+        bind:value={entry.ende}
+        labelText="Ende"
+    />
+</Row>
+<Row>
     <WalterTextArea
         {readonly}
         labelText="Beschreibung"
