@@ -53,27 +53,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         }
 
         private async Task<List<Buchungssatz>> LoadEaSaetzeAsync(HashSet<int> aufwandsKontoIds)
-        {
-            // BK-Forderungs-Buchungssätze also get a Soll-Zeile on AufwandsKonto when leerstand
-            // NK-Anteile are booked during Abrechnung. Exclude them by checking that no
-            // Haben-Zeile on the Buchungssatz belongs to a Umlage.NkVerrechnungsKonto.
-            var nkVerrechnungsKontoIds = (await ctx.Umlagen
-                .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
-                .ToListAsync())
-                .ToHashSet();
-
-            return await ctx.Buchungssaetze
+            => await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .Where(s =>
-                    s.Buchungszeilen.Any(z =>
-                        z.SollHaben == SollHaben.Soll &&
-                        aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)) &&
-                    !s.Buchungszeilen.Any(z =>
-                        z.SollHaben == SollHaben.Haben &&
-                        nkVerrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
+                .Where(s => s.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Soll &&
+                    aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
                 .ToListAsync();
-        }
 
         private static (Wohnung? Wohnung, Kontakt? Aussteller) FindContext(
             Buchungssatz satz,

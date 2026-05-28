@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         .FirstOrDefault(z => z.SollHaben == SollHaben.Haben)
                         ?.Buchungskonto.BuchungskontoId;
                     var aussteller = habenKontoId.HasValue && verbindlichkeitsMap.TryGetValue(habenKontoId.Value, out var k) ? k : null;
-                    return new ErhaltungsaufwendungEntryBase(s, new SelectionEntry(entity.WohnungId, entity.Bezeichnung), aussteller, permissions);
+                    return new ErhaltungsaufwendungEntryBase(s, new SelectionEntry(entity.WohnungId, entity.Bezeichnung), aussteller, permissions, aufwandsKontoId);
                 }).ToList();
 
                 return entry;
