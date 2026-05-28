@@ -73,6 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         private readonly ILogger<TransaktionController> _logger;
         private readonly TransaktionBuchungsService _buchungsService;
+        private readonly NkAnteilBuchungsService _nkAnteilService;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
         protected override TransaktionDbService DbService { get; }
@@ -81,12 +82,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             ILogger<TransaktionController> logger,
             TransaktionDbService dbService,
             TransaktionBuchungsService buchungsService,
+            NkAnteilBuchungsService nkAnteilService,
             SaverwalterContext ctx,
             IAuthorizationService auth,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _buchungsService = buchungsService;
+            _nkAnteilService = nkAnteilService;
             _ctx = ctx;
             _auth = auth;
             _logger = logger;
@@ -131,11 +134,38 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 if (!authRx.Succeeded) return Forbid();
             }
 
+            foreach (var nk in input.NkAnteilEingaenge)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(nk.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {nk.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            var nkAnteile = input.NkAnteilEingaenge.ToList();
+            input.NkAnteilEingaenge.Clear();
+
             try
             {
-                var transaktion = await _buchungsService.BucheAsync(input);
-                var permissions = await GetPermissions(User!, transaktion, _auth);
-                return Ok(new TransaktionEntry(transaktion, permissions));
+                TransaktionEntry? result = null;
+                if (input.Betrag > 0)
+                {
+                    var transaktion = await _buchungsService.BucheAsync(input);
+                    var permissions = await GetPermissions(User!, transaktion, _auth);
+                    result = new TransaktionEntry(transaktion, permissions);
+                }
+
+                foreach (var nk in nkAnteile)
+                    await _nkAnteilService.BucheVertragsNkAnteilAsync(
+                        nk.VertragId, nk.UmlageId, nk.Betrag, nk.BetreffendesJahr,
+                        input.Zahlungsdatum, nk.Notiz);
+
+                if (result is not null)
+                    return Ok(result);
+
+                return nkAnteile.Count > 0
+                    ? Ok(new { message = $"{nkAnteile.Count} NK-Anteil(e) gebucht." })
+                    : BadRequest("Keine Positionen vorhanden.");
             }
             catch (ArgumentException ex) { return BadRequest(ex.Message); }
             catch (InvalidOperationException ex) { return BadRequest(ex.Message); }

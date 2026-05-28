@@ -113,3 +113,4 @@ export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungs
 export { default as WalterMietOpos } from './lists/WalterMietOpos.svelte';
 export { default as WalterRechnungenOpos } from './lists/WalterRechnungenOpos.svelte';
 export { default as WalterSimpleList } from './lists/WalterSimpleList.svelte';
+export { default as WalterVertragsNkAnteile } from './lists/WalterVertragsNkAnteile.svelte';

@@ -53,21 +53,38 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         }
 
         private async Task<List<Buchungssatz>> LoadEaSaetzeAsync(HashSet<int> aufwandsKontoIds)
-            => await ctx.Buchungssaetze
+        {
+            // BK-Forderungs-Buchungssätze also get a Soll-Zeile on AufwandsKonto when leerstand
+            // NK-Anteile are booked during Abrechnung. Exclude them by checking that no
+            // Haben-Zeile on the Buchungssatz belongs to a Umlage.NkVerrechnungsKonto.
+            var nkVerrechnungsKontoIds = (await ctx.Umlagen
+                .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
+                .ToListAsync())
+                .ToHashSet();
+
+            return await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .Where(s => s.Buchungszeilen.Any(z =>
-                    z.SollHaben == SollHaben.Soll &&
-                    aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
+                .Where(s =>
+                    s.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Soll &&
+                        aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)) &&
+                    !s.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Haben &&
+                        nkVerrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
                 .ToListAsync();
+        }
 
         private static (Wohnung? Wohnung, Kontakt? Aussteller) FindContext(
             Buchungssatz satz,
             Dictionary<int, Wohnung> aufwandsMap,
             Dictionary<int, Kontakt> verbindlichkeitsMap)
         {
+            // Find the Soll-Zeile that is on an AufwandsKonto — a Buchungssatz from the
+            // Abrechnung may contain multiple Soll-Zeilen (for Mieter NK-Konten + Leerstand
+            // AufwandsKonto), so checking only FirstOrDefault would pick the wrong one.
             var sollKontoId = satz.Buchungszeilen
-                .FirstOrDefault(z => z.SollHaben == SollHaben.Soll)
+                .FirstOrDefault(z => z.SollHaben == SollHaben.Soll && aufwandsMap.ContainsKey(z.Buchungskonto.BuchungskontoId))
                 ?.Buchungskonto.BuchungskontoId;
             var habenKontoId = satz.Buchungszeilen
                 .FirstOrDefault(z => z.SollHaben == SollHaben.Haben)
@@ -150,7 +167,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         Update = false,
                         Remove = p.Wohnung != null && writableWohnungIds.Contains(p.Wohnung.WohnungId)
                     };
-                return (ErhaltungsaufwendungEntryBase)new ErhaltungsaufwendungEntryBase(p.Satz, new SelectionEntry(p.Wohnung!.WohnungId, p.Wohnung.Bezeichnung), p.Aussteller, perms);
+                return (ErhaltungsaufwendungEntryBase)new ErhaltungsaufwendungEntryBase(p.Satz, new SelectionEntry(p.Wohnung!.WohnungId, p.Wohnung.Bezeichnung), p.Aussteller, perms, p.Wohnung.AufwandsKonto.BuchungskontoId);
             });
 
             return new PagedResult<ErhaltungsaufwendungEntryBase>(items, totalCount);

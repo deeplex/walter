@@ -101,6 +101,14 @@ export interface SonstigerBuchungssatzInput {
     beschreibung?: string;
 }
 
+export interface NkAnteilEingangInput {
+    vertragId?: number;
+    umlageId?: number;
+    betreffendesJahr: number;
+    betrag: number;
+    notiz?: string;
+}
+
 export interface TransaktionsInput {
     betrag: number;
     zahlungsdatum: string;
@@ -113,6 +121,7 @@ export interface TransaktionsInput {
     betriebskostenEingaenge: BetriebskostenEingangInput[];
     erhaltungsaufwendungen: ErhaltungsaufwendungsInput[];
     sonstige: SonstigerBuchungssatzInput[];
+    nkAnteilEingaenge: NkAnteilEingangInput[];
 }
 
 export function emptyMietzahlungsInput(vertragId?: number): MietzahlungsInput {
@@ -128,6 +137,7 @@ export function emptyTransaktionsInput(): TransaktionsInput {
         garagenEingaenge: [],
         betriebskostenEingaenge: [],
         erhaltungsaufwendungen: [],
-        sonstige: []
+        sonstige: [],
+        nkAnteilEingaenge: []
     };
 }

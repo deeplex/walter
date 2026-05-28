@@ -43,11 +43,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public Permissions Permissions { get; set; } = new Permissions();
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Buchungssatz satz, SelectionEntry wohnung, Kontakt? aussteller, Permissions permissions)
+            public ErhaltungsaufwendungEntryBase(Buchungssatz satz, SelectionEntry wohnung, Kontakt? aussteller, Permissions permissions, int aufwandsKontoId = -1)
             {
                 Id = satz.BuchungssatzId;
                 Datum = satz.Buchungsdatum;
-                Betrag = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
+                // Filter to this Wohnung's AufwandsKonto only — avoids summing all Parteien
+                // when a BK-Forderungs-Buchungssatz has multiple Soll-Zeilen after Abrechnung.
+                Betrag = satz.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Soll &&
+                                (aufwandsKontoId < 0 || z.Buchungskonto.BuchungskontoId == aufwandsKontoId))
+                    .Sum(z => z.Betrag);
                 Bezeichnung = satz.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
                     ? satz.Beschreibung["Erhaltungsaufwendung: ".Length..]
                     : satz.Beschreibung;
@@ -68,7 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public ErhaltungsaufwendungEntry() { }
             public ErhaltungsaufwendungEntry(Buchungssatz satz, Deeplex.Saverwalter.Model.Wohnung wohnung, Kontakt? aussteller, Permissions permissions)
-                : base(satz, BuildWohnungEntry(wohnung), aussteller, permissions)
+                : base(satz, BuildWohnungEntry(wohnung), aussteller, permissions, wohnung.AufwandsKonto.BuchungskontoId)
             {
                 Notiz = satz.Notiz;
                 CreatedAt = satz.CreatedAt;

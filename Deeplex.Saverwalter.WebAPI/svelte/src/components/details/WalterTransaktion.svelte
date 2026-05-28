@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
     import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
     import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
+    import WalterTransaktionPositionNkAnteil from './WalterTransaktionPositionNkAnteil.svelte';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
@@ -74,7 +75,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         (buchung.garagenEingaenge?.length || 0) +
         buchung.betriebskostenEingaenge.length +
         buchung.erhaltungsaufwendungen.length +
-        buchung.sonstige.length;
+        buchung.sonstige.length +
+        (buchung.nkAnteilEingaenge?.length || 0);
 
     $: isSinglePosition = totalPositions === 1;
 
@@ -85,13 +87,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let garageInvalids: boolean[] = [];
     let bkInvalids: boolean[] = [];
     let eaInvalids: boolean[] = [];
+    let nkAnteilInvalids: boolean[] = [];
+    $: hasCashPositions =
+        buchung.mieten.length > 0 ||
+        (buchung.garagenEingaenge?.length || 0) > 0 ||
+        buchung.betriebskostenEingaenge.length > 0 ||
+        buchung.erhaltungsaufwendungen.length > 0 ||
+        buchung.sonstige.length > 0;
     $: isValid =
-        buchung.betrag > 0 &&
-        Math.abs(offenerBetrag) < 0.005 &&
+        (hasCashPositions
+            ? buchung.betrag > 0 && Math.abs(offenerBetrag) < 0.005
+            : (buchung.nkAnteilEingaenge?.length || 0) > 0) &&
         !mieteInvalids.some(Boolean) &&
         !garageInvalids.some(Boolean) &&
         !bkInvalids.some(Boolean) &&
-        !eaInvalids.some(Boolean);
+        !eaInvalids.some(Boolean) &&
+        !nkAnteilInvalids.some(Boolean);
 
     function addWohnungsmiete() {
         const available = Math.max(0, offenerBetrag);
@@ -166,6 +177,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function removeSonstiges(i: number) {
         buchung.sonstige = buchung.sonstige.filter((_, idx) => idx !== i);
+    }
+
+    function addNkAnteil() {
+        const now = new Date();
+        buchung.nkAnteilEingaenge = [
+            ...(buchung.nkAnteilEingaenge ?? []),
+            { betrag: 0, betreffendesJahr: now.getFullYear() - 1 }
+        ];
+    }
+
+    function removeNkAnteil(i: number) {
+        buchung.nkAnteilEingaenge = buchung.nkAnteilEingaenge.filter(
+            (_, idx) => idx !== i
+        );
     }
 
     function onZahlerChange(e: CustomEvent) {
@@ -339,6 +364,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Tile>
 {/each}
 
+<!-- NK-Anteile (nicht-monetär) -->
+{#each buchung.nkAnteilEingaenge ?? [] as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Vertrags-NK-Anteil</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeNkAnteil(i)}
+            />
+        </div>
+        <WalterTransaktionPositionNkAnteil
+            {fetchImpl}
+            bind:nk={buchung.nkAnteilEingaenge[i]}
+            bind:invalid={nkAnteilInvalids[i]}
+        />
+    </Tile>
+{/each}
+
 <!-- Position hinzufügen -->
 <Row style="margin-bottom: 1.5rem">
     <Column>
@@ -372,6 +420,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 on:click={addSonstiges}
             >
                 Sonstiges
+            </Button>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addNkAnteil}
+            >
+                NK-Anteil
             </Button>
         </div>
     </Column>

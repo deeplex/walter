@@ -84,6 +84,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public string? Beschreibung { get; set; }
         }
 
+        public class NkAnteilEingangInput
+        {
+            public int VertragId { get; set; }
+            public int UmlageId { get; set; }
+            public int BetreffendesJahr { get; set; }
+            public decimal Betrag { get; set; }
+            public string? Notiz { get; set; }
+        }
+
         public class TransaktionsInput
         {
             public decimal Betrag { get; set; }
@@ -97,6 +106,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public List<BetriebskostenEingangInput> BetriebskostenEingaenge { get; set; } = [];
             public List<ErhaltungsaufwendungsInput> Erhaltungsaufwendungen { get; set; } = [];
             public List<SonstigerBuchungssatzInput> Sonstige { get; set; } = [];
+            public List<NkAnteilEingangInput> NkAnteilEingaenge { get; set; } = [];
         }
 
         // ── Hauptmethode ─────────────────────────────────────────────────────────

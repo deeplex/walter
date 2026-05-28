@@ -27,7 +27,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterVertrag,
         WalterVertragVersionen,
         WalterLinkTile,
-        WalterLinks
+        WalterLinks,
+        WalterVertragsNkAnteile
     } from '$walter/components';
     import { getMietminderungEntry, getVertragversionEntry } from './utils';
     import {
@@ -114,6 +115,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
 
         <WalterMietOpos title="Mieten" rows={data.mietOpos} />
+
+        <WalterVertragsNkAnteile
+            fetchImpl={data.fetchImpl}
+            vertragId={data.entry.id}
+            title="NK-Anteile"
+        />
 
         <WalterAbrechnungsresultate
             title="Abrechnungsresultate"

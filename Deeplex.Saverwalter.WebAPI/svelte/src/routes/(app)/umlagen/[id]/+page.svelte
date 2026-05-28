@@ -28,7 +28,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile,
         WalterZaehler,
-        WalterRechnungenOpos
+        WalterRechnungenOpos,
+        WalterVertragsNkAnteile
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -134,6 +135,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterRechnungenOpos
             title="Rechnungen OPOS"
             rows={data.entry.betriebskostenrechnungen}
+        />
+        <WalterVertragsNkAnteile
+            fetchImpl={data.fetchImpl}
+            umlageId={data.entry.id}
+            title="Vertragsanteile"
         />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if `${data.entry?.schluessel?.id}` === '3'}

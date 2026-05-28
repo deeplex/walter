@@ -22,6 +22,7 @@ export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+export { WalterVertragsNkAnteilEntry, validateVertragsNkAnteil } from './WalterVertragsNkAnteil';
 export { WalterHKVOEntry } from './WalterHKVO';
 export {
     WalterMietzahlungListEntry,
@@ -59,6 +60,7 @@ export {
     type BetriebskostenEingangInput,
     type ErhaltungsaufwendungsInput,
     type SonstigerBuchungssatzInput,
+    type NkAnteilEingangInput,
     type TransaktionsInput,
     emptyMietzahlungsInput,
     emptyTransaktionsInput

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.BetriebskostenabrechnungService.NkGruppenAbrechnungsService;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
@@ -39,6 +40,54 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         public NkAnteilBuchungsService(SaverwalterContext ctx)
         {
             _ctx = ctx;
+        }
+
+        public const string BeschreibungPrefix = "NK-Anteil: ";
+
+        /// <summary>
+        /// Erstellt einen neuen Buchungssatz für einen manuellen Vertrags-NK-Anteil.
+        ///   Soll  Vertrag.NkBuchungskonto     — NK-Forderung gegen den Mieter
+        ///   Haben Umlage.NkVerrechnungsKonto  — Umlagekosten verteilt
+        /// </summary>
+        public async Task<Buchungssatz> BucheVertragsNkAnteilAsync(
+            int vertragId, int umlageId, decimal betrag, int betreffendesJahr, DateOnly datum, string? notiz)
+        {
+            if (betrag <= 0)
+                throw new ArgumentException($"Betrag muss größer als 0 sein (aktuell: {betrag:C}).");
+
+            var vertrag = await _ctx.Vertraege
+                .Include(v => v.NkBuchungskonto)
+                .Include(v => v.Mieter)
+                .Include(v => v.Wohnung)
+                .FirstOrDefaultAsync(v => v.VertragId == vertragId)
+                ?? throw new ArgumentException($"Vertrag {vertragId} nicht gefunden.");
+
+            var umlage = await _ctx.Umlagen
+                .Include(u => u.NkVerrechnungsKonto)
+                .Include(u => u.Typ)
+                .FirstOrDefaultAsync(u => u.UmlageId == umlageId)
+                ?? throw new ArgumentException($"Umlage {umlageId} nicht gefunden.");
+
+            var beschreibung = $"{BeschreibungPrefix}{umlage.Typ.Bezeichnung} {betreffendesJahr}";
+            var satz = new Buchungssatz(datum, beschreibung)
+            {
+                Buchungsjahr = betreffendesJahr,
+                Notiz = notiz
+            };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = vertrag.NkBuchungskonto
+            });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = umlage.NkVerrechnungsKonto
+            });
+
+            _ctx.Buchungssaetze.Add(satz);
+            await _ctx.SaveChangesAsync();
+            return satz;
         }
 
         public sealed class NkAnteilBuchungsResult
