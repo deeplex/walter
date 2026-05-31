@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class AbrechnungsresultatDbService : WalterDbServiceBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat>
     {

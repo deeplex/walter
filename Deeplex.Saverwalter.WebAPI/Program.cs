@@ -20,7 +20,7 @@ using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

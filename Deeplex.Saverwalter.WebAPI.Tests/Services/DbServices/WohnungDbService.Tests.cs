@@ -16,8 +16,8 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Helper;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Utils;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +33,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
         private static Wohnung MakeWohnung(string name, Kontakt? besitzer = null)
         {
-            var w = new Wohnung(name);
+            var w = new Wohnung(name)
+            {
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
+            };
             if (besitzer != null)
                 w.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = w, Kontakt = besitzer });
             w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = w });
@@ -150,7 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
             var entry = new WohnungEntry(entity, new());
-            entry.Wohnflaeche = 200;
+            entry.Bezeichnung = "Test geändert";
 
             var result = await service.Put(user, entity.WohnungId, entry);
 
@@ -160,7 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new Exception("Wohnung not found");
             }
-            updatedEntity.Versionen.OrderByDescending(v => v.Beginn).First().Wohnflaeche.Should().Be(200);
+            updatedEntity.Bezeichnung.Should().Be("Test geändert");
         }
 
         [Fact]

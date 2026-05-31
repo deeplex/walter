@@ -21,10 +21,10 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class GarageVertragDbService : WalterDbServiceBase<GarageVertragEntry, int, GarageVertrag>
     {

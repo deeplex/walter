@@ -14,11 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Helper;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Utils;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers

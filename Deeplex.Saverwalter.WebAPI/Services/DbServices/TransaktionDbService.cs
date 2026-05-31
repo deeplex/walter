@@ -23,7 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class TransaktionDbService : WalterDbServiceBase<TransaktionEntry, Guid, Transaktion>
     {

@@ -16,7 +16,7 @@
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {

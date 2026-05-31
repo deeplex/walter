@@ -15,7 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragsNkAnteilController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class VertragsNkAnteilDbService(
         SaverwalterContext ctx,
@@ -109,10 +109,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         Datum = t.Satz.Buchungsdatum,
                         BetreffendesJahr = t.Satz.Buchungsjahr,
                         Notiz = t.Satz.Notiz,
-                        Vertrag = new Controllers.Services.SelectionListController.SelectionEntry(
+                        Vertrag = new Controllers.SelectionListController.SelectionEntry(
                             t.Vertrag!.VertragId,
                             VertragLabel(t.Vertrag)),
-                        Umlage = new Controllers.Services.SelectionListController.SelectionEntry(
+                        Umlage = new Controllers.SelectionListController.SelectionEntry(
                             t.Umlage!.UmlageId,
                             t.Umlage.Typ.Bezeichnung),
                         Permissions = new Permissions { Read = true, Update = false, Remove = true }
@@ -155,9 +155,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 Datum = satz.Buchungsdatum,
                 BetreffendesJahr = satz.Buchungsjahr,
                 Notiz = satz.Notiz,
-                Vertrag = new Controllers.Services.SelectionListController.SelectionEntry(
+                Vertrag = new Controllers.SelectionListController.SelectionEntry(
                     v!.VertragId, VertragLabel(v)),
-                Umlage = new Controllers.Services.SelectionListController.SelectionEntry(
+                Umlage = new Controllers.SelectionListController.SelectionEntry(
                     u!.UmlageId, u.Typ.Bezeichnung),
                 Permissions = new Permissions { Read = true, Update = false, Remove = true }
             };

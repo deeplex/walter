@@ -18,16 +18,15 @@ using System.Security.Claims;
 using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
-using Deeplex.Saverwalter.WebAPI.Helper;
-using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Utils;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using MigraDoc.DocumentObjectModel;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [Route("api/user")]
     public class UserController : ControllerBase

@@ -15,7 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Controllers.Services;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;

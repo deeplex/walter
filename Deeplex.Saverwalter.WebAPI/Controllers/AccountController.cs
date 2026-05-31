@@ -15,11 +15,11 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {

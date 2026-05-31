@@ -1,10 +1,10 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers

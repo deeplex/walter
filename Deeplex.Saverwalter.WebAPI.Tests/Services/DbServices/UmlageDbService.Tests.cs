@@ -16,7 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +30,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     {
         private static Umlage MakeUmlage(Umlageschluessel schluessel, Umlagetyp? typ = null)
         {
-            var u = new Umlage { Typ = typ ?? new Umlagetyp("Allgemeinstrom/Hausbeleuchtung") };
+            var u = new Umlage
+            {
+                Typ = typ ?? new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
+                NkVerrechnungsKonto = new Buchungskonto("7000", "NK-Verrechnung", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1200", "Zahlung", BuchungskontoTyp.Aktiv),
+            };
             u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = u });
             return u;
         }

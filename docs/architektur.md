@@ -1,6 +1,6 @@
 # Architektur
 
-Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietverhältnissen und Betriebskostenabrechnungen.
+Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietverhältnissen und Betriebskostenabrechnungen. Sämtliche Geld­bewegungen werden seit dem Zahlungsmodell-Umbau über eine **doppelte Buchführung** (Buchungssätze auf Buchungskonten) abgebildet.
 
 ---
 
@@ -9,12 +9,13 @@ Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietver
 | Schicht       | Technologie                              |
 |---------------|------------------------------------------|
 | Backend       | .NET 8, ASP.NET Core (REST API)          |
-| ORM           | Entity Framework Core                    |
+| ORM           | Entity Framework Core (Npgsql)           |
 | Datenbank     | PostgreSQL                               |
-| Frontend      | Svelte, Carbon Design System, D3.js      |
+| DI-Container  | Simple Injector                          |
+| Frontend      | SvelteKit, Carbon Design System, D3.js   |
 | Dateiablage   | S3-kompatibel (MinIO im Entwicklungs-Stack) |
-| Observability | OpenTelemetry (konfigurierbar)           |
-| Tests         | xUnit (Unit/Integration), Playwright (E2E) |
+| Observability | OpenTelemetry (optional, via `OTEL_ENDPOINT`) |
+| Tests         | xUnit (Backend), Vitest + Playwright (Frontend) |
 | CI            | GitHub Actions                           |
 
 ---
@@ -22,16 +23,32 @@ Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietver
 ## Projektstruktur
 
 ```
-Deeplex.Saverwalter.Model/                    ← Datenmodelle & EF Core DbContext
-Deeplex.Saverwalter.BetriebskostenabrechnungService/  ← Berechnungslogik Nebenkosten
-Deeplex.Saverwalter.ErhaltungsaufwendungService/      ← Logik Erhaltungsaufwendungen
-Deeplex.Saverwalter.PrintService/             ← Word- und PDF-Generierung
-Deeplex.Saverwalter.WebAPI/                   ← REST API + eingebettetes Svelte-Frontend
-Deeplex.Saverwalter.CLI/                      ← Kommandozeilen-Werkzeuge (Datenbankinitialisierung)
-Deeplex.Saverwalter.InitiateTestDbs/          ← Testdaten-Seed für Entwicklung und Tests
+Deeplex.Saverwalter.Model/                            ← EF-Core-Entitäten, DbContext, Migrationen
+Deeplex.Saverwalter.BetriebskostenabrechnungService/  ← Berechnungslogik Nebenkosten (rein fachlich)
+Deeplex.Saverwalter.PrintService/                     ← Word- und PDF-Generierung (OOXML / MigraDoc)
+Deeplex.Saverwalter.WebAPI/                           ← REST API + eingebettetes SvelteKit-Frontend (svelte/)
+Deeplex.Saverwalter.CLI/                              ← Kommandozeilen-Werkzeuge (Datenbankinitialisierung)
+Deeplex.Saverwalter.InitiateTestDbs/                  ← Testdaten-Seed für Entwicklung und Tests
 ```
 
-Jedes Service-Projekt hat ein zugehöriges Test-Projekt (Suffix `.Tests`).
+Test-Projekte (xUnit): `Deeplex.Saverwalter.Model.Tests`, `…PrintService.Tests`, `…WebAPI.Tests`.
+
+> **Hinweis:** Das frühere `Deeplex.Saverwalter.ErhaltungsaufwendungService`-Projekt wurde entfernt. Erhaltungsaufwendungen sind heute reine Buchungssätze auf dem `AufwandsKonto` der Wohnung (siehe `WebAPI/Services/Buchungen/ErhaltungsaufwendungBuchungsService`).
+
+### Aufbau der WebAPI
+
+```
+Deeplex.Saverwalter.WebAPI/
+├── Controllers/              ← HTTP-Endpunkte (ein Controller je Ressource)
+│   └── Utils/                ← Selection-Listen, Datei-Handling, Paging
+├── Services/
+│   ├── DbServices/           ← CRUD-/Lade-Logik je Entität (von Controllern aufgerufen)
+│   ├── Buchungen/            ← Erzeugen von Buchungssätzen (Transaktion, Erhaltungs-
+│   │                            aufwendung, Betriebskostenrechnung, NK-Anteil, Storno, …)
+│   └── Abrechnung/           ← Abrechnungslauf (Berechnung + Druck + DTOs)
+├── Utils/                    ← Querschnitt (FileHandling, AccountExtensions, …)
+└── svelte/                   ← SvelteKit-Frontend (Quelle); Build landet in wwwroot/
+```
 
 ---
 
@@ -39,25 +56,38 @@ Jedes Service-Projekt hat ein zugehöriges Test-Projekt (Suffix `.Tests`).
 
 ```
 ┌──────────────────────────────────────┐
-│  Svelte-Frontend (SPA, eingebettet)  │
+│  SvelteKit-Frontend (SPA, eingebettet)│
 └──────────────┬───────────────────────┘
                │ HTTP/JSON
 ┌──────────────▼───────────────────────┐
-│  ASP.NET Core REST API               │
-│  Controller → Handler/Services       │
+│  ASP.NET Core REST API                │
+│  Controller → DbService / BuchungsService
 └──────────────┬───────────────────────┘
                │
-       ┌───────┴────────┐
-       │                │
-┌──────▼──────┐  ┌──────▼──────────────┐
-│ Abrechnung- │  │ EF Core DbContext    │
-│ Services    │  │ (PostgreSQL)        │
-└─────────────┘  └─────────────────────┘
+       ┌───────┴─────────────┐
+       │                     │
+┌──────▼───────────┐  ┌──────▼──────────────┐
+│ Abrechnungs- /   │  │ EF Core DbContext    │
+│ Buchungs-Services│  │ (PostgreSQL)         │
+└──────┬───────────┘  └─────────────────────┘
        │
 ┌──────▼──────┐
-│ PrintService│  (Word/PDF via OOXML)
+│ PrintService│  (Word/PDF via OOXML / MigraDoc)
 └─────────────┘
 ```
+
+---
+
+## Buchführungs-Kern
+
+Alle Geldbewegungen laufen über vier Modell-Typen (Details siehe [Datenmodell](datenmodell.md)):
+
+- **Buchungskonto** — ein Konto im Kontenrahmen (Aktiv / Passiv / Aufwand / Ertrag). Z. B. das `AufwandsKonto` einer Wohnung, das `NkBuchungskonto`/`MietBuchungskonto` eines Vertrags oder das `VerbindlichkeitsKonto` eines Kontakts.
+- **Buchungssatz** — ein vollständiger, gemäß § 239 HGB lückenlos nummerierter Buchungssatz mit Buchungsjahr und optionalem Belegpfad. Korrekturen erfolgen ausschließlich per **Stornobuchung** (`StornoVon`).
+- **Buchungszeile** — eine Soll- oder Haben-Zeile eines Buchungssatzes auf genau einem Buchungskonto.
+- **OffenerPostenAusgleich** — verbindet eine offene Forderung (Soll-Zeile) mit ihrer ausgleichenden Zahlung (Haben-Zeile) auf demselben Konto (OPOS-Prinzip).
+
+Eine importierte oder erfasste **Transaktion** (Kontoauszugseintrag) wird über `Buchungssaetze` mit den passenden Buchungen verknüpft.
 
 ---
 
@@ -68,17 +98,16 @@ Jedes Service-Projekt hat ein zugehöriges Test-Projekt (Suffix `.Tests`).
 | `DATABASE_HOST`     | PostgreSQL-Host                                 |
 | `DATABASE_PORT`     | PostgreSQL-Port (Standard: 5432)                |
 | `DATABASE_USER`     | Datenbankbenutzer                               |
-| `DATABASE_PASSWORD` | Datenbankpasswort                               |
+| `DATABASE_PASS`     | Datenbankpasswort                               |
 | `DATABASE_NAME`     | Datenbankname                                   |
-| `S3_PROVIDER`       | S3-Anbieter (`minio` oder AWS-kompatibel)       |
-| `S3_*`              | S3-Verbindungsparameter (Endpoint, Bucket, etc.) |
+| `S3_*`              | S3/MinIO-Verbindungsparameter (Endpoint, Bucket, Keys) |
 | `OTEL_ENDPOINT`     | OpenTelemetry Collector Endpoint (optional)     |
 
 ---
 
-## Authentifizierung
+## Authentifizierung & Autorisierung
 
-Walter verwendet ein eigenes Benutzer- und Rechtesystem. Kontakte können mit `UserAccount`-Einträgen verknüpft werden. Die Zugriffskontrolle erfolgt pro Vertrag/Wohnung über `Verwalter`-Einträge.
+Walter verwendet ein eigenes Benutzer- und Rechtesystem. Ein `UserAccount` (mit `Username`, `IsAdmin`) kann mit einem `Kontakt` verknüpft sein. Der Zugriff wird pro Wohnung/Vertrag über `Verwalter`-Einträge gesteuert (`VerwalterRolle`: `Eigentuemer`, `Vollmacht`, `Ableser`). Die API setzt dies über `IAuthorizationHandler`-Implementierungen je Ressource durch; die Authentifizierung erfolgt über einen Token-Scheme-Handler (`TokenAuthenticationHandler`).
 
 ---
 
@@ -86,3 +115,4 @@ Walter verwendet ein eigenes Benutzer- und Rechtesystem. Kontakte können mit `U
 
 - [Datenmodell](datenmodell.md) — alle Entitäten und Felder
 - [Betriebskostenabrechnung](betriebskostenabrechnung.md) — Berechnungsprozess im Detail
+- [Leitfaden für Buchhalter](buchhalter.md) — Jahresablauf und Datenpflege

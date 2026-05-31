@@ -16,18 +16,18 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class UmlageDbService : WalterDbServiceBase<UmlageEntry, int, Umlage>
     {

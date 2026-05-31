@@ -1,472 +1,493 @@
 # Datenmodell
 
-Walter verwendet PostgreSQL als Datenbank und Entity Framework Core als ORM. Alle Entitäten befinden sich im Projekt `Deeplex.Saverwalter.Model`.
+Walter verwendet PostgreSQL als Datenbank und Entity Framework Core als ORM. Alle Entitäten befinden sich im Projekt `Deeplex.Saverwalter.Model` (Ordner `model/`, Authentifizierung in `Auth/`).
+
+Zwei Dinge prägen das Modell:
+
+1. **Versionierung statt Überschreiben.** Veränderliche Stammdaten (Wohnungsflächen, Miethöhe, Umlageschlüssel, Eigentümer) werden als zeitlich gültige *Versionen* bzw. Zuordnungen mit `Beginn`/`Ende` geführt, nicht direkt auf der Hauptentität.
+2. **Doppelte Buchführung.** Geldbeträge stehen nicht mehr als Felder auf Fachentitäten (es gibt keine `Miete`, `Betriebskostenrechnung` oder `Erhaltungsaufwendung` mehr), sondern als **Buchungssätze** mit Soll-/Haben-**Buchungszeilen** auf **Buchungskonten**. Fachentitäten verweisen auf „ihre“ Konten.
 
 ---
 
-## Entity-Relationship-Diagramm
+## Entity-Relationship-Diagramm (Kern)
 
 ```mermaid
 erDiagram
-    Adresse {
-        int     AdresseId    PK
-        string  Strasse
-        string  Hausnummer
-        string  Postleitzahl
-        string  Stadt
-    }
-    Kontakt {
-        int     KontaktId   PK
-        string  Name
-        string  Vorname
-        string  Rechtsform
-        string  Anrede
-        string  Email
-        string  Telefon
-        int     AdresseId   FK
-    }
-    Wohnung {
-        int     WohnungId              PK
+    Buchungskonto {
+        int     BuchungskontoId  PK
+        string  Kontonummer
         string  Bezeichnung
-        double  Wohnflaeche_m2
-        double  Nutzflaeche_m2
-        double  Miteigentumsanteile
+        enum    Kontotyp
+    }
+    Buchungssatz {
+        guid    BuchungssatzId   PK
+        date    Buchungsdatum
+        int     Buchungsnummer
+        int     Buchungsjahr
+        string  Beschreibung
+        string  Belegpfad
+        guid    StornoVonId      FK
+        guid    TransaktionId    FK
+    }
+    Buchungszeile {
+        guid    BuchungszeileId  PK
+        guid    BuchungssatzId   FK
+        int     BuchungskontoId  FK
+        enum    SollHaben
+        decimal Betrag
+    }
+    OffenerPostenAusgleich {
+        guid    Id          PK
+        guid    SollZeileId  FK
+        guid    HabenZeileId FK
+    }
+    Transaktion {
+        guid    TransaktionId  PK
+        int     ZahlerId       FK
+        int     EmpfaengerId   FK
+        date    Zahlungsdatum
+        decimal Betrag
+        string  Verwendungszweck
+    }
+    Bankkonto {
+        int     BankkontoId    PK
+        string  Bank
+        string  Iban
+        int     BuchungsKontoId FK
+    }
+
+    Buchungssatz   ||--|{ Buchungszeile         : "besteht aus"
+    Buchungskonto  ||--o{ Buchungszeile         : "bebucht durch"
+    Buchungssatz   |o--o| Buchungssatz          : "storniert (StornoVon)"
+    Transaktion    ||--o{ Buchungssatz          : "verbucht als"
+    Bankkonto      ||--|| Buchungskonto         : "geführt auf"
+    Buchungszeile  ||--o{ OffenerPostenAusgleich : "Soll/Haben-Ausgleich"
+```
+
+```mermaid
+erDiagram
+    Wohnung {
+        int     WohnungId       PK
+        string  Bezeichnung
+        int     MietErtragskontoId FK
+        int     AufwandsKontoId    FK
+        int     AdresseId          FK
+    }
+    WohnungVersion {
+        int     WohnungVersionId PK
+        int     WohnungId        FK
+        date    Beginn
+        decimal Wohnflaeche
+        decimal Nutzflaeche
+        decimal Miteigentumsanteile
         int     Nutzeinheit
-        int     BesitzerId             FK
-        int     AdresseId              FK
+    }
+    WohnungEigentuemer {
+        int     Id        PK
+        int     WohnungId FK
+        int     KontaktId FK
+        date    Beginn
+        date    Ende
     }
     Vertrag {
         int     VertragId          PK
         int     WohnungId          FK
         int     AnsprechpartnerId  FK
         date    Ende
+        decimal KautionBetrag
     }
     VertragVersion {
-        int     VertragVersionId  PK
-        int     VertragId         FK
-        date    Beginn
-        double  Grundmiete_EUR
-        int     Personenzahl
-    }
-    Miete {
-        int     MieteId            PK
-        int     VertragId          FK
-        date    Zahlungsdatum
-        date    BetreffenderMonat
-        double  Betrag_EUR
-    }
-    Mietminderung {
-        int     MietminderungId  PK
+        int     VertragVersionId PK
         int     VertragId        FK
         date    Beginn
+        double  Grundmiete
+        int     Personenzahl
+    }
+    Mietminderung {
+        int     MietminderungId PK
+        int     VertragId       FK
+        date    Beginn
         date    Ende
-        double  Minderung_Anteil
-    }
-    Abrechnungsresultat {
-        guid    AbrechnungsresultatId  PK
-        int     VertragId              FK
-        int     Jahr
-        double  Kaltmiete_EUR
-        double  Vorauszahlung_EUR
-        double  Rechnungsbetrag_EUR
-        double  Minderung_Anteil
-        double  Saldo_EUR
-        bool    Abgesendet
-    }
-    Umlagetyp {
-        int     UmlagetypId  PK
-        string  Bezeichnung
+        double  Minderung
     }
     Umlage {
-        int     UmlageId      PK
-        int     UmlagetypId   FK
-        string  Schluessel
-        string  Beschreibung
+        int     UmlageId          PK
+        int     TypId             FK
+        int     NkVerrechnungsKontoId FK
+        date    Ende
     }
-    Betriebskostenrechnung {
-        int     BetriebskostenrechnungId  PK
-        int     UmlageId                  FK
-        double  Betrag_EUR
-        date    Datum
-        int     BetreffendesJahr
+    UmlageVersion {
+        int     UmlageVersionId PK
+        int     UmlageId        FK
+        date    Beginn
+        enum    Schluessel
+    }
+    Umlagetyp {
+        int     UmlagetypId PK
+        string  Bezeichnung
+    }
+    HKVO {
+        int     HKVOId        PK
+        double  HKVO_P7
+        double  HKVO_P8
+        enum    HKVO_P9
+        double  Strompauschale
+        int     HeizkostenId  FK
+        int     BetriebsstromId FK
     }
     Zaehler {
-        int     ZaehlerId   PK
+        int     ZaehlerId PK
         string  Kennnummer
-        string  Typ
-        int     WohnungId   FK
-        int     AdresseId   FK
+        enum    Typ
+        int     WohnungId FK
+        int     AdresseId FK
         date    Ende
     }
     Zaehlerstand {
-        int     ZaehlerstandId  PK
-        int     ZaehlerId       FK
+        int     ZaehlerstandId PK
+        int     ZaehlerId      FK
         date    Datum
         double  Stand
     }
-    HKVO {
-        int     HKVOId               PK
-        double  HKVO_P7
-        double  HKVO_P8
-        string  HKVO_P9
-        double  Strompauschale
-        int     HeizkostenUmlageId   FK
-        int     BetriebsstromId      FK
+    Abrechnungsresultat {
+        guid    AbrechnungsresultatId PK
+        int     VertragId   FK
+        guid    BuchungssatzId FK
+        bool    Abgesendet
     }
-    Garage {
-        int     GarageId   PK
-        string  Kennung
-        int     BesitzerId FK
-        int     AdresseId  FK
-    }
-    Erhaltungsaufwendung {
-        int     ErhaltungsaufwendungId  PK
-        int     WohnungId               FK
-        int     AusstellerId            FK
-        string  Bezeichnung
-        double  Betrag_EUR
-        date    Datum
+    Kontakt {
+        int     KontaktId PK
+        string  Name
+        enum    Rechtsform
+        int     VerbindlichkeitsKontoId FK
     }
 
-    Adresse        ||--o{ Wohnung               : "liegt in"
-    Adresse        ||--o{ Kontakt               : "Anschrift von"
-    Adresse        ||--o{ Zaehler               : "Standort von"
-    Adresse        ||--o{ Garage                : "Standort von"
-
-    Kontakt        ||--o{ Wohnung               : "besitzt"
-    Kontakt        }o--o{ Vertrag               : "Mieter in"
-    Kontakt        ||--o{ Erhaltungsaufwendung   : "Aussteller von"
-
-    Wohnung        ||--o{ Vertrag               : "Grundlage von"
-    Wohnung        ||--o{ Zaehler               : "ausgestattet mit"
-    Wohnung        ||--o{ Erhaltungsaufwendung   : "betroffen von"
-    Wohnung        }o--|{ Umlage                : "zugeordnet zu"
-
-    Vertrag        ||--|{ VertragVersion         : "versioniert durch"
-    Vertrag        ||--o{ Miete                 : "hat Zahlung"
-    Vertrag        ||--o{ Mietminderung         : "hat Minderung"
-    Vertrag        ||--o{ Abrechnungsresultat   : "hat Ergebnis"
-    Vertrag        }o--o{ Garage                : "enthält"
-
-    Umlagetyp      ||--|{ Umlage                : "klassifiziert"
-    Umlage         ||--o{ Betriebskostenrechnung : "abgerechnet durch"
-    Umlage         }o--|{ Zaehler               : "gemessen durch"
-    Umlage         ||--o| HKVO                  : "konfiguriert durch"
-    HKVO           ||--|| Umlage                : "Betriebsstrom"
-
-    Zaehler        ||--o{ Zaehlerstand          : "abgelesen als"
+    Adresse        ||--o{ Wohnung            : "liegt in"
+    Wohnung        ||--|{ WohnungVersion     : "versioniert durch"
+    Wohnung        ||--o{ WohnungEigentuemer : "gehört (zeitlich)"
+    Kontakt        ||--o{ WohnungEigentuemer : "ist Eigentümer"
+    Wohnung        ||--o{ Vertrag            : "Grundlage von"
+    Wohnung        ||--o{ Zaehler            : "ausgestattet mit"
+    Wohnung        }o--o{ Umlage             : "zugeordnet zu"
+    Vertrag        ||--|{ VertragVersion     : "versioniert durch"
+    Vertrag        ||--o{ Mietminderung      : "hat Minderung"
+    Vertrag        }o--o{ Kontakt            : "Mieter in"
+    Vertrag        ||--o{ Abrechnungsresultat : "hat Ergebnis"
+    Umlagetyp      ||--|{ Umlage             : "klassifiziert"
+    Umlage         ||--|{ UmlageVersion      : "versioniert durch"
+    Umlage         }o--|{ Zaehler            : "gemessen durch"
+    Umlage         ||--o| HKVO              : "Heizkosten-Konfig"
+    Zaehler        ||--o{ Zaehlerstand       : "abgelesen als"
+    Kontakt        |o--o| Buchungskonto      : "Verbindlichkeitskonto"
+    Abrechnungsresultat ||--|| Buchungssatz  : "festgehalten als"
 ```
 
-> **Hinweis zur HKVO:** `HKVO` referenziert zwei `Umlage`-Einträge — einmal die Heizkosten-Umlage (über die die HKVO konfiguriert ist) und einmal eine separate Betriebsstrom-Umlage, aus der der Strompauschalen-Abzug berechnet wird.
+> **HKVO:** Eine `HKVO` referenziert eine `Heizkosten`-Umlage (Pflicht) und optional eine `Betriebsstrom`-Umlage. Eine Umlage kann über `HeizkostenHKVOs` bzw. `BetriebsstromHKVOs` in beiden Rollen auftreten.
 
 ---
 
-## Entitäten
+## Buchführungs-Entitäten
+
+### Buchungskonto
+
+Ein Konto im Kontenrahmen. Fachentitäten besitzen ihre Konten (z. B. `Wohnung.AufwandsKonto`).
+
+| Feld             | Typ              | Pflicht | Beschreibung                          |
+|------------------|------------------|---------|---------------------------------------|
+| `BuchungskontoId`| int              | PK      | Primärschlüssel                       |
+| `Kontonummer`    | string           | ja      | Kontonummer im Kontenrahmen           |
+| `Bezeichnung`    | string           | ja      | Klartextbezeichnung                   |
+| `Kontotyp`       | BuchungskontoTyp | ja      | `Aktiv`, `Passiv`, `Aufwand`, `Ertrag`|
+| `Notiz`          | string           | nein    |                                       |
+
+### Buchungssatz
+
+Ein vollständiger Buchungssatz nach GoB / § 239 HGB. Korrekturen nur per Stornobuchung.
+
+| Feld            | Typ          | Pflicht | Beschreibung                                                |
+|-----------------|--------------|---------|------------------------------------------------------------|
+| `BuchungssatzId`| Guid         | PK      | Primärschlüssel                                            |
+| `Buchungsdatum` | DateOnly     | ja      | Datum der Buchung                                          |
+| `Beschreibung`  | string       | ja      | Buchungstext                                              |
+| `Buchungsnummer`| int          | (auto)  | Lückenlose fortlaufende Nummer je Buchungsjahr (DB-Sequence)|
+| `Buchungsjahr`  | int          | ja      | Wirtschaftsjahr (Default = Jahr des Buchungsdatums)        |
+| `Belegpfad`     | string       | nein    | S3-Pfad zum Originalbeleg                                  |
+| `StornoVon`     | Buchungssatz | nein    | Gesetzt, wenn dieser Satz ein Storno ist                  |
+| `StornoNach`    | Buchungssatz | nein    | Rücknavigation: gesetzt, wenn dieser Satz storniert wurde |
+| `Transaktion`   | Transaktion  | nein    | Verweis auf den importierten Kontoauszugseintrag          |
+| `Notiz`         | string       | nein    |                                                            |
+
+### Buchungszeile
+
+Eine Soll- oder Haben-Zeile eines Buchungssatzes.
+
+| Feld            | Typ          | Pflicht | Beschreibung                            |
+|-----------------|--------------|---------|-----------------------------------------|
+| `BuchungszeileId`| Guid        | PK      | Primärschlüssel                         |
+| `Buchungssatz`  | Buchungssatz | ja      | Zugehöriger Satz                        |
+| `Buchungskonto` | Buchungskonto| ja      | Bebuchtes Konto                         |
+| `SollHaben`     | SollHaben    | ja      | `Soll` oder `Haben`                     |
+| `Betrag`        | decimal      | ja      | Betrag in Euro                          |
+
+### OffenerPostenAusgleich
+
+Verbindet eine offene Forderung (Soll-Zeile) mit ihrer ausgleichenden Zahlung (Haben-Zeile) auf demselben Buchungskonto (OPOS-Prinzip).
+
+| Feld          | Typ           | Pflicht | Beschreibung                       |
+|---------------|---------------|---------|------------------------------------|
+| `…Id`         | Guid          | PK      | Primärschlüssel                    |
+| `SollZeile`   | Buchungszeile | ja      | Die offene Forderung               |
+| `HabenZeile`  | Buchungszeile | ja      | Die ausgleichende Zahlung          |
+
+*Invariante:* `SollZeile.BuchungskontoId == HabenZeile.BuchungskontoId`. Offen ist eine Forderung, solange Σ(Ausgleiche) < `SollZeile.Betrag`.
+
+### Transaktion
+
+Ein importierter oder manuell erfasster Kontoauszugseintrag.
+
+| Feld               | Typ        | Pflicht | Beschreibung                       |
+|--------------------|------------|---------|------------------------------------|
+| `TransaktionId`    | Guid       | PK      | Primärschlüssel                    |
+| `Zahler`           | Bankkonto  | nein    | Zahlendes Bankkonto                |
+| `Zahlungsempfaenger`| Bankkonto | nein    | Empfangendes Bankkonto             |
+| `Zahlungsdatum`    | DateOnly   | ja      | Datum der Zahlung                  |
+| `Betrag`           | decimal    | ja      | Betrag in Euro                     |
+| `Verwendungszweck` | string     | ja      | Verwendungszweck                   |
+| `Buchungssaetze`   | List       | —       | Zugeordnete Buchungssätze          |
+
+### Bankkonto
+
+| Feld            | Typ           | Pflicht | Beschreibung                       |
+|-----------------|---------------|---------|------------------------------------|
+| `BankkontoId`   | int           | PK      | Primärschlüssel                    |
+| `Bank`          | string        | nein    | Name der Bank                      |
+| `Iban`          | string        | nein    | IBAN                               |
+| `Besitzer`      | List\<Kontakt\>| —      | Kontoinhaber                       |
+| `BuchungsKonto` | Buchungskonto | ja      | Zugehöriges Buchungskonto          |
+
+> Bei der Erfassung ist mindestens **IBAN oder Bank** erforderlich.
+
+---
+
+## Stamm- und Fachentitäten
 
 ### Adresse
 
-Physische Anschrift. Wird von Wohnungen, Garagen, Kontakten und Zählern referenziert.
+| Feld           | Typ    | Pflicht | Beschreibung |
+|----------------|--------|---------|--------------|
+| `AdresseId`    | int    | PK      | Primärschlüssel |
+| `Strasse`      | string | ja      | Straßenname |
+| `Hausnummer`   | string | ja      | Hausnummer |
+| `Postleitzahl` | string | ja      | Postleitzahl |
+| `Stadt`        | string | ja      | Stadt |
+| `Notiz`        | string | nein    | |
 
-| Feld           | Typ    | Pflicht | Beschreibung                         |
-|----------------|--------|---------|--------------------------------------|
-| `AdresseId`    | int    | PK      | Primärschlüssel                      |
-| `Strasse`      | string | ja      | Straßenname                          |
-| `Hausnummer`   | string | ja      | Hausnummer                           |
-| `Postleitzahl` | string | ja      | Postleitzahl                         |
-| `Stadt`        | string | ja      | Stadt                                |
-| `Notiz`        | string | nein    |                                      |
-
-Berechnetes Feld: `Anschrift` → `"Strasse Hausnummer, PLZ Stadt"`
-
----
+Berechnetes Feld: `Anschrift` → `"Strasse Hausnummer, PLZ Stadt"`.
 
 ### Kontakt
 
-Repräsentiert eine natürliche oder juristische Person (Vermieter, Mieter, Ansprechpartner, Hausverwaltung).
+Natürliche oder juristische Person (Vermieter, Mieter, Ansprechpartner, Handwerker …).
 
-| Feld           | Typ        | Pflicht | Beschreibung                              |
-|----------------|------------|---------|-------------------------------------------|
-| `KontaktId`    | int        | PK      | Primärschlüssel                           |
-| `Name`         | string     | ja      | Nachname oder Unternehmensname            |
-| `Vorname`      | string     | nein    | Vorname (nur natürliche Personen)         |
-| `Rechtsform`   | enum       | ja      | Siehe unten                               |
-| `Anrede`       | enum       | nein    | `Herr`, `Frau`, `Keine`                  |
-| `Telefon`      | string     | nein    |                                           |
-| `Mobil`        | string     | nein    |                                           |
-| `Fax`          | string     | nein    |                                           |
-| `Email`        | string     | nein    |                                           |
-| `Adresse`      | Adresse    | nein    | Postanschrift                             |
-| `Notiz`        | string     | nein    |                                           |
+| Feld                   | Typ           | Pflicht | Beschreibung |
+|------------------------|---------------|---------|--------------|
+| `KontaktId`            | int           | PK      | Primärschlüssel |
+| `Name`                 | string        | ja      | Nachname oder Firmenname |
+| `Rechtsform`           | Rechtsform    | ja      | siehe unten |
+| `Vorname`              | string        | nein    | nur natürliche Personen |
+| `Anrede`               | Anrede        | nein    | `Herr`, `Frau`, `Keine` |
+| `Telefon`/`Mobil`/`Fax`/`Email` | string | nein  | Kontaktdaten |
+| `Adresse`              | Adresse       | nein    | Postanschrift |
+| `VerbindlichkeitsKonto`| Buchungskonto | nein    | Konto für Verbindlichkeiten ggü. diesem Kontakt (z. B. Handwerker); wird bei Bedarf automatisch angelegt |
+| `Notiz`                | string        | nein    | |
 
-Berechnetes Feld: `Bezeichnung` → `"Vorname Name"` oder nur `"Name"` falls kein Vorname.
+Berechnetes Feld: `Bezeichnung` → `"Vorname Name"` bzw. `"Name"`.
 
-**Rechtsformen:**
+Beziehungen: `Mietvertraege`, `VerwaltetVertraege`, `EigentuemerIn` (WohnungEigentuemer), `Garagen`, `Accounts`, `AlsMitglied`/`AlsJuristischePerson` (KontaktMitgliedschaft).
 
-| Wert          | Bezeichnung              |
-|---------------|--------------------------|
-| `natuerlich`  | Natürliche Person        |
-| `gmbh`        | GmbH                     |
-| `gbr`         | GbR                      |
-| `ag`          | AG                       |
-| `ev`          | e.V.                     |
-| `kg`          | KG                       |
-| `ohg`         | OHG                      |
-| `ug`          | UG (haftungsbeschränkt)  |
-| `stiftung`    | Stiftung                 |
-| `verein`      | Verein                   |
-| `genossenschaft` | Genossenschaft        |
-| `sonstige`    | Sonstige                 |
+**Rechtsformen:** `natuerlich`, `gmbh`, `gbr`, `ag`, `ev`, `kg`, `ohg`, `ug`, `stiftung`, `verein`, `genossenschaft`, `sonstige`.
 
----
+### KontaktMitgliedschaft
+
+Verknüpft einen Kontakt (`Mitglied`) mit einer juristischen Person (`JuristischePerson`) — z. B. Gesellschafter ↔ GmbH.
 
 ### Wohnung
 
-Die vermietete Wohneinheit. Zentrales Objekt, das Verträge, Zähler, Umlagen und Erhaltungsaufwendungen zusammenführt.
+Die Wohneinheit. Veränderliche Größen liegen in `WohnungVersion`, die Eigentümer in `WohnungEigentuemer`.
 
-| Feld                    | Typ     | Pflicht | Beschreibung                          |
-|-------------------------|---------|---------|---------------------------------------|
-| `WohnungId`             | int     | PK      | Primärschlüssel                       |
-| `Bezeichnung`           | string  | ja      | Name der Wohnung, z.B. "OG links"    |
-| `Wohnflaeche`           | double  | ja      | Wohnfläche in m²                     |
-| `Nutzflaeche`           | double  | ja      | Nutzfläche in m²                     |
-| `Miteigentumsanteile`   | double  | ja      | MEA-Anteil (für WEG-Abrechnung)      |
-| `Nutzeinheit`           | int     | ja      | Anzahl der Nutzeinheiten              |
-| `Besitzer`              | Kontakt | nein    | Eigentümer der Wohnung               |
-| `Adresse`               | Adresse | nein    | Lage der Wohnung                     |
-| `Notiz`                 | string  | nein    |                                       |
+| Feld               | Typ           | Pflicht | Beschreibung |
+|--------------------|---------------|---------|--------------|
+| `WohnungId`        | int           | PK      | Primärschlüssel |
+| `Bezeichnung`      | string        | ja      | z. B. „OG links“ |
+| `MietErtragskonto` | Buchungskonto | ja      | Ertragskonto für Mieten dieser Wohnung |
+| `AufwandsKonto`    | Buchungskonto | ja      | Aufwandskonto (Erhaltungsaufwendungen, Leerstand …) |
+| `Adresse`          | Adresse       | nein    | Lage der Wohnung |
+| `Notiz`            | string        | nein    | |
 
-Relationen: `Vertraege`, `Zaehler`, `Erhaltungsaufwendungen`, `Umlagen`, `Verwalter`
+Beziehungen: `Versionen`, `Eigentuemer`, `Vertraege`, `Zaehler`, `Umlagen`, `Verwalter`.
 
----
+### WohnungVersion
+
+Zeitlich gültige Flächen-/Anteilsangaben einer Wohnung.
+
+| Feld                  | Typ      | Pflicht | Beschreibung |
+|-----------------------|----------|---------|--------------|
+| `WohnungVersionId`    | int      | PK      | Primärschlüssel |
+| `Wohnung`             | Wohnung  | ja      | Zugehörige Wohnung |
+| `Beginn`              | DateOnly | ja      | Gültig ab |
+| `Wohnflaeche`         | decimal  | ja      | Wohnfläche in m² |
+| `Nutzflaeche`         | decimal  | ja      | Nutzfläche in m² |
+| `Miteigentumsanteile` | decimal  | ja      | MEA-Anteil (WEG) |
+| `Nutzeinheit`         | int      | ja      | Anzahl Nutzeinheiten |
+
+### WohnungEigentuemer
+
+Zeitlich begrenzte Eigentümer-Zuordnung (Wohnung ↔ Kontakt) mit `Beginn`/`Ende`.
 
 ### Vertrag
 
-Ein Mietverhältnis für eine Wohnung. Kann mehrere Versionen (bei Mietänderungen), mehrere Mieter und mehrere Zahlungen haben.
+Ein Mietverhältnis für eine Wohnung. Hält mehrere fachliche Buchungskonten.
 
-| Feld              | Typ     | Pflicht | Beschreibung                                  |
-|-------------------|---------|---------|-----------------------------------------------|
-| `VertragId`       | int     | PK      | Primärschlüssel                               |
-| `Wohnung`         | Wohnung | ja      | Die zugehörige Wohnung                        |
-| `Ansprechpartner` | Kontakt | nein    | Ansprechpartner (Standard: Besitzer)          |
-| `Ende`            | DateOnly| nein    | Vertragsende (null = laufend)                 |
-| `Notiz`           | string  | nein    |                                               |
+| Feld                 | Typ           | Pflicht | Beschreibung |
+|----------------------|---------------|---------|--------------|
+| `VertragId`          | int           | PK      | Primärschlüssel |
+| `Wohnung`            | Wohnung       | ja      | Zugehörige Wohnung |
+| `Ansprechpartner`    | Kontakt       | nein    | Ansprechpartner |
+| `Ende`               | DateOnly      | nein    | Vertragsende (null = laufend) |
+| `MietBuchungskonto`  | Buchungskonto | ja      | Forderungskonto Kaltmiete |
+| `NkBuchungskonto`    | Buchungskonto | ja      | Forderungskonto Nebenkostenvorauszahlung |
+| `BkAbrechnungsKonto` | Buchungskonto | ja      | Konto für das Abrechnungsergebnis |
+| `ZahlungsKonto`      | Buchungskonto | ja      | Zahlungseingangskonto |
+| `MietminderungsKonto`| Buchungskonto | ja      | Konto für Mietminderungen |
+| `KautionBetrag`      | decimal       | nein    | Kautionshöhe |
+| `KautionEingangsdatum` / `KautionRueckgabedatum` | DateOnly | nein | Kautionsdaten |
+| `KautionArt`         | string        | nein    | Art der Kaution |
+| `Notiz`              | string        | nein    | |
 
-Relationen: `Versionen`, `Mieten`, `Mietminderungen`, `Garagen`, `Mieter` (List\<Kontakt\>), `Abrechnungsresultate`
-
----
+Beziehungen: `Versionen`, `Mietminderungen`, `GarageVertraege`, `Mieter` (List\<Kontakt\>), `Abrechnungsresultate`.
 
 ### VertragVersion
 
-Eine Version eines Vertrags, gültig ab einem bestimmten Datum. Ermöglicht die Abbildung von Mieterhöhungen oder Personenänderungen ohne einen neuen Vertrag anlegen zu müssen.
-
-| Feld              | Typ      | Pflicht | Beschreibung                              |
-|-------------------|----------|---------|-------------------------------------------|
-| `VertragVersionId`| int      | PK      | Primärschlüssel                           |
-| `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag                       |
-| `Beginn`          | DateOnly | ja      | Ab wann gilt diese Version                |
-| `Grundmiete`      | double   | ja      | Kaltmiete in Euro                         |
-| `Personenzahl`    | int      | ja      | Anzahl der im Haushalt lebenden Personen  |
-| `Notiz`           | string   | nein    |                                           |
-
----
-
-### Miete
-
-Eine einzelne Mietzahlung eines Mieters.
-
-| Feld                 | Typ      | Pflicht | Beschreibung                             |
-|----------------------|----------|---------|------------------------------------------|
-| `MieteId`            | int      | PK      | Primärschlüssel                          |
-| `Vertrag`            | Vertrag  | ja      | Zugehöriger Vertrag                      |
-| `Zahlungsdatum`      | DateOnly | ja      | Datum der tatsächlichen Zahlung          |
-| `BetreffenderMonat`  | DateOnly | ja      | Für welchen Monat die Zahlung gilt       |
-| `Betrag`             | double   | ja      | Gezahlter Betrag in Euro (Warm- oder Gesamtmiete) |
-| `Notiz`              | string   | nein    |                                          |
-
----
+| Feld              | Typ      | Pflicht | Beschreibung |
+|-------------------|----------|---------|--------------|
+| `VertragVersionId`| int      | PK      | Primärschlüssel |
+| `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag |
+| `Beginn`          | DateOnly | ja      | Gültig ab |
+| `Grundmiete`      | double   | ja      | Kaltmiete in Euro |
+| `Personenzahl`    | int      | ja      | Personen im Haushalt |
 
 ### Mietminderung
 
-Eine zeitlich begrenzte Minderung der Miete (z.B. wegen Mängeln). Wird bei der Betriebskostenabrechnung anteilig von Kalt- und Nebenkosten abgezogen.
-
-| Feld              | Typ      | Pflicht | Beschreibung                              |
-|-------------------|----------|---------|-------------------------------------------|
-| `MietminderungId` | int      | PK      | Primärschlüssel                           |
-| `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag                       |
-| `Beginn`          | DateOnly | ja      | Beginn der Minderung                      |
-| `Minderung`       | double   | ja      | Minderungsquote als Dezimalzahl (z.B. 0.1 = 10%) |
-| `Ende`            | DateOnly | nein    | Ende der Minderung (null = unbegrenzt)    |
-| `Notiz`           | string   | nein    |                                           |
-
----
+| Feld              | Typ      | Pflicht | Beschreibung |
+|-------------------|----------|---------|--------------|
+| `MietminderungId` | int      | PK      | Primärschlüssel |
+| `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag |
+| `Beginn`          | DateOnly | ja      | Beginn der Minderung |
+| `Ende`            | DateOnly | nein    | Ende (null = unbegrenzt) |
+| `Minderung`       | double   | ja      | Quote als Dezimalzahl (0.1 = 10 %) |
 
 ### Umlagetyp
 
-Die Art einer Betriebskostenposition, z.B. "Heizkosten", "Wasser", "Allgemeinstrom".
-
-| Feld           | Typ    | Pflicht | Beschreibung              |
-|----------------|--------|---------|---------------------------|
-| `UmlagetypId`  | int    | PK      | Primärschlüssel           |
-| `Bezeichnung`  | string | ja      | Name des Kostentyps       |
-| `Notiz`        | string | nein    |                           |
-
----
+Art einer Betriebskostenposition (z. B. „Heizkosten“, „Wasser“). Felder: `UmlagetypId`, `Bezeichnung`, `Notiz`.
 
 ### Umlage
 
-Verbindet einen Umlagetyp mit einer Gruppe von Wohnungen und legt den Verteilungsschlüssel fest. Eine Umlage kann mehreren Wohnungen zugeordnet sein (n:m).
+Verbindet einen Umlagetyp mit einer Gruppe von Wohnungen. Der Verteilungsschlüssel liegt zeitlich in `UmlageVersion`.
 
-| Feld           | Typ              | Pflicht | Beschreibung                              |
-|----------------|------------------|---------|-------------------------------------------|
-| `UmlageId`     | int              | PK      | Primärschlüssel                           |
-| `Typ`          | Umlagetyp        | ja      | Art der Betriebskosten                    |
-| `Schluessel`   | Umlageschluessel | ja      | Verteilungsschlüssel (siehe unten)        |
-| `Beschreibung` | string           | nein    | Optionale Beschreibung                    |
-| `HKVO`         | HKVO             | nein    | Heizkostenkonfiguration (nur Heizkosten)  |
-| `Notiz`        | string           | nein    |                                           |
+| Feld                  | Typ           | Pflicht | Beschreibung |
+|-----------------------|---------------|---------|--------------|
+| `UmlageId`            | int           | PK      | Primärschlüssel |
+| `Typ`                 | Umlagetyp     | ja      | Art der Kosten |
+| `NkVerrechnungsKonto` | Buchungskonto | ja      | Verrechnungskonto der Nebenkosten |
+| `ZahlungsKonto`       | Buchungskonto | ja      | Zahlungskonto |
+| `Ende`                | DateOnly      | nein    | Enddatum der Umlage |
+| `Beschreibung`/`Notiz`| string        | nein    | |
 
-Relationen: `Wohnungen` (List\<Wohnung\>), `Betriebskostenrechnungen`, `Zaehler`, `HKVOs`
+Beziehungen: `Versionen` (UmlageVersion), `Wohnungen` (n:m), `Zaehler`, `HeizkostenHKVOs`, `BetriebsstromHKVOs`.
 
-**Umlageschlüssel:**
+### UmlageVersion
 
-| Wert                    | Kürzel   | Beschreibung                                    |
-|-------------------------|----------|-------------------------------------------------|
-| `NachWohnflaeche`       | n. WF    | Anteil der Wohnfläche an der Gesamtwohnfläche   |
-| `NachNutzflaeche`       | n. NF    | Anteil der Nutzfläche an der Gesamtnutzfläche   |
-| `NachNutzeinheit`       | n. NE    | Anteil der Nutzeinheiten an den Gesamteinheiten |
-| `NachPersonenzahl`      | n. Pers. | Anteil der Personen (gewichtet nach Zeit)        |
-| `NachVerbrauch`         | n. Verb. | Anteil des Verbrauchs laut Zählerstand           |
-| `NachMiteigentumsanteil`| n. MEA   | Anteil der Miteigentumsanteile                  |
+| Feld             | Typ              | Pflicht | Beschreibung |
+|------------------|------------------|---------|--------------|
+| `UmlageVersionId`| int              | PK      | Primärschlüssel |
+| `Umlage`         | Umlage           | ja      | Zugehörige Umlage |
+| `Beginn`         | DateOnly         | ja      | Gültig ab |
+| `Schluessel`     | Umlageschluessel | ja      | Verteilungsschlüssel |
 
----
-
-### Betriebskostenrechnung
-
-Eine einzelne Rechnung zu einer Umlage für ein bestimmtes Abrechnungsjahr (z.B. die Jahresrechnung des Wasserversorgers).
-
-| Feld                       | Typ      | Pflicht | Beschreibung                          |
-|----------------------------|----------|---------|---------------------------------------|
-| `BetriebskostenrechnungId` | int      | PK      | Primärschlüssel                       |
-| `Umlage`                   | Umlage   | ja      | Zugehörige Umlage                     |
-| `Betrag`                   | double   | ja      | Rechnungsbetrag in Euro               |
-| `Datum`                    | DateOnly | ja      | Rechnungsdatum                        |
-| `BetreffendesJahr`         | int      | ja      | Das Abrechnungsjahr (z.B. 2023)       |
-| `Notiz`                    | string   | nein    |                                       |
-
----
-
-### Zaehler
-
-Ein Verbrauchszähler (Strom, Gas, Warm- oder Kaltwasser). Kann einer Wohnung oder einer Adresse (Allgemeinzähler) zugeordnet sein.
-
-| Feld         | Typ        | Pflicht | Beschreibung                                   |
-|--------------|------------|---------|------------------------------------------------|
-| `ZaehlerId`  | int        | PK      | Primärschlüssel                                |
-| `Kennnummer` | string     | ja      | Eindeutige Zählernummer                        |
-| `Typ`        | Zaehlertyp | ja      | Art des Zählers (siehe unten)                  |
-| `Wohnung`    | Wohnung    | nein    | Zugehörige Wohnung (null = Allgemeinzähler)    |
-| `Adresse`    | Adresse    | nein    | Standort des Zählers                           |
-| `Ende`       | DateOnly   | nein    | Außerbetriebnahme                              |
-| `Notiz`      | string     | nein    |                                                |
-
-Relationen: `Staende` (List\<Zaehlerstand\>), `Umlagen`
-
-**Zählertypen und Einheiten:**
-
-| Typ           | Einheit |
-|---------------|---------|
-| `Warmwasser`  | m³      |
-| `Kaltwasser`  | m³      |
-| `Strom`       | kWh     |
-| `Gas`         | kWh     |
-
----
-
-### Zaehlerstand
-
-Ein abgelesener Stand eines Zählers zu einem bestimmten Datum.
-
-| Feld             | Typ       | Pflicht | Beschreibung                    |
-|------------------|-----------|---------|---------------------------------|
-| `ZaehlerstandId` | int       | PK      | Primärschlüssel                 |
-| `Zaehler`        | Zaehler   | ja      | Zugehöriger Zähler              |
-| `Datum`          | DateOnly  | ja      | Ablesedatum                     |
-| `Stand`          | double    | ja      | Abgelesener Zählerstand         |
-| `Notiz`          | string    | nein    |                                 |
-
----
+**Umlageschlüssel:** `NachWohnflaeche` (n. WF), `NachNutzflaeche` (n. NF), `NachNutzeinheit` (n. NE), `NachPersonenzahl` (n. Pers.), `NachVerbrauch` (n. Verb.), `NachMiteigentumsanteil` (n. MEA).
 
 ### HKVO
 
-Konfiguration gemäß Heizkostenverordnung (HeizkostenV) für eine warme Betriebskostenumlage. Definiert die Parameter für die gesetzlich vorgeschriebene Aufteilung von Heizkosten.
+Konfiguration nach Heizkostenverordnung für eine warme Umlage.
 
-| Feld            | Typ        | Pflicht | Beschreibung                                                           |
-|-----------------|------------|---------|------------------------------------------------------------------------|
-| `HKVOId`        | int        | PK      | Primärschlüssel                                                        |
-| `HKVO_P7`       | double     | ja      | Verbrauchsanteil Heizwärme nach §7 HeizkostenV (z.B. 0.5 = 50%)       |
-| `HKVO_P8`       | double     | ja      | Verbrauchsanteil Warmwasser nach §8 HeizkostenV                        |
-| `HKVO_P9`       | HKVO_P9A2  | ja      | Berechnungssatz nach §9 Abs. 2 (`Satz_1`, `Satz_2`, `Satz_4`)         |
-| `Strompauschale`| double     | ja      | Anteil des Betriebsstroms an den Heizkosten (z.B. 0.05 = 5%)          |
-| `Heizkosten`    | Umlage     | ja      | Die Heizkosten-Umlage                                                  |
-| `Betriebsstrom` | Umlage     | ja      | Die Betriebsstrom-Umlage (wird anteilig von Heizkosten abgezogen)      |
-| `Notiz`         | string     | nein    |                                                                        |
+| Feld            | Typ        | Pflicht | Beschreibung |
+|-----------------|------------|---------|--------------|
+| `HKVOId`        | int        | PK      | Primärschlüssel |
+| `HKVO_P7`       | double     | ja      | Verbrauchsanteil Heizwärme (§ 7) |
+| `HKVO_P8`       | double     | ja      | Verbrauchsanteil Warmwasser (§ 8) |
+| `HKVO_P9`       | HKVO_P9A2  | ja      | Berechnungssatz § 9 Abs. 2 (`Satz_1`, `Satz_2`, `Satz_4`) |
+| `Strompauschale`| double     | ja      | Anteil Betriebsstrom an den Heizkosten |
+| `Heizkosten`    | Umlage     | ja      | Heizkosten-Umlage |
+| `Betriebsstrom` | Umlage     | nein    | Betriebsstrom-Umlage |
 
----
+### Zaehler
+
+| Feld         | Typ        | Pflicht | Beschreibung |
+|--------------|------------|---------|--------------|
+| `ZaehlerId`  | int        | PK      | Primärschlüssel |
+| `Kennnummer` | string     | ja      | Zählernummer |
+| `Typ`        | Zaehlertyp | ja      | `Warmwasser`, `Kaltwasser`, `Strom`, `Gas` |
+| `Wohnung`    | Wohnung    | nein    | null = Allgemeinzähler |
+| `Adresse`    | Adresse    | nein    | Standort |
+| `Ende`       | DateOnly   | nein    | Außerbetriebnahme |
+
+Beziehungen: `Staende` (Zaehlerstand), `Umlagen`.
+
+### Zaehlerstand
+
+`ZaehlerstandId`, `Zaehler`, `Datum` (DateOnly), `Stand` (double), `Notiz`.
+
+### Garage / GarageVertrag / GarageVertragVersion
+
+- **Garage**: `GarageId`, `Kennung`, `Adresse`, `GarageVertraege`.
+- **GarageVertrag**: `GarageVertragId`, `Garage`, `Mieter` (Kontakt), `Versionen`.
+- **GarageVertragVersion**: `Beginn` (DateOnly), `Betrag` (decimal) — zeitlich gültige Miete des Stellplatzes.
 
 ### Abrechnungsresultat
 
-Das gespeicherte Ergebnis einer fertig berechneten Betriebskostenabrechnung für einen Vertrag und ein Jahr.
+Das gespeicherte Ergebnis einer Betriebskostenabrechnung. Die Beträge werden aus dem verknüpften `Buchungssatz` abgeleitet, nicht mehr redundant gespeichert.
 
-| Feld                    | Typ     | Pflicht | Beschreibung                                              |
-|-------------------------|---------|---------|-----------------------------------------------------------|
-| `AbrechnungsresultatId` | Guid    | PK      | Primärschlüssel                                           |
-| `Vertrag`               | Vertrag | ja      | Zugehöriger Vertrag                                       |
-| `Jahr`                  | int     | ja      | Abrechnungsjahr                                           |
-| `Kaltmiete`             | double  | ja      | Berechnete Kaltmiete des Jahres                           |
-| `Vorauszahlung`         | double  | ja      | Tatsächlich geleistete Gesamtzahlung des Mieters          |
-| `Minderung`             | double  | ja      | Gewichtete Mietminderungsquote des Jahres                 |
-| `Rechnungsbetrag`       | double  | ja      | Summe aller Betriebskosten (Anteil der Wohnung)           |
-| `Saldo`                 | double  | nein    | Positiv = Mieter zahlt nach; Negativ = Vermieter erstattet|
-| `Abgesendet`            | bool    | nein    | Ob das Dokument bereits an den Mieter verschickt wurde    |
-| `Notiz`                 | string  | nein    |                                                           |
+| Feld                    | Typ          | Pflicht | Beschreibung |
+|-------------------------|--------------|---------|--------------|
+| `AbrechnungsresultatId` | Guid         | PK      | Primärschlüssel |
+| `Vertrag`               | Vertrag      | ja      | Zugehöriger Vertrag |
+| `Buchungssatz`          | Buchungssatz | ja      | Buchung des Abrechnungsergebnisses |
+| `Abgesendet`            | bool         | nein    | Ob das Dokument versandt wurde |
+| `Notiz`                 | string       | nein    | |
 
----
+### Verwalter
 
-### Garage
+Zugriffs-/Rollenzuordnung eines `UserAccount` zu einer Wohnung.
 
-Ein Garagenstellplatz, der optional einem Vertrag zugeordnet werden kann.
-
-| Feld        | Typ     | Pflicht | Beschreibung              |
-|-------------|---------|---------|---------------------------|
-| `GarageId`  | int     | PK      | Primärschlüssel           |
-| `Kennung`   | string  | ja      | Bezeichnung der Garage    |
-| `Besitzer`  | Kontakt | ja      | Eigentümer                |
-| `Adresse`   | Adresse | nein    | Standort                  |
-| `Notiz`     | string  | nein    |                           |
+| Feld         | Typ           | Pflicht | Beschreibung |
+|--------------|---------------|---------|--------------|
+| `VerwalterId`| int           | PK      | Primärschlüssel |
+| `UserAccount`| UserAccount   | ja      | Benutzer |
+| `Wohnung`    | Wohnung       | nein    | Betroffene Wohnung |
+| `Rolle`      | VerwalterRolle| ja      | `Eigentuemer`, `Vollmacht`, `Ableser` |
 
 ---
 
-### Erhaltungsaufwendung
+## Authentifizierung (`Auth/`)
 
-Eine Instandhaltungs- oder Reparaturmaßnahme an einer Wohnung (für steuerliche Zwecke und Übersicht).
-
-| Feld                     | Typ     | Pflicht | Beschreibung                     |
-|--------------------------|---------|---------|----------------------------------|
-| `ErhaltungsaufwendungId` | int     | PK      | Primärschlüssel                  |
-| `Wohnung`                | Wohnung | ja      | Betroffene Wohnung               |
-| `Aussteller`             | Kontakt | ja      | Rechnungssteller (Handwerker)    |
-| `Bezeichnung`            | string  | ja      | Beschreibung der Maßnahme        |
-| `Betrag`                 | double  | ja      | Betrag in Euro                   |
-| `Datum`                  | DateOnly| ja      | Rechnungsdatum                   |
-| `Notiz`                  | string  | nein    |                                  |
+- **UserAccount**: `Id` (Guid), `Username`, `IsAdmin`, optional verknüpfter `Kontakt`, `Verwalter`-Zuordnungen.
+- **Pbkdf2PasswordCredential**: Passwort-Hash (PBKDF2) eines Benutzers.
+- **UserResetCredential**: Token zum Zurücksetzen des Passworts.
 
 ---
 
 ## Gemeinsame Felder aller Entitäten
 
-Alle Entitäten verfügen über automatisch befüllte Audit-Felder:
-
-| Feld           | Typ      | Beschreibung                         |
-|----------------|----------|--------------------------------------|
-| `CreatedAt`    | DateTime | Erstellungszeitpunkt (UTC, read-only)|
-| `LastModified` | DateTime | Letzter Änderungszeitpunkt (UTC)     |
+| Feld           | Typ      | Beschreibung |
+|----------------|----------|--------------|
+| `CreatedAt`    | DateTime | Erstellungszeitpunkt (UTC, read-only) |
+| `LastModified` | DateTime | Letzter Änderungszeitpunkt (UTC) |

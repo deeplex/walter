@@ -11,7 +11,7 @@
 		},
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
 	},
-	"postCreateCommand": "dotnet tool install --global dotnet ef && dotnet restore",
+	"postCreateCommand": "dotnet tool install --global dotnet-ef && dotnet restore",
 	"customizations": {
 		"vscode": {
 			"extensions": [

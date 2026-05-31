@@ -16,7 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +25,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungContro
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class BetriebskostenrechnungDbService(
         SaverwalterContext ctx,

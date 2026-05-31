@@ -21,10 +21,10 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageController;
-using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class GarageDbService : WalterDbServiceBase<GarageEntry, int, Garage>
     {

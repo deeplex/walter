@@ -16,7 +16,7 @@
 using Deeplex.Saverwalter.Model;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 
-namespace Deeplex.Saverwalter.WebAPI.Helper
+namespace Deeplex.Saverwalter.WebAPI.Utils
 {
     public static class Utils
     {

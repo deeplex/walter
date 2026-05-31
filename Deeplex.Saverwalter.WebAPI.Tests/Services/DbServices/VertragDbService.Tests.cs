@@ -16,7 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -75,7 +75,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entity = new Vertrag()
             {
                 Ansprechpartner = vertrag.Ansprechpartner,
-                Wohnung = vertrag.Wohnung
+                Wohnung = vertrag.Wohnung,
+                MietBuchungskonto = new Buchungskonto("1000", "Miete", BuchungskontoTyp.Aktiv),
+                NkBuchungskonto = new Buchungskonto("1001", "NK-Vorauszahlung", BuchungskontoTyp.Passiv),
+                BkAbrechnungsKonto = new Buchungskonto("1003", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
             };
             var entry = new VertragEntry(entity, new());
 

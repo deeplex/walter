@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, int, Zaehlerstand>
     {

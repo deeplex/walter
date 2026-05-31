@@ -17,7 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -65,7 +65,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var wohnung = new Wohnung("Test");
+            var wohnung = new Wohnung("Test")
+            {
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
+            };
             wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = besitzer });
             wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
             ctx.Wohnungen.Add(wohnung);
@@ -74,7 +78,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entity = new Vertrag()
             {
                 Ansprechpartner = besitzer,
-                Wohnung = wohnung
+                Wohnung = wohnung,
+                MietBuchungskonto = new Buchungskonto("1000", "Miete", BuchungskontoTyp.Aktiv),
+                NkBuchungskonto = new Buchungskonto("1001", "NK-Vorauszahlung", BuchungskontoTyp.Passiv),
+                BkAbrechnungsKonto = new Buchungskonto("1003", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
             };
             var entry = new VertragEntry(entity, new());
 

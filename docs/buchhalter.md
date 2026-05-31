@@ -156,17 +156,17 @@ Häufige Ursachen für Fehler:
 
 ### Schritt 4 — Dokument erzeugen und versenden
 
-Über den `POST`-Endpunkt (oder die entsprechende Schaltfläche in der Oberfläche) wird das Dokument erzeugt und gleichzeitig das **Abrechnungsresultat** gespeichert.
+Über die entsprechende Schaltfläche in der Oberfläche (technisch: `GET /api/abrechnungslauf/{jahr}/vertrag/{vertragId}/{format}` mit `format` = `pdf` oder `word`) wird das Dokument erzeugt. Das **Abrechnungsresultat** wird als Buchungssatz auf dem `BkAbrechnungsKonto` des Vertrags festgehalten.
 
-Das Resultat enthält:
+Das Resultat umfasst:
 
 | Feld | Bedeutung |
 |------|----------|
-| Kaltmiete | Summe der im Jahr fälligen Kaltmieten |
-| Vorauszahlung | Tatsächlich vom Mieter gezahlte Gesamtsumme |
-| Rechnungsbetrag | Berechneter Anteil der Nebenkosten |
+| Jahr | Abrechnungsjahr |
 | Saldo | **Positiv** = Mieter bekommt Geld zurück / **Negativ** = Mieter muss nachzahlen |
 | Abgesendet | Wird nach dem Versand auf `true` gesetzt |
+
+Die Beträge (Kaltmiete, Vorauszahlung, Rechnungsbetrag) ergeben sich aus dem verknüpften Buchungssatz und werden nicht zusätzlich gespeichert.
 
 > **Fristen:** Die Betriebskostenabrechnung muss dem Mieter spätestens **12 Monate nach Ende des Abrechnungszeitraums** zugegangen sein (§ 556 BGB). Bei einem Abrechnungsjahr 2024 also spätestens bis zum 31.12.2025.
 

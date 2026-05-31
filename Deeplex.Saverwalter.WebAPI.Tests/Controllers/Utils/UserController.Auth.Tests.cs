@@ -5,14 +5,14 @@ using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.UserController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UserController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {

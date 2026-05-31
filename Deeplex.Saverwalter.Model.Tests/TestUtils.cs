@@ -57,6 +57,8 @@ namespace Deeplex.Saverwalter.ModelTests
             var wohnung = new Wohnung("TestWohnung")
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
             };
             wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = vermieter });
             wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });

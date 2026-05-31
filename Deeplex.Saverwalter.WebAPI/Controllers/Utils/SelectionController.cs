@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     public class SelectionListController : ControllerBase
     {
@@ -241,7 +241,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/garagen")]
         public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetGaragen()
         {
-            var list = GaragePermissionHandler.GetQueryable(Ctx, User).ToList();
+            var list = await GaragePermissionHandler.GetQueryable(Ctx, User).ToListAsync();
             return Ok(list.Select(e => new SelectionEntry(
                 e.GarageId,
                 e.Kennung,
