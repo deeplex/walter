@@ -296,8 +296,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
                 .Include(u => u.NkVerrechnungsKonto)
                     .ThenInclude(k => k.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben
-                                 && (z.Buchungssatz.Buchungsjahr == jahr)))
+                        .Where(z => z.SollHaben == SollHaben.Haben))
                     .ThenInclude(z => z.Buchungssatz)
                 .Include(u => u.NkVerrechnungsKonto)
                     .ThenInclude(k => k.Buchungszeilen

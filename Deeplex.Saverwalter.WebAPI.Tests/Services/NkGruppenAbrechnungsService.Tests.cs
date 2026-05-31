@@ -180,6 +180,110 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             umlage.NkVerrechnungsKonto.Buchungszeilen.Add(zeile);
         }
 
+        // ── Mieterwechsel ─────────────────────────────────────────────────────
+
+        [Fact]
+        public void Mieterwechsel_BetragWirdNachZeitanteilAufgeteilt()
+        {
+            var wohnung = MakeWohnung("W1");
+            var vertragA = MakeVertrag(wohnung, start: new DateOnly(2021, 1, 1), end: new DateOnly(2021, 6, 30));
+            var vertragB = MakeVertrag(wohnung, start: new DateOnly(2021, 7, 1));
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK Test", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+            var einheit = einheiten.Single();
+
+            // Lückenlose Belegung → kein Eigenanteil
+            einheit.Parteien.Where(p => p.Vertrag != null).Should().HaveCount(2);
+            einheit.Parteien.Where(p => p.Vertrag == null).Should().BeEmpty();
+
+            // Gesamtbetrag erhalten
+            var plan = einheit.Rechnungsplaene.Single();
+            plan.Anteile.Sum(a => a.Betrag).Should().Be(1000m);
+
+            // Anteile proportional zu Nutzungstagen (181 / 184 bei 365 Tagen)
+            var anteilA = plan.Anteile.Single(a => a.Partei.Vertrag == vertragA).Betrag;
+            var anteilB = plan.Anteile.Single(a => a.Partei.Vertrag == vertragB).Betrag;
+            anteilA.Should().BeApproximately(1000m * 181m / 365m, 0.01m);
+            anteilB.Should().BeApproximately(1000m * 184m / 365m, 0.01m);
+        }
+
+        // ── NK-Anteil-Buchungssatz ────────────────────────────────────────────
+
+        [Fact]
+        public void NkAnteilBuchungssatz_WirdNichtAlsBkRechnungVerteilt()
+        {
+            var wohnung = MakeWohnung("W1");
+            var vertrag = MakeVertrag(wohnung);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+
+            // Bereits gebuchter manueller NK-Anteil: Soll NkBuchungskonto, Haben NkVerrechnungsKonto
+            // (genau das, was NkAnteilBuchungsService.BucheVertragsNkAnteilAsync erzeugt)
+            var nkAnteilSatz = new Buchungssatz(new DateOnly(2021, 6, 1), "NK-Anteil: Test 2021") { Buchungsjahr = 2021 };
+            var nkHaben = new Buchungszeile(SollHaben.Haben, 400m) { Buchungssatz = nkAnteilSatz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            nkAnteilSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 400m) { Buchungssatz = nkAnteilSatz, Buchungskonto = vertrag.NkBuchungskonto });
+            nkAnteilSatz.Buchungszeilen.Add(nkHaben);
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(nkHaben);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+
+            // Erwartet: nur 1 Rechnungsplan (BK-Rechnung 1000 €), nicht 2
+            einheiten.Single().Rechnungsplaene.Should().HaveCount(1);
+            einheiten.Single().Rechnungsplaene.Single().Betrag.Should().Be(1000m);
+        }
+
+        [Fact]
+        public void PartielleVerteilung_BuchungssatzWirdNochBeruecksichtigt()
+        {
+            var w1 = MakeWohnung("W1");
+            var w2 = MakeWohnung("W2");
+            var v1 = MakeVertrag(w1);
+            MakeVertrag(w2);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.AddRange([w1, w2]);
+
+            // Forderungs-BS: 1000 € Haben, aber erst 500 € Soll (nur Vertrag 1 schon eingetragen)
+            var satz = new Buchungssatz(new DateOnly(2021, 12, 31), "BK-Forderung Test 2021") { Buchungsjahr = 2021 };
+            var haben = new Buchungszeile(SollHaben.Haben, 1000m) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            satz.Buchungszeilen.Add(haben);
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 500m) { Buchungssatz = satz, Buchungskonto = v1.NkBuchungskonto });
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(haben);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+
+            // SollSumme(500) < HabenSumme(1000) → noch nicht vollständig verteilt, wird eingeschlossen
+            einheiten.Single().Rechnungsplaene.Should().HaveCount(1);
+            einheiten.Single().Rechnungsplaene.Single().Betrag.Should().Be(1000m);
+        }
+
+        [Fact]
+        public void VollstaendigVerteilterBS_WirdNichtNochmalVerteilt()
+        {
+            var w1 = MakeWohnung("W1");
+            var w2 = MakeWohnung("W2");
+            var v1 = MakeVertrag(w1);
+            var v2 = MakeVertrag(w2);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.AddRange([w1, w2]);
+
+            // Forderungs-BS: 1000 € Haben, 500 + 500 € Soll → ausgeglichen
+            var satz = new Buchungssatz(new DateOnly(2021, 12, 31), "BK-Forderung Test 2021") { Buchungsjahr = 2021 };
+            var haben = new Buchungszeile(SollHaben.Haben, 1000m) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            satz.Buchungszeilen.Add(haben);
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 500m) { Buchungssatz = satz, Buchungskonto = v1.NkBuchungskonto });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 500m) { Buchungssatz = satz, Buchungskonto = v2.NkBuchungskonto });
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(haben);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+
+            // SollSumme(1000) == HabenSumme(1000) → vollständig verteilt, nichts mehr zu tun
+            einheiten.Single().Rechnungsplaene.Should().BeEmpty();
+        }
+
         // ── Rechnungsplaene ───────────────────────────────────────────────────
 
         [Fact]

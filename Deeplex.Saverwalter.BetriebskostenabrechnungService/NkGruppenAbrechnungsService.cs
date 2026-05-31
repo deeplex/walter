@@ -502,7 +502,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 var schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel;
                 var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Haben
-                             && z.Buchungssatz.Buchungsjahr == jahr)
+                             && z.Buchungssatz.Buchungsjahr == jahr
+                             && z.Buchungssatz.Buchungszeilen.Where(sz => sz.SollHaben == SollHaben.Soll).Sum(sz => sz.Betrag)
+                                < z.Buchungssatz.Buchungszeilen.Where(sz => sz.SollHaben == SollHaben.Haben).Sum(sz => sz.Betrag))
                     .ToList() ?? [];
 
                 foreach (var zeile in habenZeilen)
@@ -621,7 +623,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Haben
                          && (z.Buchungssatz.Buchungsjahr == jahr
-                             || z.Buchungssatz.Buchungsdatum.Year == jahr))
+                             || z.Buchungssatz.Buchungsdatum.Year == jahr)
+                         && z.Buchungssatz.Buchungszeilen.Where(sz => sz.SollHaben == SollHaben.Soll).Sum(sz => sz.Betrag)
+                            < z.Buchungssatz.Buchungszeilen.Where(sz => sz.SollHaben == SollHaben.Haben).Sum(sz => sz.Betrag))
                 .ToList() ?? [];
 
             foreach (var zeile in habenZeilen)

@@ -43,7 +43,7 @@ export const walter_selection = {
     },
     betriebskostenrechnungenOffen(fetchImpl: typeof fetch) {
         return walter_get(
-            '/api/selection/betriebskostenrechnungen/offen',
+            '/api/selection/bk-forderungen/offen',
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
     },

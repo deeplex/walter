@@ -31,31 +31,44 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { walter_selection, walter_get } from '$walter/services/requests';
     import type {
         WalterSelectionEntry,
-        WalterOffenerPostenStatus
+        WalterOffenerPostenStatus,
+        NkAnteilEingangInput
     } from '$walter/lib';
     import type { BetriebskostenEingangInput } from '$walter/lib';
 
     const dispatch = createEventDispatcher<{
         zahlerResolved: number | undefined;
+        modeChange: { isDirekt: boolean };
     }>();
 
     export let fetchImpl: typeof fetch;
     export let bk: BetriebskostenEingangInput;
+    export let nk: NkAnteilEingangInput;
+    export let isDirekt = false;
     export let availableBetrag = 0;
     export let isSinglePosition = false;
     export let invalid = false;
 
+    // ── BK-Modus ──────────────────────────────────────────────────────────
     let modeExisting = false;
     let umlage: WalterSelectionEntry | undefined = undefined;
     let existingBk: WalterSelectionEntry | undefined = undefined;
     let offenerPosten: WalterOffenerPostenStatus | undefined = undefined;
 
+    // ── Direktzuweisung-Modus ─────────────────────────────────────────────
+    let direktUmlage: WalterSelectionEntry | undefined = undefined;
+    let direktVertrag: WalterSelectionEntry | undefined = undefined;
+
     const umlagen = walter_selection.umlagen(fetchImpl);
     const betriebskostenrechnungen =
         walter_selection.betriebskostenrechnungenOffen(fetchImpl);
+    const vertraege = walter_selection.vertraege(fetchImpl);
 
     if (!bk.betreffendesJahr) {
         bk.betreffendesJahr = new Date().getFullYear() - 1;
+    }
+    if (!nk.betreffendesJahr) {
+        nk.betreffendesJahr = new Date().getFullYear() - 1;
     }
 
     onMount(async () => {
@@ -131,6 +144,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
+    function onDirektUmlageSelect(e: CustomEvent) {
+        direktUmlage = e.detail?.selectedItem;
+        nk = { ...nk, umlageId: direktUmlage?.id as number | undefined };
+    }
+
+    function onDirektVertragSelect(e: CustomEvent) {
+        direktVertrag = e.detail?.selectedItem;
+        nk = { ...nk, vertragId: direktVertrag?.id as number | undefined };
+    }
+
     type BkForderungInfo = {
         buchungssatzId: string;
         betrag: number;
@@ -139,7 +162,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         verbleibend: number;
     };
     let existingeForderungen: BkForderungInfo[] = [];
-    $: if (!modeExisting && bk.umlageId && bk.betreffendesJahr) {
+    $: if (!modeExisting && !isDirekt && bk.umlageId && bk.betreffendesJahr) {
         walter_get(
             `/api/mietzahlungen/bk/check-forderung?umlageId=${bk.umlageId}&year=${bk.betreffendesJahr}`,
             fetchImpl
@@ -150,7 +173,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             .catch(() => {
                 existingeForderungen = [];
             });
-    } else if (modeExisting) {
+    } else if (modeExisting || isDirekt) {
         existingeForderungen = [];
     }
 
@@ -161,16 +184,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return 'noch nicht bezahlt';
     }
 
-    $: invalid = modeExisting
-        ? !bk.existingBuchungssatzId ||
-          !!(
-              (offenerPosten &&
-                  bk.betrag > offenerPosten.verbleibenderBetrag + 0.005) ||
-              bk.betrag > availableBetrag + 0.005
-          )
-        : !bk.umlageId || !bk.rechnungsDatum || !bk.betreffendesJahr;
+    $: invalid = isDirekt
+        ? !nk.umlageId || !nk.vertragId || nk.betrag <= 0
+        : modeExisting
+          ? !bk.existingBuchungssatzId ||
+            !!(
+                (offenerPosten &&
+                    bk.betrag > offenerPosten.verbleibenderBetrag + 0.005) ||
+                bk.betrag > availableBetrag + 0.005
+            )
+          : !bk.umlageId || !bk.rechnungsDatum || !bk.betreffendesJahr;
 
-    $: if (isSinglePosition && availableBetrag > 0) {
+    $: if (!isDirekt && isSinglePosition && availableBetrag > 0) {
         bk.betrag = availableBetrag;
     }
 
@@ -201,13 +226,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let autoSelectBkId: string | undefined = undefined;
 
     function switchToNew() {
+        isDirekt = false;
         modeExisting = false;
         bk.existingBuchungssatzId = undefined;
+        dispatch('modeChange', { isDirekt: false });
     }
 
     async function switchToExisting() {
         const first = existingeForderungen[0];
+        isDirekt = false;
         modeExisting = true;
+        dispatch('modeChange', { isDirekt: false });
         if (first && !bk.existingBuchungssatzId) {
             autoSelectBkId = first.buchungssatzId;
             bk.existingBuchungssatzId = first.buchungssatzId;
@@ -228,13 +257,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             }
         }
     }
+
+    function switchToDirekt() {
+        isDirekt = true;
+        modeExisting = false;
+        dispatch('modeChange', { isDirekt: true });
+        dispatch('zahlerResolved', undefined);
+    }
 </script>
 
 <Row style="margin-bottom: 0.5rem">
     <Column>
         <div style="display: flex; gap: 0.5rem">
             <Button
-                kind={!modeExisting ? 'primary' : 'ghost'}
+                kind={!isDirekt && !modeExisting ? 'primary' : 'ghost'}
                 size="small"
                 on:click={switchToNew}
             >
@@ -247,11 +283,58 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             >
                 Bestehende Forderung zahlen
             </Button>
+            <Button
+                kind={isDirekt ? 'primary' : 'ghost'}
+                size="small"
+                on:click={switchToDirekt}
+            >
+                Vertrag-Direktzuweisung
+            </Button>
         </div>
     </Column>
 </Row>
 
-{#if modeExisting}
+{#if isDirekt}
+    <Row>
+        <Column>
+            <WalterComboBox
+                required
+                titleText="Umlage"
+                entries={umlagen}
+                bind:value={direktUmlage}
+                initialId={nk.umlageId}
+                on:select={onDirektUmlageSelect}
+            />
+        </Column>
+        <Column>
+            <WalterComboBox
+                required
+                titleText="Vertrag"
+                entries={vertraege}
+                bind:value={direktVertrag}
+                initialId={nk.vertragId}
+                on:select={onDirektVertragSelect}
+            />
+        </Column>
+    </Row>
+    <Row>
+        <Column>
+            <WalterNumberInput
+                required
+                label="Betreffendes Jahr"
+                digits={0}
+                bind:value={nk.betreffendesJahr}
+            />
+        </Column>
+        <Column>
+            <WalterNumberInput
+                required
+                label="Betrag (€)"
+                bind:value={nk.betrag}
+            />
+        </Column>
+    </Row>
+{:else if modeExisting}
     <Row>
         <Column>
             <WalterComboBox

@@ -28,11 +28,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
     import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
     import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
-    import WalterTransaktionPositionNkAnteil from './WalterTransaktionPositionNkAnteil.svelte';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
-        type WalterTransaktionEntry
+        type WalterTransaktionEntry,
+        type BetriebskostenEingangInput,
+        type NkAnteilEingangInput
     } from '$walter/lib';
     import WalterTransaktionRaw from './WalterTransaktionRaw.svelte';
 
@@ -49,6 +50,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         transaktionEntry = {};
     }
 
+    // Objektidentität (Referenzen) synchron gehalten — kein Index-Mapping nötig.
+    type BkTile = { bk: BetriebskostenEingangInput; nk: NkAnteilEingangInput; isDirekt: boolean };
+    let bkTiles: BkTile[] = [];
+    let bkTileInvalids: boolean[] = [];
+
     $: verteilterBetrag =
         buchung.mieten.reduce(
             (s, m) =>
@@ -60,10 +66,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ) +
         (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) ||
             0) +
-        buchung.betriebskostenEingaenge.reduce(
-            (s, b) => s + (b.betrag || 0),
-            0
-        ) +
+        bkTiles.filter(t => !t.isDirekt).reduce((s, t) => s + (t.bk.betrag || 0), 0) +
         buchung.erhaltungsaufwendungen.reduce(
             (s, e) => s + (e.betrag || 0),
             0
@@ -73,10 +76,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: totalPositions =
         buchung.mieten.length +
         (buchung.garagenEingaenge?.length || 0) +
-        buchung.betriebskostenEingaenge.length +
+        bkTiles.length +
         buchung.erhaltungsaufwendungen.length +
-        buchung.sonstige.length +
-        (buchung.nkAnteilEingaenge?.length || 0);
+        buchung.sonstige.length;
 
     $: isSinglePosition = totalPositions === 1;
 
@@ -85,24 +87,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let mieteInvalids: boolean[] = [];
     let mieteStatusTexts: string[] = [];
     let garageInvalids: boolean[] = [];
-    let bkInvalids: boolean[] = [];
     let eaInvalids: boolean[] = [];
-    let nkAnteilInvalids: boolean[] = [];
+
     $: hasCashPositions =
         buchung.mieten.length > 0 ||
         (buchung.garagenEingaenge?.length || 0) > 0 ||
-        buchung.betriebskostenEingaenge.length > 0 ||
+        bkTiles.some(t => !t.isDirekt) ||
         buchung.erhaltungsaufwendungen.length > 0 ||
         buchung.sonstige.length > 0;
+
     $: isValid =
         (hasCashPositions
             ? buchung.betrag > 0 && Math.abs(offenerBetrag) < 0.005
-            : (buchung.nkAnteilEingaenge?.length || 0) > 0) &&
+            : bkTiles.some(t => t.isDirekt)) &&
         !mieteInvalids.some(Boolean) &&
         !garageInvalids.some(Boolean) &&
-        !bkInvalids.some(Boolean) &&
-        !eaInvalids.some(Boolean) &&
-        !nkAnteilInvalids.some(Boolean);
+        !bkTileInvalids.some(Boolean) &&
+        !eaInvalids.some(Boolean);
 
     function addWohnungsmiete() {
         const available = Math.max(0, offenerBetrag);
@@ -116,14 +117,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const available = Math.max(0, offenerBetrag);
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        buchung.betriebskostenEingaenge = [
-            ...buchung.betriebskostenEingaenge,
-            {
-                betrag: available,
-                betreffendesJahr: now.getFullYear() - 1,
-                rechnungsDatum: today
-            }
-        ];
+        const bkEntry: BetriebskostenEingangInput = {
+            betrag: available,
+            betreffendesJahr: now.getFullYear() - 1,
+            rechnungsDatum: today
+        };
+        const nkEntry: NkAnteilEingangInput = {
+            betrag: 0,
+            betreffendesJahr: now.getFullYear() - 1
+        };
+        bkTiles = [...bkTiles, { bk: bkEntry, nk: nkEntry, isDirekt: false }];
+        bkTileInvalids = [...bkTileInvalids, true];
+        buchung.betriebskostenEingaenge = [...buchung.betriebskostenEingaenge, bkEntry];
+    }
+
+    function removeBkTile(i: number) {
+        const tile = bkTiles[i];
+        if (tile.isDirekt) {
+            buchung.nkAnteilEingaenge = (buchung.nkAnteilEingaenge ?? []).filter(n => n !== tile.nk);
+        } else {
+            buchung.betriebskostenEingaenge = buchung.betriebskostenEingaenge.filter(b => b !== tile.bk);
+        }
+        bkTiles = bkTiles.filter((_, idx) => idx !== i);
+        bkTileInvalids = bkTileInvalids.filter((_, idx) => idx !== i);
+    }
+
+    function onTileModeChange(i: number, isDirekt: boolean) {
+        const tile = bkTiles[i];
+        if (isDirekt === tile.isDirekt) return;
+        if (isDirekt) {
+            buchung.betriebskostenEingaenge = buchung.betriebskostenEingaenge.filter(b => b !== tile.bk);
+            buchung.nkAnteilEingaenge = [...(buchung.nkAnteilEingaenge ?? []), tile.nk];
+        } else {
+            buchung.nkAnteilEingaenge = (buchung.nkAnteilEingaenge ?? []).filter(n => n !== tile.nk);
+            buchung.betriebskostenEingaenge = [...buchung.betriebskostenEingaenge, tile.bk];
+        }
+        bkTiles[i] = { ...tile, isDirekt };
+        bkTiles = bkTiles;
     }
 
     function addEA() {
@@ -136,11 +166,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function removeMiete(i: number) {
         buchung.mieten = buchung.mieten.filter((_, idx) => idx !== i);
-    }
-
-    function removeBK(i: number) {
-        buchung.betriebskostenEingaenge =
-            buchung.betriebskostenEingaenge.filter((_, idx) => idx !== i);
     }
 
     function removeEA(i: number) {
@@ -177,20 +202,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function removeSonstiges(i: number) {
         buchung.sonstige = buchung.sonstige.filter((_, idx) => idx !== i);
-    }
-
-    function addNkAnteil() {
-        const now = new Date();
-        buchung.nkAnteilEingaenge = [
-            ...(buchung.nkAnteilEingaenge ?? []),
-            { betrag: 0, betreffendesJahr: now.getFullYear() - 1 }
-        ];
-    }
-
-    function removeNkAnteil(i: number) {
-        buchung.nkAnteilEingaenge = buchung.nkAnteilEingaenge.filter(
-            (_, idx) => idx !== i
-        );
     }
 
     function onZahlerChange(e: CustomEvent) {
@@ -290,28 +301,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Tile>
 {/each}
 
-<!-- Betriebskosten -->
-{#each buchung.betriebskostenEingaenge as _, i (i)}
+<!-- Betriebskosten / Direktzuweisung -->
+{#each bkTiles as tile, i (i)}
     <Tile style="margin-bottom: 1rem">
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
         >
-            <strong>Betriebskostenrechnung</strong>
+            <strong>{tile.isDirekt ? 'Vertrag-Direktzuweisung' : 'Betriebskostenrechnung'}</strong>
             <Button
                 kind="ghost"
                 size="small"
                 icon={TrashCan}
                 iconDescription="Entfernen"
-                on:click={() => removeBK(i)}
+                on:click={() => removeBkTile(i)}
             />
         </div>
         <WalterTransaktionPositionBK
             {fetchImpl}
-            bind:bk={buchung.betriebskostenEingaenge[i]}
+            bind:bk={bkTiles[i].bk}
+            bind:nk={bkTiles[i].nk}
+            isDirekt={tile.isDirekt}
             availableBetrag={buchung.betrag ?? 0}
-            bind:invalid={bkInvalids[i]}
+            bind:invalid={bkTileInvalids[i]}
             {isSinglePosition}
             on:zahlerResolved={onZahlerResolved}
+            on:modeChange={(e) => onTileModeChange(i, e.detail.isDirekt)}
         />
     </Tile>
 {/each}
@@ -364,29 +378,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Tile>
 {/each}
 
-<!-- NK-Anteile (nicht-monetär) -->
-{#each buchung.nkAnteilEingaenge ?? [] as _, i (i)}
-    <Tile style="margin-bottom: 1rem">
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
-        >
-            <strong>Vertrags-NK-Anteil</strong>
-            <Button
-                kind="ghost"
-                size="small"
-                icon={TrashCan}
-                iconDescription="Entfernen"
-                on:click={() => removeNkAnteil(i)}
-            />
-        </div>
-        <WalterTransaktionPositionNkAnteil
-            {fetchImpl}
-            bind:nk={buchung.nkAnteilEingaenge[i]}
-            bind:invalid={nkAnteilInvalids[i]}
-        />
-    </Tile>
-{/each}
-
 <!-- Position hinzufügen -->
 <Row style="margin-bottom: 1.5rem">
     <Column>
@@ -420,14 +411,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 on:click={addSonstiges}
             >
                 Sonstiges
-            </Button>
-            <Button
-                kind="tertiary"
-                size="small"
-                icon={Add}
-                on:click={addNkAnteil}
-            >
-                NK-Anteil
             </Button>
         </div>
     </Column>

@@ -17,23 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import {
-        WalterDataTable,
-        WalterTransaktion,
-        WalterVertrag
-    } from '$walter/components';
-    import {
-        WalterVertragEntry,
-        type TransaktionsInput,
-        type WalterVertragVersionEntry
-    } from '$walter/lib';
-    import {
-        emptyTransaktionsInput,
-        validateVertragQuickAdd
-    } from '$walter/lib';
+    import { WalterDataTable, WalterVertrag } from '$walter/components';
+    import { WalterVertragEntry } from '$walter/lib';
+    import { validateVertragQuickAdd } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
-    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import { invalidateAll } from '$app/navigation';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -48,71 +35,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'wohnung.text', value: 'Wohnung' },
         { key: 'mieterAuflistung', value: 'Mieter' },
         { key: 'beginn', value: 'Beginn' },
-        { key: 'ende', value: 'Ende' },
-        { key: 'button', value: 'Miete hinzufügen' }
+        { key: 'ende', value: 'Ende' }
     ];
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.vertrag(e.detail.id);
     const rowHref = (row: DataTableRow) => `/vertraege/${row.id}`;
 
-    let modalOpen = false;
-    let modalTitle = 'Mietzahlung';
-    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
-    let transaktionIsValid = false;
-
-    function add(e: CustomEvent, vertrag: WalterVertragEntry) {
-        e.stopPropagation();
-        modalTitle = vertrag.wohnung?.text || `Vertrag ${vertrag.id}`;
-        buchungsInput = {
-            ...emptyTransaktionsInput(),
-            mieten: [
-                {
-                    kaltmiete: 0,
-                    garagen: [],
-                    nkVorauszahlung: 0,
-                    vertragId: vertrag.id as number
-                }
-            ]
-        };
-        modalOpen = true;
-    }
-
-    async function onSubmit() {
-        await invalidateAll();
-    }
-
-    const transformRow = (row: DataTableRow) => ({
-        ...(row as WalterVertragEntry),
-        button: (e: CustomEvent) => add(e, row as WalterVertragEntry)
-    });
-
     const fetchData =
         rows === undefined
             ? (p: Parameters<typeof WalterVertragEntry.GetPaged>[1]) =>
                   WalterVertragEntry.GetPaged<WalterVertragEntry>(fetchImpl, p)
             : undefined;
-
-    $: embeddedRows = rows?.map((row) => ({
-        ...row,
-        button: (e: CustomEvent) => add(e, row)
-    }));
 </script>
-
-<WalterDataWrapperQuickAdd
-    title={modalTitle}
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={buchungsInput}
-    bind:addModalOpen={modalOpen}
-    {onSubmit}
-    submitDisabled={!transaktionIsValid}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={buchungsInput}
-        bind:isValid={transaktionIsValid}
-    />
-</WalterDataWrapperQuickAdd>
 
 <WalterDataTable
     addUrl={entry !== undefined ? WalterVertragEntry.ApiURL : undefined}
@@ -123,9 +58,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     quickAddTitle={title}
     {on_click_row}
     {rowHref}
-    rows={embeddedRows}
+    {rows}
     {fetchData}
-    {transformRow}
     initialSortBy="beginn"
     initialSortDir="desc"
     {headers}
