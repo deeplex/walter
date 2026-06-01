@@ -162,7 +162,7 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, KontaktPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, TransaktionPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, TransaktionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagenPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagetypPermissionHandler>();

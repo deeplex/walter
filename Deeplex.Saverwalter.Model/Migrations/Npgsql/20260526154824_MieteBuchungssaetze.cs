@@ -108,6 +108,20 @@ END;
 $$;
 ");
 
+            // Alte Einzelwert-Spalten sichern, BEVOR sie unten gedroppt werden.
+            // wohnungen.{wohnflaeche,nutzflaeche,miteigentumsanteile,nutzeinheit} und
+            // umlagen.schluessel ziehen in die neuen Versionstabellen um. Ohne diese
+            // Überführung bleiben wohnung_versionen/umlage_versionen leer und jede
+            // Abrechnung scheitert (Wohnung.VersionAt(...) wirft "Sequence contains no
+            // elements", Umlageschlüssel/Flächen fehlen).
+            migrationBuilder.Sql(@"
+CREATE TEMP TABLE _wohnung_version_seed AS
+SELECT wohnung_id, wohnflaeche, nutzflaeche, miteigentumsanteile, nutzeinheit FROM wohnungen;
+
+CREATE TEMP TABLE _umlage_version_seed AS
+SELECT umlage_id, schluessel FROM umlagen;
+");
+
             migrationBuilder.DropForeignKey(
                 name: "fk_abrechnungsresultate_buchungssaetze_buchungssatz_id",
                 table: "abrechnungsresultate");
@@ -123,10 +137,6 @@ $$;
             migrationBuilder.DropForeignKey(
                 name: "fk_transaktionen_kontakte_zahlungsempfaenger_kontakt_id",
                 table: "transaktionen");
-
-            migrationBuilder.DropForeignKey(
-                name: "fk_vertraege_buchungskonten_kautions_konto_id",
-                table: "vertraege");
 
             migrationBuilder.DropForeignKey(
                 name: "fk_vertraege_buchungskonten_mietminderungs_konto_id",
@@ -148,10 +158,6 @@ $$;
             migrationBuilder.DropIndex(
                 name: "ix_wohnungen_besitzer_kontakt_id",
                 table: "wohnungen");
-
-            migrationBuilder.DropIndex(
-                name: "ix_vertraege_kautions_konto_id",
-                table: "vertraege");
 
             migrationBuilder.DropIndex(
                 name: "ix_transaktionen_zahler_kontakt_id",
@@ -188,10 +194,6 @@ $$;
             migrationBuilder.DropColumn(
                 name: "wohnflaeche",
                 table: "wohnungen");
-
-            migrationBuilder.DropColumn(
-                name: "kautions_konto_id",
-                table: "vertraege");
 
             migrationBuilder.DropColumn(
                 name: "schluessel",
@@ -648,6 +650,21 @@ $$;
                 principalTable: "buchungssaetze",
                 principalColumn: "buchungssatz_id");
 
+            // Ertragskonto (Ertrag=3) je Garage anlegen und verknüpfen, bevor der
+            // NOT-NULL-FK greift. Naming wie im Code (GarageDbService): 'G{id:D5}-EK',
+            // 'Garagenmietertrag'. Ohne dies würde der FK bei vorhandenen Garagen auf
+            // das nicht existierende Buchungskonto 0 zeigen.
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'G' || LPAD(garage_id::text, 5, '0') || '-EK', 'Garagenmietertrag', 3, NOW(), NOW()
+                    FROM garagen
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE garagen g SET ertragskonto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'G' || LPAD(g.garage_id::text, 5, '0') || '-EK'
+            ");
+
             migrationBuilder.AddForeignKey(
                 name: "fk_garagen_buchungskonten_ertragskonto_id",
                 table: "garagen",
@@ -685,12 +702,26 @@ $$;
                 principalColumn: "buchungskonto_id",
                 onDelete: ReferentialAction.Cascade);
 
+            // ── Versionsdaten: gesicherte Einzelwerte in die Versionstabellen überführen ──
+            // Je eine Version pro Wohnung/Umlage mit frühem Beginn (2000-01-01), damit
+            // VersionAt(...) für alle Abrechnungsjahre eine Version findet.
+            migrationBuilder.Sql(@"
+INSERT INTO wohnung_versionen (wohnung_id, beginn, wohnflaeche, nutzflaeche, miteigentumsanteile, nutzeinheit, created_at, last_modified)
+SELECT wohnung_id, DATE '2000-01-01', wohnflaeche, nutzflaeche, miteigentumsanteile, nutzeinheit, NOW(), NOW()
+FROM _wohnung_version_seed;
+
+INSERT INTO umlage_versionen (umlage_id, beginn, schluessel, created_at, last_modified)
+SELECT umlage_id, DATE '2000-01-01', schluessel, NOW(), NOW()
+FROM _umlage_version_seed;
+");
+
             // ── BK-Datenmigration: Buchungssätze für BK-Einträge ohne echten Buchungssatz ──
             migrationBuilder.Sql(@"
 DO $$
 DECLARE
     r RECORD;
     satz_id UUID;
+    trans_id UUID;
 BEGIN
     FOR r IN
         SELECT bk.betriebskostenrechnung_id, bk.betrag, bk.datum, bk.betreffendes_jahr,
@@ -698,13 +729,17 @@ BEGIN
                'Betriebskosten ' || typ.bezeichnung || ' ' || bk.betreffendes_jahr AS beschr
         FROM betriebskostenrechnungen bk
         JOIN umlagen u ON u.umlage_id = bk.umlage_id
-        JOIN umlagetypen typ ON typ.umlagetyp_id = u.umlagetyp_id
+        JOIN umlagetypen typ ON typ.umlagetyp_id = u.typ_umlagetyp_id
         WHERE bk.buchungssatz_id IS NULL
            OR bk.buchungssatz_id = '00000000-0000-0000-0000-000000000000'
     LOOP
+        trans_id := gen_random_uuid();
+        INSERT INTO transaktionen (transaktion_id, zahlungsdatum, betrag, verwendungszweck, created_at, last_modified)
+        VALUES (trans_id, r.datum, r.betrag, r.beschr, NOW(), NOW());
+
         satz_id := gen_random_uuid();
-        INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, created_at, last_modified)
-        VALUES (satz_id, r.datum, r.beschr, r.betreffendes_jahr, nextval('buchungsnummer_seq'), NOW(), NOW());
+        INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, transaktion_id, created_at, last_modified)
+        VALUES (satz_id, r.datum, r.beschr, r.betreffendes_jahr, nextval('buchungsnummer_seq'), trans_id, NOW(), NOW());
         INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
         VALUES (gen_random_uuid(), satz_id, r.nk_verrechnungs_konto_id, 1, r.betrag, NOW(), NOW());
         UPDATE betriebskostenrechnungen
@@ -720,12 +755,12 @@ DO $$
 DECLARE
     r RECORD;
     satz_id UUID;
+    trans_id UUID;
     verbindl_id INT;
 BEGIN
     FOR r IN
         SELECT ea.erhaltungsaufwendung_id, ea.betrag, ea.datum, ea.bezeichnung,
                ea.aussteller_kontakt_id AS aussteller_id,
-               k.verbindlichkeits_konto_id,
                COALESCE(k.vorname || ' ', '') || k.name AS aussteller_name,
                w.aufwands_konto_id
         FROM erhaltungsaufwendungen ea
@@ -734,8 +769,12 @@ BEGIN
         WHERE ea.buchungssatz_id IS NULL
           AND ea.aussteller_kontakt_id IS NOT NULL
     LOOP
-        -- Verbindlichkeitskonto für Aussteller anlegen falls fehlend
-        verbindl_id := r.verbindlichkeits_konto_id;
+        -- Verbindlichkeitskonto für Aussteller anlegen falls fehlend.
+        -- Frisch aus kontakte lesen (nicht aus dem materialisierten FOR-Snapshot),
+        -- damit mehrere Erhaltungsaufwendungen desselben Ausstellers EIN gemeinsames
+        -- Konto teilen statt je Eintrag ein eigenes anzulegen.
+        SELECT verbindlichkeits_konto_id INTO verbindl_id
+        FROM kontakte WHERE kontakt_id = r.aussteller_id;
         IF verbindl_id IS NULL THEN
             INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
             VALUES ('VK-' || r.aussteller_id, 'Verbindlichkeiten ' || r.aussteller_name, 1, NOW(), NOW())
@@ -743,9 +782,13 @@ BEGIN
             UPDATE kontakte SET verbindlichkeits_konto_id = verbindl_id WHERE kontakt_id = r.aussteller_id;
         END IF;
 
+        trans_id := gen_random_uuid();
+        INSERT INTO transaktionen (transaktion_id, zahlungsdatum, betrag, verwendungszweck, created_at, last_modified)
+        VALUES (trans_id, r.datum, r.betrag, 'Erhaltungsaufwendung: ' || r.bezeichnung, NOW(), NOW());
+
         satz_id := gen_random_uuid();
-        INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, created_at, last_modified)
-        VALUES (satz_id, r.datum, 'Erhaltungsaufwendung: ' || r.bezeichnung, EXTRACT(YEAR FROM r.datum)::int, nextval('buchungsnummer_seq'), NOW(), NOW());
+        INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, transaktion_id, created_at, last_modified)
+        VALUES (satz_id, r.datum, 'Erhaltungsaufwendung: ' || r.bezeichnung, EXTRACT(YEAR FROM r.datum)::int, nextval('buchungsnummer_seq'), trans_id, NOW(), NOW());
 
         -- Soll: Aufwandskonto der Wohnung (soll_haben = 0)
         INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
@@ -759,40 +802,168 @@ BEGIN
 END $$;
 ");
 
-            // ── Miete-Datenmigration: Zahlungs-Buchungssätze für alle historischen Mietzahlungen ──
+            // ── Miete-Datenmigration: vollständige Rekonstruktion wie im WebAPI ──
+            // Spiegelt TransaktionBuchungsService.ErstelleMietzahlungAsync je historischer Miete:
+            //   1. Mietsoll-Forderung (Soll MietBuchungskonto / Haben MietErtragskonto = Grundmiete),
+            //      genau eine je (Vertrag, Monat) — Beschreibung "Mietsoll MM/yyyy", Datum = 3. Werktag.
+            //   2. EINE Transaktion je Miete, Verwendungszweck
+            //      "Miete MM/yyyy | {Mieter} | {Anschrift – Wohnung}" ({Mieter}="Leerstand" wenn keiner).
+            //   3. Zahlung aufgeteilt (alter Miete.Betrag = Kaltmiete + NK-VZ, siehe ANALYSE_BUCHUNGSMODELL).
+            //      Die alte VertragVersion.Nebenkostenvorauszahlung ist durchweg 0 — die VZ steckt im
+            //      Differenzbetrag zur Grundmiete (= Kaltmiete). Daher abgeleitet:
+            //        Kaltmiete  = min(Betrag, Grundmiete)        → Haben MietBuchungskonto
+            //                     ("Mietzahlung Kaltmiete MM/yyyy") + OffenerPostenAusgleich auf die Forderung
+            //        NK-VZ      = Betrag − Kaltmiete (Überschuss) → Haben NkBuchungskonto
+            //                     ("Mietzahlung NK-VZ MM/yyyy")
+            //   Keine Doppelung: Mietsoll je (Vertrag, Monat) dedupliziert (Map), Zahlungen je Miete einmalig.
             migrationBuilder.Sql(@"
 DO $$
 DECLARE
     m RECORD;
+    trans_id UUID;
     satz_id UUID;
+    soll_satz_id UUID;
+    v_soll_zeile_id UUID;
+    v_haben_zeile_id UUID;
+    v_grundmiete NUMERIC;
+    v_nk NUMERIC;
+    v_kaltmiete NUMERIC;
+    v_dritter DATE;
+    v_jahr INT;
+    v_monat_num INT;
 BEGIN
+    CREATE TEMP TABLE _mietsoll_map (
+        vertrag_id INT, jahr INT, monat INT, soll_zeile_id UUID,
+        PRIMARY KEY (vertrag_id, jahr, monat)
+    );
+
     FOR m IN
-        SELECT mi.miete_id, mi.zahlungsdatum, mi.betreffender_monat,
+        WITH vertrag_info AS (
+            SELECT v.vertrag_id,
+                   v.zahlungs_konto_id,
+                   v.miet_buchungskonto_id,
+                   v.nk_buchungskonto_id,
+                   w.miet_ertragskonto_id,
+                   COALESCE(
+                       NULLIF(string_agg(COALESCE(k.vorname || ' ', '') || k.name, ', ' ORDER BY k.name), ''),
+                       'Leerstand'
+                   ) AS mieter_namen,
+                   CASE WHEN a.adresse_id IS NOT NULL
+                        THEN a.strasse || ' ' || a.hausnummer || ', ' || a.postleitzahl || ' ' || a.stadt || ' – ' || w.bezeichnung
+                        ELSE w.bezeichnung
+                   END AS wohnung_info
+            FROM vertraege v
+            JOIN wohnungen w ON w.wohnung_id = v.wohnung_id
+            LEFT JOIN adressen a ON a.adresse_id = w.adresse_id
+            LEFT JOIN kontakt_vertrag kv ON kv.mietvertraege_vertrag_id = v.vertrag_id
+            LEFT JOIN kontakte k ON k.kontakt_id = kv.mieter_kontakt_id
+            GROUP BY v.vertrag_id, v.zahlungs_konto_id, v.miet_buchungskonto_id, v.nk_buchungskonto_id,
+                     w.miet_ertragskonto_id, a.adresse_id, a.strasse, a.hausnummer, a.postleitzahl, a.stadt, w.bezeichnung
+        )
+        SELECT mi.vertrag_id,
+               mi.zahlungsdatum,
+               date_trunc('month', mi.betreffender_monat)::date AS monat,
                ROUND(mi.betrag::numeric, 2) AS betrag,
-               v.zahlungs_konto_id, v.miet_buchungskonto_id
+               vi.zahlungs_konto_id, vi.miet_buchungskonto_id, vi.nk_buchungskonto_id, vi.miet_ertragskonto_id,
+               vi.mieter_namen, vi.wohnung_info
         FROM mieten mi
-        JOIN vertraege v ON v.vertrag_id = mi.vertrag_id
-        WHERE v.zahlungs_konto_id IS NOT NULL
-          AND v.miet_buchungskonto_id IS NOT NULL
+        JOIN vertrag_info vi ON vi.vertrag_id = mi.vertrag_id
+        WHERE vi.zahlungs_konto_id IS NOT NULL
+          AND vi.miet_buchungskonto_id IS NOT NULL
+        ORDER BY mi.vertrag_id, mi.betreffender_monat, mi.zahlungsdatum
     LOOP
-        satz_id := gen_random_uuid();
-        INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, created_at, last_modified)
-        VALUES (
-            satz_id,
-            m.zahlungsdatum,
-            'Miete ' || TO_CHAR(m.betreffender_monat, 'YYYY-MM'),
-            EXTRACT(YEAR FROM m.zahlungsdatum)::int,
-            nextval('buchungsnummer_seq'),
-            NOW(),
-            NOW()
-        );
-        -- Soll: ZahlungsKonto (bank; soll_haben = 0)
-        INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
-        VALUES (gen_random_uuid(), satz_id, m.zahlungs_konto_id, 0, m.betrag, NOW(), NOW());
-        -- Haben: MietBuchungskonto (soll_haben = 1)
-        INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
-        VALUES (gen_random_uuid(), satz_id, m.miet_buchungskonto_id, 1, m.betrag, NOW(), NOW());
+        v_jahr := EXTRACT(YEAR FROM m.monat)::int;
+        v_monat_num := EXTRACT(MONTH FROM m.monat)::int;
+
+        -- Anzuwendende VertragVersion: jüngste mit beginn <= Monat, sonst früheste.
+        SELECT grundmiete INTO v_grundmiete
+        FROM vertrag_versionen
+        WHERE vertrag_id = m.vertrag_id AND beginn <= m.monat
+        ORDER BY beginn DESC LIMIT 1;
+        IF NOT FOUND THEN
+            SELECT grundmiete INTO v_grundmiete
+            FROM vertrag_versionen WHERE vertrag_id = m.vertrag_id
+            ORDER BY beginn ASC LIMIT 1;
+        END IF;
+        v_grundmiete := COALESCE(v_grundmiete, 0);
+
+        -- Aufteilung: Kaltmiete bis zur Grundmiete, Überschuss = NK-VZ.
+        -- Bei unbekannter Grundmiete (0) fließt alles in die Kaltmiete (kein erfundenes NK-VZ).
+        IF v_grundmiete > 0 THEN
+            v_kaltmiete := LEAST(m.betrag, v_grundmiete);
+        ELSE
+            v_kaltmiete := m.betrag;
+        END IF;
+        v_nk := m.betrag - v_kaltmiete;
+
+        -- 3. Werktag des Monats (nur Sonntag zählt nicht als Werktag)
+        SELECT d::date INTO v_dritter
+        FROM generate_series(m.monat, m.monat + 10, INTERVAL '1 day') AS g(d)
+        WHERE EXTRACT(DOW FROM d) <> 0
+        ORDER BY d OFFSET 2 LIMIT 1;
+
+        -- Mietsoll-Forderung je (Vertrag, Monat) genau einmal
+        SELECT soll_zeile_id INTO v_soll_zeile_id
+        FROM _mietsoll_map WHERE vertrag_id = m.vertrag_id AND jahr = v_jahr AND monat = v_monat_num;
+
+        IF v_soll_zeile_id IS NULL AND v_grundmiete > 0 THEN
+            soll_satz_id := gen_random_uuid();
+            INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, created_at, last_modified)
+            VALUES (soll_satz_id, v_dritter, 'Mietsoll ' || TO_CHAR(m.monat, 'MM/YYYY'), EXTRACT(YEAR FROM v_dritter)::int, nextval('buchungsnummer_seq'), NOW(), NOW());
+
+            v_soll_zeile_id := gen_random_uuid();
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (v_soll_zeile_id, soll_satz_id, m.miet_buchungskonto_id, 0, v_grundmiete, NOW(), NOW());
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (gen_random_uuid(), soll_satz_id, m.miet_ertragskonto_id, 1, v_grundmiete, NOW(), NOW());
+
+            INSERT INTO _mietsoll_map (vertrag_id, jahr, monat, soll_zeile_id)
+            VALUES (m.vertrag_id, v_jahr, v_monat_num, v_soll_zeile_id);
+        END IF;
+
+        -- Eine Transaktion je Miete.
+        -- Buchungsjahr der Zahlungs-Sätze = Jahr des betreffenden Monats (Wirtschaftsjahr),
+        -- NICHT des Zahlungsdatums: historische Mieten wurden oft verspätet/gesammelt
+        -- gezahlt; sonst landen mehrere Jahre VZ im Zahljahr und die Abrechnungs-
+        -- Vorauszahlung explodiert. Buchungsdatum bleibt das echte Zahlungsdatum.
+        trans_id := gen_random_uuid();
+        INSERT INTO transaktionen (transaktion_id, zahlungsdatum, betrag, verwendungszweck, created_at, last_modified)
+        VALUES (trans_id, m.zahlungsdatum, m.betrag,
+                'Miete ' || TO_CHAR(m.monat, 'MM/YYYY') || ' | ' || m.mieter_namen || ' | ' || m.wohnung_info,
+                NOW(), NOW());
+
+        -- Kaltmiete-Zahlung: Soll ZahlungsKonto / Haben MietBuchungskonto + Ausgleich auf die Forderung
+        IF v_kaltmiete > 0 THEN
+            satz_id := gen_random_uuid();
+            INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, transaktion_id, created_at, last_modified)
+            VALUES (satz_id, m.zahlungsdatum, 'Mietzahlung Kaltmiete ' || TO_CHAR(m.monat, 'MM/YYYY'), EXTRACT(YEAR FROM m.monat)::int, nextval('buchungsnummer_seq'), trans_id, NOW(), NOW());
+
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (gen_random_uuid(), satz_id, m.zahlungs_konto_id, 0, v_kaltmiete, NOW(), NOW());
+            v_haben_zeile_id := gen_random_uuid();
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (v_haben_zeile_id, satz_id, m.miet_buchungskonto_id, 1, v_kaltmiete, NOW(), NOW());
+
+            IF v_soll_zeile_id IS NOT NULL THEN
+                INSERT INTO offene_posten_ausgleiche (offener_posten_ausgleich_id, soll_zeile_id, haben_zeile_id)
+                VALUES (gen_random_uuid(), v_soll_zeile_id, v_haben_zeile_id);
+            END IF;
+        END IF;
+
+        -- NK-VZ-Zahlung: Soll ZahlungsKonto / Haben NkBuchungskonto
+        IF v_nk > 0 THEN
+            satz_id := gen_random_uuid();
+            INSERT INTO buchungssaetze (buchungssatz_id, buchungsdatum, beschreibung, buchungsjahr, buchungsnummer, transaktion_id, created_at, last_modified)
+            VALUES (satz_id, m.zahlungsdatum, 'Mietzahlung NK-VZ ' || TO_CHAR(m.monat, 'MM/YYYY'), EXTRACT(YEAR FROM m.monat)::int, nextval('buchungsnummer_seq'), trans_id, NOW(), NOW());
+
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (gen_random_uuid(), satz_id, m.zahlungs_konto_id, 0, v_nk, NOW(), NOW());
+            INSERT INTO buchungszeilen (buchungszeile_id, buchungssatz_id, buchungskonto_id, soll_haben, betrag, created_at, last_modified)
+            VALUES (gen_random_uuid(), satz_id, m.nk_buchungskonto_id, 1, v_nk, NOW(), NOW());
+        END IF;
     END LOOP;
+
+    DROP TABLE _mietsoll_map;
 END $$;
 ");
         }
@@ -970,13 +1141,6 @@ END $$;
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<int>(
-                name: "kautions_konto_id",
-                table: "vertraege",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
                 name: "schluessel",
                 table: "umlagen",
                 type: "integer",
@@ -1099,11 +1263,6 @@ END $$;
                 column: "besitzer_kontakt_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_vertraege_kautions_konto_id",
-                table: "vertraege",
-                column: "kautions_konto_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_transaktionen_zahler_kontakt_id",
                 table: "transaktionen",
                 column: "zahler_kontakt_id");
@@ -1171,14 +1330,6 @@ END $$;
                 column: "zahlungsempfaenger_kontakt_id",
                 principalTable: "kontakte",
                 principalColumn: "kontakt_id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "fk_vertraege_buchungskonten_kautions_konto_id",
-                table: "vertraege",
-                column: "kautions_konto_id",
-                principalTable: "buchungskonten",
-                principalColumn: "buchungskonto_id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(

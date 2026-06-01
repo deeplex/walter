@@ -152,43 +152,83 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class TransaktionPermissionHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaktion>
+    public class TransaktionPermissionHandler(SaverwalterContext ctx)
+        : AuthorizationHandler<OperationAuthorizationRequirement, Transaktion>
     {
-        public static IQueryable<Transaktion> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        /// <summary>
+        /// Buchungskonto-IDs, die zu einer Wohnung gehören, die der Nutzer in der
+        /// gegebenen Rolle verwaltet — inklusive der Konten der zugehörigen Verträge,
+        /// Garagenverträge und Umlagen. Über diese Konten werden Transaktionen einer
+        /// Wohnung zugeordnet (eine Transaktion hat keine direkte Wohnungs-Beziehung).
+        /// </summary>
+        public static IQueryable<int> ManagedBuchungskontoIds(
+            SaverwalterContext ctx, Guid guid, VerwalterRolle rolle)
         {
-            // TODO: Limit access to transactions where the user is either the payer or the recipient.
-            return ctx.Transaktionen;
+            var wohnungIds = ctx.Wohnungen
+                .Where(w => w.Verwalter.Count > 0 &&
+                    w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Select(w => w.WohnungId);
+
+            var wohnungen = ctx.Wohnungen.Where(w => wohnungIds.Contains(w.WohnungId));
+            var vertraege = ctx.Vertraege.Where(v => wohnungIds.Contains(v.Wohnung.WohnungId));
+            var garageVertraege = ctx.GarageVertraege
+                .Where(gv => gv.Vertrag != null && wohnungIds.Contains(gv.Vertrag.Wohnung.WohnungId));
+            var umlagen = ctx.Umlagen.Where(u => u.Wohnungen.Any(w => wohnungIds.Contains(w.WohnungId)));
+
+            return wohnungen.Select(w => w.MietErtragskonto.BuchungskontoId)
+                .Union(wohnungen.Select(w => w.AufwandsKonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.MietBuchungskonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.NkBuchungskonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.BkAbrechnungsKonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.ZahlungsKonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.MietminderungsKonto.BuchungskontoId))
+                .Union(garageVertraege.Select(gv => gv.MietBuchungskonto.BuchungskontoId))
+                .Union(garageVertraege.Select(gv => gv.ZahlungsKonto.BuchungskontoId))
+                .Union(garageVertraege.Select(gv => gv.Garage.Ertragskonto.BuchungskontoId))
+                .Union(umlagen.Select(u => u.NkVerrechnungsKonto.BuchungskontoId))
+                .Union(umlagen.Select(u => u.ZahlungsKonto.BuchungskontoId));
         }
 
-        protected override Task HandleRequirementAsync(
+        public static IQueryable<Transaktion> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+            {
+                return ctx.Transaktionen;
+            }
+
+            var kontoIds = ManagedBuchungskontoIds(ctx, user.GetUserId(), VerwalterRolle.Keine);
+            return ctx.Transaktionen
+                .Where(t => t.Buchungssaetze.Any(s =>
+                    s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))));
+        }
+
+        protected override async Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
            Transaktion entity)
         {
-            // TODO: Limit access to transactions where the user is either the payer or the recipient.
-            // if (context.User.IsInRole("Admin"))
-            // {
-            //     context.Succeed(requirement);
-            // }
-            // else if ((
-            //         requirement.Name == Operations.SubCreate.Name ||
-            //         requirement.Name == Operations.Update.Name ||
-            //         requirement.Name == Operations.Delete.Name
-            //    ) && entity.Zahler.Accounts.Any(a => a.Id == context.User.GetUserId()))
-            // {
-            //     context.Succeed(requirement);
-            // }
-            // else if (
-            //     requirement.Name == Operations.Read.Name
-            //     && (entity.
-            //     Zahler.Accounts.Any(a => a.Id == context.User.GetUserId()) ||
-            //         entity.Zahlungsempfaenger.Accounts.Any(a => a.Id == context.User.GetUserId())))
-            // {
-            //     context.Succeed(requirement);
-            // }
+            if (context.User.IsInRole("Admin"))
+            {
+                context.Succeed(requirement);
+                return;
+            }
 
-            context.Succeed(requirement);
-            return Task.CompletedTask;
+            // Lesen darf jeder Verwalter der betroffenen Wohnung (Rolle Keine genügt),
+            // Ändern/Löschen/Buchen erfordert Vollmacht — analog zur Wohnung.
+            var rolle = requirement.Name == Operations.Read.Name
+                ? VerwalterRolle.Keine
+                : VerwalterRolle.Vollmacht;
+
+            var kontoIds = ManagedBuchungskontoIds(ctx, context.User.GetUserId(), rolle);
+            var darfZugreifen = await ctx.Transaktionen
+                .Where(t => t.TransaktionId == entity.TransaktionId)
+                .AnyAsync(t => t.Buchungssaetze.Any(s =>
+                    s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))));
+
+            if (darfZugreifen)
+            {
+                context.Succeed(requirement);
+            }
         }
     }
 

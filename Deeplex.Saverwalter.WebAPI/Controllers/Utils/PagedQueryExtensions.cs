@@ -35,7 +35,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var totalCount = await source.CountAsync();
             source = applySort(source, query.SortBy ?? "", query.SortDir);
             var items = await source.Skip(query.Skip).Take(query.Take).ToListAsync();
-            var entries = await Task.WhenAll(items.Select(toEntry));
+            var entries = new List<TEntry>(items.Count);
+            foreach (var item in items)
+                entries.Add(await toEntry(item));
             return new PagedResult<TEntry>(entries, totalCount);
         }
 

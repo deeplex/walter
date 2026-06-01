@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,10 +68,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag)
         };
 
+        /// <summary>
+        /// Buchungskonten, die der Nutzer in der gegebenen Rolle sehen darf — Admin
+        /// alle, sonst nur Konten von Wohnungen (inkl. Verträge/Garagen/Umlagen), die
+        /// er verwaltet. Das Buchungskonto ist der Anker der Buchungssätze, daher wird
+        /// die Sichtbarkeit hier verankert.
+        /// </summary>
+        private IQueryable<Buchungskonto> ScopedKonten(VerwalterRolle rolle)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return ctx.Buchungskonten;
+            }
+
+            var kontoIds = TransaktionPermissionHandler
+                .ManagedBuchungskontoIds(ctx, User.GetUserId(), rolle);
+            return ctx.Buchungskonten.Where(k => kontoIds.Contains(k.BuchungskontoId));
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BuchungskontoEntry>>> GetAll()
         {
-            var konten = await ctx.Buchungskonten
+            var konten = await ScopedKonten(VerwalterRolle.Keine)
                 .Include(k => k.Buchungszeilen)
                 .OrderBy(k => k.Kontonummer)
                 .ToListAsync();
@@ -80,12 +100,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BuchungskontoDetail>> Get(int id)
         {
-            var konto = await ctx.Buchungskonten
+            var konto = await ScopedKonten(VerwalterRolle.Keine)
                 .Include(k => k.Buchungszeilen)
                     .ThenInclude(z => z.Buchungssatz)
                 .FirstOrDefaultAsync(k => k.BuchungskontoId == id);
 
-            if (konto is null) return NotFound();
+            if (konto is null)
+            {
+                // Existiert das Konto, ist aber außerhalb des Sichtbereichs? -> 403 statt 404
+                return await ctx.Buchungskonten.AnyAsync(k => k.BuchungskontoId == id)
+                    ? Forbid()
+                    : NotFound();
+            }
 
             var entry = ToEntry(konto);
             var detail = new BuchungskontoDetail
@@ -117,11 +143,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<BuchungskontoEntry>> Put(int id, [FromBody] BuchungskontoUpdateEntry update)
         {
-            var konto = await ctx.Buchungskonten
+            var konto = await ScopedKonten(VerwalterRolle.Vollmacht)
                 .Include(k => k.Buchungszeilen)
                 .FirstOrDefaultAsync(k => k.BuchungskontoId == id);
 
-            if (konto is null) return NotFound();
+            if (konto is null)
+            {
+                return await ctx.Buchungskonten.AnyAsync(k => k.BuchungskontoId == id)
+                    ? Forbid()
+                    : NotFound();
+            }
 
             konto.Bezeichnung = update.Bezeichnung;
             konto.Notiz = update.Notiz;

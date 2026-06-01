@@ -262,33 +262,88 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 table: "buchungszeilen",
                 column: "buchungssatz_id");
 
+            // --- vertraege Buchungskonten ---
+
             migrationBuilder.AddColumn<int>(
                 name: "miet_buchungskonto_id",
                 table: "vertraege",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "nk_buchungskonto_id",
                 table: "vertraege",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "kautions_konto_id",
-                table: "vertraege",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "bk_abrechnungs_konto_id",
                 table: "vertraege",
                 type: "integer",
+                nullable: true);
+
+            // Buchungskonto (Aktiv=0) für Mietforderungen je Vertrag anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'V' || LPAD(vertrag_id::text, 5, '0') || '-MB', 'Mietforderungen', 0, NOW(), NOW()
+                    FROM vertraege
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE vertraege v SET miet_buchungskonto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'V' || LPAD(v.vertrag_id::text, 5, '0') || '-MB'
+            ");
+
+            // Buchungskonto (Passiv=1) für NK-Vorauszahlungen je Vertrag anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'V' || LPAD(vertrag_id::text, 5, '0') || '-NK', 'NK-Vorauszahlungen', 1, NOW(), NOW()
+                    FROM vertraege
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE vertraege v SET nk_buchungskonto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'V' || LPAD(v.vertrag_id::text, 5, '0') || '-NK'
+            ");
+
+            // Buchungskonto (Aktiv=0) für BK-Abrechnung je Vertrag anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'V' || LPAD(vertrag_id::text, 5, '0') || '-BK', 'BK-Abrechnung', 0, NOW(), NOW()
+                    FROM vertraege
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE vertraege v SET bk_abrechnungs_konto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'V' || LPAD(v.vertrag_id::text, 5, '0') || '-BK'
+            ");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "miet_buchungskonto_id",
+                table: "vertraege",
+                type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "nk_buchungskonto_id",
+                table: "vertraege",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "bk_abrechnungs_konto_id",
+                table: "vertraege",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vertraege_miet_buchungskonto_id",
@@ -299,11 +354,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 name: "ix_vertraege_nk_buchungskonto_id",
                 table: "vertraege",
                 column: "nk_buchungskonto_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_vertraege_kautions_konto_id",
-                table: "vertraege",
-                column: "kautions_konto_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_vertraege_bk_abrechnungs_konto_id",
@@ -327,14 +377,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "fk_vertraege_buchungskonten_kautions_konto_id",
-                table: "vertraege",
-                column: "kautions_konto_id",
-                principalTable: "buchungskonten",
-                principalColumn: "buchungskonto_id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
                 name: "fk_vertraege_buchungskonten_bk_abrechnungs_konto_id",
                 table: "vertraege",
                 column: "bk_abrechnungs_konto_id",
@@ -342,19 +384,61 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 principalColumn: "buchungskonto_id",
                 onDelete: ReferentialAction.Cascade);
 
+            // --- wohnungen Buchungskonten ---
+
             migrationBuilder.AddColumn<int>(
                 name: "erhaltungsaufwands_konto_id",
                 table: "wohnungen",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "miet_ertragskonto_id",
                 table: "wohnungen",
                 type: "integer",
+                nullable: true);
+
+            // Buchungskonto (Aufwand=2) für Erhaltungsaufwand je Wohnung anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'W' || LPAD(wohnung_id::text, 5, '0') || '-E', 'Erhaltungsaufwand', 2, NOW(), NOW()
+                    FROM wohnungen
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE wohnungen w SET erhaltungsaufwands_konto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'W' || LPAD(w.wohnung_id::text, 5, '0') || '-E'
+            ");
+
+            // Buchungskonto (Ertrag=3) für Mieterlöse je Wohnung anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'W' || LPAD(wohnung_id::text, 5, '0') || '-M', 'Mieterlöse', 3, NOW(), NOW()
+                    FROM wohnungen
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE wohnungen w SET miet_ertragskonto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'W' || LPAD(w.wohnung_id::text, 5, '0') || '-M'
+            ");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "erhaltungsaufwands_konto_id",
+                table: "wohnungen",
+                type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "miet_ertragskonto_id",
+                table: "wohnungen",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_wohnungen_erhaltungsaufwands_konto_id",
@@ -382,6 +466,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 principalColumn: "buchungskonto_id",
                 onDelete: ReferentialAction.Cascade);
 
+            // --- kontakte Verbindlichkeitskonto (optional) ---
+
             migrationBuilder.AddColumn<int>(
                 name: "verbindlichkeits_konto_id",
                 table: "kontakte",
@@ -400,12 +486,13 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 principalTable: "buchungskonten",
                 principalColumn: "buchungskonto_id");
 
+            // --- betriebskostenrechnungen Buchungssatz (data migration handled in MieteBuchungssaetze) ---
+
             migrationBuilder.AddColumn<Guid>(
                 name: "buchungssatz_id",
                 table: "betriebskostenrechnungen",
                 type: "uuid",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_betriebskostenrechnungen_buchungssatz_id",
@@ -420,12 +507,34 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 principalColumn: "buchungssatz_id",
                 onDelete: ReferentialAction.Cascade);
 
+            // --- umlagen Buchungskonten ---
+
             migrationBuilder.AddColumn<int>(
                 name: "nk_verrechnungs_konto_id",
                 table: "umlagen",
                 type: "integer",
+                nullable: true);
+
+            // Buchungskonto (Passiv=1) für NK-Verrechnung je Umlage anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'U' || LPAD(umlage_id::text, 5, '0') || '-NR', 'NK-Verrechnung', 1, NOW(), NOW()
+                    FROM umlagen
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE umlagen u SET nk_verrechnungs_konto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'U' || LPAD(u.umlage_id::text, 5, '0') || '-NR'
+            ");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "nk_verrechnungs_konto_id",
+                table: "umlagen",
+                type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_umlagen_nk_verrechnungs_konto_id",
@@ -440,19 +549,61 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 principalColumn: "buchungskonto_id",
                 onDelete: ReferentialAction.Cascade);
 
+            // --- zahlungskonten für vertraege und umlagen ---
+
             migrationBuilder.AddColumn<int>(
                 name: "zahlungs_konto_id",
                 table: "vertraege",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "zahlungs_konto_id",
                 table: "umlagen",
                 type: "integer",
+                nullable: true);
+
+            // Buchungskonto (Aktiv=0) für Zahlung je Vertrag anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'V' || LPAD(vertrag_id::text, 5, '0') || '-ZK', 'Zahlung', 0, NOW(), NOW()
+                    FROM vertraege
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE vertraege v SET zahlungs_konto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'V' || LPAD(v.vertrag_id::text, 5, '0') || '-ZK'
+            ");
+
+            // Buchungskonto (Aktiv=0) für NK-Zahlung je Umlage anlegen und verknüpfen
+            migrationBuilder.Sql(@"
+                WITH inserted AS (
+                    INSERT INTO buchungskonten (kontonummer, bezeichnung, kontotyp, created_at, last_modified)
+                    SELECT 'U' || LPAD(umlage_id::text, 5, '0') || '-ZK', 'NK-Zahlung', 0, NOW(), NOW()
+                    FROM umlagen
+                    RETURNING buchungskonto_id, kontonummer
+                )
+                UPDATE umlagen u SET zahlungs_konto_id = i.buchungskonto_id
+                FROM inserted i WHERE i.kontonummer = 'U' || LPAD(u.umlage_id::text, 5, '0') || '-ZK'
+            ");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "zahlungs_konto_id",
+                table: "vertraege",
+                type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "zahlungs_konto_id",
+                table: "umlagen",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vertraege_zahlungs_konto_id",
@@ -533,10 +684,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 table: "vertraege");
 
             migrationBuilder.DropForeignKey(
-                name: "fk_vertraege_buchungskonten_kautions_konto_id",
-                table: "vertraege");
-
-            migrationBuilder.DropForeignKey(
                 name: "fk_vertraege_buchungskonten_bk_abrechnungs_konto_id",
                 table: "vertraege");
 
@@ -565,10 +712,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                 table: "vertraege");
 
             migrationBuilder.DropIndex(
-                name: "ix_vertraege_kautions_konto_id",
-                table: "vertraege");
-
-            migrationBuilder.DropIndex(
                 name: "ix_vertraege_bk_abrechnungs_konto_id",
                 table: "vertraege");
 
@@ -594,10 +737,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
             migrationBuilder.DropColumn(
                 name: "nk_buchungskonto_id",
-                table: "vertraege");
-
-            migrationBuilder.DropColumn(
-                name: "kautions_konto_id",
                 table: "vertraege");
 
             migrationBuilder.DropColumn(

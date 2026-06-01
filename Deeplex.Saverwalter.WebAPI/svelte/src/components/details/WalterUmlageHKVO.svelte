@@ -112,7 +112,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     umlage.selectedWohnungen.map((e) => +e.id)
                 );
                 return (
-                    selectedWohnungenSet.size === wohnungenSet.size &&
+                    selectedWohnungenSet.size > 0 &&
                     [...selectedWohnungenSet].every((id) =>
                         wohnungenSet.has(id)
                     )
