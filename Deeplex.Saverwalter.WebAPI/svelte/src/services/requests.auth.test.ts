@@ -99,7 +99,11 @@ describe('requests auth behavior', () => {
         );
         const { walter_selection } = await import('./requests');
 
-        const expectations: Array<[keyof typeof walter_selection, string]> = [
+        // 'waermezaehler' ist parametrisiert (umlageId) und wird nicht über diesen
+        // generischen (fetchImpl-only) Loop getestet.
+        const expectations: Array<
+            [Exclude<keyof typeof walter_selection, 'waermezaehler'>, string]
+        > = [
             ['adressen', '/api/selection/adressen'],
             ['anreden', '/api/selection/anreden'],
             [

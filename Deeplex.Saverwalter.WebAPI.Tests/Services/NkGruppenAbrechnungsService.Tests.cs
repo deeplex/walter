@@ -363,5 +363,127 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             einheiten.Should().HaveCount(2);
         }
+
+        // ── Strompauschale (HeizkostenV) ──────────────────────────────────────
+
+        private static (Umlage heiz, Umlage betr, Buchungskonto heizKonto, Buchungskonto betrKonto)
+            MakeHkvoSetup(Wohnung wohnung, decimal heizBetrag, decimal betrBetrag, decimal strompauschale, int jahr)
+        {
+            var heizKonto = new Buchungskonto("2000", "Heiz-NkVK", BuchungskontoTyp.Passiv);
+            var betrKonto = new Buchungskonto("2001", "Betr-NkVK", BuchungskontoTyp.Passiv);
+
+            var betr = MakeUmlage(Umlageschluessel.NachWohnflaeche, "Allgemeinstrom", betrKonto);
+            betr.UmlageId = 9002;
+            betr.Wohnungen.Add(wohnung);
+            AddBkForderung(betr, betrBetrag, new DateOnly(jahr, 12, 31), jahr);
+
+            var heiz = MakeUmlage(Umlageschluessel.NachVerbrauch, "Heizkosten", heizKonto);
+            heiz.UmlageId = 9001;
+            heiz.Wohnungen.Add(wohnung);
+            AddBkForderung(heiz, heizBetrag, new DateOnly(jahr, 12, 31), jahr);
+            heiz.HeizkostenHKVOs.Add(new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, strompauschale)
+            {
+                Heizkosten = heiz,
+                Betriebsstrom = betr
+            });
+
+            return (heiz, betr, heizKonto, betrKonto);
+        }
+
+        [Fact]
+        public void Strompauschale_VerschiebtAnteilVonBetriebsstromZuHeizkosten()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var (heiz, betr, heizKonto, betrKonto) = MakeHkvoSetup(wohnung, heizBetrag: 2000m, betrBetrag: 1000m, strompauschale: 0.05m, jahr: 2021);
+
+            var plaene = ComputeEinheiten([heiz, betr], 2021).SelectMany(e => e.Rechnungsplaene).ToList();
+
+            const decimal delta = 100m; // 2000 × 5%
+
+            plaene.Where(p => p.Umlage == heiz).Sum(p => p.Anteile.Sum(a => a.Betrag))
+                .Should().BeApproximately(2000m + delta, 0.05m);
+            plaene.Where(p => p.Umlage == betr).Sum(p => p.Anteile.Sum(a => a.Betrag))
+                .Should().BeApproximately(1000m - delta, 0.05m);
+
+            var sp = plaene.Single(p => p.IstStrompauschale);
+            sp.Betrag.Should().BeApproximately(delta, 0.05m);
+            sp.Buchungssatz.Buchungszeilen.Should().Contain(z =>
+                z.SollHaben == SollHaben.Soll && z.Buchungskonto == betrKonto && z.Betrag == delta);
+            sp.Buchungssatz.Buchungszeilen.Should().Contain(z =>
+                z.SollHaben == SollHaben.Haben && z.Buchungskonto == heizKonto && z.Betrag == delta);
+        }
+
+        [Fact]
+        public void Strompauschale_GesamtkostenBleibenErhalten()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var (heiz, betr, _, _) = MakeHkvoSetup(wohnung, heizBetrag: 2000m, betrBetrag: 1000m, strompauschale: 0.05m, jahr: 2021);
+
+            var plaene = ComputeEinheiten([heiz, betr], 2021).SelectMany(e => e.Rechnungsplaene).ToList();
+
+            // Summe aller verteilten Anteile bleibt = 2000 + 1000 (nur Umverteilung).
+            plaene.Sum(p => p.Anteile.Sum(a => a.Betrag)).Should().BeApproximately(3000m, 0.05m);
+        }
+
+        [Fact]
+        public void Strompauschale_WirdAufAllgemeinstromGekuerzt_WennGroesser()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            // delta = 2000 × 50% = 1000 > Allgemeinstrom 200 → auf 200 gekürzt.
+            var (heiz, betr, _, _) = MakeHkvoSetup(wohnung, heizBetrag: 2000m, betrBetrag: 200m, strompauschale: 0.5m, jahr: 2021);
+
+            var plaene = ComputeEinheiten([heiz, betr], 2021).SelectMany(e => e.Rechnungsplaene).ToList();
+
+            plaene.Where(p => p.Umlage == betr).Sum(p => p.Anteile.Sum(a => a.Betrag))
+                .Should().BeApproximately(0m, 0.05m);
+            plaene.Single(p => p.IstStrompauschale).Betrag.Should().BeApproximately(200m, 0.05m);
+            plaene.Single(p => p.IstStrompauschale).Warnungen.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void Strompauschale_IstInDieHeizkostenZeileEingerechnet()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var (heiz, betr, _, _) = MakeHkvoSetup(wohnung, heizBetrag: 2000m, betrBetrag: 1000m, strompauschale: 0.05m, jahr: 2021);
+
+            var plaene = ComputeEinheiten([heiz, betr], 2021).SelectMany(e => e.Rechnungsplaene).ToList();
+
+            // Die Heizkosten-Verteilzeile trägt BK + delta (= 2100), kein separater Pauschal-Plan.
+            var heizZeile = plaene.Single(p => p.Umlage == heiz && !p.IstStrompauschale);
+            heizZeile.Betrag.Should().BeApproximately(2100m, 0.05m);
+            heizZeile.Anteile.Sum(a => a.Betrag).Should().BeApproximately(2100m, 0.05m);
+
+            // Die Umbuchung ist ein reines Buchungs-Artefakt ohne Anteile.
+            plaene.Single(p => p.IstStrompauschale).Anteile.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Hkvo_VerbrauchsunabhaengigerAnteil_NachNutzflaeche()
+        {
+            // W1: WF 100 / NF 200, W2: WF 100 / NF 100. Heizkosten ohne Verbrauchszähler
+            // → verbrauchsunabhängig → Verteilung nach NUTZfläche (2:1), nicht Wohnfläche (1:1).
+            var w1 = MakeWohnung("W1", wf: 100, nf: 200);
+            var w2 = MakeWohnung("W2", wf: 100, nf: 100);
+            MakeVertrag(w1);
+            MakeVertrag(w2);
+
+            var heiz = MakeUmlage(Umlageschluessel.NachVerbrauch, "Heizkosten",
+                new Buchungskonto("2000", "Heiz-NkVK", BuchungskontoTyp.Passiv));
+            heiz.UmlageId = 9101;
+            heiz.Wohnungen.AddRange([w1, w2]);
+            AddBkForderung(heiz, 900m, new DateOnly(2021, 12, 31), 2021);
+            heiz.HeizkostenHKVOs.Add(new HKVO(new DateOnly(2000, 1, 1), 0.5m, 0.5m, HKVO_P9A2.Satz_2, 0m));
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+            var a1 = plan.Anteile.Single(a => a.Partei.Wohnung == w1).Betrag;
+            var a2 = plan.Anteile.Single(a => a.Partei.Wohnung == w2).Betrag;
+
+            a1.Should().BeApproximately(600m, 0.05m); // NF 200/300 × 900
+            a2.Should().BeApproximately(300m, 0.05m); // NF 100/300 × 900
+        }
     }
 }

@@ -43,12 +43,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let selectableUmlagen: Promise<WalterSelectionEntry[]> = new Promise(
         () => []
     );
+    let selectableWaermezaehler: Promise<WalterSelectionEntry[]> =
+        Promise.resolve([]);
     let seitWannHkvo: string | undefined;
 
     onMount(() => {
         visible = !!entry.hkvo;
         initialHKVO = { ...entry.hkvo };
         updateSelectableUmlagen();
+        if (entry.id) {
+            selectableWaermezaehler = walter_selection.waermezaehler(
+                entry.id,
+                fetchImpl
+            );
+        }
     });
 
     $: hasHkvoChanges =
@@ -61,7 +69,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 (initialHKVO.hkvO_P9?.id ?? '') ||
             entry.hkvo.strompauschale !== initialHKVO.strompauschale ||
             (entry.hkvo.stromrechnung?.id ?? '') !==
-                (initialHKVO.stromrechnung?.id ?? ''));
+                (initialHKVO.stromrechnung?.id ?? '') ||
+            (entry.hkvo.allgemeinWaerme?.id ?? '') !==
+                (initialHKVO.allgemeinWaerme?.id ?? ''));
 
     $: blockSave = hasHkvoChanges && !seitWannHkvo;
 
@@ -144,7 +154,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 hkvO_P8: initialHKVO.hkvO_P8 || 50,
                 hkvO_P9: initialHKVO.hkvO_P9 || p9a2[1],
                 strompauschale: initialHKVO.strompauschale || 5,
-                stromrechnung: initialHKVO.stromrechnung || undefined
+                stromrechnung: initialHKVO.stromrechnung || undefined,
+                allgemeinWaerme: initialHKVO.allgemeinWaerme || undefined
             };
         } else {
             entry.hkvo = undefined;
@@ -179,7 +190,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     {readonly}
                     required
                     bind:entries={selectableUmlagen}
-                    titleText="Stromrechnung"
+                    titleText="Stromrechnung (Betriebsstrom)"
+                />
+                <WalterComboBox
+                    bind:value={entry.hkvo.allgemeinWaerme}
+                    {readonly}
+                    bind:entries={selectableWaermezaehler}
+                    titleText="AllgemeinWärme-Zähler (§9 Abs. 2)"
                 />
             </Row>
             <Row>

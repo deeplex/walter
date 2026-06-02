@@ -261,7 +261,7 @@ namespace Deeplex.Saverwalter.PrintService
                     HeizVerbrauchAlle = totalWaerme,
                     WWVerbrauchDiese = dieseWW,
                     WWVerbrauchAlle = totalWW,
-                    WFZeitanteil = partei.WFZeitanteil,
+                    NFZeitanteil = partei.NFZeitanteil,
                     MeinBetragGesamt = meinBetrag,
                 });
             }
@@ -381,8 +381,8 @@ namespace Deeplex.Saverwalter.PrintService
         public required decimal WWVerbrauchAlle { get; init; }
         public decimal WWVerbrauchAnteil => WWVerbrauchAlle > 0 ? WWVerbrauchDiese / WWVerbrauchAlle : 0;
 
-        // WF-Zeitanteil dieser Partei (Fallback wenn keine individuellen Zähler)
-        public required decimal WFZeitanteil { get; init; }
+        // Nutzflächen-Zeitanteil dieser Partei (verbrauchsunabhängige §7/§8-Basis)
+        public required decimal NFZeitanteil { get; init; }
 
         // Autoritativer Gesamtbetrag dieser Partei (aus Rechnungsplan)
         public required decimal MeinBetragGesamt { get; init; }
@@ -391,10 +391,10 @@ namespace Deeplex.Saverwalter.PrintService
         public decimal HeizBetrag => Gesamtbetrag * (1 - P9_2.Para9_2);
         public decimal WWBetrag => Gesamtbetrag * P9_2.Para9_2;
         public decimal HeizAnteilFaktor => HeizVerbrauchAlle > 0
-            ? P7 * HeizVerbrauchAnteil + (1 - P7) * WFZeitanteil
-            : WFZeitanteil;
+            ? P7 * HeizVerbrauchAnteil + (1 - P7) * NFZeitanteil
+            : NFZeitanteil;
         public decimal WWAnteilFaktor => WWVerbrauchAlle > 0
-            ? P8 * WWVerbrauchAnteil + (1 - P8) * WFZeitanteil
-            : WFZeitanteil;
+            ? P8 * WWVerbrauchAnteil + (1 - P8) * NFZeitanteil
+            : NFZeitanteil;
     }
 }

@@ -26,6 +26,7 @@ export type NkAnteilInfo = {
     geplanterBetrag: number | null;
     gebuchterBetrag: number | null;
     anteilFaktor: number;
+    nfZeitanteil: number;
     nutzungsbeginn: string;
     nutzungsende: string;
     heizVerbrauchAnteil: number | null;
@@ -108,10 +109,11 @@ export type AbrechnungslaufGruppeResult = {
 export function hkvoKosten(z: NkZeileInfo, a: NkAnteilInfo): number {
     const heizBetrag = z.betrag * (1 - z.para9_2!);
     const wwBetrag = z.betrag * z.para9_2!;
+    // Verbrauchsunabhängiger Anteil (§7/§8) nach Nutzfläche.
     const vbHeiz =
         a.heizVerbrauchAnteil != null ? z.p7! * a.heizVerbrauchAnteil : 0;
-    const wfHeiz = (1 - z.p7!) * a.anteilFaktor;
+    const nfHeiz = (1 - z.p7!) * a.nfZeitanteil;
     const vbWW = a.wwVerbrauchAnteil != null ? z.p8! * a.wwVerbrauchAnteil : 0;
-    const wfWW = (1 - z.p8!) * a.anteilFaktor;
-    return heizBetrag * (vbHeiz + wfHeiz) + wwBetrag * (vbWW + wfWW);
+    const nfWW = (1 - z.p8!) * a.nfZeitanteil;
+    return heizBetrag * (vbHeiz + nfHeiz) + wwBetrag * (vbWW + nfWW);
 }

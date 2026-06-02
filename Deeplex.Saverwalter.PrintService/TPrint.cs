@@ -381,10 +381,10 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false); underlined.Add(false);
             }
 
-            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Wohnflaeche));
-            col2.Add(Prozent(1 - hr.P7) + " n.WF"); col3.Add(nutzungsIntervall);
-            col4.Add(""); col5.Add(Prozent((1 - hr.P7) * hr.WFZeitanteil));
-            col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.WFZeitanteil));
+            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche));
+            col2.Add(Prozent(1 - hr.P7) + " n.NF"); col3.Add(nutzungsIntervall);
+            col4.Add(""); col5.Add(Prozent((1 - hr.P7) * hr.NFZeitanteil));
+            col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.NFZeitanteil));
             bold.Add(false); underlined.Add(true);
 
             // §8 Warmwasseranteil
@@ -403,10 +403,10 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false); underlined.Add(false);
             }
 
-            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Wohnflaeche));
-            col2.Add(Prozent(1 - hr.P8) + " n.WF"); col3.Add(nutzungsIntervall);
-            col4.Add(""); col5.Add(Prozent((1 - hr.P8) * hr.WFZeitanteil));
-            col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.WFZeitanteil));
+            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche));
+            col2.Add(Prozent(1 - hr.P8) + " n.NF"); col3.Add(nutzungsIntervall);
+            col4.Add(""); col5.Add(Prozent((1 - hr.P8) * hr.NFZeitanteil));
+            col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.NFZeitanteil));
             bold.Add(false); underlined.Add(true);
 
             col1.Add(""); col2.Add(""); col3.Add(""); col4.Add(Euro(hr.Gesamtbetrag));

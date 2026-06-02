@@ -54,18 +54,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         wwVerbrauchAnteil: number | null;
         heizZaehler: ZaehlerVerbrauchInfo[];
         wwZaehler: ZaehlerVerbrauchInfo[];
-        wfZeitanteil: number;
+        nfZeitanteil: number;
     };
 
     const hkvoZeilen: HkvoZeile[] = zeilen
         .filter((z) => z.para9_2 != null)
         .map((z) => {
             const anteil = z.anteile.find((a) => a.vertragId === vertragId);
-            const wfZeitanteil = anteil?.anteilFaktor ?? 0;
+            const nfZeitanteil = anteil?.nfZeitanteil ?? 0;
             return {
                 zeile: z,
                 gesamtbetrag: z.betrag,
-                meinBetrag: z.betrag * (anteil?.anteilFaktor ?? 0),
+                meinBetrag: anteil ? hkvoKosten(z, anteil) : 0,
                 para9_2: z.para9_2!,
                 p7: z.p7!,
                 p8: z.p8!,
@@ -73,7 +73,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 wwVerbrauchAnteil: anteil?.wwVerbrauchAnteil ?? null,
                 heizZaehler: anteil?.heizZaehler ?? [],
                 wwZaehler: anteil?.wwZaehler ?? [],
-                wfZeitanteil
+                nfZeitanteil
             };
         });
 
@@ -99,17 +99,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {@const showP9 = !gezeigteUmlageIds.has(hz.zeile.umlageId)}
     {#if showP9}
         {@const _add = gezeigteUmlageIds.add(hz.zeile.umlageId)}
-        <p style="padding: 0.5rem 1rem;">
-            <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil: 2,5 × V/Q × (t<sub
-                >w</sub
-            >
-            − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
-        </p>
+        {#if hz.para9_2 > 0}
+            <p style="padding: 0.5rem 1rem;">
+                <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil: 2,5 × V/Q × (t<sub
+                    >w</sub
+                >
+                − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
+            </p>
+        {:else}
+            <p style="padding: 0.5rem 1rem; color: var(--cds-text-helper);">
+                Keine Warmwasser-Trennung nach §9 Abs. 2 HKVO (kein AllgemeinWärme-Zähler
+                konfiguriert) – der gesamte Betrag wird als Heizung (§7) abgerechnet.
+            </p>
+        {/if}
     {/if}
 
     <!-- §7 Heizkosten -->
     {@const heizBetrag = hz.gesamtbetrag * (1 - hz.para9_2)}
-    {@const wfHeizAnteil = (1 - hz.p7) * hz.wfZeitanteil}
+    {@const nfHeizAnteil = (1 - hz.p7) * hz.nfZeitanteil}
     {@const vbHeizAnteil =
         hz.heizVerbrauchAnteil != null ? hz.p7 * hz.heizVerbrauchAnteil : 0}
 
@@ -177,7 +184,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {/each}
             {/if}
             <StructuredListRow>
-                <StructuredListCell>nach Wohnfläche</StructuredListCell>
+                <StructuredListCell>nach Nutzfläche</StructuredListCell>
                 <StructuredListCell
                     >{convertPercent(1 - hz.p7)}</StructuredListCell
                 >
@@ -186,21 +193,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     >{convertEuro(heizBetrag * (1 - hz.p7))}</StructuredListCell
                 >
                 <StructuredListCell
-                    >{convertPercent(wfHeizAnteil)}</StructuredListCell
+                    >{convertPercent(nfHeizAnteil)}</StructuredListCell
                 >
                 <StructuredListCell></StructuredListCell>
                 <StructuredListCell
                     >{convertEuro(
-                        heizBetrag * wfHeizAnteil
+                        heizBetrag * nfHeizAnteil
                     )}</StructuredListCell
                 >
             </StructuredListRow>
         </StructuredListBody>
     </StructuredList>
 
-    <!-- §8 Warmwasser -->
+    <!-- §8 Warmwasser (nur bei §9(2)-Trennung; sonst fällt alles auf §7) -->
+    {#if hz.para9_2 > 0}
     {@const wwBetrag = hz.gesamtbetrag * hz.para9_2}
-    {@const wfWWAnteil = (1 - hz.p8) * hz.wfZeitanteil}
+    {@const nfWWAnteil = (1 - hz.p8) * hz.nfZeitanteil}
     {@const vbWWAnteil =
         hz.wwVerbrauchAnteil != null ? hz.p8 * hz.wwVerbrauchAnteil : 0}
 
@@ -268,7 +276,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {/each}
             {/if}
             <StructuredListRow>
-                <StructuredListCell>nach Wohnfläche</StructuredListCell>
+                <StructuredListCell>nach Nutzfläche</StructuredListCell>
                 <StructuredListCell
                     >{convertPercent(1 - hz.p8)}</StructuredListCell
                 >
@@ -277,15 +285,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     >{convertEuro(wwBetrag * (1 - hz.p8))}</StructuredListCell
                 >
                 <StructuredListCell
-                    >{convertPercent(wfWWAnteil)}</StructuredListCell
+                    >{convertPercent(nfWWAnteil)}</StructuredListCell
                 >
                 <StructuredListCell></StructuredListCell>
                 <StructuredListCell
-                    >{convertEuro(wwBetrag * wfWWAnteil)}</StructuredListCell
+                    >{convertEuro(wwBetrag * nfWWAnteil)}</StructuredListCell
                 >
             </StructuredListRow>
         </StructuredListBody>
     </StructuredList>
+    {/if}
 
     <p style="padding: 0.5rem 1rem;">
         <strong>{hz.zeile.bezeichnung}:</strong>

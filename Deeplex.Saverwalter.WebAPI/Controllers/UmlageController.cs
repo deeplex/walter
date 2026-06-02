@@ -42,6 +42,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry HKVO_P9 { get; set; } = null!;
             public int Strompauschale { get; set; }
             public SelectionEntry Stromrechnung { get; set; } = null!;
+            /// <summary>AllgemeinWärme-Zähler (Q für §9(2) Satz 2). Optional.</summary>
+            public SelectionEntry? AllgemeinWaerme { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -56,6 +58,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 HKVO_P9 = new((int)entity.HKVO_P9, entity.HKVO_P9.ToDescriptionString());
                 Strompauschale = (int)(entity.Strompauschale * 100);
                 Stromrechnung = new SelectionEntry(entity.Betriebsstrom.UmlageId, entity.Betriebsstrom.Typ.Bezeichnung);
+                AllgemeinWaerme = entity.AllgemeinWaerme is { } z
+                    ? new SelectionEntry(z.ZaehlerId, z.Kennnummer)
+                    : null;
 
                 Permissions = permissions;
             }

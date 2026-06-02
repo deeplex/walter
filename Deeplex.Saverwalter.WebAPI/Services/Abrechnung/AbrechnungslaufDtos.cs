@@ -34,6 +34,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public decimal? GebuchterBetrag { get; init; }
         /// <summary>Anteilsfaktor 0–1; proportionaler Anteil dieser Partei an der Rechnung.</summary>
         public decimal AnteilFaktor { get; init; }
+        /// <summary>Nutzflächen-Zeitanteil (0–1) – Basis der verbrauchsunabhängigen §7/§8-Quote.</summary>
+        public decimal NfZeitanteil { get; init; }
         public DateOnly Nutzungsbeginn { get; init; }
         public DateOnly Nutzungsende { get; init; }
         /// <summary>Individueller Wärme-Verbrauchsanteil (0–1). Nur für HKVO-Umlagen.</summary>

@@ -215,7 +215,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             {
                 try
                 {
-                    var nkResult = await _nkAnteilBuchungsService.BucheAnteileAsync(plan.Buchungssatz, plan.Anteile);
+                    // Der Strompauschale-Plan trägt eine transiente Umbuchung
+                    // (Soll Betriebsstrom-NkVK / Haben Heizkosten-NkVK). Diese erst
+                    // persistieren (idempotent) und dann die Anteile darauf buchen.
+                    var satz = plan.IstStrompauschale
+                        ? await EnsureStrompauschaleUmbuchungAsync(plan, jahr, preview.Warnungen)
+                        : plan.Buchungssatz;
+                    if (satz is null) continue;
+
+                    var nkResult = await _nkAnteilBuchungsService.BucheAnteileAsync(satz, plan.Anteile);
                     preview.Warnungen.AddRange(nkResult.Warnungen);
                 }
                 catch (Exception ex)
@@ -226,6 +234,43 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             }
 
             return preview;
+        }
+
+        /// <summary>
+        /// Stellt die Strompauschale-Umbuchung des Plans in der DB sicher (idempotent):
+        /// findet eine vorhandene gleichartige Umbuchung (gleiche Konten + Jahr) wieder,
+        /// prüft auf abweichenden Betrag (Konflikt → null) oder legt sie sonst neu an.
+        /// </summary>
+        private async Task<Buchungssatz?> EnsureStrompauschaleUmbuchungAsync(
+            NkGruppenAbrechnungsService.NkRechnungsplan plan, int jahr, List<string> warnungen)
+        {
+            var transient = plan.Buchungssatz;
+            var habenKontoId = transient.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben).Buchungskonto.BuchungskontoId;
+            var sollKontoId = transient.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Buchungskonto.BuchungskontoId;
+
+            var vorhanden = await _ctx.Buchungssaetze
+                .Include(b => b.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Where(b => b.Buchungsjahr == jahr && b.Beschreibung.StartsWith(NkGruppenAbrechnungsService.StrompauschaleMarker))
+                .Where(b => b.StornoNach == null) // bereits stornierte Umbuchungen ignorieren
+                .Where(b => b.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == habenKontoId)
+                         && b.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Soll && z.Buchungskonto.BuchungskontoId == sollKontoId))
+                .FirstOrDefaultAsync();
+
+            if (vorhanden is not null)
+            {
+                var gebucht = vorhanden.Buchungszeilen
+                    .First(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == habenKontoId).Betrag;
+                if (Math.Abs(gebucht - plan.Betrag) > 0.005m)
+                {
+                    warnungen.Add(
+                        $"Strompauschale-Umbuchung weicht vom gebuchten Betrag ab (gebucht {gebucht:N2} €, berechnet {plan.Betrag:N2} €). Bitte erst stornieren.");
+                    return null;
+                }
+                return vorhanden;
+            }
+
+            _ctx.Buchungssaetze.Add(transient);
+            return transient;
         }
 
         // ── Datenladung ───────────────────────────────────────────────────────
@@ -292,6 +337,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.HeizkostenHKVOs)
                     .ThenInclude(h => h.AllgemeinWaerme)
                         .ThenInclude(z => z!.Staende)
+                // Betriebsstrom-Umlage (+ Verrechnungskonto) für die Strompauschale-Umbuchung
+                .Include(u => u.HeizkostenHKVOs)
+                    .ThenInclude(h => h.Betriebsstrom)
+                        .ThenInclude(b => b.NkVerrechnungsKonto)
                 // Wohnungsversionen für Flächenberechnung
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Versionen)
@@ -444,6 +493,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 foreach (var partei in einheit.Parteien.Where(p => p.Vertrag is not null))
                     kontoIdToPartei[partei.Buchungskonto.BuchungskontoId] = partei;
 
+                // Verrechnungskonten der Einheit: Soll-Zeilen darauf sind Umbuchungen
+                // (z.B. Strompauschale), keine Mieter-/Eigenanteile.
+                var verrechnungsKontoIds = einheit.Umlagen
+                    .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
+                    .ToHashSet();
+
                 foreach (var plan in einheit.Rechnungsplaene)
                 {
                     var buchungssatz = plan.Buchungssatz;
@@ -451,6 +506,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     if (plan.Warnungen.Count > 0)
                         warnungen.AddRange(plan.Warnungen.Select(
                             w => $"BS {buchungssatz.BuchungssatzId}: {w}"));
+
+                    // Strompauschale-Umbuchung: reines Buchungs-Artefakt, keine Anzeigezeile.
+                    if (plan.IstStrompauschale)
+                        continue;
 
                     // Geplante Anteile, indexiert nach Buchungskonto-Id
                     var plannedByKonto = plan.Anteile
@@ -461,9 +520,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .GroupBy(x => x.KontoId)
                         .ToDictionary(g => g.Key, g => g.ToList());
 
-                    // Bereits gebuchte Soll-Zeilen
+                    // Bereits gebuchte Soll-Zeilen (Transfer-/Umbuchungszeilen auf
+                    // Verrechnungskonten ausgeschlossen – das sind keine Anteile).
                     var bookedByKonto = buchungssatz.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Soll)
+                        .Where(z => z.SollHaben == SollHaben.Soll
+                                 && !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
                         .GroupBy(z => z.Buchungskonto.BuchungskontoId)
                         .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -522,6 +583,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                             GeplanterBetrag = plannedSum,
                             GebuchterBetrag = bookedSum,
                             AnteilFaktor = anteilFaktor,
+                            NfZeitanteil = partei?.NFZeitanteil ?? 0,
                             Nutzungsbeginn = partei?.Nutzungsbeginn ?? default,
                             Nutzungsende = partei?.Nutzungsende ?? default,
                             HeizVerbrauchAnteil = heizVerbrauchAnteil,
@@ -535,7 +597,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
                     var sollSum = buchungssatz.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-                    bool istVollstaendigGebucht = habenSum > 0 && habenSum == sollSum;
+                    bool istVollstaendigGebucht = habenSum > 0 && sollSum >= habenSum;
 
                     einheitenByKey[einheitKey].Zeilen.Add(new NkZeileInfo
                     {

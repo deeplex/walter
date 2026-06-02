@@ -58,6 +58,12 @@ export const walter_selection = {
             WalterSelectionEntry[]
         >;
     },
+    waermezaehler(umlageId: number, fetchImpl: typeof fetch) {
+        return walter_get(
+            `/api/selection/umlage/${umlageId}/waermezaehler`,
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
     juristischePersonen(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/juristischepersonen',

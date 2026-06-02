@@ -187,6 +187,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             /// Key = NkPartei-Instanz; nur für HKVO-Umlagen mit Wohnungszählern befüllt.
             /// </summary>
             public IReadOnlyDictionary<NkPartei, NkHkvoParteiVerbrauch>? HkvoVerbrauchAnteile { get; init; }
+
+            /// <summary>
+            /// True für den Strompauschale-Umbuchungs-Plan (HeizkostenV): delta der Heizkosten
+            /// wird vom Allgemeinstrom abgezogen und den Heizkosten zugeschlagen. Der
+            /// <see cref="Buchungssatz"/> ist die Umbuchung (Soll Betriebsstrom-NkVK /
+            /// Haben Heizkosten-NkVK); er wird beim Buchen persistiert.
+            /// </summary>
+            public bool IstStrompauschale { get; init; }
         }
 
         /// <summary>
@@ -537,8 +545,135 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }
             }
 
+            ApplyStrompauschale(umlagen, parteien, result, jahr);
+
             return result;
         }
+
+        /// <summary>Beschreibungs-Marker der Strompauschale-Umbuchung (HeizkostenV).</summary>
+        public const string StrompauschaleMarker = "Strompauschale-Umbuchung";
+
+        /// <summary>
+        /// Wendet die Strompauschale (HeizkostenV) an: delta = Heizkosten × Strompauschale wird
+        /// vom Allgemeinstrom/Betriebsstrom abgezogen und auf die Heizkosten umgelegt.
+        /// Die Anteile der Betriebsstrom-Pläne werden anteilig um delta gekürzt; zusätzlich
+        /// entsteht ein Heizkosten-Plan über delta (verteilt nach den vorhandenen Heizkosten-
+        /// Anteilen) mit einer Umbuchung als Buchungssatz (Soll Betriebsstrom-NkVK /
+        /// Haben Heizkosten-NkVK). Heizkosten- und Betriebsstrom-Umlage müssen dieselben
+        /// Wohnungen (= dieselbe Einheit) haben.
+        /// </summary>
+        private static void ApplyStrompauschale(
+            List<Umlage> umlagen, List<NkPartei> parteien, List<NkRechnungsplan> plaene, int jahr)
+        {
+            var endeJahr = new DateOnly(jahr, 12, 31);
+            var umlageIds = umlagen.Select(u => u.UmlageId).ToHashSet();
+
+            foreach (var heiz in umlagen)
+            {
+                var hkvo = heiz.HkvoAt(endeJahr);
+                if (hkvo?.Betriebsstrom == null || hkvo.Strompauschale <= 0) continue;
+
+                var betrId = hkvo.Betriebsstrom.UmlageId;
+                if (!umlageIds.Contains(betrId)) continue; // Betriebsstrom in anderer Einheit – hier nicht behandelt
+
+                var heizPlaene = plaene.Where(p => p.Umlage.UmlageId == heiz.UmlageId && !p.IstStrompauschale).ToList();
+                var heizTotal = heizPlaene.Sum(p => p.Betrag);
+                if (heizTotal <= 0) continue;
+
+                var delta = Math.Round(heizTotal * hkvo.Strompauschale, 2);
+                if (delta <= 0) continue;
+
+                var betrPlaene = plaene.Where(p => p.Umlage.UmlageId == betrId).ToList();
+                var betrTotal = betrPlaene.Sum(p => p.Betrag);
+                if (betrTotal <= 0) continue;
+
+                var warnungen = new List<string>();
+                if (delta > betrTotal)
+                {
+                    warnungen.Add(
+                        $"Strompauschale ({delta:N2} €) übersteigt die Allgemeinstromrechnung ({betrTotal:N2} €) — auf diese gekürzt.");
+                    delta = betrTotal;
+                }
+
+                // Strompauschale fließt VOR der §7/§8-Aufteilung in die Heizkosten ein:
+                // die Heizkosten-Pläne werden um delta hochskaliert (Betrag + Anteile),
+                // die §7/§8-Proportionen bleiben erhalten. So bleibt es EINE Heizkosten-Zeile
+                // (BK + Pauschale), kein separater Pauschal-Plan.
+                var heizFaktor = (heizTotal + delta) / heizTotal;
+                for (var i = 0; i < heizPlaene.Count; i++)
+                {
+                    var hp = heizPlaene[i];
+                    var neuBetrag = i == heizPlaene.Count - 1
+                        ? heizTotal + delta - heizPlaene.Take(i).Sum(p => Math.Round(p.Betrag * heizFaktor, 2))
+                        : Math.Round(hp.Betrag * heizFaktor, 2);
+                    var skaliert = hp.Anteile
+                        .Select(a => a with { Betrag = Math.Round(a.Betrag * heizFaktor, 2) })
+                        .ToList();
+                    ApplyRundungskorrektur(neuBetrag, skaliert);
+                    plaene[plaene.IndexOf(hp)] = CopyPlanMitAnteilen(hp, skaliert, neuBetrag);
+                }
+
+                // Betriebsstrom-Pläne anteilig um delta kürzen (Betrag UND Anteile),
+                // damit der Abzug auch in der Vorschau/Druck sichtbar ist.
+                var kuerzungsFaktor = 1m - delta / betrTotal;
+                foreach (var bp in betrPlaene)
+                {
+                    var neuBetrag = Math.Round(bp.Betrag * kuerzungsFaktor, 2);
+                    var gekuerzt = bp.Anteile
+                        .Select(a => a with { Betrag = Math.Round(a.Betrag * kuerzungsFaktor, 2) })
+                        .Where(a => a.Betrag > 0)
+                        .ToList();
+                    ApplyRundungskorrektur(neuBetrag, gekuerzt);
+                    plaene[plaene.IndexOf(bp)] = CopyPlanMitAnteilen(bp, gekuerzt, neuBetrag);
+                }
+
+                // Reines Buchungs-Artefakt: balancierte Umbuchung (Soll Betriebsstrom-NkVK /
+                // Haben Heizkosten-NkVK) OHNE Anteile. Wird beim Buchen persistiert und gleicht
+                // die Verrechnungskonten aus; sie ist KEINE Verteilungs-/Anzeigezeile
+                // (in BuildAbrechnungseinheitenInfos übersprungen).
+                var umbuchung = new Buchungssatz(endeJahr, $"{StrompauschaleMarker} {heiz.Typ.Bezeichnung} {jahr}")
+                {
+                    Buchungsjahr = jahr
+                };
+                umbuchung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, delta)
+                {
+                    Buchungssatz = umbuchung,
+                    Buchungskonto = hkvo.Betriebsstrom.NkVerrechnungsKonto
+                });
+                umbuchung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, delta)
+                {
+                    Buchungssatz = umbuchung,
+                    Buchungskonto = heiz.NkVerrechnungsKonto
+                });
+
+                plaene.Add(new NkRechnungsplan
+                {
+                    Buchungssatz = umbuchung,
+                    Betrag = delta,
+                    Umlage = heiz,
+                    Anteile = [],
+                    Warnungen = warnungen,
+                    IstStrompauschale = true
+                });
+            }
+        }
+
+        private static NkRechnungsplan CopyPlanMitAnteilen(
+            NkRechnungsplan plan, List<NkRechnungsAnteil> anteile, decimal? betrag = null,
+            List<string>? warnungen = null) =>
+            new()
+            {
+                Buchungssatz = plan.Buchungssatz,
+                Betrag = betrag ?? plan.Betrag,
+                Umlage = plan.Umlage,
+                Anteile = anteile,
+                Warnungen = warnungen ?? plan.Warnungen,
+                Para9_2 = plan.Para9_2,
+                GesamtWaerme = plan.GesamtWaerme,
+                GesamtWW = plan.GesamtWW,
+                HkvoVerbrauchAnteile = plan.HkvoVerbrauchAnteile,
+                IstStrompauschale = plan.IstStrompauschale
+            };
 
         /// <summary>
         /// HKVO §7/§8/§9: Aufteilung der Heizkosten nach warmer und kalter Fraktion.
@@ -639,13 +774,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 {
                     var hkvoPartei = hkvoVerbrauchAnteile[partei];
 
+                    // Verbrauchsunabhängiger Anteil (§7/§8) wird nach NUTZfläche verteilt.
                     decimal heizKostenAnteil = totalWaerme > 0
-                        ? p7 * hkvoPartei.HeizAnteil + (1 - p7) * partei.WFZeitanteil
-                        : partei.WFZeitanteil;
+                        ? p7 * hkvoPartei.HeizAnteil + (1 - p7) * partei.NFZeitanteil
+                        : partei.NFZeitanteil;
 
                     decimal wwKostenAnteil = totalWW > 0
-                        ? p8 * hkvoPartei.WWAnteil + (1 - p8) * partei.WFZeitanteil
-                        : partei.WFZeitanteil;
+                        ? p8 * hkvoPartei.WWAnteil + (1 - p8) * partei.NFZeitanteil
+                        : partei.NFZeitanteil;
 
                     decimal meinBetrag = Math.Round(betragHZ * heizKostenAnteil + betragWW * wwKostenAnteil, 2);
                     if (meinBetrag <= 0) continue;
@@ -662,7 +798,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     Umlage = umlage,
                     Anteile = anteile,
                     Warnungen = [],
-                    Para9_2 = para9_2 > 0 ? para9_2 : null,
+                    // Immer setzen (0, wenn kein §9(2)-Warmwasserzähler): markiert die Zeile
+                    // als HKVO-Zeile. null bleibt den kalten Betriebskosten vorbehalten —
+                    // sonst würde eine Heizkostenzeile ohne §9(2) im Frontend als kalt gelten
+                    // und die §7/§8-Aufteilung nicht angezeigt.
+                    Para9_2 = para9_2,
                     GesamtWaerme = totalWaerme > 0 ? totalWaerme : null,
                     GesamtWW = totalWW > 0 ? totalWW : null,
                     HkvoVerbrauchAnteile = hkvoVerbrauchAnteile,

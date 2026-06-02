@@ -129,6 +129,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
+        [Route("api/selection/umlage/{umlageId}/waermezaehler")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetWaermezaehler(int umlageId)
+        {
+            // AllgemeinWärme-Kandidaten (§9(2) Q): Wärmequelle-Zähler der Umlage ohne Wohnung.
+            var zaehler = await Ctx.Umlagen
+                .Where(u => u.UmlageId == umlageId)
+                .SelectMany(u => u.Zaehler)
+                .Where(z => z.Wohnung == null
+                         && (z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Wärme))
+                .OrderBy(z => z.Kennnummer)
+                .Select(z => new { z.ZaehlerId, z.Kennnummer })
+                .ToListAsync();
+
+            return Ok(zaehler.Select(z => new SelectionEntry(z.ZaehlerId, z.Kennnummer)));
+        }
+
+        [HttpGet]
         [Route("api/selection/erhaltungsaufwendungen")]
         public async Task<ActionResult<IEnumerable<object>>> GetErhaltungsaufwendungen()
         {

@@ -231,7 +231,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                         (HKVO_P9A2)hkvo.HKVO_P9.Id,
                         (decimal)hkvo.Strompauschale / 100)
                     {
-                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id)
+                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id),
+                        AllgemeinWaerme = hkvo.AllgemeinWaerme is { } aw
+                            ? Ctx.ZaehlerSet.Single(z => z.ZaehlerId == aw.Id)
+                            : null
                     };
                     entity.HeizkostenHKVOs.Add(newHKVO);
                     Ctx.HKVO.Add(newHKVO);
@@ -243,6 +246,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     currentHkvo.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
                     currentHkvo.Strompauschale = (decimal)hkvo.Strompauschale / 100;
                     currentHkvo.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
+                    currentHkvo.AllgemeinWaerme = hkvo.AllgemeinWaerme is { } aw
+                        ? Ctx.ZaehlerSet.Single(z => z.ZaehlerId == aw.Id)
+                        : null;
                     Ctx.HKVO.Update(currentHkvo);
                 }
             }
