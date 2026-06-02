@@ -41,7 +41,7 @@ export type NkZeileInfo = {
     beschreibung: string;
     schluessel: string;
     umlagetypId: number;
-    betriebskostenrechnungId: number | null;
+    buchungssatzId: string | null;
     betrag: number;
     betragLetztesJahr: number;
     istVollstaendigGebucht: boolean;

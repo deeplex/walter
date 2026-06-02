@@ -98,13 +98,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                               wohnungId: r?.wohnungId ?? null,
                               umlageId: z.umlageId,
                               umlagetypId: z.umlagetypId,
-                              rechnungId: z.betriebskostenrechnungId,
+                              rechnungId: z.buchungssatzId,
                               rechnungsBetrag: z.betrag,
                               empfaengerName: a.bezeichnung,
                               vertragId: a.vertragId,
                               hatVerteilung: true,
                               istGebucht:
-                                  z.betriebskostenrechnungId != null &&
+                                  z.buchungssatzId != null &&
                                   a.gebuchterBetrag != null,
                               anteilBetrag: {
                                   value: nkAnteilDisplayBetrag(a),
