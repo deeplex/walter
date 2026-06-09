@@ -106,7 +106,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             IReadOnlyList<NkRechnungsAnteil> anteile)
         {
             var bereitsGebuchteKontoIds = satz.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Soll)
                 .Select(z => z.Buchungskonto.BuchungskontoId)
                 .ToHashSet();
 
@@ -122,13 +121,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     continue;
                 }
 
-                if (anteil.Betrag <= 0)
+                if (anteil.Betrag == 0)
                 {
                     uebersprungen++;
                     continue;
                 }
 
-                var zeile = new Buchungszeile(SollHaben.Soll, anteil.Betrag)
+                // Positive Anteile: Soll NkBuchungskonto (Forderung gegen Mieter).
+                // Negative Anteile (Gutschrift): Haben NkBuchungskonto (Entlastung des Mieters).
+                var sollHaben = anteil.Betrag > 0 ? SollHaben.Soll : SollHaben.Haben;
+                var zeile = new Buchungszeile(sollHaben, Math.Abs(anteil.Betrag))
                 {
                     Buchungssatz = satz,
                     Buchungskonto = konto

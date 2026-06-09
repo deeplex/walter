@@ -1,5 +1,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { authHeader, signInApi } from './auth';
+import { unwrapList } from './api';
+import { findPrintableAbrechnung, isPdfOrZip } from './abrechnung';
 
 type WalterFileEntry = {
     fileName: string;
@@ -70,7 +72,9 @@ test.describe('S3-backed file storage flow', () => {
             headers: authHeader(ownerLogin.token)
         });
         expect(wohnungenResp.ok()).toBeTruthy();
-        const wohnungen = (await wohnungenResp.json()) as WohnungListEntry[];
+        const wohnungen = unwrapList<WohnungListEntry>(
+            await wohnungenResp.json()
+        );
         const target = wohnungen.find((w) => w.permissions.update);
         expect(
             target,
@@ -125,7 +129,9 @@ test.describe('S3-backed file storage flow', () => {
             headers: authHeader(viewerLogin.token)
         });
         expect(wohnungenResp.ok()).toBeTruthy();
-        const wohnungen = (await wohnungenResp.json()) as WohnungListEntry[];
+        const wohnungen = unwrapList<WohnungListEntry>(
+            await wohnungenResp.json()
+        );
         const readOnly = wohnungen.find(
             (w) => w.permissions.read && !w.permissions.update
         );
@@ -153,7 +159,9 @@ test.describe('S3-backed file storage flow', () => {
             headers: authHeader(adminLogin.token)
         });
         expect(wohnungenResp.ok()).toBeTruthy();
-        const wohnungen = (await wohnungenResp.json()) as WohnungListEntry[];
+        const wohnungen = unwrapList<WohnungListEntry>(
+            await wohnungenResp.json()
+        );
 
         let foundFile = false;
         // The seeder uploads to the first ~15 wohnungen by id; checking the
@@ -210,73 +218,39 @@ test.describe('S3-backed file storage flow', () => {
 });
 
 test.describe('Abrechnung PDF generation and download', () => {
-    test('owner can generate a Betriebskostenabrechnung PDF for a contract', async ({
+    test('owner can generate a Betriebskostenabrechnung for a billing group', async ({
         request
     }) => {
         const ownerLogin = await signInApi(request, 'owner.dev');
 
-        const vertraegeResp = await request.get('/api/vertraege', {
-            headers: authHeader(ownerLogin.token)
-        });
-        expect(vertraegeResp.ok()).toBeTruthy();
-        const vertraege = (await vertraegeResp.json()) as Array<{
-            id: number;
-            permissions: { update: boolean };
-            beginn?: string;
-            ende?: string | null;
-        }>;
-        expect(vertraege.length).toBeGreaterThan(0);
-
-        // Try contracts in order until one returns a renderable abrechnung.
-        // Generated test data always contains some unfinished contracts where
-        // certain years are empty, so we walk a few candidates.
-        let resp:
-            | { status: number; body: Buffer; vertragId: number; jahr: number }
-            | undefined;
-        const editable = vertraege
-            .filter((v) => v.permissions.update)
-            .slice(0, 12);
-        for (const vertrag of editable) {
-            const beginn = vertrag.beginn ? new Date(vertrag.beginn) : null;
-            const ende = vertrag.ende ? new Date(vertrag.ende) : new Date();
-            if (!beginn) continue;
-            const startYear = beginn.getFullYear();
-            const endYear = ende.getFullYear();
-            for (let jahr = endYear; jahr >= startYear; jahr--) {
-                const url = `/api/betriebskostenabrechnung/${vertrag.id}/${jahr}/pdf_document`;
-                const r = await request.get(url, {
-                    headers: authHeader(ownerLogin.token)
-                });
-                if (r.ok()) {
-                    resp = {
-                        status: r.status(),
-                        body: await r.body(),
-                        vertragId: vertrag.id,
-                        jahr
-                    };
-                    break;
-                }
-            }
-            if (resp) break;
-        }
+        // The print endpoint requires the submitted wohnungIds to match a
+        // complete billing group. Walk the seeded groups/years until one
+        // renders. Generated data always has some empty years, hence the walk.
+        const printable = await findPrintableAbrechnung(
+            request,
+            ownerLogin.token
+        );
 
         expect(
-            resp,
-            'expected the dev seed to contain at least one contract with renderable abrechnung data'
+            printable,
+            'expected the dev seed to contain at least one billing group with renderable abrechnung data'
         ).toBeDefined();
-        expect(resp!.status).toBe(200);
-        expect(resp!.body.length).toBeGreaterThan(100);
-        expect(resp!.body.subarray(0, 5).toString('latin1')).toBe('%PDF-');
+        expect(printable!.body.length).toBeGreaterThan(100);
+        // One-contract groups return a raw PDF; multi-contract groups a ZIP.
+        expect(isPdfOrZip(printable!.body)).toBeTruthy();
     });
 
-    test('non-existing contract reports a clean error without 5xx', async ({
+    test('print request for an unknown wohnung is denied without a 5xx', async ({
         request
     }) => {
         const ownerLogin = await signInApi(request, 'owner.dev');
-        const url = `/api/betriebskostenabrechnung/99999999/2024/pdf_document`;
-        const r = await request.get(url, {
-            headers: authHeader(ownerLogin.token)
+        const r = await request.post('/api/abrechnungslauf/print/pdf', {
+            headers: authHeader(ownerLogin.token),
+            data: { wohnungIds: [99999999], jahr: 2024 }
         });
         expect(r.status()).toBeLessThan(500);
+        // Authorization runs first: an unknown/unmanaged wohnung is forbidden
+        // (no information leak about which ids exist), not a 400.
+        expect(r.status()).toBe(403);
     });
 });

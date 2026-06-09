@@ -284,6 +284,51 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             einheiten.Single().Rechnungsplaene.Should().BeEmpty();
         }
 
+        // ── Gutschrift ────────────────────────────────────────────────────────
+
+        private static void AddGutschrift(Umlage umlage, decimal betrag, DateOnly datum, int jahr)
+        {
+            var satz = new Buchungssatz(datum, $"Gutschrift {umlage.Typ?.Bezeichnung} {jahr}") { Buchungsjahr = jahr };
+            var zeile = new Buchungszeile(SollHaben.Soll, Math.Abs(betrag)) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            satz.Buchungszeilen.Add(zeile);
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(zeile);
+        }
+
+        [Fact]
+        public void Gutschrift_WirdAlsNegativerBetragVerteilt()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddGutschrift(umlage, -600m, new DateOnly(2021, 6, 1), 2021);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+            var plan = einheiten.Single().Rechnungsplaene.Single();
+
+            plan.Betrag.Should().Be(-600m);
+            plan.Anteile.Single(a => a.Partei.Vertrag != null).Betrag.Should().Be(-600m);
+        }
+
+        [Fact]
+        public void GutschriftUndRechnung_BeideWerdenVerteilt()
+        {
+            var w1 = MakeWohnung("W1");
+            var w2 = MakeWohnung("W2");
+            MakeVertrag(w1); MakeVertrag(w2);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.AddRange([w1, w2]);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+            AddGutschrift(umlage, -200m, new DateOnly(2021, 6, 1), 2021);
+
+            var einheiten = ComputeEinheiten([umlage], 2021);
+            var plaene = einheiten.Single().Rechnungsplaene;
+
+            plaene.Should().HaveCount(2);
+            plaene.Sum(p => p.Betrag).Should().Be(800m);
+            plaene.Sum(p => p.Anteile.Sum(a => a.Betrag)).Should().Be(800m);
+        }
+
         // ── Rechnungsplaene ───────────────────────────────────────────────────
 
         [Fact]

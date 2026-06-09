@@ -76,6 +76,74 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return result?.Succeeded == true;
         }
 
+        /// <summary>
+        /// Prüft, ob der Nutzer die <paramref name="operation"/> auf <b>allen</b>
+        /// angegebenen Wohnungen ausführen darf. Wird für Sammel-Operationen
+        /// (Abrechnungslauf über eine Abrechnungsgruppe) verwendet, die sonst
+        /// keine pro-Wohnung-Autorisierung durchlaufen. Unbekannte IDs führen zu
+        /// <c>false</c> (kein Information-Leak über existierende Wohnungen).
+        /// </summary>
+        public static async Task<bool> CanAccessAllWohnungen(
+            IAuthorizationService auth,
+            SaverwalterContext ctx,
+            ClaimsPrincipal user,
+            IReadOnlyCollection<int> wohnungIds,
+            OperationAuthorizationRequirement operation)
+        {
+            if (auth is null || wohnungIds.Count == 0)
+            {
+                return false;
+            }
+
+            var distinct = wohnungIds.Distinct().ToList();
+            var wohnungen = await ctx.Wohnungen
+                .Include(w => w.Verwalter)
+                    .ThenInclude(v => v.UserAccount)
+                .Where(w => distinct.Contains(w.WohnungId))
+                .ToListAsync();
+
+            // Jede angeforderte Wohnung muss existieren und autorisiert sein.
+            if (wohnungen.Count != distinct.Count)
+            {
+                return false;
+            }
+
+            foreach (var wohnung in wohnungen)
+            {
+                if (!await IsAuthorized(user, wohnung, auth, operation))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>Ändernde Operationen (Anlegen/Ändern/Löschen) — im Gegensatz zu Read.</summary>
+        public static bool IsWriteOperation(OperationAuthorizationRequirement requirement) =>
+            requirement.Name == Operations.Update.Name
+            || requirement.Name == Operations.Delete.Name
+            || requirement.Name == Operations.SubCreate.Name;
+
+        /// <summary>
+        /// Ob der Nutzer überhaupt Verwaltungsrechte besitzt — Admin oder Vollmacht
+        /// auf mindestens einer Wohnung. Wird für global lesbare, aber nicht von
+        /// jedem schreibbare Ressourcen (Kontakte, Garagen, wohnungslose Zähler)
+        /// genutzt, damit reine Lese-/Gast-Konten dort nichts ändern können.
+        /// </summary>
+        public static bool HasAnyManagementAuthority(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            if (user.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            var id = user.GetUserId();
+            return ctx.Wohnungen.Any(w =>
+                w.Verwalter.Count > 0 &&
+                w.Verwalter.AsQueryable().Any(HasRequiredAuth(VerwalterRolle.Vollmacht, id)));
+        }
+
     }
 
     public static class Operations
@@ -232,7 +300,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class KontaktPermissionHandler : WohnungPermissionHandlerBase<Kontakt>
+    public class KontaktPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Kontakt>
     {
         public static IQueryable<Kontakt> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
@@ -256,7 +324,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
            OperationAuthorizationRequirement requirement,
            Kontakt entity)
         {
-            context.Succeed(requirement);
+            // Kontakte sind ein gemeinsames Adressbuch: für alle lesbar, aber nur
+            // von Nutzern mit Verwaltungsrechten änderbar (nicht von Gast/Nur-Lese).
+            if (!Utils.IsWriteOperation(requirement)
+                || Utils.HasAnyManagementAuthority(ctx, context.User))
+            {
+                context.Succeed(requirement);
+            }
             return Task.CompletedTask;
         }
     }
@@ -369,7 +443,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class GaragePermissionHandler : WohnungPermissionHandlerBase<Garage>
+    public class GaragePermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Garage>
     {
         public static IQueryable<Garage> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
@@ -394,12 +468,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             OperationAuthorizationRequirement requirement,
             Garage entity)
         {
-            context.Succeed(requirement);
+            if (!Utils.IsWriteOperation(requirement)
+                || Utils.HasAnyManagementAuthority(ctx, context.User))
+            {
+                context.Succeed(requirement);
+            }
             return Task.CompletedTask;
         }
     }
 
-    public class GarageVertragPermissionHandler : WohnungPermissionHandlerBase<GarageVertrag>
+    public class GarageVertragPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<GarageVertrag>
     {
         public static IQueryable<GarageVertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
@@ -423,7 +501,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             OperationAuthorizationRequirement requirement,
             GarageVertrag entity)
         {
-            context.Succeed(requirement);
+            if (!Utils.IsWriteOperation(requirement)
+                || Utils.HasAnyManagementAuthority(ctx, context.User))
+            {
+                context.Succeed(requirement);
+            }
             return Task.CompletedTask;
         }
     }
@@ -542,7 +624,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
-    public class ZaehlerPermissionHandler : WohnungPermissionHandlerBase<Zaehler>
+    public class ZaehlerPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Zaehler>
     {
         public static IQueryable<Zaehler> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
@@ -584,13 +666,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             }
             else
             {
-                context.Succeed(requirement);
+                // Zähler ohne Wohnung: für alle lesbar, nur mit Verwaltungsrechten änderbar.
+                if (!Utils.IsWriteOperation(requirement)
+                    || Utils.HasAnyManagementAuthority(ctx, context.User))
+                {
+                    context.Succeed(requirement);
+                }
                 return Task.CompletedTask;
             }
         }
     }
 
-    public class ZaehlerstandPermissionHandler : WohnungPermissionHandlerBase<Zaehlerstand>
+    public class ZaehlerstandPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Zaehlerstand>
     {
         public static async Task<List<Zaehlerstand>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
         {
@@ -618,7 +705,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             }
             if (entity.Zaehler.Adresse == null || entity.Zaehler.Adresse.Wohnungen.Count == 0)
             {
-                context.Succeed(requirement);
+                // Stand eines wohnungslosen Zählers: lesbar für alle, änderbar nur
+                // mit Verwaltungsrechten.
+                if (!Utils.IsWriteOperation(requirement)
+                    || Utils.HasAnyManagementAuthority(ctx, context.User))
+                {
+                    context.Succeed(requirement);
+                }
                 return Task.CompletedTask;
             }
             else
@@ -646,7 +739,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         {
             if (entities.Count() == 0)
             {
-                context.Succeed(requirement);
+                // Entität ohne Wohnungsbezug: lesbar für alle, aber ändern darf nur
+                // ein Admin — sonst könnte jeder beziehungslose Entitäten manipulieren.
+                if (!Utils.IsWriteOperation(requirement) || context.User.IsInRole("Admin"))
+                {
+                    context.Succeed(requirement);
+                }
+                return Task.CompletedTask;
             }
 
             foreach (var wohnung in entities)

@@ -10,6 +10,7 @@ import {
     signInApi,
     withFreshApiContext
 } from './auth';
+import { getList } from './api';
 
 type WohnungListEntry = {
     id: number;
@@ -39,12 +40,7 @@ async function getWohnungen(
     username: string
 ): Promise<WohnungListEntry[]> {
     const authState = await signInApi(api, username);
-    const response = await api.get('/api/wohnungen', {
-        headers: authHeader(authState.token)
-    });
-
-    expect(response.ok()).toBeTruthy();
-    return (await response.json()) as WohnungListEntry[];
+    return getList<WohnungListEntry>(api, authState.token, '/api/wohnungen');
 }
 
 async function getAccounts(
@@ -52,12 +48,7 @@ async function getAccounts(
     username: string
 ): Promise<AccountEntry[]> {
     const authState = await signInApi(api, username);
-    const response = await api.get('/api/accounts', {
-        headers: authHeader(authState.token)
-    });
-
-    expect(response.ok()).toBeTruthy();
-    return (await response.json()) as AccountEntry[];
+    return getList<AccountEntry>(api, authState.token, '/api/accounts');
 }
 
 test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({

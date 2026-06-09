@@ -56,7 +56,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         wohnungId: number | null;
         umlageId: number;
         umlagetypId: number;
-        rechnungId: number | null;
+        rechnungId: string | null;
         rechnungsBetrag: number;
         empfaengerName: string;
         vertragId: number | null;

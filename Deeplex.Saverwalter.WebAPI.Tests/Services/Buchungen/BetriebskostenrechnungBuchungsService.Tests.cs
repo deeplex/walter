@@ -50,10 +50,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             satz.Notiz.Should().Be("Jahresrechnung");
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public async Task WirftBeiBetragKleinerGleichNull(decimal betrag)
+        [Fact]
+        public async Task BuchtEineSollZeileAufNkVerrechnungsKontoFuerGutschrift()
         {
             var ctx = TestUtils.GetContext();
             var umlage = MakeUmlage();
@@ -61,9 +59,29 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             await ctx.SaveChangesAsync();
 
             var service = new BetriebskostenrechnungBuchungsService(ctx);
-            var act = () => service.BucheRechnungAsync(umlage, betrag, new DateOnly(2024, 1, 1), 2024, null);
+            var satz = await service.BucheRechnungAsync(umlage, -300m, new DateOnly(2024, 6, 1), 2024, "Gutschrift");
 
-            await act.Should().ThrowAsync<InvalidOperationException>();
+            satz.Buchungszeilen.Should().ContainSingle();
+            var zeile = satz.Buchungszeilen.Single();
+            zeile.SollHaben.Should().Be(SollHaben.Soll);
+            zeile.Betrag.Should().Be(300m);
+            zeile.Buchungskonto.Should().Be(umlage.NkVerrechnungsKonto);
+        }
+
+        [Fact]
+        public async Task BuchtEineHabenZeileBeiBetragNull()
+        {
+            var ctx = TestUtils.GetContext();
+            var umlage = MakeUmlage();
+            ctx.Umlagen.Add(umlage);
+            await ctx.SaveChangesAsync();
+
+            var service = new BetriebskostenrechnungBuchungsService(ctx);
+            var satz = await service.BucheRechnungAsync(umlage, 0m, new DateOnly(2024, 1, 1), 2024, null);
+
+            satz.Buchungszeilen.Should().ContainSingle();
+            satz.Buchungszeilen.Single().SollHaben.Should().Be(SollHaben.Haben);
+            satz.Buchungszeilen.Single().Betrag.Should().Be(0m);
         }
 
         [Fact]
@@ -86,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
         }
 
         [Fact]
-        public async Task AktualisiereWirftBeiBetragKleinerGleichNull()
+        public async Task AktualisiereAendertSollHabenBeiBetragWechselZuGutschrift()
         {
             var ctx = TestUtils.GetContext();
             var umlage = MakeUmlage();
@@ -96,8 +114,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             var service = new BetriebskostenrechnungBuchungsService(ctx);
             var satz = await service.BucheRechnungAsync(umlage, 1000m, new DateOnly(2024, 1, 1), 2024, null);
 
-            var act = () => service.AktualisiereBuchungssatzAsync(satz, umlage, 0m, new DateOnly(2024, 1, 1), 2024, null);
-            await act.Should().ThrowAsync<InvalidOperationException>();
+            await service.AktualisiereBuchungssatzAsync(satz, umlage, -400m, new DateOnly(2024, 2, 1), 2024, "korrigiert zu Gutschrift");
+
+            var zeile = satz.Buchungszeilen.Single(z => z.Buchungskonto == umlage.NkVerrechnungsKonto);
+            zeile.SollHaben.Should().Be(SollHaben.Soll);
+            zeile.Betrag.Should().Be(400m);
         }
     }
 }

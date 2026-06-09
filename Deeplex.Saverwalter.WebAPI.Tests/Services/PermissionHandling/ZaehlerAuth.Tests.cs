@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
             ctx.SaveChanges();
 
             var authContext = new AuthorizationHandlerContext([requirement], claimsPrincipal, entity);
-            var permissionHandler = new ZaehlerPermissionHandler();
+            var permissionHandler = new ZaehlerPermissionHandler(ctx);
 
             // Act
             await permissionHandler.HandleAsync(authContext);

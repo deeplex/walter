@@ -14,7 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -35,10 +39,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly AbrechnungslaufService _service;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
 
-        public AbrechnungslaufController(AbrechnungslaufService service)
+        public AbrechnungslaufController(
+            AbrechnungslaufService service,
+            SaverwalterContext ctx,
+            IAuthorizationService auth)
         {
             _service = service;
+            _ctx = ctx;
+            _auth = auth;
         }
 
         [HttpGet("gruppen")]
@@ -46,7 +57,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             try
             {
-                return await _service.GetGruppenAsync();
+                var gruppen = await _service.GetGruppenAsync();
+
+                // Nur Gruppen zurückgeben, deren Wohnungen der Nutzer vollständig
+                // lesen darf — sonst würden fremde Abrechnungsgruppen geleakt.
+                var sichtbar = new List<AbrechnungsGruppe>();
+                foreach (var gruppe in gruppen)
+                {
+                    if (await CanAccessAllWohnungen(
+                            _auth, _ctx, User!, gruppe.WohnungIds, Operations.Read))
+                    {
+                        sichtbar.Add(gruppe);
+                    }
+                }
+
+                return sichtbar;
             }
             catch (Exception ex)
             {
@@ -68,6 +93,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 {
                     if (gruppe.WohnungIds.Count == 0)
                         return BadRequest("Abrechnungsgruppe darf nicht leer sein.");
+
+                    if (!await CanAccessAllWohnungen(
+                            _auth, _ctx, User!, gruppe.WohnungIds, Operations.Read))
+                        return Forbid();
 
                     var gruppeResult = await _service.PreviewAsync(gruppe.WohnungIds, request.Jahr);
                     results.Add(new AbrechnungslaufResult
@@ -99,6 +128,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 {
                     if (gruppe.WohnungIds.Count == 0)
                         return BadRequest("Abrechnungsgruppe darf nicht leer sein.");
+
+                    // Buchen verändert Finanzdaten → Vollmacht (Update) nötig.
+                    if (!await CanAccessAllWohnungen(
+                            _auth, _ctx, User!, gruppe.WohnungIds, Operations.Update))
+                        return Forbid();
 
                     var gruppeResult = await _service.BookAsync(gruppe.WohnungIds, request.Jahr);
                     results.Add(new AbrechnungslaufResult

@@ -508,16 +508,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }
 
                 var schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel;
-                var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben
-                             && z.Buchungssatz.Buchungsjahr == jahr)
+                var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
+                    .Where(z => z.Buchungssatz.Buchungsjahr == jahr
+                             && !IstVollstaendigVerteilt(z.Buchungssatz))
+                    .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                     .ToList() ?? [];
 
-                foreach (var zeile in habenZeilen)
+                foreach (var (zeile, betrag) in verrechnungsZeilen)
                 {
+                    if (betrag == 0) continue;
                     var warnungen = new List<string>();
                     var anteile = new List<NkRechnungsAnteil>();
-                    var betrag = zeile.Betrag;
 
                     foreach (var partei in parteien)
                     {
@@ -525,7 +526,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         if (anteilFaktor <= 0) continue;
 
                         decimal anteil = Math.Round(betrag * anteilFaktor, 2);
-                        if (anteil <= 0) continue;
+                        if (anteil == 0) continue;
 
                         anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = anteil });
                     }
@@ -753,15 +754,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         WwZaehler: wwZaehlerByPartei[p]);
                 });
 
-            var habenZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben
-                         && (z.Buchungssatz.Buchungsjahr == jahr
-                             || z.Buchungssatz.Buchungsdatum.Year == jahr))
+            var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
+                .Where(z => (z.Buchungssatz.Buchungsjahr == jahr
+                             || z.Buchungssatz.Buchungsdatum.Year == jahr)
+                         && !IstVollstaendigVerteilt(z.Buchungssatz))
+                .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                 .ToList() ?? [];
 
-            foreach (var zeile in habenZeilen)
+            foreach (var (zeile, betrag) in verrechnungsZeilen)
             {
-                var betrag = zeile.Betrag;
+                if (betrag == 0) continue;
                 var betragHZ = betrag * (1 - para9_2);
                 var betragWW = betrag * para9_2;
                 var anteile = new List<NkRechnungsAnteil>();
@@ -780,7 +782,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         : partei.NFZeitanteil;
 
                     decimal meinBetrag = Math.Round(betragHZ * heizKostenAnteil + betragWW * wwKostenAnteil, 2);
-                    if (meinBetrag <= 0) continue;
+                    if (meinBetrag == 0) continue;
 
                     anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = meinBetrag });
                 }
@@ -804,6 +806,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     HkvoVerbrauchAnteile = hkvoVerbrauchAnteile,
                 });
             }
+        }
+
+        // Ein ausgeglichener Buchungssatz (SollSumme == HabenSumme) ist bereits vollständig verteilt.
+        private static bool IstVollstaendigVerteilt(Buchungssatz satz)
+        {
+            var sollSum = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
+            var habenSum = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
+            return sollSum == habenSum;
         }
 
         // Bevorzugt letzten Eigenanteil als Träger der Rundungsdifferenz.

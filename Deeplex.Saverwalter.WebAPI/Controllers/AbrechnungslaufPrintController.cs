@@ -14,7 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.IO.Compression;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -32,10 +36,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly AbrechnungslaufPrintService _printService;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
 
-        public AbrechnungslaufPrintController(AbrechnungslaufPrintService printService)
+        public AbrechnungslaufPrintController(
+            AbrechnungslaufPrintService printService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth)
         {
             _printService = printService;
+            _ctx = ctx;
+            _auth = auth;
         }
 
         [HttpPost("pdf")]
@@ -50,6 +61,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             if (request.WohnungIds.Count == 0)
                 return BadRequest("Mindestens eine Wohnung muss ausgewählt sein.");
+
+            // Dokumente enthalten fremde Mieter-/Finanzdaten → Lese-Recht auf
+            // allen angeforderten Wohnungen erforderlich.
+            if (!await CanAccessAllWohnungen(
+                    _auth, _ctx, User!, request.WohnungIds, Operations.Read))
+                return Forbid();
 
             try
             {

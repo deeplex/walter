@@ -9,7 +9,7 @@ type RouteExpectation = {
 
 const mainRoutes: RouteExpectation[] = [
     { path: '/', expectedText: 'Walter' },
-    { path: '/abrechnung', expectedText: 'Wähle einen Vertrag aus' },
+    { path: '/abrechnungslauf', expectedText: 'Abrechnungslauf' },
     { path: '/kontakte', expectedText: 'Kontakte' },
     { path: '/wohnungen', expectedText: 'Wohnungen' },
     { path: '/vertraege', expectedText: 'Verträge' },
@@ -28,10 +28,13 @@ async function visitMainRoutes(page: Page, username: string): Promise<void> {
     for (const route of mainRoutes) {
         await test.step(`${username} opens ${route.path}`, async () => {
             await page.goto(route.path);
-            await expect(page).toHaveURL(
-                new RegExp(`${route.path === '/' ? '/$' : `${route.path}$`}`),
-                { timeout: 20_000 }
-            );
+            // Some pages append query state (e.g. the dashboard adds
+            // `?jahr=YYYY`), so assert on the pathname and ignore any query.
+            await expect
+                .poll(async () => new URL(page.url()).pathname, {
+                    timeout: 20_000
+                })
+                .toBe(route.path);
             await expect(page.getByText('Fehler', { exact: true })).toHaveCount(
                 0
             );

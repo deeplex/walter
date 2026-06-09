@@ -156,11 +156,12 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
             builder.Services.AddSingleton<IAuthorizationHandler, AbrechnungsresultatPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, GaragePermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, GarageVertragPermissionHandler>();
+            // Handlers that read the DbContext must be scoped (ctx is scoped).
+            builder.Services.AddScoped<IAuthorizationHandler, GaragePermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, GarageVertragPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, KontaktPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, KontaktPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
             builder.Services.AddScoped<IAuthorizationHandler, TransaktionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
@@ -171,8 +172,8 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungenPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungVersionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlageVersionPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, ZaehlerPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
         }
 
         private static Container GetServiceContainer()

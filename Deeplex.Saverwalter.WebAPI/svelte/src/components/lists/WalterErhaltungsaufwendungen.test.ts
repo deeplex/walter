@@ -15,21 +15,17 @@
 
 import { expect, describe, it, afterEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
+import { createMockFetch } from '$walter/test-helpers/mock-fetch';
 
 import Page from './WalterErhaltungsaufwendungen.svelte';
 import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
 import { convertDateGerman } from '$walter/services/utils';
 import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-vi.mock('$app/stores', async (importOriginal) => {
+vi.mock('$app/stores', async () => {
+    const { readable } = await import('svelte/store');
     return {
-        page: {
-            subscribe: writable<boolean>().subscribe,
-            url: {
-                pathname: 'mock'
-            }
-        }
+        page: readable({ url: new URL('http://localhost/mock'), params: {} })
     };
 });
 
@@ -62,7 +58,7 @@ describe('adressen/page.svelte tests', () => {
     it('Should have header with 4 entries', () => {
         render(Page, {
             rows: createEntryMocks(5),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
         const header = document.getElementsByTagName('thead');
@@ -81,7 +77,7 @@ describe('adressen/page.svelte tests', () => {
     it('Should have 15 entries', () => {
         render(Page, {
             rows: createEntryMocks(15),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
         const body = document.getElementsByTagName('tbody');
@@ -106,17 +102,15 @@ describe('adressen/page.svelte tests', () => {
     it('Should have a button to create a new entry', () => {
         render(Page, {
             rows: createEntryMocks(1),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
-        const buttons = Array.from(document.getElementsByTagName('button'));
-
-        const addButtons = buttons.filter((e) =>
-            e.innerHTML.includes('Eintrag hinzufügen')
+        // The "create new entry" affordance is a link to the entity's /new page.
+        const addLinks = Array.from(document.querySelectorAll('a')).filter(
+            (e) => e.textContent?.includes('Eintrag hinzufügen')
         );
 
-        expect(addButtons.length).toBe(1);
-        // TODO: this should be true if user has only read rights
-        expect(addButtons[0].disabled).toBe(false);
+        expect(addLinks.length).toBe(1);
+        expect(addLinks[0].getAttribute('href')).toContain('/new');
     });
 });

@@ -15,20 +15,15 @@
 
 import { expect, describe, it, afterEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
 
 import Page from './WalterAdressen.svelte';
 import { WalterAdresseEntry } from '$walter/lib';
 import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-vi.mock('$app/stores', async (importOriginal) => {
+vi.mock('$app/stores', async () => {
+    const { readable } = await import('svelte/store');
     return {
-        page: {
-            subscribe: writable<boolean>().subscribe,
-            url: {
-                pathname: 'mock'
-            }
-        }
+        page: readable({ url: new URL('http://localhost/mock'), params: {} })
     };
 });
 
@@ -102,14 +97,12 @@ describe('adressen/page.svelte tests', () => {
             rows: createEntryMocks(1)
         });
 
-        const buttons = Array.from(document.getElementsByTagName('button'));
-
-        const addButtons = buttons.filter((e) =>
-            e.innerHTML.includes('Eintrag hinzufügen')
+        // The "create new entry" affordance is a link to the entity's /new page.
+        const addLinks = Array.from(document.querySelectorAll('a')).filter(
+            (e) => e.textContent?.includes('Eintrag hinzufügen')
         );
 
-        expect(addButtons.length).toBe(1);
-        // TODO: this should be true if user has only read rights
-        expect(addButtons[0].disabled).toBe(false);
+        expect(addLinks.length).toBe(1);
+        expect(addLinks[0].getAttribute('href')).toContain('/new');
     });
 });

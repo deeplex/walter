@@ -23,6 +23,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// Eine Betriebskostenrechnung erzeugt einen Buchungssatz mit genau einer Zeile:
     ///   Haben Umlage.NkVerrechnungsKonto [Gesamtbetrag]
     ///
+    /// Eine Gutschrift (negativer Betrag) dreht Soll und Haben:
+    ///   Soll Umlage.NkVerrechnungsKonto [Absolutbetrag]
+    ///
     /// Die Soll-Seite wird durch die NK-Anteil-Buchungen (NkAnteileService) ergänzt:
     /// je Vertrag Soll NkBuchungskonto und für Eigenanteile Soll Wohnung.AufwandsKonto.
     /// Die Bezahlung an den Dienstleister ist ein separater Buchungssatz.
@@ -43,11 +46,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             int betreffendesJahr,
             string? notiz)
         {
-            if (betrag <= 0)
-                throw new InvalidOperationException($"Rechnungsbetrag muss größer als 0 sein (aktueller Wert: {betrag:C}).");
-
             var buchungssatz = new Buchungssatz(datum, $"Betriebskosten {umlage.Typ.Bezeichnung} {betreffendesJahr}");
-            AddZeile(buchungssatz, SollHaben.Haben, betrag, umlage.NkVerrechnungsKonto);
+            var sollHaben = betrag >= 0 ? SollHaben.Haben : SollHaben.Soll;
+            AddZeile(buchungssatz, sollHaben, Math.Abs(betrag), umlage.NkVerrechnungsKonto);
             buchungssatz.Notiz = notiz;
             _ctx.Buchungssaetze.Add(buchungssatz);
             await _ctx.SaveChangesAsync();
@@ -62,16 +63,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             int neuesJahr,
             string? neueNotiz)
         {
-            if (neuerBetrag <= 0)
-                throw new InvalidOperationException($"Rechnungsbetrag muss größer als 0 sein (aktueller Wert: {neuerBetrag:C}).");
-
             satz.Buchungsdatum = neuesDatum;
             satz.Beschreibung = $"Betriebskosten {neueUmlage.Typ.Bezeichnung} {neuesJahr}";
             satz.Notiz = neueNotiz;
 
-            var habenZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-            if (habenZeile is not null)
-                habenZeile.Betrag = neuerBetrag;
+            var nkZeile = satz.Buchungszeilen
+                .FirstOrDefault(z => z.Buchungskonto.BuchungskontoId == neueUmlage.NkVerrechnungsKonto.BuchungskontoId);
+            if (nkZeile is not null)
+            {
+                nkZeile.SollHaben = neuerBetrag >= 0 ? SollHaben.Haben : SollHaben.Soll;
+                nkZeile.Betrag = Math.Abs(neuerBetrag);
+            }
 
             await _ctx.SaveChangesAsync();
         }

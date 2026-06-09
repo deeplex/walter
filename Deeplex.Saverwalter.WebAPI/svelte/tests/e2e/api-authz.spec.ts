@@ -1,12 +1,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { devUsers } from './credentials';
 import { authHeader, signInApi } from './auth';
-
-type EntityPermissions = {
-    read: boolean;
-    update: boolean;
-    remove: boolean;
-};
+import { getList, type EntityPermissions } from './api';
 
 type WohnungListEntry = {
     id: number;
@@ -31,13 +26,7 @@ async function getWohnungen(
     username: string
 ): Promise<WohnungListEntry[]> {
     const login = await signInApi(api, username);
-    const response = await api.get('/api/wohnungen', {
-        headers: authHeader(login.token)
-    });
-
-    expect(response.ok()).toBeTruthy();
-
-    return (await response.json()) as WohnungListEntry[];
+    return getList<WohnungListEntry>(api, login.token, '/api/wohnungen');
 }
 
 async function getWohnungDetail(

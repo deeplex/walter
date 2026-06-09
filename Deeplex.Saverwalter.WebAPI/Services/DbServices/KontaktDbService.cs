@@ -67,13 +67,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
-                // TODO: Who can manage contacts?
-                var permissions = new Permissions()
-                {
-                    Read = true,
-                    Update = true,
-                    Remove = true
-                };
+                // Kontakte sind für alle lesbar, aber nur mit Verwaltungsrechten
+                // änderbar — dieselbe Regel wie im KontaktPermissionHandler.
+                var permissions = await GetPermissions(user, entity, Auth);
                 var entry = new KontaktEntry(entity, permissions);
 
                 entry.JuristischePersonen = await Task.WhenAll(entity.AlsMitglied
