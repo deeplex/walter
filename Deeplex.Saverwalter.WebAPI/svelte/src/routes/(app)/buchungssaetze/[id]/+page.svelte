@@ -22,7 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile
     } from '$walter/components';
-    import { kontoVerknuepfungHref } from '$walter/lib';
+    import { kontoVerknuepfungHref, type WalterAusgleich } from '$walter/lib';
+    import { convertEuro } from '$walter/services/utils';
+    import { formatToTableDate } from '$walter/components/elements/WalterDataTable';
     import type { PageData } from './$types';
 
     export let data: PageData;
@@ -31,6 +33,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: {
         title = `Buchungssatz ${data.entry.nummer}`;
     }
+
+    // OPOS-Ausgleiche aller Zeilen, pro Partner-Satz zusammengefasst —
+    // so folgt man von der Forderung zur Zahlung und umgekehrt.
+    $: ausgleiche = [
+        ...data.entry.zeilen
+            .flatMap((zeile) => zeile.ausgleiche)
+            .reduce((map, ausgleich) => {
+                const existing = map.get(ausgleich.buchungssatzId);
+                if (existing) {
+                    existing.betrag += ausgleich.betrag;
+                } else {
+                    map.set(ausgleich.buchungssatzId, { ...ausgleich });
+                }
+                return map;
+            }, new Map<string, WalterAusgleich>())
+            .values()
+    ];
 
     // Eine Entität kann über mehrere Konten beteiligt sein — pro Entität
     // ein Link-Tile mit allen Funktionen.
@@ -82,6 +101,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 href={`/transaktionen/${data.entry.transaktion.id}`}
             />
         {/if}
+        {#each ausgleiche as ausgleich}
+            <WalterLinkTile
+                fileref=""
+                name={`OPOS-Ausgleich: ${ausgleich.buchungsjahr}-${ausgleich.buchungsnummer} | ${formatToTableDate(ausgleich.buchungsdatum)} | ${ausgleich.beschreibung} — ${convertEuro(ausgleich.betrag)}`}
+                href={`/buchungssaetze/${ausgleich.buchungssatzId}`}
+            />
+        {/each}
         {#each verknuepfungen as verknuepfung}
             <WalterLinkTile
                 fileref=""

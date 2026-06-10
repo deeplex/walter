@@ -146,6 +146,56 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task Get_und_kontoblatt_zeigen_opos_ausgleich()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, forderung, _, vertrag) = Seed(ctx);
+
+            // Zahlung über 300 € gleicht die Forderung (Soll 500 auf dem Mietkonto)
+            // teilweise aus: Forderungszeile (Soll) <-> Zahlungszeile (Haben).
+            var zahlung = new Buchungssatz(new DateOnly(2026, 5, 10), "Teilzahlung Mai");
+            zahlung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 300m)
+            {
+                Buchungssatz = zahlung,
+                Buchungskonto = vertrag.ZahlungsKonto
+            });
+            var habenZeile = new Buchungszeile(SollHaben.Haben, 300m)
+            {
+                Buchungssatz = zahlung,
+                Buchungskonto = vertrag.MietBuchungskonto
+            };
+            zahlung.Buchungszeilen.Add(habenZeile);
+            ctx.Buchungssaetze.Add(zahlung);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = forderung.Buchungszeilen.Single(z =>
+                    z.SollHaben == SollHaben.Soll),
+                HabenZeile = habenZeile
+            });
+            ctx.SaveChanges();
+
+            var controller = WithUser(ctx, Principal(manager));
+
+            // Detail: Forderungszeile ist teilweise ausgeglichen und verlinkt die Zahlung
+            var detailResult = (await controller.Get(forderung.BuchungssatzId)).Result as OkObjectResult;
+            var detail = detailResult!.Value as BuchungssatzEntry;
+            var sollZeile = detail!.Zeilen.Single(z =>
+                z.SollHaben == "Soll" && z.KontoId == vertrag.MietBuchungskonto.BuchungskontoId);
+            sollZeile.Ausgleichbar.Should().BeTrue();
+            sollZeile.Ausgeglichen.Should().Be(300m);
+            sollZeile.Offen.Should().Be(200m);
+            sollZeile.Ausgleiche.Should().ContainSingle(a =>
+                a.BuchungssatzId == zahlung.BuchungssatzId && a.Betrag == 300m);
+
+            // Kontoblatt des Mietkontos: Forderung 200 € offen, Zahlung voll zugeordnet
+            var listResult = (await controller.GetList(
+                new PagedQuery(), vertrag.MietBuchungskonto.BuchungskontoId)).Result as OkObjectResult;
+            var rows = (listResult!.Value as PagedResult<BuchungssatzEntryBase>)!.Items.ToList();
+            rows.Single(r => r.Id == forderung.BuchungssatzId).KontoOffen.Should().Be(200m);
+            rows.Single(r => r.Id == zahlung.BuchungssatzId).KontoOffen.Should().Be(0m);
+        }
+
+        [Fact]
         public async Task Get_foreign_satz_is_forbidden()
         {
             var ctx = TestUtils.GetContext();

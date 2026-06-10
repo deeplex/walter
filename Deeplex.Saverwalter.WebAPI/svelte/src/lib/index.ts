@@ -50,6 +50,7 @@ export {
 } from './WalterBuchungskonto';
 export {
     WalterBuchungssatzEntry,
+    type WalterAusgleich,
     type WalterBuchungszeile,
     type WalterBuchungssatzLink,
     type WalterTransaktionLink

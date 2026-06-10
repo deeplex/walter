@@ -17,6 +17,16 @@ import { walter_get } from '$walter/services/requests';
 import { WalterApiHandler } from './WalterApiHandler';
 import type { WalterKontoVerknuepfung } from './WalterBuchungskonto';
 
+/** Gegenseite eines OPOS-Ausgleichs — verlinkt den ausgleichenden Buchungssatz. */
+export type WalterAusgleich = {
+    buchungssatzId: string;
+    buchungsnummer: number;
+    buchungsjahr: number;
+    buchungsdatum: string;
+    beschreibung: string;
+    betrag: number;
+};
+
 export type WalterBuchungszeile = {
     id: string;
     kontoId: number;
@@ -24,6 +34,10 @@ export type WalterBuchungszeile = {
     kontobezeichnung: string;
     sollHaben: 'Soll' | 'Haben';
     betrag: number;
+    ausgeglichen: number;
+    offen: number;
+    ausgleichbar: boolean;
+    ausgleiche: WalterAusgleich[];
 };
 
 export type WalterBuchungssatzLink = {
@@ -51,10 +65,12 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
         public habenKonten: string,
         public istStorno: boolean,
         public istStorniert: boolean,
-        // Soll-/Haben-Anteil eines Kontos an diesem Satz — nur gefüllt,
-        // wenn die Liste nach kontoId gefiltert ist (Kontoblatt).
+        // Konto-Sicht dieses Satzes — nur gefüllt, wenn die Liste nach
+        // kontoId gefiltert ist (Kontoblatt): Soll-/Haben-Anteil und der
+        // nicht durch OPOS-Ausgleiche gedeckte Rest.
         public kontoSoll: number | undefined,
         public kontoHaben: number | undefined,
+        public kontoOffen: number | undefined,
         // Nur im Detail (GET /api/buchungssaetze/{id}) gefüllt.
         public notiz: string | undefined,
         public belegpfad: string | undefined,
@@ -94,6 +110,7 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
             json.istStorniert,
             json.kontoSoll ?? undefined,
             json.kontoHaben ?? undefined,
+            json.kontoOffen ?? undefined,
             json.notiz,
             json.belegpfad,
             json.zeilen ?? [],

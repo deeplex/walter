@@ -61,6 +61,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             /// </summary>
             public decimal? KontoSoll { get; set; }
             public decimal? KontoHaben { get; set; }
+            /// <summary>Nicht durch OPOS-Ausgleiche gedeckter Rest der Zeilen dieses Kontos.</summary>
+            public decimal? KontoOffen { get; set; }
 
             public BuchungssatzEntryBase() { }
             public BuchungssatzEntryBase(Buchungssatz entity)
@@ -86,6 +88,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .Distinct());
         }
 
+        /// <summary>
+        /// Verweis auf den Buchungssatz der Gegenzeile eines OPOS-Ausgleichs —
+        /// von der Forderung zur ausgleichenden Zahlung navigieren und umgekehrt.
+        /// </summary>
+        public class AusgleichEntry
+        {
+            public Guid BuchungssatzId { get; set; }
+            public int Buchungsnummer { get; set; }
+            public int Buchungsjahr { get; set; }
+            public DateOnly Buchungsdatum { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public decimal Betrag { get; set; }
+        }
+
         public class BuchungszeileEntry
         {
             public Guid Id { get; set; }
@@ -94,6 +110,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Kontobezeichnung { get; set; } = string.Empty;
             public string SollHaben { get; set; } = string.Empty;
             public decimal Betrag { get; set; }
+
+            /// <summary>Über OPOS-Ausgleiche gedeckter Anteil dieser Zeile.</summary>
+            public decimal Ausgeglichen { get; set; }
+            public decimal Offen { get; set; }
+            /// <summary>Ob das Konto der Zeile ein Ausgleichskonto ist — nur dann ist "Offen" ein offener Posten.</summary>
+            public bool Ausgleichbar { get; set; }
+            public List<AusgleichEntry> Ausgleiche { get; set; } = [];
         }
 
         public class BuchungssatzLink
@@ -131,15 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Zeilen = entity.Buchungszeilen
                     .OrderBy(z => z.SollHaben)
                     .ThenBy(z => z.Buchungskonto.Kontonummer)
-                    .Select(z => new BuchungszeileEntry
-                    {
-                        Id = z.BuchungszeileId,
-                        KontoId = z.Buchungskonto.BuchungskontoId,
-                        Kontonummer = z.Buchungskonto.Kontonummer,
-                        Kontobezeichnung = z.Buchungskonto.Bezeichnung,
-                        SollHaben = z.SollHaben == Model.SollHaben.Soll ? "Soll" : "Haben",
-                        Betrag = z.Betrag
-                    })
+                    .Select(ToZeileEntry)
                     .ToList();
                 Transaktion = entity.Transaktion is Transaktion t
                     ? new TransaktionLink
@@ -150,6 +165,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     : null;
                 StornoVon = ToLink(entity.StornoVon);
                 StornoNach = ToLink(entity.StornoNach);
+            }
+
+            private static BuchungszeileEntry ToZeileEntry(Buchungszeile z)
+            {
+                // Gegenzeilen aller OPOS-Ausgleiche dieser Zeile — egal ob sie
+                // selbst die Soll- oder die Haben-Seite des Ausgleichs ist.
+                var gegenzeilen = z.AlsSollZeile.Select(a => a.HabenZeile)
+                    .Concat(z.AlsHabenZeile.Select(a => a.SollZeile))
+                    .ToList();
+                var ausgeglichen = gegenzeilen.Sum(g => g.Betrag);
+
+                return new BuchungszeileEntry
+                {
+                    Id = z.BuchungszeileId,
+                    KontoId = z.Buchungskonto.BuchungskontoId,
+                    Kontonummer = z.Buchungskonto.Kontonummer,
+                    Kontobezeichnung = z.Buchungskonto.Bezeichnung,
+                    SollHaben = z.SollHaben == Model.SollHaben.Soll ? "Soll" : "Haben",
+                    Betrag = z.Betrag,
+                    Ausgeglichen = ausgeglichen,
+                    Offen = Math.Max(0, z.Betrag - ausgeglichen),
+                    Ausgleiche = gegenzeilen
+                        .Select(g => new AusgleichEntry
+                        {
+                            BuchungssatzId = g.Buchungssatz.BuchungssatzId,
+                            Buchungsnummer = g.Buchungssatz.Buchungsnummer,
+                            Buchungsjahr = g.Buchungssatz.Buchungsjahr,
+                            Buchungsdatum = g.Buchungssatz.Buchungsdatum,
+                            Beschreibung = g.Buchungssatz.Beschreibung,
+                            Betrag = g.Betrag
+                        })
+                        .ToList()
+                };
             }
 
             private static BuchungssatzLink? ToLink(Buchungssatz? satz) =>
@@ -186,8 +234,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var saetze = ScopedSaetze();
             if (kontoId is int konto)
             {
-                saetze = saetze.Where(s =>
-                    s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == konto));
+                saetze = saetze
+                    .Where(s =>
+                        s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == konto))
+                    // Für die OPOS-Spalte des Kontoblatts werden die Ausgleiche gebraucht
+                    .Include(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsSollZeile)
+                            .ThenInclude(a => a.HabenZeile)
+                    .Include(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsHabenZeile)
+                            .ThenInclude(a => a.SollZeile);
             }
 
             var result = await saetze
@@ -216,6 +272,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         {
                             entry.KontoSoll = KontoSeite(s, kId, Model.SollHaben.Soll);
                             entry.KontoHaben = KontoSeite(s, kId, Model.SollHaben.Haben);
+                            entry.KontoOffen = s.Buchungszeilen
+                                .Where(z => z.Buchungskonto.BuchungskontoId == kId)
+                                .Sum(z => Math.Max(0, z.Betrag -
+                                    z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag) -
+                                    z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag)));
                         }
                         return entry;
                     });
@@ -237,6 +298,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var satz = await ScopedSaetze()
                 .Include(s => s.Buchungszeilen)
                     .ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile)
+                        .ThenInclude(a => a.HabenZeile)
+                            .ThenInclude(z => z.Buchungssatz)
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile)
+                        .ThenInclude(a => a.SollZeile)
+                            .ThenInclude(z => z.Buchungssatz)
                 .Include(s => s.Transaktion)
                 .Include(s => s.StornoVon)
                 .Include(s => s.StornoNach)
@@ -256,6 +325,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Distinct()
                 .ToList();
             entry.Verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+
+            // Offene Posten gibt es nur auf Ausgleichskonten — auf Summenkonten
+            // (Erträge, Zahlungseingänge, ...) ist "Offen" bedeutungslos.
+            foreach (var zeile in entry.Zeilen)
+            {
+                zeile.Ausgleichbar = entry.Verknuepfungen
+                    .Any(v => v.KontoId == zeile.KontoId && v.Ausgleichbar);
+            }
 
             return Ok(entry);
         }

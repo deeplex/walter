@@ -51,6 +51,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Buchungssätze"
             kontoId={data.entry.id}
+            oposStatus={data.entry.ausgleichbar}
         />
 
         {#each data.entry.verknuepfungen as verknuepfung}

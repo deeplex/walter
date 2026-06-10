@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterDataTable } from '$walter/components';
     import { WalterBuchungssatzEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+    import { convertEuro } from '$walter/services/utils';
 
     export let fetchImpl: typeof fetch;
     export let fullHeight = false;
@@ -29,6 +30,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Buchungskonto gefiltert.
     export let rows: WalterBuchungssatzEntry[] | undefined = undefined;
     export let kontoId: number | undefined = undefined;
+    // Zeigt im Kontoblatt den OPOS-Status je Satz — nur für Ausgleichskonten
+    // sinnvoll, auf Summenkonten gibt es keine offenen Posten.
+    export let oposStatus = false;
 
     // Mit Konto-Filter wird die Liste zum Kontoblatt: Soll/Haben aus Sicht
     // des Kontos statt der Konten-Auflistung des ganzen Satzes.
@@ -40,6 +44,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                   { key: 'beschreibung', value: 'Beschreibung' },
                   { key: 'kontoSoll', value: 'Soll' },
                   { key: 'kontoHaben', value: 'Haben' },
+                  ...(oposStatus
+                      ? [{ key: 'opos', value: 'OPOS', sort: false as const }]
+                      : []),
                   { key: 'status', value: 'Status', sort: false as const }
               ]
             : [
@@ -62,11 +69,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return '';
     }
 
+    function oposTag(satz: WalterBuchungssatzEntry) {
+        if (satz.kontoOffen === undefined) {
+            return '';
+        }
+        return satz.kontoOffen <= 0.005
+            ? { text: 'Ausgeglichen', tag: 'green' }
+            : { text: `Offen: ${convertEuro(satz.kontoOffen)}`, tag: 'red' };
+    }
+
     // Getter (nummer) überleben kein Spread — explizit übernehmen.
     const toRow = (satz: WalterBuchungssatzEntry): DataTableRow => ({
         ...satz,
         nummer: satz.nummer,
-        status: statusTag(satz)
+        status: statusTag(satz),
+        opos: oposTag(satz)
     });
 
     $: mappedRows = rows?.map(toRow);

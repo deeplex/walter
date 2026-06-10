@@ -34,15 +34,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const zeilenHeaders = [
         { key: 'konto', value: 'Konto' },
         { key: 'soll', value: 'Soll' },
-        { key: 'haben', value: 'Haben' }
+        { key: 'haben', value: 'Haben' },
+        { key: 'opos', value: 'OPOS', sort: false as const }
     ];
+
+    // OPOS-Status nur für Zeilen auf Ausgleichskonten — auf Summenkonten
+    // (Erträge, Zahlungseingänge, ...) gibt es keine offenen Posten.
+    function oposTag(zeile: (typeof entry.zeilen)[number]) {
+        if (!zeile.ausgleichbar) {
+            return '';
+        }
+        return zeile.offen <= 0.005
+            ? { text: 'Ausgeglichen', tag: 'green' }
+            : { text: `Offen: ${convertEuro(zeile.offen)}`, tag: 'red' };
+    }
 
     $: zeilenRows = entry.zeilen.map((zeile) => ({
         id: zeile.id,
         kontoId: zeile.kontoId,
         konto: `${zeile.kontonummer} ${zeile.kontobezeichnung}`,
         soll: zeile.sollHaben === 'Soll' ? convertEuro(zeile.betrag) : '',
-        haben: zeile.sollHaben === 'Haben' ? convertEuro(zeile.betrag) : ''
+        haben: zeile.sollHaben === 'Haben' ? convertEuro(zeile.betrag) : '',
+        opos: oposTag(zeile)
     }));
 
     const rowHref = (row: DataTableRow) => `/buchungskonten/${row.kontoId}`;
