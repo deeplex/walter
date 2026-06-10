@@ -18,6 +18,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -34,11 +35,66 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public int AnzahlBuchungszeilen { get; set; }
             public decimal Saldo { get; set; }
+            /// <summary>Funktion des Kontos bei seiner Besitzer-Entität, z.B. "Mietforderungen".</summary>
+            public string? Funktion { get; set; }
+            /// <summary>Ob das Konto sich ausgleichen soll — ein Saldo ist dann ein offener Posten.</summary>
+            public bool Ausgleichbar { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+            public Permissions Permissions { get; set; } = new Permissions();
+        }
+
+        public class MonatsSumme
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+            public decimal Soll { get; set; }
+            public decimal Haben { get; set; }
         }
 
         public class BuchungskontoDetail : BuchungskontoEntry
         {
+            public decimal SollSumme { get; set; }
+            public decimal HabenSumme { get; set; }
+            public List<MonatsSumme> MonatsSummen { get; set; } = [];
             public List<BuchungszeileInfo> LetzteZeilen { get; set; } = [];
+            public List<KontoVerknuepfungEntry> Verknuepfungen { get; set; } = [];
+        }
+
+        /// <summary>
+        /// Schlanke Konto-Referenz für die Detail-DTOs der Entitäten, denen Konten
+        /// zugeordnet sind (Vertrag, Wohnung, Umlage, Kontakt, Garage, Garagenvertrag).
+        /// </summary>
+        public class BuchungskontoRefEntry
+        {
+            public int Id { get; set; }
+            public string Kontonummer { get; set; } = "";
+            public string Bezeichnung { get; set; } = "";
+            public string Kontotyp { get; set; } = "";
+            public string Funktion { get; set; } = "";
+            public bool Ausgleichbar { get; set; }
+            public decimal Saldo { get; set; }
+
+            public static BuchungskontoRefEntry? From(Buchungskonto? konto, KontoFunktion funktion) =>
+                konto is null ? null : new BuchungskontoRefEntry
+                {
+                    Id = konto.BuchungskontoId,
+                    Kontonummer = konto.Kontonummer,
+                    Bezeichnung = konto.Bezeichnung,
+                    Kontotyp = konto.Kontotyp.ToString(),
+                    Funktion = funktion.Name,
+                    Ausgleichbar = funktion.Ausgleichbar,
+                    Saldo = konto.Buchungszeilen
+                        .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag)
+                };
+
+            /// <summary>Sammelt die Referenzen, lässt nicht gesetzte Konten aus.</summary>
+            public static List<BuchungskontoRefEntry> Collect(
+                params (Buchungskonto? Konto, KontoFunktion Funktion)[] konten) =>
+                konten
+                    .Select(k => From(k.Konto, k.Funktion))
+                    .OfType<BuchungskontoRefEntry>()
+                    .ToList();
         }
 
         public class BuchungszeileInfo
@@ -56,7 +112,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
         }
 
-        private static BuchungskontoEntry ToEntry(Buchungskonto k) => new()
+        private static BuchungskontoEntry ToEntry(
+            Buchungskonto k, bool canUpdate, KontoVerknuepfungEntry? verknuepfung) => new()
         {
             Id = k.BuchungskontoId,
             Kontonummer = k.Kontonummer,
@@ -65,8 +122,29 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             Notiz = k.Notiz,
             AnzahlBuchungszeilen = k.Buchungszeilen.Count,
             Saldo = k.Buchungszeilen
-                .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag)
+                .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag),
+            Funktion = verknuepfung?.Funktion,
+            Ausgleichbar = verknuepfung?.Ausgleichbar ?? false,
+            CreatedAt = k.CreatedAt,
+            LastModified = k.LastModified,
+            Permissions = new Permissions(true) { Update = canUpdate }
         };
+
+        /// <summary>
+        /// Konto-IDs mit Vollmacht-Zugriff des Nutzers — null bedeutet Admin (alle).
+        /// </summary>
+        private async Task<HashSet<int>?> VollmachtKontoIds()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            var ids = await TransaktionPermissionHandler
+                .ManagedBuchungskontoIds(ctx, User.GetUserId(), VerwalterRolle.Vollmacht)
+                .ToListAsync();
+            return ids.ToHashSet();
+        }
 
         /// <summary>
         /// Buchungskonten, die der Nutzer in der gegebenen Rolle sehen darf — Admin
@@ -94,7 +172,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .OrderBy(k => k.Kontonummer)
                 .ToListAsync();
 
-            return Ok(konten.Select(ToEntry));
+            var vollmachtIds = await VollmachtKontoIds();
+            var verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(
+                ctx, konten.Select(k => k.BuchungskontoId).ToList());
+            return Ok(konten.Select(k => ToEntry(k,
+                vollmachtIds == null || vollmachtIds.Contains(k.BuchungskontoId),
+                verknuepfungen.FirstOrDefault(v => v.KontoId == k.BuchungskontoId))));
         }
 
         [HttpGet("{id}")]
@@ -113,7 +196,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     : NotFound();
             }
 
-            var entry = ToEntry(konto);
+            var vollmachtIds = await VollmachtKontoIds();
+            var verknuepfungen = await KontoVerknuepfungService
+                .ForKontenAsync(ctx, [konto.BuchungskontoId]);
+            var entry = ToEntry(konto,
+                vollmachtIds == null || vollmachtIds.Contains(konto.BuchungskontoId),
+                verknuepfungen.FirstOrDefault());
             var detail = new BuchungskontoDetail
             {
                 Id = entry.Id,
@@ -123,6 +211,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entry.Notiz,
                 AnzahlBuchungszeilen = entry.AnzahlBuchungszeilen,
                 Saldo = entry.Saldo,
+                Funktion = entry.Funktion,
+                Ausgleichbar = entry.Ausgleichbar,
+                CreatedAt = entry.CreatedAt,
+                LastModified = entry.LastModified,
+                Permissions = entry.Permissions,
+                SollSumme = konto.Buchungszeilen
+                    .Where(z => z.SollHaben == Model.SollHaben.Soll)
+                    .Sum(z => z.Betrag),
+                HabenSumme = konto.Buchungszeilen
+                    .Where(z => z.SollHaben == Model.SollHaben.Haben)
+                    .Sum(z => z.Betrag),
+                MonatsSummen = konto.Buchungszeilen
+                    .GroupBy(z => (z.Buchungssatz.Buchungsdatum.Year, z.Buchungssatz.Buchungsdatum.Month))
+                    .OrderBy(g => g.Key)
+                    .Select(g => new MonatsSumme
+                    {
+                        Jahr = g.Key.Year,
+                        Monat = g.Key.Month,
+                        Soll = g.Where(z => z.SollHaben == Model.SollHaben.Soll).Sum(z => z.Betrag),
+                        Haben = g.Where(z => z.SollHaben == Model.SollHaben.Haben).Sum(z => z.Betrag)
+                    })
+                    .ToList(),
                 LetzteZeilen = konto.Buchungszeilen
                     .OrderByDescending(z => z.Buchungssatz.Buchungsdatum)
                     .Take(50)
@@ -134,7 +244,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         SollHaben = z.SollHaben == Model.SollHaben.Soll ? "Soll" : "Haben",
                         Betrag = z.Betrag
                     })
-                    .ToList()
+                    .ToList(),
+                Verknuepfungen = verknuepfungen
             };
 
             return Ok(detail);
@@ -158,7 +269,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             konto.Notiz = update.Notiz;
             await ctx.SaveChangesAsync();
 
-            return Ok(ToEntry(konto));
+            var verknuepfungen = await KontoVerknuepfungService
+                .ForKontenAsync(ctx, [konto.BuchungskontoId]);
+            return Ok(ToEntry(konto, canUpdate: true, verknuepfungen.FirstOrDefault()));
         }
     }
 }

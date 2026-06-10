@@ -22,7 +22,10 @@ export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
-export { WalterVertragsNkAnteilEntry, validateVertragsNkAnteil } from './WalterVertragsNkAnteil';
+export {
+    WalterVertragsNkAnteilEntry,
+    validateVertragsNkAnteil
+} from './WalterVertragsNkAnteil';
 export { WalterHKVOEntry } from './WalterHKVO';
 export {
     WalterMietzahlungListEntry,
@@ -36,7 +39,25 @@ export {
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterMiettabelleEntry } from './WalterMiettabelle';
 export { WalterBankkontoEntry } from './WalterBankkonto';
-export { WalterKontaktEntry, type WalterMitgliedschaftEntry } from './WalterKontakt';
+export {
+    WalterBuchungskontoEntry,
+    kontoVerknuepfungHref,
+    kontoAnzeigeSaldo,
+    kontoStatusTag,
+    type WalterKontoVerknuepfung,
+    type WalterKontoMonatsSumme,
+    type WalterKontoStatusTag
+} from './WalterBuchungskonto';
+export {
+    WalterBuchungssatzEntry,
+    type WalterBuchungszeile,
+    type WalterBuchungssatzLink,
+    type WalterTransaktionLink
+} from './WalterBuchungssatz';
+export {
+    WalterKontaktEntry,
+    type WalterMitgliedschaftEntry
+} from './WalterKontakt';
 export { WalterKontaktMitgliedschaftEntry } from './WalterKontaktMitgliedschaft';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';
@@ -48,7 +69,10 @@ export { WalterUmlagetypEntry, BETRK_V_NUMMERN } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';
-export { WalterWohnungEntry, type WalterEigentuemerEntry } from './WalterWohnung';
+export {
+    WalterWohnungEntry,
+    type WalterEigentuemerEntry
+} from './WalterWohnung';
 export { WalterWohnungEigentuemerEntry } from './WalterWohnungEigentuemer';
 export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';

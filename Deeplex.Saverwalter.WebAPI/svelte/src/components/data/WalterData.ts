@@ -16,6 +16,7 @@
 import type {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
+    WalterKontoMonatsSumme,
     WalterUmlageEntry,
     WalterVertragEntry,
     WalterWohnungEntry
@@ -111,8 +112,13 @@ export const months = [
     'Dezember'
 ];
 
-export function walter_data_mieten(title: string, mieten: WalterMietzahlungListEntry[]) {
-    const sortedMieten = mieten.sort((a, b) => a.kaltmieteZahlung - b.kaltmieteZahlung);
+export function walter_data_mieten(
+    title: string,
+    mieten: WalterMietzahlungListEntry[]
+) {
+    const sortedMieten = mieten.sort(
+        (a, b) => a.kaltmieteZahlung - b.kaltmieteZahlung
+    );
 
     const options = {
         ...baseOptions,
@@ -298,7 +304,8 @@ function fillDataWithMieten(
             return;
         }
 
-        previous.value = ((previous.value as number) || 0) + miete.kaltmieteZahlung;
+        previous.value =
+            ((previous.value as number) || 0) + miete.kaltmieteZahlung;
     }
 }
 
@@ -402,6 +409,35 @@ export function walter_data_ne(
         group: wohnung.bezeichnung,
         value: wohnung.einheiten
     }));
+
+    return { data, options };
+}
+
+/**
+ * Soll- und Haben-Umsätze eines Buchungskontos je Monat als gruppierte
+ * Balken — macht auf einen Blick sichtbar, wann sich beide Seiten decken.
+ */
+export function walter_data_soll_haben_monate(
+    title: string,
+    monatsSummen: WalterKontoMonatsSumme[]
+): WalterDataConfigType {
+    const options = {
+        ...baseOptions,
+        title,
+        legend: { enabled: true },
+        axes: {
+            bottom: { mapsTo: 'key', scaleType: 'labels' },
+            left: { mapsTo: 'value', scaleType: 'linear' }
+        }
+    };
+
+    const data = monatsSummen.flatMap((monat) => {
+        const key = `${`${monat.monat}`.padStart(2, '0')}/${monat.jahr}`;
+        return [
+            { group: 'Soll', key, value: monat.soll },
+            { group: 'Haben', key, value: monat.haben }
+        ];
+    });
 
     return { data, options };
 }

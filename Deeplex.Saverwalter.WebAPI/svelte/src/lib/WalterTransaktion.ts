@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterBuchungssatzEntry } from './WalterBuchungssatz';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
@@ -30,7 +31,8 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         public notiz: string,
         public permissions: WalterPermissions,
         public createdAt: Date,
-        public lastModified: Date
+        public lastModified: Date,
+        public buchungssaetze: WalterBuchungssatzEntry[]
     ) {
         super();
     }
@@ -43,6 +45,8 @@ export class WalterTransaktionEntry extends WalterApiHandler {
             WalterSelectionEntry.fromJson(json.zahlungsempfaenger);
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
+        const buchungssaetze =
+            json.buchungssaetze?.map(WalterBuchungssatzEntry.fromJson) ?? [];
 
         return new WalterTransaktionEntry(
             json.id,
@@ -54,7 +58,8 @@ export class WalterTransaktionEntry extends WalterApiHandler {
             json.notiz,
             permissions,
             new Date(json.createdAt),
-            new Date(json.lastModified)
+            new Date(json.lastModified),
+            buchungssaetze
         );
     }
 }

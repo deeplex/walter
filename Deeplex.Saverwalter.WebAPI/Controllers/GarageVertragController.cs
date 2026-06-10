@@ -19,6 +19,7 @@ using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
@@ -88,6 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
@@ -97,6 +99,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entity.Notiz;
                 SelectedMieter = entity.Mieter.Select(m => new SelectionEntry(m.KontaktId, m.Bezeichnung));
                 Mieter = entity.Mieter.Select(m => new KontaktEntryBase(m, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.MietBuchungskonto, KontoFunktion.Mietforderungen),
+                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge));
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
             }

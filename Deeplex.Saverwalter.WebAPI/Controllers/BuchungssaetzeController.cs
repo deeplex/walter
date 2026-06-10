@@ -14,7 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,225 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Buchungsjahr { get; set; }
             public DateOnly Buchungsdatum { get; set; }
             public string Beschreibung { get; set; } = string.Empty;
+        }
+
+        public class BuchungssatzEntryBase
+        {
+            public Guid Id { get; set; }
+            public int Buchungsnummer { get; set; }
+            public int Buchungsjahr { get; set; }
+            public DateOnly Buchungsdatum { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            /// <summary>Summe der Soll-Seite — bei einem ausgeglichenen Satz der Buchungsbetrag.</summary>
+            public decimal Betrag { get; set; }
+            public string SollKonten { get; set; } = string.Empty;
+            public string HabenKonten { get; set; } = string.Empty;
+            public bool IstStorno { get; set; }
+            public bool IstStorniert { get; set; }
+
+            /// <summary>
+            /// Soll-/Haben-Anteil eines bestimmten Kontos an diesem Satz —
+            /// nur gefüllt, wenn die Liste nach kontoId gefiltert ist (Kontoblatt).
+            /// </summary>
+            public decimal? KontoSoll { get; set; }
+            public decimal? KontoHaben { get; set; }
+
+            public BuchungssatzEntryBase() { }
+            public BuchungssatzEntryBase(Buchungssatz entity)
+            {
+                Id = entity.BuchungssatzId;
+                Buchungsnummer = entity.Buchungsnummer;
+                Buchungsjahr = entity.Buchungsjahr;
+                Buchungsdatum = entity.Buchungsdatum;
+                Beschreibung = entity.Beschreibung;
+                Betrag = entity.Buchungszeilen
+                    .Where(z => z.SollHaben == Model.SollHaben.Soll)
+                    .Sum(z => z.Betrag);
+                SollKonten = KontenText(entity, Model.SollHaben.Soll);
+                HabenKonten = KontenText(entity, Model.SollHaben.Haben);
+                IstStorno = entity.StornoVon != null;
+                IstStorniert = entity.StornoNach != null;
+            }
+
+            private static string KontenText(Buchungssatz entity, SollHaben seite) =>
+                string.Join(", ", entity.Buchungszeilen
+                    .Where(z => z.SollHaben == seite)
+                    .Select(z => $"{z.Buchungskonto.Kontonummer} {z.Buchungskonto.Bezeichnung}")
+                    .Distinct());
+        }
+
+        public class BuchungszeileEntry
+        {
+            public Guid Id { get; set; }
+            public int KontoId { get; set; }
+            public string Kontonummer { get; set; } = string.Empty;
+            public string Kontobezeichnung { get; set; } = string.Empty;
+            public string SollHaben { get; set; } = string.Empty;
+            public decimal Betrag { get; set; }
+        }
+
+        public class BuchungssatzLink
+        {
+            public Guid Id { get; set; }
+            public int Buchungsnummer { get; set; }
+            public int Buchungsjahr { get; set; }
+        }
+
+        public class TransaktionLink
+        {
+            public Guid Id { get; set; }
+            public string Text { get; set; } = string.Empty;
+        }
+
+        public class BuchungssatzEntry : BuchungssatzEntryBase
+        {
+            public string? Notiz { get; set; }
+            public string? Belegpfad { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+            public List<BuchungszeileEntry> Zeilen { get; set; } = [];
+            public TransaktionLink? Transaktion { get; set; }
+            public BuchungssatzLink? StornoVon { get; set; }
+            public BuchungssatzLink? StornoNach { get; set; }
+            public List<KontoVerknuepfungEntry> Verknuepfungen { get; set; } = [];
+
+            public BuchungssatzEntry() : base() { }
+            public BuchungssatzEntry(Buchungssatz entity) : base(entity)
+            {
+                Notiz = entity.Notiz;
+                Belegpfad = entity.Belegpfad;
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
+                Zeilen = entity.Buchungszeilen
+                    .OrderBy(z => z.SollHaben)
+                    .ThenBy(z => z.Buchungskonto.Kontonummer)
+                    .Select(z => new BuchungszeileEntry
+                    {
+                        Id = z.BuchungszeileId,
+                        KontoId = z.Buchungskonto.BuchungskontoId,
+                        Kontonummer = z.Buchungskonto.Kontonummer,
+                        Kontobezeichnung = z.Buchungskonto.Bezeichnung,
+                        SollHaben = z.SollHaben == Model.SollHaben.Soll ? "Soll" : "Haben",
+                        Betrag = z.Betrag
+                    })
+                    .ToList();
+                Transaktion = entity.Transaktion is Transaktion t
+                    ? new TransaktionLink
+                    {
+                        Id = t.TransaktionId,
+                        Text = $"{t.Zahlungsdatum:dd.MM.yyyy} | {t.Betrag:0.00} € | {t.Verwendungszweck}"
+                    }
+                    : null;
+                StornoVon = ToLink(entity.StornoVon);
+                StornoNach = ToLink(entity.StornoNach);
+            }
+
+            private static BuchungssatzLink? ToLink(Buchungssatz? satz) =>
+                satz is null ? null : new BuchungssatzLink
+                {
+                    Id = satz.BuchungssatzId,
+                    Buchungsnummer = satz.Buchungsnummer,
+                    Buchungsjahr = satz.Buchungsjahr
+                };
+        }
+
+        /// <summary>
+        /// Buchungssätze, die der Nutzer sehen darf — Admin alle, sonst nur Sätze
+        /// mit mindestens einer Zeile auf einem Konto einer verwalteten Wohnung
+        /// (analog zur Sichtbarkeit der Buchungskonten).
+        /// </summary>
+        private IQueryable<Buchungssatz> ScopedSaetze()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return ctx.Buchungssaetze;
+            }
+
+            var kontoIds = TransaktionPermissionHandler
+                .ManagedBuchungskontoIds(ctx, User.GetUserId(), VerwalterRolle.Keine);
+            return ctx.Buchungssaetze.Where(s =>
+                s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId)));
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<BuchungssatzEntryBase>>> GetList(
+            [FromQuery] PagedQuery query, [FromQuery] int? kontoId)
+        {
+            var saetze = ScopedSaetze();
+            if (kontoId is int konto)
+            {
+                saetze = saetze.Where(s =>
+                    s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == konto));
+            }
+
+            var result = await saetze
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .PagedAsync(query,
+                    searchPredicate: t => s =>
+                        s.Beschreibung.ToLower().Contains(t) ||
+                        (s.Notiz != null && s.Notiz.ToLower().Contains(t)) ||
+                        s.Buchungszeilen.Any(z =>
+                            z.Buchungskonto.Kontonummer.ToLower().Contains(t) ||
+                            z.Buchungskonto.Bezeichnung.ToLower().Contains(t)),
+                    applySort: (q, sortBy, dir) => sortBy switch
+                    {
+                        "buchungsnummer" => q.SortBy(s => s.Buchungsjahr, dir).ThenSortBy(s => s.Buchungsnummer, dir),
+                        "beschreibung" => q.SortBy(s => s.Beschreibung, dir),
+                        "betrag" => q.SortBy(s => s.Buchungszeilen
+                            .Where(z => z.SollHaben == Model.SollHaben.Soll)
+                            .Sum(z => z.Betrag), dir),
+                        _ => q.SortBy(s => s.Buchungsdatum, dir).ThenSortBy(s => s.Buchungsnummer, dir)
+                    },
+                    toEntry: s =>
+                    {
+                        var entry = new BuchungssatzEntryBase(s);
+                        if (kontoId is int kId)
+                        {
+                            entry.KontoSoll = KontoSeite(s, kId, Model.SollHaben.Soll);
+                            entry.KontoHaben = KontoSeite(s, kId, Model.SollHaben.Haben);
+                        }
+                        return entry;
+                    });
+
+            return Ok(result);
+        }
+
+        private static decimal? KontoSeite(Buchungssatz satz, int kontoId, SollHaben seite)
+        {
+            var summe = satz.Buchungszeilen
+                .Where(z => z.Buchungskonto.BuchungskontoId == kontoId && z.SollHaben == seite)
+                .Sum(z => z.Betrag);
+            return summe == 0 ? null : summe;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BuchungssatzEntry>> Get(Guid id)
+        {
+            var satz = await ScopedSaetze()
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.Transaktion)
+                .Include(s => s.StornoVon)
+                .Include(s => s.StornoNach)
+                .FirstOrDefaultAsync(s => s.BuchungssatzId == id);
+
+            if (satz is null)
+            {
+                // Existiert der Satz, ist aber außerhalb des Sichtbereichs? -> 403 statt 404
+                return await ctx.Buchungssaetze.AnyAsync(s => s.BuchungssatzId == id)
+                    ? Forbid()
+                    : NotFound();
+            }
+
+            var entry = new BuchungssatzEntry(satz);
+            var kontoIds = satz.Buchungszeilen
+                .Select(z => z.Buchungskonto.BuchungskontoId)
+                .Distinct()
+                .ToList();
+            entry.Verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+
+            return Ok(entry);
         }
 
         /// <summary>

@@ -15,6 +15,7 @@
 
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
@@ -32,7 +33,8 @@ export class WalterGarageEntry extends WalterApiHandler {
         public adresse: WalterAdresseEntry | undefined,
         public aktuelleMieter: string | undefined,
         public vertraege: WalterGarageVertragEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public konten: Partial<WalterBuchungskontoEntry>[] = []
     ) {
         super();
     }
@@ -58,7 +60,8 @@ export class WalterGarageEntry extends WalterApiHandler {
             adresse,
             json.aktuelleMieter,
             vertraege,
-            permissions
+            permissions,
+            json.konten ?? []
         );
     }
 }

@@ -15,6 +15,7 @@
 
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
@@ -53,7 +54,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
         public umlagen: WalterUmlageEntry[],
         public bewohner: string,
         public versionen: WalterWohnungVersionEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public konten: Partial<WalterBuchungskontoEntry>[]
     ) {
         super();
     }
@@ -66,15 +68,14 @@ export class WalterWohnungEntry extends WalterApiHandler {
     static fromJson(json: WalterWohnungEntry) {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
-        const eigentuemer: WalterEigentuemerEntry[] = json.eigentuemer?.map(
-            (e) => ({
+        const eigentuemer: WalterEigentuemerEntry[] =
+            json.eigentuemer?.map((e) => ({
                 id: e.id,
                 kontakt: WalterSelectionEntry.fromJson(e.kontakt),
                 von: e.von,
                 bis: e.bis ?? undefined,
                 anteil: e.anteil ?? undefined
-            })
-        ) ?? [];
+            })) ?? [];
         const haus: WalterWohnungEntry[] = json.haus?.map(
             WalterWohnungEntry.fromJson
         );
@@ -108,7 +109,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
             umlagen,
             json.bewohner,
             versionen,
-            permissions
+            permissions,
+            json.konten ?? []
         );
     }
 }

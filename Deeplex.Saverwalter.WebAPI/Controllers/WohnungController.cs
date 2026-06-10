@@ -14,10 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
@@ -146,6 +148,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; set; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
             public IEnumerable<WohnungVersionEntryBase> Versionen { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
@@ -159,6 +162,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Erhaltungsaufwendungen = [];
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
                 Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new WohnungVersionEntryBase(e, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.MietErtragskonto, KontoFunktion.Mietertraege),
+                    (entity.AufwandsKonto, KontoFunktion.Aufwendungen));
             }
         }
 

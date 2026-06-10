@@ -18,10 +18,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterAbrechnungsresultate,
+        WalterBuchungskonten,
         WalterGarageVertraege,
         WalterKontakte,
         WalterMietminderungen,
-        WalterMietOpos,
         WalterHeaderDetail,
         WalterGrid,
         WalterVertrag,
@@ -38,7 +38,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateVertrag
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import WalterVertragTransaktionen from '$walter/components/lists/WalterVertragTransaktionen.svelte';
     import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
@@ -97,12 +96,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        <WalterVertragTransaktionen
-            fetchImpl={data.fetchImpl}
-            vertrag={data.entry}
-            title="Transaktionen"
-            rows={data.transaktionen}
-        />
         <WalterMietminderungen
             entry={mietminderungEntry}
             title="Mietminderungen"
@@ -114,8 +107,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.garageVertraege}
         />
 
-        <WalterMietOpos title="Mieten" rows={data.mietOpos} />
-
         <WalterVertragsNkAnteile
             fetchImpl={data.fetchImpl}
             vertragId={data.entry.id}
@@ -126,6 +117,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Abrechnungsresultate"
             rows={data.entry.abrechnungsresultate}
         />
+
+        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         {#if data.entry.ansprechpartner?.id}
             <WalterLinkTile

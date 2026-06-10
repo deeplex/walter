@@ -16,8 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
+        WalterBuchungssaetze,
         WalterHeaderDetail,
         WalterGrid,
+        WalterLinks,
         WalterLinkTile,
         WalterTransaktionRaw
     } from '$walter/components';
@@ -43,6 +45,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterGrid>
     <WalterTransaktionRaw fetchImpl={data.fetchImpl} entry={data.entry} />
+
+    <WalterLinks>
+        <WalterBuchungssaetze
+            fetchImpl={data.fetchImpl}
+            title="Buchungssätze"
+            rows={data.entry.buchungssaetze}
+        />
+    </WalterLinks>
 
     {#if data.entry.zahler}
         <WalterLinkTile

@@ -15,6 +15,7 @@
 
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterHKVOEntry } from './WalterHKVO';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
@@ -44,7 +45,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public hkvos: WalterHKVOEntry[],
         public permissions: WalterPermissions,
         public ende: string | undefined = undefined,
-        public betriebskostenrechnungsJahre: number[] = []
+        public betriebskostenrechnungsJahre: number[] = [],
+        public konten: Partial<WalterBuchungskontoEntry>[] = []
     ) {
         super();
     }
@@ -92,7 +94,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
             hkvos,
             permissions,
             json.ende ?? undefined,
-            json.betriebskostenrechnungsJahre ?? []
+            json.betriebskostenrechnungsJahre ?? [],
+            json.konten ?? []
         );
     }
 }

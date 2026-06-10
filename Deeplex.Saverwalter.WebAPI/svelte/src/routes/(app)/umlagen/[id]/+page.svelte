@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterBetriebskostenrechnungen,
+        WalterBuchungskonten,
         WalterHeaderDetail,
         WalterGrid,
         WalterWohnungen,
@@ -28,7 +29,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile,
         WalterZaehler,
-        WalterRechnungenOpos,
         WalterVertragsNkAnteile
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
@@ -132,15 +132,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Rechnungen"
             rows={data.entry.betriebskostenrechnungen}
         />
-        <WalterRechnungenOpos
-            title="Rechnungen OPOS"
-            rows={data.entry.betriebskostenrechnungen}
-        />
         <WalterVertragsNkAnteile
             fetchImpl={data.fetchImpl}
             umlageId={data.entry.id}
             title="Vertragsanteile"
         />
+        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if `${data.entry?.schluessel?.id}` === '3'}
             <WalterZaehlerList

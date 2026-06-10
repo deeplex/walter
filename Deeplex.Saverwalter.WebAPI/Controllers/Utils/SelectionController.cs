@@ -303,15 +303,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(list.Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag))));
         }
 
-        private static string GetVertragName(Vertrag vertrag)
-        {
-            var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
-            var mieterList = vertrag.Mieter.Select(person => person.Bezeichnung);
-            var mieterText = string.Join(", ", mieterList);
-            var vertragname = $"{wohnung} - {mieterText}";
-
-            return vertragname;
-        }
+        private static string GetVertragName(Vertrag vertrag) =>
+            KontoVerknuepfungService.GetVertragName(vertrag);
 
         [HttpGet]
         [Route("api/selection/zaehler")]

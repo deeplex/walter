@@ -20,6 +20,7 @@ using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -62,12 +63,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
+            public IEnumerable<BuchungssatzEntryBase> Buchungssaetze { get; set; } = [];
 
             public TransaktionEntry() : base() { }
             public TransaktionEntry(Transaktion entity, Permissions permissions) : base(entity, permissions)
             {
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+                Buchungssaetze = entity.Buchungssaetze
+                    .OrderByDescending(s => s.Buchungsdatum)
+                    .ThenByDescending(s => s.Buchungsnummer)
+                    .Select(s => new BuchungssatzEntryBase(s))
+                    .ToList();
             }
         }
 

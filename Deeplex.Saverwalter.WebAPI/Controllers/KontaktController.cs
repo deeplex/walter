@@ -14,10 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BankkontoController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktMitgliedschaftController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
@@ -96,6 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
             public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
             public IEnumerable<BankkontoEntryBase> Bankkontos { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
 
             public KontaktEntry() : base() { }
             public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)
@@ -105,6 +108,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Vorname = entity.Vorname;
                 Name = entity.Name;
                 Notiz = entity.Notiz;
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.VerbindlichkeitsKonto, KontoFunktion.Verbindlichkeiten));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

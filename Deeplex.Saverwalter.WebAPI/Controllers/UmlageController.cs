@@ -15,9 +15,11 @@
 
 using System.ComponentModel.DataAnnotations;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -152,6 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<UmlageVersionEntryBase> Versionen { get; set; } = [];
             public IEnumerable<HKVOEntryBase> HKVOs { get; set; } = [];
             public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
 
             public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)
@@ -177,6 +180,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new UmlageVersionEntryBase(e, permissions)).ToList();
                 HKVOs = entity.HeizkostenHKVOs.OrderBy(h => h.Beginn).Select(e => new HKVOEntryBase(e, permissions)).ToList();
                 Betriebskostenrechnungen = [];
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.NkVerrechnungsKonto, KontoFunktion.NkVerrechnung),
+                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

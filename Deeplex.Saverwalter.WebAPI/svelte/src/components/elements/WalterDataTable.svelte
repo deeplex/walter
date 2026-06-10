@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         DataTable,
         DataTableSkeleton,
         Pagination,
+        Tag,
         Toolbar,
         ToolbarContent,
         ToolbarSearch
@@ -62,6 +63,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let headers: {
         key: string;
         value: string;
+        sort?: false;
     }[];
     export let readonly = false;
     export let rows: WalterDataTableRow[] | undefined = undefined;
@@ -315,6 +317,37 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         event.stopPropagation();
     }
 
+    // Zellen können statt Text auch einen farbigen Status-Tag anzeigen,
+    // indem der Wert als { text, tag } geliefert wird.
+    type WalterTagCellValue = {
+        text: string;
+        tag:
+            | 'red'
+            | 'magenta'
+            | 'purple'
+            | 'blue'
+            | 'cyan'
+            | 'teal'
+            | 'green'
+            | 'gray'
+            | 'cool-gray'
+            | 'warm-gray'
+            | 'high-contrast'
+            | 'outline';
+    };
+
+    function tagCell(value: unknown): WalterTagCellValue | undefined {
+        if (
+            typeof value === 'object' &&
+            value !== null &&
+            'tag' in value &&
+            'text' in value
+        ) {
+            return value as WalterTagCellValue;
+        }
+        return undefined;
+    }
+
     function getCellDisplayValue(cell: {
         key: string;
         value: unknown;
@@ -506,27 +539,36 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 />
                             </span>
                         {:else}
-                            {@const displayValue = getCellDisplayValue(cell)}
-                            {@const tooltip =
-                                displayValue === '---'
-                                    ? undefined
-                                    : displayValue}
-                            {@const href = resolveRowHref(row)}
-                            {#if href}
-                                <a
-                                    class="walter-table-link"
-                                    {href}
-                                    title={tooltip}
-                                    on:click={onRowLinkClick}
+                            {@const tagValue = tagCell(cell.value)}
+                            {#if tagValue}
+                                <Tag size="sm" type={tagValue.tag}
+                                    >{tagValue.text}</Tag
                                 >
-                                    <span class="walter-table-link__label"
-                                        >{displayValue}</span
-                                    >
-                                </a>
                             {:else}
-                                <span class="walter-table-text" title={tooltip}
-                                    >{displayValue}</span
-                                >
+                                {@const displayValue =
+                                    getCellDisplayValue(cell)}
+                                {@const tooltip =
+                                    displayValue === '---'
+                                        ? undefined
+                                        : displayValue}
+                                {@const href = resolveRowHref(row)}
+                                {#if href}
+                                    <a
+                                        class="walter-table-link"
+                                        {href}
+                                        title={tooltip}
+                                        on:click={onRowLinkClick}
+                                    >
+                                        <span class="walter-table-link__label"
+                                            >{displayValue}</span
+                                        >
+                                    </a>
+                                {:else}
+                                    <span
+                                        class="walter-table-text"
+                                        title={tooltip}>{displayValue}</span
+                                    >
+                                {/if}
                             {/if}
                         {/if}
                     </span>

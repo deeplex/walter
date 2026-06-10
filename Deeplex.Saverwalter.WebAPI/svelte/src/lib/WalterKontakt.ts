@@ -16,6 +16,7 @@
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBankkontoEntry } from './WalterBankkonto';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterTransaktionEntry } from './WalterTransaktion';
@@ -59,7 +60,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public bankkontos: WalterBankkontoEntry[] = [],
         public mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] = [],
         public mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] = [],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public konten: Partial<WalterBuchungskontoEntry>[] = []
     ) {
         super();
     }
@@ -93,7 +95,9 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] =
             json.mitgliedschaftenAlsMitglied?.map((m) => ({
                 id: m.id,
-                juristischePerson: WalterSelectionEntry.fromJson(m.juristischePerson),
+                juristischePerson: WalterSelectionEntry.fromJson(
+                    m.juristischePerson
+                ),
                 mitglied: WalterSelectionEntry.fromJson(m.mitglied),
                 von: m.von,
                 bis: m.bis ?? undefined,
@@ -102,7 +106,9 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] =
             json.mitgliedschaftenAlsJuristischePerson?.map((m) => ({
                 id: m.id,
-                juristischePerson: WalterSelectionEntry.fromJson(m.juristischePerson),
+                juristischePerson: WalterSelectionEntry.fromJson(
+                    m.juristischePerson
+                ),
                 mitglied: WalterSelectionEntry.fromJson(m.mitglied),
                 von: m.von,
                 bis: m.bis ?? undefined,
@@ -134,7 +140,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
             bankkontos,
             mitgliedschaftenAlsMitglied,
             mitgliedschaftenAlsJuristischePerson,
-            permissions
+            permissions,
+            json.konten ?? []
         );
     }
 }

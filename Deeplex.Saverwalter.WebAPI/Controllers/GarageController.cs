@@ -14,10 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
@@ -75,6 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public IEnumerable<GarageVertragEntryBase> Vertraege { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
 
             public GarageEntry() : base() { }
             public GarageEntry(Garage entity, Permissions permissions) : base(entity, permissions)
@@ -83,6 +86,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
                 Vertraege = entity.Vertraege.Select(v => new GarageVertragEntryBase(v, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.Ertragskonto, KontoFunktion.Mietertraege));
             }
         }
 

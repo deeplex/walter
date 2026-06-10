@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterApiHandler } from './WalterApiHandler';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterGarageVertragVersionEntry } from './WalterGarageVertragVersion';
 import { WalterKontaktEntry } from './WalterKontakt';
 import { WalterPermissions } from './WalterPermissions';
@@ -35,7 +36,8 @@ export class WalterGarageVertragEntry extends WalterApiHandler {
         public selectedMieter: WalterSelectionEntry[],
         public mieter: WalterKontaktEntry[],
         public versionen: WalterGarageVertragVersionEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public konten: Partial<WalterBuchungskontoEntry>[] = []
     ) {
         super();
     }
@@ -77,7 +79,8 @@ export class WalterGarageVertragEntry extends WalterApiHandler {
             selectedMieter,
             mieter,
             versionen,
-            permissions
+            permissions,
+            json.konten ?? []
         );
     }
 }

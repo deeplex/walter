@@ -25,6 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterBetriebskostenrechnungEntry,
         validateBetriebskostenrechnung
     } from '$walter/lib';
+    import { convertEuro } from '$walter/services/utils';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -40,11 +41,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'betreffendesJahr', value: 'Betreffendes Jahr' },
         { key: 'betrag', value: 'Betrag' },
         { key: 'datum', value: 'Datum' },
-        { key: 'ausgeglichen', value: '⚖' }
+        { key: 'bezahltStatus', value: 'Bezahlt', sort: false as const },
+        { key: 'nkStatus', value: 'NK-Verteilung', sort: false as const }
     ];
 
+    // OPOS-Sicht der Rechnung: Zahlungseingang und Verteilung auf die
+    // NK-Anteile als Status-Tags direkt in der Rechnungsliste.
     function enrich(r: WalterBetriebskostenrechnungEntry) {
-        return { ...r, ausgeglichen: r.isBalanced ? '✓' : '✗' };
+        const nkOffen = Math.max(0, r.betrag - r.verteilt);
+        return {
+            ...r,
+            bezahltStatus: r.isBezahlt
+                ? { text: 'Bezahlt', tag: 'green' }
+                : { text: 'Offen', tag: 'red' },
+            nkStatus:
+                nkOffen <= 0.005
+                    ? { text: 'Verteilt', tag: 'green' }
+                    : {
+                          text: `Offen: ${convertEuro(nkOffen)}`,
+                          tag: 'warm-gray'
+                      }
+        };
     }
 
     const transformRow = (row: DataTableRow) =>

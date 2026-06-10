@@ -15,6 +15,7 @@
 
 import type { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterKontaktEntry } from './WalterKontakt';
 import { WalterMietzahlungListEntry } from './WalterMietzahlung';
@@ -47,7 +48,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         public kautionBetrag: number | undefined,
         public kautionEingangsdatum: string | undefined,
         public kautionRueckgabedatum: string | undefined,
-        public kautionArt: string | undefined
+        public kautionArt: string | undefined,
+        public konten: Partial<WalterBuchungskontoEntry>[]
     ) {
         super();
     }
@@ -100,7 +102,8 @@ export class WalterVertragEntry extends WalterApiHandler {
             json.kautionBetrag,
             json.kautionEingangsdatum,
             json.kautionRueckgabedatum,
-            json.kautionArt
+            json.kautionArt,
+            json.konten ?? []
         );
     }
 }

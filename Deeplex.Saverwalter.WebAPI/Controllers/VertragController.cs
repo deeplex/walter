@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
@@ -94,6 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
 
             public decimal? KautionBetrag { get; set; }
             public DateOnly? KautionEingangsdatum { get; set; }
@@ -124,6 +126,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     => new AbrechnungsresultatEntry(e, permissions));
                 GarageVertraege = entity.GarageVertraege.Select(e
                     => new GarageVertragEntryBase(e, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.MietBuchungskonto, KontoFunktion.Mietforderungen),
+                    (entity.NkBuchungskonto, KontoFunktion.NkVorauszahlungen),
+                    (entity.BkAbrechnungsKonto, KontoFunktion.BkAbrechnung),
+                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge),
+                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

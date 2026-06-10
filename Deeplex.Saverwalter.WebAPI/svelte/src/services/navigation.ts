@@ -17,6 +17,8 @@ import { walter_goto } from './utils';
 
 export const navigation = {
     bankkonto: (id: number) => walter_goto(`/bankkontos/${id}`),
+    buchungskonto: (id: number) => walter_goto(`/buchungskonten/${id}`),
+    buchungssatz: (id: string) => walter_goto(`/buchungssaetze/${id}`),
     garage: (id: number) => walter_goto(`/garagen/${id}`),
     garageVertrag: (id: number) => walter_goto(`/garage-vertraege/${id}`),
     abrechnungsresultat: (id: string) =>

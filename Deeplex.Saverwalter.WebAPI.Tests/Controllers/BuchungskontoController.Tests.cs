@@ -101,6 +101,35 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task Get_liefert_funktion_summen_und_verknuepfung()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managedKontoId, _) = Seed(ctx);
+
+            var konto = ctx.Buchungskonten.Find(managedKontoId)!;
+            var satz = new Buchungssatz(new DateOnly(2026, 5, 1), "Mietforderung Mai");
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 500m)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = konto
+            });
+            ctx.Buchungssaetze.Add(satz);
+            ctx.SaveChanges();
+
+            var controller = WithUser(ctx, Principal(manager));
+            var result = (await controller.Get(managedKontoId)).Result as OkObjectResult;
+            var detail = result!.Value as BuchungskontoDetail;
+
+            detail!.Funktion.Should().Be("Mietforderungen");
+            detail.Ausgleichbar.Should().BeTrue();
+            detail.SollSumme.Should().Be(500m);
+            detail.HabenSumme.Should().Be(0m);
+            detail.MonatsSummen.Should().ContainSingle(m =>
+                m.Jahr == 2026 && m.Monat == 5 && m.Soll == 500m && m.Haben == 0m);
+            detail.Verknuepfungen.Should().ContainSingle(v => v.Typ == "Vertrag");
+        }
+
+        [Fact]
         public async Task Get_foreign_konto_is_forbidden()
         {
             var ctx = TestUtils.GetContext();

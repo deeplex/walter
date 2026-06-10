@@ -56,7 +56,7 @@ function createEntryMocks(entries: number) {
 describe('adressen/page.svelte tests', () => {
     afterEach(cleanup);
 
-    it('Should have header with 6 entries', () => {
+    it('Should have header with 7 entries', () => {
         render(Page, {
             rows: createEntryMocks(5),
             fetchImpl: createMockFetch()
@@ -70,11 +70,12 @@ describe('adressen/page.svelte tests', () => {
         expect(headers?.item(2)?.innerHTML).toContain('Betreffendes Jahr');
         expect(headers?.item(3)?.innerHTML).toContain('Betrag');
         expect(headers?.item(4)?.innerHTML).toContain('Datum');
-        // Column added by the proper-books work: a balanced (ausgeglichen) flag.
-        expect(headers?.item(5)?.innerHTML).toContain('⚖');
+        // OPOS-Status der Rechnung: Zahlungseingang und NK-Verteilung.
+        expect(headers?.item(5)?.innerHTML).toContain('Bezahlt');
+        expect(headers?.item(6)?.innerHTML).toContain('NK-Verteilung');
 
         expect(headers).toBeDefined();
-        expect(headers).toHaveLength(6);
+        expect(headers).toHaveLength(7);
     });
 
     it('Should have 15 entries', () => {
@@ -90,15 +91,17 @@ describe('adressen/page.svelte tests', () => {
 
         for (let i = 0; i < rows!.length; ++i) {
             const cells = rows?.item(i)?.getElementsByTagName('td');
-            expect(cells?.length).toBe(6);
+            expect(cells?.length).toBe(7);
             expect(cells?.item(0)?.innerHTML).toContain('Testtyp');
             // TODO check wohnungen
             // expect(cells?.item(1)?.innerHTML).toContain(`${i}`);
             expect(cells?.item(2)?.innerHTML).toContain('2021');
             expect(cells?.item(3)?.innerHTML).toMatch(/\d/);
             expect(cells?.item(4)?.innerHTML).toMatch(/\d{2}\.\d{2}\.\d{4}/);
-            // Balanced flag column renders either ✓ or ✗.
-            expect(cells?.item(5)?.innerHTML).toMatch(/[✓✗]/);
+            // Status-Tags: Zahlungseingang offen, NK vollständig verteilt
+            // (betrag === verteilt in den Mocks).
+            expect(cells?.item(5)?.innerHTML).toContain('Offen');
+            expect(cells?.item(6)?.innerHTML).toContain('Verteilt');
         }
     });
 
