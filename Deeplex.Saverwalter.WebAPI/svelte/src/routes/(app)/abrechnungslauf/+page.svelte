@@ -27,8 +27,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         Button,
         InlineNotification,
+        Modal,
         NumberInput,
-        Row
+        Row,
+        TextArea
     } from 'carbon-components-svelte';
     import { tick } from 'svelte';
     import { download_file_blob } from '$walter/services/files';
@@ -235,6 +237,80 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
               .flatMap((g) => g.resultate)
               .filter((r) => r.vertragId != null)
         : [];
+    $: gebuchteResultate = vertragResultate.filter(
+        (r) => r.gebuchtesAbrechnungsResultat != null
+    );
+
+    // ── Rückabwicklung / Storno der gebuchten Abrechnung ────────────────────
+
+    let rueckabwicklungOpen = false;
+    let stornoAbrechnungOpen = false;
+    let stornoAbrechnungGrund = '';
+    let rueckabwicklungLoading = false;
+
+    const RueckabwicklungToast = new WalterToastContent(
+        'Abrechnung zurückgenommen',
+        'Rücknahme fehlgeschlagen',
+        () => 'Resultate, NK-Verteilungen und Umbuchungen wurden entfernt.',
+        (error: unknown) =>
+            typeof error === 'string' && error.length > 0
+                ? error
+                : 'Bitte erneut versuchen.'
+    );
+
+    const StornoAbrechnungToast = new WalterToastContent(
+        'Abrechnung storniert',
+        'Storno fehlgeschlagen',
+        () =>
+            'Alle Abrechnungsbuchungen wurden durch Gegenbuchungen neutralisiert.',
+        (error: unknown) =>
+            typeof error === 'string' && error.length > 0
+                ? error
+                : 'Bitte erneut versuchen.'
+    );
+
+    async function rueckabwicklung() {
+        rueckabwicklungLoading = true;
+        try {
+            for (const wohnungIds of selectedGruppenWohnungIds) {
+                const resp = await walter_post(
+                    '/api/abrechnungslauf/rueckabwicklung',
+                    { wohnungIds, jahr }
+                );
+                if (!resp.ok) {
+                    addToast(RueckabwicklungToast, false, await resp.text());
+                    return;
+                }
+            }
+            addToast(RueckabwicklungToast, true, undefined);
+            await preview();
+        } finally {
+            rueckabwicklungLoading = false;
+            rueckabwicklungOpen = false;
+        }
+    }
+
+    async function stornoAbrechnung() {
+        rueckabwicklungLoading = true;
+        try {
+            for (const wohnungIds of selectedGruppenWohnungIds) {
+                const resp = await walter_post('/api/abrechnungslauf/storno', {
+                    wohnungIds,
+                    jahr,
+                    grund: stornoAbrechnungGrund
+                });
+                if (!resp.ok) {
+                    addToast(StornoAbrechnungToast, false, await resp.text());
+                    return;
+                }
+            }
+            addToast(StornoAbrechnungToast, true, undefined);
+            await preview();
+        } finally {
+            rueckabwicklungLoading = false;
+            stornoAbrechnungOpen = false;
+        }
+    }
     $: fehlendeBuchungen = vertragResultate.filter(
         (r) => r.gebuchtesAbrechnungsResultat == null
     ).length;
@@ -407,5 +483,81 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             on:download={downloadAbrechnungen}
             on:book={book}
         />
+
+        {#if gebuchteResultate.length > 0}
+            <div class="rueckabwicklung">
+                <span style="color: var(--cds-text-secondary);">
+                    Korrektur der gebuchten Abrechnung:
+                </span>
+                <Button
+                    kind="danger-tertiary"
+                    size="small"
+                    disabled={rueckabwicklungLoading}
+                    on:click={() => (rueckabwicklungOpen = true)}
+                >
+                    Abrechnung {jahr} zurücknehmen
+                </Button>
+                <Button
+                    kind="danger-tertiary"
+                    size="small"
+                    disabled={rueckabwicklungLoading}
+                    on:click={() => (stornoAbrechnungOpen = true)}
+                >
+                    Abrechnung {jahr} stornieren
+                </Button>
+            </div>
+        {/if}
     {/if}
 </WalterGrid>
+
+<Modal
+    bind:open={rueckabwicklungOpen}
+    danger
+    modalHeading={`Abrechnung ${jahr} zurücknehmen`}
+    primaryButtonText="Zurücknehmen"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={rueckabwicklungLoading}
+    on:click:button--secondary={() => (rueckabwicklungOpen = false)}
+    on:submit={rueckabwicklung}
+>
+    <p>
+        Die gebuchte Abrechnung der ausgewählten Gruppen wird vollständig
+        zurückgenommen: Abrechnungsresultate samt Buchungssätzen, die
+        NK-Verteilungen auf den Rechnungen und die Strompauschale-Umbuchungen.
+        Manuell erfasste NK-Anteile und die Rechnungen selbst bleiben erhalten.
+        Bereits versendete Abrechnungen können nur storniert werden.
+    </p>
+</Modal>
+
+<Modal
+    bind:open={stornoAbrechnungOpen}
+    danger
+    modalHeading={`Abrechnung ${jahr} stornieren`}
+    primaryButtonText="Stornieren"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={rueckabwicklungLoading ||
+        stornoAbrechnungGrund.trim().length === 0}
+    on:click:button--secondary={() => (stornoAbrechnungOpen = false)}
+    on:submit={stornoAbrechnung}
+>
+    <p style="margin-bottom: 1rem;">
+        Alle Abrechnungsbuchungen der ausgewählten Gruppen werden durch
+        Gegenbuchungen neutralisiert — der Weg für bereits versendete
+        Abrechnungen. Die Resultate bleiben als Beleg bestehen.
+    </p>
+    <TextArea
+        labelText="Grund (Pflicht)"
+        placeholder="Warum wird die Abrechnung storniert?"
+        bind:value={stornoAbrechnungGrund}
+    />
+</Modal>
+
+<style>
+    .rueckabwicklung {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+</style>

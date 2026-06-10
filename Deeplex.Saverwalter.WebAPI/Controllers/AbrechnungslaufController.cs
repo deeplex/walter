@@ -38,6 +38,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Jahr { get; set; }
         }
 
+        public class RueckabwicklungRequest
+        {
+            public List<int> WohnungIds { get; set; } = [];
+            public int Jahr { get; set; }
+            /// <summary>Pflicht beim Storno, beim Löschen ungenutzt.</summary>
+            public string? Grund { get; set; }
+        }
+
         private readonly AbrechnungslaufService _service;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
@@ -147,6 +155,60 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.GetBaseException().Message);
+            }
+        }
+
+        /// <summary>
+        /// Nimmt die gebuchte Abrechnung der Gruppe für das Jahr vollständig zurück
+        /// (Resultate, Verteil-Zeilen, Umbuchungen). Gesperrt bei abgesendeten
+        /// Abrechnungen — dann ist nur noch das Gruppen-Storno möglich.
+        /// </summary>
+        [HttpPost("rueckabwicklung")]
+        public async Task<ActionResult<AbrechnungslaufService.RueckabwicklungResult>> Rueckabwicklung(
+            [FromBody] RueckabwicklungRequest request)
+        {
+            if (request.WohnungIds.Count == 0)
+                return BadRequest("Abrechnungsgruppe darf nicht leer sein.");
+
+            if (!await CanAccessAllWohnungen(
+                    _auth, _ctx, User!, request.WohnungIds, Operations.Delete))
+                return Forbid();
+
+            try
+            {
+                return Ok(await _service.DeleteAsync(request.WohnungIds, request.Jahr));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Storniert die gebuchte Abrechnung der Gruppe GoB-konform — der Weg für
+        /// bereits abgesendete Abrechnungen. Grund ist Pflicht.
+        /// </summary>
+        [HttpPost("storno")]
+        public async Task<ActionResult<AbrechnungslaufService.RueckabwicklungResult>> Storno(
+            [FromBody] RueckabwicklungRequest request)
+        {
+            if (request.WohnungIds.Count == 0)
+                return BadRequest("Abrechnungsgruppe darf nicht leer sein.");
+
+            if (string.IsNullOrWhiteSpace(request.Grund))
+                return BadRequest("Für ein Storno muss ein Grund angegeben werden.");
+
+            if (!await CanAccessAllWohnungen(
+                    _auth, _ctx, User!, request.WohnungIds, Operations.Delete))
+                return Forbid();
+
+            try
+            {
+                return Ok(await _service.StornoAsync(request.WohnungIds, request.Jahr, request.Grund));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
             }
         }
     }

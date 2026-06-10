@@ -29,9 +29,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/buchungssaetze")]
     public class BuchungssaetzeController(
         StornoBuchungsService stornoService,
+        BuchungssatzSchutzService schutzService,
         SaverwalterContext ctx,
         IAuthorizationService auth) : ControllerBase
     {
+        public class StornoRequest
+        {
+            public string Grund { get; set; } = string.Empty;
+        }
+
         public class StornoBuchungssatzInfo
         {
             public Guid BuchungssatzId { get; set; }
@@ -143,6 +149,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public BuchungssatzLink? StornoVon { get; set; }
             public BuchungssatzLink? StornoNach { get; set; }
             public List<KontoVerknuepfungEntry> Verknuepfungen { get; set; } = [];
+
+            /// <summary>Schutzstatus: Korrekturen nur im Rahmen der GoB-Regeln.</summary>
+            public bool KannStornieren { get; set; }
+            public bool KannLoeschen { get; set; }
+            public string? Sperrgrund { get; set; }
 
             public BuchungssatzEntry() : base() { }
             public BuchungssatzEntry(Buchungssatz entity) : base(entity)
@@ -334,46 +345,81 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .Any(v => v.KontoId == zeile.KontoId && v.Ausgleichbar);
             }
 
+            var schutz = await schutzService.PruefeAsync(satz);
+            entry.KannStornieren = schutz.KannStornieren;
+            entry.KannLoeschen = schutz.KannLoeschen;
+            entry.Sperrgrund = schutz.Sperrgrund;
+
             return Ok(entry);
         }
+
+        /// <summary>
+        /// Autorisierung für Korrekturen: Admin oder Vollzugriff auf die Wohnung
+        /// des ersten Buchungskontos des Satzes.
+        /// </summary>
+        private async Task<ActionResult?> AuthorizeKorrektur(Guid id)
+        {
+            if (User!.IsInRole("Admin"))
+            {
+                return null;
+            }
+
+            var wohnung = await ctx.Buchungssaetze
+                .Where(s => s.BuchungssatzId == id)
+                .SelectMany(s => s.Buchungszeilen)
+                .Select(z => z.Buchungskonto)
+                .SelectMany(k =>
+                    ctx.Vertraege
+                        .Where(v =>
+                            v.MietBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
+                            v.NkBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
+                            v.ZahlungsKonto.BuchungskontoId == k.BuchungskontoId)
+                        .Select(v => v.Wohnung))
+                .FirstOrDefaultAsync();
+
+            if (wohnung == null) return Forbid();
+
+            var authRx = await auth.AuthorizeAsync(User!, wohnung, [Operations.Delete]);
+            return authRx.Succeeded ? null : Forbid();
+        }
+
+        private async Task<Buchungssatz?> LadeSatzMitZeilen(Guid id) =>
+            await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.StornoVon)
+                .Include(s => s.StornoNach)
+                .FirstOrDefaultAsync(s => s.BuchungssatzId == id);
 
         /// <summary>
         /// Erstellt eine Stornobuchung für den angegebenen Buchungssatz.
         /// Alle Buchungszeilen werden mit umgekehrten Soll/Haben-Seiten gebucht,
         /// bestehende OPOS-Ausgleiche der Originalzeilen werden gelöscht.
+        /// Der Grund ist Pflicht und wird als Notiz am Storno-Satz festgehalten.
         /// </summary>
         [HttpPost("{id}/storno")]
-        public async Task<ActionResult<StornoBuchungssatzInfo>> Stornieren(Guid id)
+        public async Task<ActionResult<StornoBuchungssatzInfo>> Stornieren(
+            Guid id, [FromBody] StornoRequest request)
         {
-            // Autorisierung: Admin oder Vollzugriff auf die Wohnung des ersten Buchungskontos
-            var satz = await ctx.Buchungssaetze.FindAsync(id);
+            if (string.IsNullOrWhiteSpace(request.Grund))
+            {
+                return BadRequest("Für eine Stornobuchung muss ein Grund angegeben werden.");
+            }
+
+            var satz = await LadeSatzMitZeilen(id);
             if (satz == null) return NotFound();
 
-            if (!User!.IsInRole("Admin"))
+            if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
+
+            var schutz = await schutzService.PruefeAsync(satz);
+            if (!schutz.KannStornieren)
             {
-                // Storno erfordert Vollzugriff — prüfe über die Wohnung des ersten Buchungskontos
-                var wohnung = await ctx.Buchungssaetze
-                    .Where(s => s.BuchungssatzId == id)
-                    .SelectMany(s => s.Buchungszeilen)
-                    .Select(z => z.Buchungskonto)
-                    .SelectMany(k =>
-                        ctx.Vertraege
-                            .Where(v =>
-                                v.MietBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
-                                v.NkBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
-                                v.ZahlungsKonto.BuchungskontoId == k.BuchungskontoId)
-                            .Select(v => v.Wohnung))
-                    .FirstOrDefaultAsync();
-
-                if (wohnung == null) return Forbid();
-
-                var authRx = await auth.AuthorizeAsync(User!, wohnung, [Operations.Delete]);
-                if (!authRx.Succeeded) return Forbid();
+                return Conflict(schutz.Sperrgrund);
             }
 
             try
             {
-                var storno = await stornoService.StornierenAsync(id);
+                var storno = await stornoService.StornierenAsync(id, request.Grund);
                 return Ok(new StornoBuchungssatzInfo
                 {
                     BuchungssatzId = storno.BuchungssatzId,
@@ -385,6 +431,31 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
             catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
             catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+        }
+
+        /// <summary>
+        /// Löscht einen Buchungssatz endgültig — nur für "freie" Sätze erlaubt
+        /// (keine Abrechnung betroffen, keine OPOS-Verknüpfung, kein Storno-Paar).
+        /// Für alles andere ist die Stornobuchung der richtige Weg.
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(Guid id)
+        {
+            var satz = await LadeSatzMitZeilen(id);
+            if (satz == null) return NotFound();
+
+            if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
+
+            var schutz = await schutzService.PruefeAsync(satz);
+            if (!schutz.KannLoeschen)
+            {
+                return Conflict(schutz.Sperrgrund);
+            }
+
+            ctx.Buchungssaetze.Remove(satz);
+            await ctx.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

@@ -52,17 +52,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         private readonly NkAnteilBuchungsService _nkAnteilBuchungsService;
         private readonly AbrechnungsresultatBuchungsService _buchungsService;
         private readonly AbrechnungsgruppenService _gruppenService;
+        private readonly StornoBuchungsService _stornoService;
 
         public AbrechnungslaufService(
             SaverwalterContext ctx,
             NkAnteilBuchungsService nkAnteilBuchungsService,
             AbrechnungsresultatBuchungsService buchungsService,
-            AbrechnungsgruppenService gruppenService)
+            AbrechnungsgruppenService gruppenService,
+            StornoBuchungsService stornoService)
         {
             _ctx = ctx;
             _nkAnteilBuchungsService = nkAnteilBuchungsService;
             _buchungsService = buchungsService;
             _gruppenService = gruppenService;
+            _stornoService = stornoService;
         }
 
         public Task<List<AbrechnungsGruppe>> GetGruppenAsync() =>
@@ -271,6 +274,203 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
             _ctx.Buchungssaetze.Add(transient);
             return transient;
+        }
+
+        // ── Rückabwicklung ────────────────────────────────────────────────────
+
+        public sealed class RueckabwicklungResult
+        {
+            public int Resultate { get; init; }
+            public int Umbuchungen { get; init; }
+            public int BereinigteVerteilungen { get; init; }
+        }
+
+        /// <summary>
+        /// Nimmt die gebuchte Abrechnung einer Gruppe für ein Jahr vollständig zurück:
+        /// löscht die Abrechnungsresultate samt Buchungssätzen, entfernt die vom Lauf
+        /// gebuchten Verteil-Zeilen von den Rechnungssätzen und löscht die
+        /// Strompauschale-Umbuchungen. Manuelle NK-Anteil-Sätze bleiben erhalten.
+        /// Gesperrt, sobald ein Resultat als abgesendet markiert ist.
+        /// </summary>
+        public async Task<RueckabwicklungResult> DeleteAsync(List<int> wohnungIds, int jahr)
+        {
+            var resultate = await LadeResultate(wohnungIds, jahr);
+            if (resultate.Any(r => r.Abgesendet))
+                throw new InvalidOperationException(
+                    "Mindestens eine Abrechnung wurde bereits versendet — die Gruppe kann nur noch storniert werden.");
+
+            var (vertragNkKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
+            var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
+
+            var zuLoeschen = new List<Buchungssatz>();
+            foreach (var resultat in resultate)
+            {
+                zuLoeschen.Add(resultat.Buchungssatz);
+                if (resultat.Buchungssatz.StornoNach is Buchungssatz storno)
+                    zuLoeschen.Add(storno);
+            }
+
+            var umbuchungen = 0;
+            var bereinigt = 0;
+            var anteilZeilen = new List<Buchungszeile>();
+            foreach (var satz in verteilSaetze)
+            {
+                if (satz.Beschreibung.StartsWith(StrompauschaleMarker))
+                {
+                    // Vom Lauf erzeugte Umbuchung — komplett entfernen (inkl. Storno-Paar)
+                    zuLoeschen.Add(satz);
+                    if (satz.StornoNach is Buchungssatz storno)
+                        zuLoeschen.Add(storno);
+                    umbuchungen++;
+                    continue;
+                }
+
+                // Rechnungssatz: nur die vom Lauf angefügten Verteil-Zeilen
+                // (Konten der Verträge) entfernen, die Rechnung selbst bleibt.
+                var zeilen = satz.Buchungszeilen
+                    .Where(z => vertragNkKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .ToList();
+                if (zeilen.Count == 0) continue;
+                anteilZeilen.AddRange(zeilen);
+                bereinigt++;
+            }
+
+            await EntferneOpos(zuLoeschen.SelectMany(s => s.Buchungszeilen).Concat(anteilZeilen));
+            _ctx.Buchungszeilen.RemoveRange(anteilZeilen);
+            _ctx.Abrechnungsresultate.RemoveRange(resultate);
+            _ctx.Buchungssaetze.RemoveRange(zuLoeschen);
+            await _ctx.SaveChangesAsync();
+
+            return new RueckabwicklungResult
+            {
+                Resultate = resultate.Count,
+                Umbuchungen = umbuchungen,
+                BereinigteVerteilungen = bereinigt
+            };
+        }
+
+        /// <summary>
+        /// Storniert die gebuchte Abrechnung einer Gruppe GoB-konform — der Weg für
+        /// bereits abgesendete Abrechnungen: Storno-Sätze für Resultate und
+        /// Umbuchungen, Korrektur-Sätze für die Verteil-Zeilen der Rechnungssätze.
+        /// Die Abrechnungsresultate bleiben als Beleg bestehen.
+        /// </summary>
+        public async Task<RueckabwicklungResult> StornoAsync(List<int> wohnungIds, int jahr, string grund)
+        {
+            var resultate = await LadeResultate(wohnungIds, jahr);
+            var (vertragNkKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
+            var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
+
+            var stornierteResultate = 0;
+            foreach (var resultat in resultate
+                .Where(r => r.Buchungssatz.StornoNach == null))
+            {
+                await _stornoService.StornierenAsync(resultat.Buchungssatz.BuchungssatzId, grund);
+                stornierteResultate++;
+            }
+
+            var umbuchungen = 0;
+            var bereinigt = 0;
+            foreach (var satz in verteilSaetze.Where(s => s.StornoNach == null && s.StornoVon == null))
+            {
+                if (satz.Beschreibung.StartsWith(StrompauschaleMarker))
+                {
+                    await _stornoService.StornierenAsync(satz.BuchungssatzId, grund);
+                    umbuchungen++;
+                    continue;
+                }
+
+                var zeilen = satz.Buchungszeilen
+                    .Where(z => vertragNkKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .ToList();
+                if (zeilen.Count == 0) continue;
+
+                // Schon korrigiert? (Re-Runs dürfen keine doppelten Gegenbuchungen erzeugen)
+                var beschreibung = $"Storno NK-Verteilung: {satz.Beschreibung}";
+                if (await _ctx.Buchungssaetze.AnyAsync(k =>
+                        k.Buchungsjahr == jahr && k.Beschreibung == beschreibung))
+                    continue;
+
+                var korrektur = new Buchungssatz(DateOnly.FromDateTime(DateTime.Today), beschreibung)
+                {
+                    Buchungsjahr = jahr,
+                    Notiz = grund
+                };
+                foreach (var zeile in zeilen)
+                {
+                    korrektur.Buchungszeilen.Add(new Buchungszeile(
+                        zeile.SollHaben == SollHaben.Soll ? SollHaben.Haben : SollHaben.Soll,
+                        zeile.Betrag)
+                    {
+                        Buchungssatz = korrektur,
+                        Buchungskonto = zeile.Buchungskonto
+                    });
+                }
+                await EntferneOpos(zeilen);
+                _ctx.Buchungssaetze.Add(korrektur);
+                bereinigt++;
+            }
+
+            await _ctx.SaveChangesAsync();
+
+            return new RueckabwicklungResult
+            {
+                Resultate = stornierteResultate,
+                Umbuchungen = umbuchungen,
+                BereinigteVerteilungen = bereinigt
+            };
+        }
+
+        private Task<List<Abrechnungsresultat>> LadeResultate(List<int> wohnungIds, int jahr) =>
+            _ctx.Abrechnungsresultate
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.StornoNach)
+                        .ThenInclude(st => st!.Buchungszeilen)
+                .Where(r => wohnungIds.Contains(r.Vertrag.Wohnung.WohnungId)
+                         && r.Buchungssatz.Buchungsjahr == jahr)
+                .ToListAsync();
+
+        private async Task<(List<int> VertragNkKontoIds, List<int> UmlageNkVkIds)> LadeGruppenKonten(
+            List<int> wohnungIds)
+        {
+            var vertragNkKontoIds = await _ctx.Vertraege
+                .Where(v => wohnungIds.Contains(v.Wohnung.WohnungId))
+                .Select(v => v.NkBuchungskonto.BuchungskontoId)
+                .ToListAsync();
+            var umlageNkVkIds = await _ctx.Umlagen
+                .Where(u => u.Wohnungen.Any(w => wohnungIds.Contains(w.WohnungId)))
+                .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
+                .ToListAsync();
+            return (vertragNkKontoIds, umlageNkVkIds);
+        }
+
+        /// <summary>
+        /// Sätze des Jahres mit Haben auf einem NK-Verrechnungskonto der Gruppe:
+        /// BK-Rechnungen (tragen die Verteil-Zeilen des Laufs) und
+        /// Strompauschale-Umbuchungen. Manuelle NK-Anteil-Sätze sind ausgenommen.
+        /// </summary>
+        private Task<List<Buchungssatz>> LadeVerteilSaetze(List<int> umlageNkVkIds, int jahr) =>
+            _ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .Include(s => s.StornoNach)
+                    .ThenInclude(st => st!.Buchungszeilen)
+                .Where(s => s.Buchungsjahr == jahr
+                         && !s.Beschreibung.StartsWith(NkAnteilBuchungsService.BeschreibungPrefix)
+                         && s.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Haben
+                                && umlageNkVkIds.Contains(z.Buchungskonto.BuchungskontoId)))
+                .ToListAsync();
+
+        private async Task EntferneOpos(IEnumerable<Buchungszeile> zeilen)
+        {
+            var zeileIds = zeilen.Select(z => z.BuchungszeileId).Distinct().ToList();
+            var ausgleiche = await _ctx.OffenePostenAusgleiche
+                .Where(a => zeileIds.Contains(a.SollZeile.BuchungszeileId)
+                         || zeileIds.Contains(a.HabenZeile.BuchungszeileId))
+                .ToListAsync();
+            _ctx.OffenePostenAusgleiche.RemoveRange(ausgleiche);
         }
 
         // ── Datenladung ───────────────────────────────────────────────────────

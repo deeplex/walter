@@ -24,8 +24,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         /// Erstellt eine Stornobuchung für den angegebenen Buchungssatz.
         /// Alle Buchungszeilen werden mit umgekehrten Soll/Haben-Seiten gebucht.
         /// Bestehende OPOS-Ausgleiche der Originalzeilen werden entfernt.
+        /// Der Grund wird als Notiz am Storno-Satz festgehalten.
         /// </summary>
-        public async Task<Buchungssatz> StornierenAsync(Guid buchungssatzId)
+        public async Task<Buchungssatz> StornierenAsync(Guid buchungssatzId, string? grund = null)
         {
             var original = await ctx.Buchungssaetze
                 .Include(s => s.StornoNach)
@@ -50,6 +51,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             {
                 Buchungsjahr = original.Buchungsjahr,
                 StornoVon = original,
+                Notiz = string.IsNullOrWhiteSpace(grund) ? null : grund.Trim(),
             };
 
             foreach (var zeile in original.Buchungszeilen)

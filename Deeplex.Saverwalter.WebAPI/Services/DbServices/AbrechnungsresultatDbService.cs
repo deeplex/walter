@@ -86,6 +86,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             }
 
             var permissions = await GetPermissions(user, entity, Auth);
+            // Einzel-Löschen ist gesperrt (nur Rückabwicklung über den Abrechnungslauf)
+            permissions.Remove = false;
             var entry = new AbrechnungsresultatEntry(entity, permissions);
 
             return entry;
@@ -98,6 +100,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await GetPermissions(user, entity, Auth);
+                // Einzel-Löschen ist gesperrt (nur Rückabwicklung über den Abrechnungslauf)
+                permissions.Remove = false;
                 var entry = new AbrechnungsresultatEntry(entity, permissions);
 
                 return entry;
@@ -106,16 +110,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, Guid id)
         {
-            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
-            {
-                if (entity.Abgesendet)
-                    return new ConflictObjectResult("Abgesendete Abrechnungen können nicht gelöscht werden.");
-
-                Ctx.Abrechnungsresultate.Remove(entity);
-                await Ctx.SaveChangesAsync();
-
-                return new OkResult();
-            });
+            // Einzelne Resultate zu löschen würde die Abrechnung der Gruppe
+            // inkonsistent machen (Buchungssatz, NK-Verteilungen und Umbuchungen
+            // blieben zurück) — Rückabwicklung nur als Ganzes über den Abrechnungslauf.
+            return await HandleEntity(user, id, Operations.Delete, (entity) =>
+                Task.FromResult<ActionResult>(new ConflictObjectResult(
+                    "Abrechnungsresultate können nur über die Rückabwicklung des " +
+                    "Abrechnungslaufs (gesamte Gruppe + Jahr) gelöscht werden.")));
         }
 
         public override async Task<ActionResult<AbrechnungsresultatEntry>> Post(

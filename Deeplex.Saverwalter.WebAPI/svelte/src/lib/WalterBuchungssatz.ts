@@ -80,7 +80,11 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
         public stornoNach: WalterBuchungssatzLink | undefined,
         public verknuepfungen: WalterKontoVerknuepfung[],
         public createdAt: Date,
-        public lastModified: Date
+        public lastModified: Date,
+        // Schutzstatus für Korrekturen (nur im Detail gefüllt).
+        public kannStornieren: boolean,
+        public kannLoeschen: boolean,
+        public sperrgrund: string | undefined
     ) {
         super();
     }
@@ -119,7 +123,10 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
             json.stornoNach,
             json.verknuepfungen ?? [],
             new Date(json.createdAt),
-            new Date(json.lastModified)
+            new Date(json.lastModified),
+            json.kannStornieren ?? false,
+            json.kannLoeschen ?? false,
+            json.sperrgrund
         );
     }
 

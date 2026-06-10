@@ -20,6 +20,7 @@ using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -29,9 +30,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 {
     public class BuchungssaetzeControllerTests
     {
+        /// <summary>Die Wohnungs-Autorisierung selbst ist in den PermissionHandler-Tests abgedeckt.</summary>
+        private class AllowAllAuth : IAuthorizationService
+        {
+            public Task<AuthorizationResult> AuthorizeAsync(
+                ClaimsPrincipal user, object? resource, IEnumerable<IAuthorizationRequirement> requirements) =>
+                Task.FromResult(AuthorizationResult.Success());
+
+            public Task<AuthorizationResult> AuthorizeAsync(
+                ClaimsPrincipal user, object? resource, string policyName) =>
+                Task.FromResult(AuthorizationResult.Success());
+        }
+
         private static BuchungssaetzeController WithUser(SaverwalterContext ctx, ClaimsPrincipal user)
         {
-            var controller = new BuchungssaetzeController(new StornoBuchungsService(ctx), ctx, null!)
+            var controller = new BuchungssaetzeController(
+                new StornoBuchungsService(ctx), new BuchungssatzSchutzService(ctx), ctx, new AllowAllAuth())
             {
                 ControllerContext = new ControllerContext
                 {
@@ -193,6 +207,119 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var rows = (listResult!.Value as PagedResult<BuchungssatzEntryBase>)!.Items.ToList();
             rows.Single(r => r.Id == forderung.BuchungssatzId).KontoOffen.Should().Be(200m);
             rows.Single(r => r.Id == zahlung.BuchungssatzId).KontoOffen.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task Delete_freier_satz_wird_geloescht()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managedSatz, _, _) = Seed(ctx);
+            var controller = WithUser(ctx, Principal(manager));
+
+            var result = await controller.Delete(managedSatz.BuchungssatzId);
+
+            result.Should().BeOfType<OkResult>();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == managedSatz.BuchungssatzId)
+                .Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Delete_mit_opos_verknuepfung_ist_conflict()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, forderung, _, vertrag) = Seed(ctx);
+            var zahlung = AddSatz(ctx, vertrag, "Zahlung", 500m);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = forderung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll),
+                HabenZeile = zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben)
+            });
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            var result = await controller.Delete(forderung.BuchungssatzId);
+
+            result.Should().BeOfType<ConflictObjectResult>();
+        }
+
+        [Fact]
+        public async Task Delete_und_storno_sind_nach_abrechnung_gesperrt()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+
+            // NK-Vorauszahlung des Jahres 2026
+            var vorauszahlung = new Buchungssatz(new DateOnly(2026, 4, 1), "NK-Vorauszahlung April");
+            vorauszahlung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m)
+            {
+                Buchungssatz = vorauszahlung,
+                Buchungskonto = vertrag.ZahlungsKonto
+            });
+            vorauszahlung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 100m)
+            {
+                Buchungssatz = vorauszahlung,
+                Buchungskonto = vertrag.NkBuchungskonto
+            });
+            ctx.Buchungssaetze.Add(vorauszahlung);
+
+            // Abrechnung 2026 existiert
+            var abrechnungssatz = new Buchungssatz(new DateOnly(2026, 12, 31), "BK-Abrechnung 2026");
+            abrechnungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m)
+            {
+                Buchungssatz = abrechnungssatz,
+                Buchungskonto = vertrag.NkBuchungskonto
+            });
+            ctx.Buchungssaetze.Add(abrechnungssatz);
+            ctx.Abrechnungsresultate.Add(new Abrechnungsresultat
+            {
+                Vertrag = vertrag,
+                Buchungssatz = abrechnungssatz
+            });
+            ctx.SaveChanges();
+
+            var controller = WithUser(ctx, Principal(manager));
+
+            // Eingeflossene Vorauszahlung: weder löschen noch stornieren
+            (await controller.Delete(vorauszahlung.BuchungssatzId))
+                .Should().BeOfType<ConflictObjectResult>();
+            (await controller.Stornieren(vorauszahlung.BuchungssatzId, new StornoRequest { Grund = "Test" }))
+                .Result.Should().BeOfType<ConflictObjectResult>();
+
+            // Abrechnungssatz selbst: nur über den Abrechnungslauf rückabwickelbar
+            (await controller.Delete(abrechnungssatz.BuchungssatzId))
+                .Should().BeOfType<ConflictObjectResult>();
+            (await controller.Stornieren(abrechnungssatz.BuchungssatzId, new StornoRequest { Grund = "Test" }))
+                .Result.Should().BeOfType<ConflictObjectResult>();
+        }
+
+        [Fact]
+        public async Task Storno_ohne_grund_ist_bad_request()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managedSatz, _, _) = Seed(ctx);
+            var controller = WithUser(ctx, Principal(manager));
+
+            var result = await controller.Stornieren(
+                managedSatz.BuchungssatzId, new StornoRequest { Grund = "  " });
+
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task Storno_schreibt_grund_in_notiz()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managedSatz, _, _) = Seed(ctx);
+            var controller = WithUser(ctx, Principal(manager));
+
+            var result = (await controller.Stornieren(
+                managedSatz.BuchungssatzId,
+                new StornoRequest { Grund = "Falscher Betrag erfasst" })).Result as OkObjectResult;
+
+            var info = result!.Value as StornoBuchungssatzInfo;
+            var storno = ctx.Buchungssaetze.Single(s => s.BuchungssatzId == info!.BuchungssatzId);
+            storno.Notiz.Should().Be("Falscher Betrag erfasst");
+            storno.StornoVon!.BuchungssatzId.Should().Be(managedSatz.BuchungssatzId);
         }
 
         [Fact]

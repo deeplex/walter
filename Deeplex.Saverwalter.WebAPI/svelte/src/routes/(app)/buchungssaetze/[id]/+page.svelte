@@ -23,11 +23,65 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile
     } from '$walter/components';
     import { kontoVerknuepfungHref, type WalterAusgleich } from '$walter/lib';
-    import { convertEuro } from '$walter/services/utils';
+    import { convertEuro, walter_goto } from '$walter/services/utils';
     import { formatToTableDate } from '$walter/components/elements/WalterDataTable';
+    import { walter_delete, walter_post } from '$walter/services/requests';
+    import {
+        Button,
+        InlineNotification,
+        Modal,
+        TextArea
+    } from 'carbon-components-svelte';
+    import { TrashCan, Undo } from 'carbon-icons-svelte';
     import type { PageData } from './$types';
 
     export let data: PageData;
+
+    let stornoOpen = false;
+    let stornoGrund = '';
+    let loeschenOpen = false;
+    let busy = false;
+    let aktionsFehler: string | null = null;
+
+    async function stornieren() {
+        busy = true;
+        aktionsFehler = null;
+        try {
+            const resp = await walter_post(
+                `/api/buchungssaetze/${data.entry.id}/storno`,
+                { grund: stornoGrund }
+            );
+            if (resp.ok) {
+                const info = (await resp.json()) as { buchungssatzId: string };
+                stornoOpen = false;
+                await walter_goto(`/buchungssaetze/${info.buchungssatzId}`);
+            } else {
+                aktionsFehler = await resp.text();
+                stornoOpen = false;
+            }
+        } finally {
+            busy = false;
+        }
+    }
+
+    async function loeschen() {
+        busy = true;
+        aktionsFehler = null;
+        try {
+            const resp = await walter_delete(
+                `/api/buchungssaetze/${data.entry.id}`
+            );
+            if (resp.ok) {
+                loeschenOpen = false;
+                history.back();
+            } else {
+                aktionsFehler = await resp.text();
+                loeschenOpen = false;
+            }
+        } finally {
+            busy = false;
+        }
+    }
 
     let title = `Buchungssatz ${data.entry.nummer}`;
     $: {
@@ -79,6 +133,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterGrid>
     <WalterBuchungssatz entry={data.entry} />
 
+    {#if aktionsFehler}
+        <InlineNotification
+            kind="error"
+            title="Korrektur nicht möglich:"
+            subtitle={aktionsFehler}
+            lowContrast
+        />
+    {/if}
+
+    <div class="korrektur-aktionen">
+        {#if data.entry.kannStornieren}
+            <Button
+                kind="danger-tertiary"
+                icon={Undo}
+                disabled={busy}
+                on:click={() => (stornoOpen = true)}
+            >
+                Stornieren
+            </Button>
+        {/if}
+        {#if data.entry.kannLoeschen}
+            <Button
+                kind="danger-tertiary"
+                icon={TrashCan}
+                disabled={busy}
+                on:click={() => (loeschenOpen = true)}
+            >
+                Löschen
+            </Button>
+        {/if}
+        {#if data.entry.sperrgrund}
+            <InlineNotification
+                kind="info"
+                hideCloseButton
+                title="Korrektur eingeschränkt:"
+                subtitle={data.entry.sperrgrund}
+                lowContrast
+            />
+        {/if}
+    </div>
+
     <WalterLinks>
         {#if data.entry.stornoNach}
             <WalterLinkTile
@@ -117,3 +212,51 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/each}
     </WalterLinks>
 </WalterGrid>
+
+<Modal
+    bind:open={stornoOpen}
+    danger
+    modalHeading={`Buchungssatz ${data.entry.nummer} stornieren`}
+    primaryButtonText="Stornieren"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={busy || stornoGrund.trim().length === 0}
+    on:click:button--secondary={() => (stornoOpen = false)}
+    on:submit={stornieren}
+>
+    <p style="margin-bottom: 1rem;">
+        Es wird eine Gegenbuchung mit umgekehrten Soll/Haben-Seiten erstellt.
+        Bestehende OPOS-Ausgleiche dieses Satzes werden gelöst.
+    </p>
+    <TextArea
+        labelText="Grund (Pflicht)"
+        placeholder="Warum wird dieser Buchungssatz storniert?"
+        bind:value={stornoGrund}
+    />
+</Modal>
+
+<Modal
+    bind:open={loeschenOpen}
+    danger
+    modalHeading={`Buchungssatz ${data.entry.nummer} löschen`}
+    primaryButtonText="Endgültig löschen"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={busy}
+    on:click:button--secondary={() => (loeschenOpen = false)}
+    on:submit={loeschen}
+>
+    <p>
+        Der Buchungssatz „{data.entry.beschreibung}" wird endgültig entfernt.
+        Das ist nur für frische Fehleingaben gedacht — im Zweifel lieber
+        stornieren, damit die Korrektur nachvollziehbar bleibt.
+    </p>
+</Modal>
+
+<style>
+    .korrektur-aktionen {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0 1rem 1rem;
+    }
+</style>
