@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
@@ -35,6 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class HKVOEntryBase
         {
             public int Id { get; set; }
+            public int UmlageId { get; set; }
             public DateOnly Beginn { get; set; }
 
             [Range(50, 70, ErrorMessage = "HKVO §7: Verbrauchsanteil muss zwischen 50% und 70% liegen.")]
@@ -53,6 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public HKVOEntryBase(HKVO entity, Permissions permissions)
             {
                 Id = entity.HKVOId;
+                UmlageId = entity.HeizkostenId;
                 Beginn = entity.Beginn;
 
                 HKVO_P7 = (int)(entity.HKVO_P7 * 100);
@@ -152,6 +155,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
             public IEnumerable<ZaehlerEntryBase> Zaehler { get; set; } = [];
             public IEnumerable<UmlageVersionEntryBase> Versionen { get; set; } = [];
+            [JsonPropertyName("hkvos")]
             public IEnumerable<HKVOEntryBase> HKVOs { get; set; } = [];
             public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];

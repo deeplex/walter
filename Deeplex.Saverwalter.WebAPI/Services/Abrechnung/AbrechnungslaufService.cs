@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var prevYearBetragByUmlage = await LadePrevYearBetraege(umlageIds, jahr);
 
             var warnungen = new List<string>();
-            var einheitenInfos = BuildAbrechnungseinheitenInfos(einheiten, warnungen, prevYearBetragByUmlage);
+            var einheitenInfos = BuildAbrechnungseinheitenInfos(einheiten, warnungen, prevYearBetragByUmlage, jahr);
 
             var resultate = BuildResultate(einheiten, jahr);
 
@@ -660,7 +660,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         private static List<AbrechnungseinheitInfo> BuildAbrechnungseinheitenInfos(
             List<NkEinheit> einheiten,
             List<string> warnungen,
-            Dictionary<int, decimal> prevYearBetragByUmlage)
+            Dictionary<int, decimal> prevYearBetragByUmlage,
+            int jahr)
         {
             var einheitenByKey =
                 new Dictionary<string, (string Namen, List<NkZeileInfo> Zeilen, decimal GesamtWF, decimal GesamtNF, decimal GesamtNE, decimal GesamtMEA)>();
@@ -755,6 +756,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         decimal? wwVerbrauchAnteil = null;
                         List<ZaehlerVerbrauchInfo> heizZaehler = [];
                         List<ZaehlerVerbrauchInfo> wwZaehler = [];
+                        List<ZaehlerVerbrauchInfo> verbrauchZaehler = [];
                         if (plan.HkvoVerbrauchAnteile != null && partei != null
                             && plan.HkvoVerbrauchAnteile.TryGetValue(partei, out var hkvo))
                         {
@@ -775,6 +777,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                                 Einheit = "m³",
                             }).ToList();
                         }
+                        else if (plan.HkvoVerbrauchAnteile == null && partei?.VerbrauchAnteileDetail != null
+                            && partei.VerbrauchAnteileDetail.TryGetValue(plan.Umlage.UmlageId, out var vDetail))
+                        {
+                            verbrauchZaehler = vDetail.DieseZaehler
+                                .SelectMany(kv => kv.Value.Select(v => new ZaehlerVerbrauchInfo
+                                {
+                                    ZaehlerId = v.Zaehler.ZaehlerId,
+                                    Kennnummer = v.Zaehler.Kennnummer,
+                                    Verbrauch = v.Delta,
+                                    Einheit = kv.Key.ToUnitString(),
+                                }))
+                                .ToList();
+                        }
 
                         mergedAnteile.Add(new NkAnteilInfo
                         {
@@ -790,6 +805,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                             WWVerbrauchAnteil = wwVerbrauchAnteil,
                             HeizZaehler = heizZaehler,
                             WwZaehler = wwZaehler,
+                            VerbrauchZaehler = verbrauchZaehler,
                         });
                     }
 
@@ -798,6 +814,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     var sollSum = buchungssatz.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
                     bool istVollstaendigGebucht = habenSum > 0 && sollSum >= habenSum;
+
+                    decimal? gesamtVerbrauch = null;
+                    string? verbrauchEinheit = null;
+                    if (plan.HkvoVerbrauchAnteile == null)
+                    {
+                        var verbrauchPartei = plan.Anteile
+                            .Select(a => a.Partei)
+                            .FirstOrDefault(p => p.Vertrag != null && p.VerbrauchAnteileDetail.ContainsKey(plan.Umlage.UmlageId));
+                        if (verbrauchPartei != null)
+                        {
+                            var detail = verbrauchPartei.VerbrauchAnteileDetail[plan.Umlage.UmlageId];
+                            foreach (var kv in detail.AlleVerbrauch.Where(kv => kv.Value > 0).Take(1))
+                            {
+                                gesamtVerbrauch = kv.Value;
+                                verbrauchEinheit = kv.Key.ToUnitString();
+                            }
+                        }
+                    }
 
                     einheitenByKey[einheitKey].Zeilen.Add(new NkZeileInfo
                     {
@@ -816,6 +850,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         P8 = plan.Umlage.HkvoAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31))?.HKVO_P8,
                         GesamtWaerme = plan.GesamtWaerme,
                         GesamtWW = plan.GesamtWW,
+                        GesamtVerbrauch = gesamtVerbrauch,
+                        VerbrauchEinheit = verbrauchEinheit,
+                    });
+                }
+
+                // Umlagen ohne Buchungen im Abrechnungsjahr als fehlend markieren
+                var endeJahr = new DateOnly(jahr, 12, 31);
+                var coveredUmlageIds = einheit.Rechnungsplaene
+                    .Where(p => !p.IstStrompauschale)
+                    .Select(p => p.Umlage.UmlageId)
+                    .ToHashSet();
+                foreach (var umlage in einheit.Umlagen.Where(u => !coveredUmlageIds.Contains(u.UmlageId)))
+                {
+                    warnungen.Add($"Keine Buchungen für '{umlage.Typ.Bezeichnung}' im Jahr {jahr}.");
+                    einheitenByKey[einheitKey].Zeilen.Add(new NkZeileInfo
+                    {
+                        UmlageId = umlage.UmlageId,
+                        Bezeichnung = umlage.Typ.Bezeichnung,
+                        Beschreibung = umlage.Beschreibung ?? "",
+                        Schluessel = umlage.VersionAt(endeJahr).Schluessel.ToDescriptionString(),
+                        UmlagetypId = umlage.Typ.UmlagetypId,
+                        BuchungssatzId = null,
+                        Betrag = 0,
+                        BetragLetztesJahr = prevYearBetragByUmlage.GetValueOrDefault(umlage.UmlageId),
+                        IstVollstaendigGebucht = false,
+                        IstFehlend = true,
+                        Anteile = [],
                     });
                 }
             }

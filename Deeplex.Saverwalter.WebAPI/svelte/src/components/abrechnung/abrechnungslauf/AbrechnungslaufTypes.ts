@@ -33,6 +33,7 @@ export type NkAnteilInfo = {
     wwVerbrauchAnteil: number | null;
     heizZaehler: ZaehlerVerbrauchInfo[];
     wwZaehler: ZaehlerVerbrauchInfo[];
+    verbrauchZaehler: ZaehlerVerbrauchInfo[];
 };
 
 export type NkZeileInfo = {
@@ -51,6 +52,9 @@ export type NkZeileInfo = {
     p8: number | null;
     gesamtWaerme: number | null;
     gesamtWW: number | null;
+    gesamtVerbrauch: number | null;
+    verbrauchEinheit: string | null;
+    istFehlend: boolean;
 };
 
 export type AbrechnungseinheitInfo = {

@@ -15,8 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterDataTable } from '$walter/components';
-    import type { WalterHKVOEntry } from '$walter/lib';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import WalterHKVO from '../details/WalterHKVO.svelte';
+    import { WalterHKVOEntry, validateHKVO } from '$walter/lib';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'beginn', value: 'Beginn' },
@@ -28,7 +30,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     ];
 
     export let rows: WalterHKVOEntry[] | undefined = undefined;
-    export let title: string | undefined = undefined;
+    export let title: string = 'HKVO-Versionen';
+    export let entry: Partial<WalterHKVOEntry> = {};
+    export let fetchImpl: typeof fetch | undefined = undefined;
 
     $: displayRows = (rows ?? []).map((hkvo) => ({
         id: hkvo.id,
@@ -42,10 +46,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }));
 </script>
 
-<WalterDataTable
-    readonly
-    layout="accordion"
-    accordionTitle={title}
+<WalterSimpleList
+    entityClass={WalterHKVOEntry}
+    validate={validateHKVO}
     {headers}
+    navFn={navigation.hkvo}
+    routeBase="hkvo"
+    formComponent={WalterHKVO}
+    {entry}
     rows={displayRows}
+    {title}
+    {fetchImpl}
 />

@@ -97,8 +97,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
     $: neZeitanteil = anteilFaktorFuerSchluessel('n. NE');
 
-    $: alleZeilen = einheit.nkZeilen.filter((z) =>
-        z.anteile.some((a) => a.vertragId === vertragId)
+    $: alleZeilen = einheit.nkZeilen.filter(
+        (z) => z.istFehlend || z.anteile.some((a) => a.vertragId === vertragId)
     );
     $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
     $: hkvoZeilen = alleZeilen.filter((z) => z.para9_2 != null);
@@ -116,7 +116,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             gesamtBetrag: z.betrag,
             betragLetztesJahr: z.betragLetztesJahr,
             anteil: faktor,
-            betrag: z.betrag * faktor
+            betrag: z.betrag * faktor,
+            istFehlend: z.istFehlend
         };
     });
 
@@ -127,6 +128,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: hasNE = meineZeilen.some((r) => r.schluessel === 'n. NE');
     $: hasMEA = meineZeilen.some((r) => r.schluessel === 'n. MEA');
     $: hasPs = meineZeilen.some((r) => r.schluessel === 'n. Pers.');
+
+    $: verbrauchZeilen = kalteZeilen
+        .filter((z) => z.schluessel === 'n. Verb.')
+        .map((z) => {
+            const anteil = z.anteile.find((a) => a.vertragId === vertragId);
+            return {
+                umlageId: z.umlageId,
+                bezeichnung: z.bezeichnung,
+                gesamtVerbrauch: z.gesamtVerbrauch,
+                einheit: z.verbrauchEinheit ?? '',
+                zaehler: anteil?.verbrauchZaehler ?? [],
+                anteilFaktor: anteil?.anteilFaktor ?? 0
+            };
+        });
 
     const schluesselLabel: Record<string, string> = {
         'n. WF': 'Wohnfläche',
@@ -349,6 +364,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Row>
 {/if}
 
+{#if verbrauchZeilen.length > 0}
+    <Row>
+        <StructuredList condensed style="margin: 2em">
+            <StructuredListHead>
+                <StructuredListRow>
+                    <StructuredListCell head>Verbrauch (n. Verb.)</StructuredListCell>
+                    <StructuredListCell head>Zähler</StructuredListCell>
+                    <StructuredListCell head>Mein Verbrauch</StructuredListCell>
+                    <StructuredListCell head>Gesamt</StructuredListCell>
+                    <StructuredListCell head>Anteil</StructuredListCell>
+                </StructuredListRow>
+            </StructuredListHead>
+            <StructuredListBody>
+                {#each verbrauchZeilen as vz}
+                    <StructuredListRow>
+                        <StructuredListCell head>{vz.bezeichnung}</StructuredListCell>
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell>
+                            {#if vz.gesamtVerbrauch != null}
+                                {vz.gesamtVerbrauch.toFixed(2)} {vz.einheit}
+                            {/if}
+                        </StructuredListCell>
+                        <StructuredListCell>{convertPercent(vz.anteilFaktor)}</StructuredListCell>
+                    </StructuredListRow>
+                    {#each vz.zaehler as z}
+                        <StructuredListRow>
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell>Zähler {z.kennnummer}</StructuredListCell>
+                            <StructuredListCell>{z.verbrauch.toFixed(2)} {z.einheit}</StructuredListCell>
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell></StructuredListCell>
+                        </StructuredListRow>
+                    {/each}
+                {/each}
+            </StructuredListBody>
+        </StructuredList>
+    </Row>
+{/if}
+
 <!-- Kostentabelle -->
 <DataTable
     headers={[
@@ -373,6 +428,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {#if cell.key === 'typ'}
             {#if row.rechnungId}
                 <a href="/umlagen/{row.umlageId}">{cell.value}</a>
+            {:else if row.istFehlend}
+                <button
+                    title="Keine Buchungen für diese Umlage – klicken um Betriebskostenrechnung einzutragen"
+                    style="color: var(--cds-support-warning); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    on:click={() => openBKModal(row.umlageId)}
+                    >⚠ {cell.value}</button
+                >
             {:else}
                 <button
                     style="color: var(--cds-support-error); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"

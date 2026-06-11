@@ -584,7 +584,23 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 var betrPlaene = plaene.Where(p => p.Umlage.UmlageId == betrId).ToList();
                 var betrTotal = betrPlaene.Sum(p => p.Betrag);
-                if (betrTotal <= 0) continue;
+                if (betrTotal <= 0)
+                {
+                    var dummy = new Buchungssatz(endeJahr, $"{StrompauschaleMarker} {heiz.Typ.Bezeichnung} {jahr}")
+                    {
+                        Buchungsjahr = jahr
+                    };
+                    plaene.Add(new NkRechnungsplan
+                    {
+                        Buchungssatz = dummy,
+                        Betrag = 0,
+                        Umlage = heiz,
+                        Anteile = [],
+                        Warnungen = [$"Strompauschale kann nicht angewandt werden: '{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}."],
+                        IstStrompauschale = true
+                    });
+                    continue;
+                }
 
                 var warnungen = new List<string>();
                 if (delta > betrTotal)

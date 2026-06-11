@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateBetriebskostenrechnung
     } from '$walter/lib';
     import { convertEuro } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
     export let title: string | undefined = undefined;
@@ -108,6 +109,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {transformRow}
     {headers}
     {fullHeight}
+    on_click_row={(e) => navigation.buchungssatz(e.detail.id)}
 >
     {#if entry}
         <WalterBetriebskostenrechnung {fetchImpl} bind:entry />

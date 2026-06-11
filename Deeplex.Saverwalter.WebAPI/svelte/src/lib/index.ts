@@ -27,6 +27,7 @@ export {
     validateVertragsNkAnteil
 } from './WalterVertragsNkAnteil';
 export { WalterHKVOEntry } from './WalterHKVO';
+export { validateHKVO } from './WalterValidation';
 export {
     WalterMietzahlungListEntry,
     WalterMietzahlungDetailEntry,

@@ -16,6 +16,7 @@
 import { walter_get } from '$walter/services/requests';
 import { WalterApiHandler } from './WalterApiHandler';
 import type { WalterKontoVerknuepfung } from './WalterBuchungskonto';
+import { WalterPermissions } from './WalterPermissions';
 
 /** Gegenseite eines OPOS-Ausgleichs — verlinkt den ausgleichenden Buchungssatz. */
 export type WalterAusgleich = {
@@ -84,7 +85,8 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
         // Schutzstatus für Korrekturen (nur im Detail gefüllt).
         public kannStornieren: boolean,
         public kannLoeschen: boolean,
-        public sperrgrund: string | undefined
+        public sperrgrund: string | undefined,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -126,7 +128,8 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
             new Date(json.lastModified),
             json.kannStornieren ?? false,
             json.kannLoeschen ?? false,
-            json.sperrgrund
+            json.sperrgrund,
+            WalterPermissions.fromJson(json.permissions ?? { read: true, update: false, remove: false })
         );
     }
 

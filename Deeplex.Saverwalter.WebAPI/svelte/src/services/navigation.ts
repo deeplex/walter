@@ -29,6 +29,7 @@ export const navigation = {
     miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
     transaktion: (id: number) => walter_goto(`/transaktionen/${id}`),
+    hkvo: (id: number) => walter_goto(`/hkvo/${id}`),
     umlage: (id: number) => walter_goto(`/umlagen/${id}`),
     umlageversion: (id: number) => walter_goto(`/umlageversionen/${id}`),
     umlagetyp: (id: number) => walter_goto(`/umlagetypen/${id}`),

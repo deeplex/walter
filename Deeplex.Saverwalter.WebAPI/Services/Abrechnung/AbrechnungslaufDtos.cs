@@ -46,6 +46,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<ZaehlerVerbrauchInfo> HeizZaehler { get; init; } = [];
         /// <summary>Warmwasser-Einzelzähler dieser Partei. Nur für HKVO-Umlagen.</summary>
         public List<ZaehlerVerbrauchInfo> WwZaehler { get; init; } = [];
+        /// <summary>Verbrauchszähler dieser Partei. Nur für kalte verbrauchsbasierte Umlagen.</summary>
+        public List<ZaehlerVerbrauchInfo> VerbrauchZaehler { get; init; } = [];
     }
 
     /// <summary>Detailzeile je (Umlage, Rechnung) in der Gruppenansicht.</summary>
@@ -69,6 +71,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public decimal? GesamtWaerme { get; init; }
         /// <summary>Gesamtwarmwasserverbrauch aller Parteien in m³. Nur für HKVO-Umlagen.</summary>
         public decimal? GesamtWW { get; init; }
+        /// <summary>Gesamtverbrauch aller Parteien. Nur für kalte verbrauchsbasierte Umlagen.</summary>
+        public decimal? GesamtVerbrauch { get; init; }
+        /// <summary>Einheit des Gesamtverbrauchs (z.B. "m³", "kWh"). Nur für kalte verbrauchsbasierte Umlagen.</summary>
+        public string? VerbrauchEinheit { get; init; }
+        /// <summary>True wenn diese Umlage keine Buchungen für das Abrechnungsjahr hat.</summary>
+        public bool IstFehlend { get; init; }
     }
 
     /// <summary>Zusammenfassung je Wohnungskombination (Umlage-Einheit).</summary>

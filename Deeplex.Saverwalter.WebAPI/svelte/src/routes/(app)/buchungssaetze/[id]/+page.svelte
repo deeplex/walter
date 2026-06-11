@@ -22,7 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile
     } from '$walter/components';
-    import { kontoVerknuepfungHref, type WalterAusgleich } from '$walter/lib';
+    import {
+        kontoVerknuepfungHref,
+        WalterFileWrapper,
+        type WalterAusgleich
+    } from '$walter/lib';
     import { convertEuro, walter_goto } from '$walter/services/utils';
     import { formatToTableDate } from '$walter/components/elements/WalterDataTable';
     import { walter_delete, walter_post } from '$walter/services/requests';
@@ -34,6 +38,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import { TrashCan, Undo } from 'carbon-icons-svelte';
     import type { PageData } from './$types';
+    import { changeTracker } from '$walter/store';
 
     export let data: PageData;
 
@@ -42,6 +47,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let loeschenOpen = false;
     let busy = false;
     let aktionsFehler: string | null = null;
+
+    $: submitDisabled = $changeTracker === 0;
 
     async function stornieren() {
         busy = true;
@@ -73,7 +80,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
             if (resp.ok) {
                 loeschenOpen = false;
-                history.back();
+                await walter_goto('/buchungssaetze');
             } else {
                 aktionsFehler = await resp.text();
                 loeschenOpen = false;
@@ -87,6 +94,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: {
         title = `Buchungssatz ${data.entry.nummer}`;
     }
+
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
+    fileWrapper.registerStack();
+    fileWrapper.register(title, data.fileURL);
 
     // OPOS-Ausgleiche aller Zeilen, pro Partner-Satz zusammengefasst —
     // so folgt man von der Forderung zur Zahlung und umgekehrt.
@@ -128,7 +139,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     ];
 </script>
 
-<WalterHeaderDetail entry={data.entry} apiURL={data.apiURL} {title} />
+<WalterHeaderDetail
+    entry={data.entry}
+    apiURL={data.apiURL}
+    {title}
+    bind:fileWrapper
+    disabled={submitDisabled}
+/>
 
 <WalterGrid>
     <WalterBuchungssatz entry={data.entry} />

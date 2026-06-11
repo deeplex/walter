@@ -40,6 +40,7 @@ export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltung
 export { default as WalterTransaktion } from './details/WalterTransaktion.svelte';
 export { default as WalterTransaktionRaw } from './details/WalterTransaktionRaw.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
+export { default as WalterHKVO } from './details/WalterHKVO.svelte';
 export { default as WalterUmlageVersion } from './details/WalterUmlageVersion.svelte';
 export { default as WalterUmlagetyp } from './details/WalterUmlagetyp.svelte';
 export { default as WalterGarage } from './details/WalterGarage.svelte';

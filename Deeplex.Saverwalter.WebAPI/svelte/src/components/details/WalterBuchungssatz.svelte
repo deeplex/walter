@@ -19,6 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     import {
         WalterDataTable,
+        WalterNumberInput,
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
@@ -63,6 +64,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Row>
     <WalterTextInput readonly value={entry.nummer} labelText="Buchungsnummer" />
+    <WalterNumberInput
+        bind:value={entry.buchungsjahr}
+        label="Buchungsjahr"
+        min={2000}
+        max={2100}
+    />
     <WalterTextInput
         readonly
         value={formatToTableDate(entry.buchungsdatum)}
@@ -78,21 +85,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 <Row>
-    <WalterTextInput
-        readonly
-        value={entry.beschreibung}
-        labelText="Beschreibung"
-    />
+    <WalterTextInput bind:value={entry.beschreibung} labelText="Beschreibung" />
 </Row>
 {#if entry.belegpfad}
     <Row>
         <WalterTextInput readonly value={entry.belegpfad} labelText="Beleg" />
     </Row>
 {/if}
-{#if entry.notiz}
-    <Row>
-        <WalterTextArea readonly value={entry.notiz} labelText="Notiz" />
-    </Row>
-{/if}
+<Row>
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
+</Row>
 
 <WalterDataTable {rowHref} rows={zeilenRows} headers={zeilenHeaders} />

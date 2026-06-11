@@ -115,10 +115,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        {#if data.entry.hkvos.length > 0}
+        {#if data.entry.hkvos.length > 0 || data.entry.hkvo}
             <WalterHKVOVersionen
-                title="HKVO-Nachträge"
+                title="HKVO-Versionen"
                 rows={data.entry.hkvos}
+                entry={{ umlageId: data.entry.id, hkvO_P7: 70, hkvO_P8: 70, strompauschale: 0, permissions: data.entry.permissions }}
+                fetchImpl={data.fetchImpl}
             />
         {/if}
         <WalterWohnungen

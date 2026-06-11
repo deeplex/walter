@@ -827,4 +827,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return HandleWohnungRequirementAsync(context, requirement, entity.Umlage.Wohnungen);
         }
     }
+
+    public class HKVOPermissionHandler : WohnungPermissionHandlerBase<HKVO>
+    {
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            HKVO entity)
+        {
+            return HandleWohnungRequirementAsync(context, requirement, entity.Heizkosten.Wohnungen);
+        }
+    }
 }

@@ -13,22 +13,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterBuchungssatzEntry } from '$walter/lib';
-import { fileURL } from '$walter/services/files';
+import { WalterHKVOEntry, WalterUmlageEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const apiURL = `${WalterBuchungssatzEntry.ApiURL}/${params.id}`;
-    const fileUrl = fileURL.buchungssatz(params.id);
+    const apiURL = `${WalterHKVOEntry.ApiURL}/${params.id}`;
+
+    const entry = await WalterHKVOEntry.GetOne<WalterHKVOEntry>(params.id, fetch);
+    const umlage = WalterUmlageEntry.GetOne<WalterUmlageEntry>(`${entry.umlageId}`, fetch);
 
     return {
         fetchImpl: fetch,
         id: params.id,
-        apiURL: apiURL,
-        fileURL: fileUrl,
-        entry: WalterBuchungssatzEntry.GetOne<WalterBuchungssatzEntry>(
-            params.id,
-            fetch
-        )
+        apiURL,
+        entry,
+        umlage
     };
 };

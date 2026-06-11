@@ -19,10 +19,13 @@ using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
 
@@ -44,8 +47,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
         private static BuchungssaetzeController WithUser(SaverwalterContext ctx, ClaimsPrincipal user)
         {
+            var auth = new AllowAllAuth();
             var controller = new BuchungssaetzeController(
-                new StornoBuchungsService(ctx), new BuchungssatzSchutzService(ctx), ctx, new AllowAllAuth())
+                A.Fake<ILogger<BuchungssaetzeController>>(),
+                new BuchungssatzDbService(ctx, auth),
+                new StornoBuchungsService(ctx),
+                new BuchungssatzSchutzService(ctx),
+                ctx,
+                auth,
+                A.Fake<HttpClient>())
             {
                 ControllerContext = new ControllerContext
                 {

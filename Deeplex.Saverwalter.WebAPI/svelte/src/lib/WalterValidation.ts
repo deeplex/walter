@@ -107,3 +107,7 @@ export const validateWohnungEigentuemer = (e: unknown): boolean => {
     const x = e as E;
     return id(x?.wohnung) && id(x?.kontakt) && s(x?.von);
 };
+export const validateHKVO = (e: unknown): boolean => {
+    const x = e as E;
+    return s(x?.beginn) && id(x?.hkvO_P9) && id(x?.stromrechnung);
+};

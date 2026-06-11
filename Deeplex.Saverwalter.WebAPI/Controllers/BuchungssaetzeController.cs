@@ -16,10 +16,12 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 using Operations = Deeplex.Saverwalter.WebAPI.Services.Operations;
 
@@ -27,12 +29,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/buchungssaetze")]
-    public class BuchungssaetzeController(
-        StornoBuchungsService stornoService,
-        BuchungssatzSchutzService schutzService,
-        SaverwalterContext ctx,
-        IAuthorizationService auth) : ControllerBase
+    public class BuchungssaetzeController : FileControllerBase<BuchungssatzEntry, Guid, Buchungssatz>
     {
+        private readonly StornoBuchungsService stornoService;
+        private readonly BuchungssatzSchutzService schutzService;
+        private readonly SaverwalterContext ctx;
+        private readonly IAuthorizationService auth;
+        protected override BuchungssatzDbService DbService { get; }
+
+        public BuchungssaetzeController(
+            ILogger<BuchungssaetzeController> logger,
+            BuchungssatzDbService dbService,
+            StornoBuchungsService stornoService,
+            BuchungssatzSchutzService schutzService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth,
+            HttpClient httpClient) : base(logger, httpClient)
+        {
+            DbService = dbService;
+            this.stornoService = stornoService;
+            this.schutzService = schutzService;
+            this.ctx = ctx;
+            this.auth = auth;
+        }
+
         public class StornoRequest
         {
             public string Grund { get; set; } = string.Empty;
@@ -78,9 +98,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Buchungsjahr = entity.Buchungsjahr;
                 Buchungsdatum = entity.Buchungsdatum;
                 Beschreibung = entity.Beschreibung;
-                Betrag = entity.Buchungszeilen
+                var sollSum = entity.Buchungszeilen
                     .Where(z => z.SollHaben == Model.SollHaben.Soll)
                     .Sum(z => z.Betrag);
+                var habenSum = entity.Buchungszeilen
+                    .Where(z => z.SollHaben == Model.SollHaben.Haben)
+                    .Sum(z => z.Betrag);
+                Betrag = Math.Max(sollSum, habenSum);
                 SollKonten = KontenText(entity, Model.SollHaben.Soll);
                 HabenKonten = KontenText(entity, Model.SollHaben.Haben);
                 IstStorno = entity.StornoVon != null;
@@ -154,6 +178,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public bool KannStornieren { get; set; }
             public bool KannLoeschen { get; set; }
             public string? Sperrgrund { get; set; }
+            public Permissions Permissions { get; set; } = new Permissions();
 
             public BuchungssatzEntry() : base() { }
             public BuchungssatzEntry(Buchungssatz entity) : base(entity)
@@ -225,18 +250,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         /// mit mindestens einer Zeile auf einem Konto einer verwalteten Wohnung
         /// (analog zur Sichtbarkeit der Buchungskonten).
         /// </summary>
-        private IQueryable<Buchungssatz> ScopedSaetze()
-        {
-            if (User.IsInRole("Admin"))
-            {
-                return ctx.Buchungssaetze;
-            }
-
-            var kontoIds = TransaktionPermissionHandler
-                .ManagedBuchungskontoIds(ctx, User.GetUserId(), VerwalterRolle.Keine);
-            return ctx.Buchungssaetze.Where(s =>
-                s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId)));
-        }
+        private IQueryable<Buchungssatz> ScopedSaetze() =>
+            BuchungssatzDbService.Scoped(ctx, User!);
 
         [HttpGet]
         public async Task<ActionResult<PagedResult<BuchungssatzEntryBase>>> GetList(
@@ -349,6 +364,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             entry.KannStornieren = schutz.KannStornieren;
             entry.KannLoeschen = schutz.KannLoeschen;
             entry.Sperrgrund = schutz.Sperrgrund;
+            entry.Permissions = new Permissions(read: true)
+            {
+                Update = true,
+                Remove = false
+            };
 
             return Ok(entry);
         }
@@ -431,6 +451,45 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
             catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
             catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+        }
+
+        public class BuchungssatzPatchEntry
+        {
+            public int Buchungsjahr { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public string? Notiz { get; set; }
+        }
+
+        /// <summary>
+        /// Aktualisiert Metadaten eines Buchungssatzes (Buchungsjahr, Beschreibung, Notiz).
+        /// Die Buchungszeilen selbst bleiben unverändert — wer den Satz sehen darf,
+        /// darf diese Felder pflegen (analog zum Speichern-Button im Frontend).
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<ActionResult<BuchungssatzEntry>> Put(Guid id, [FromBody] BuchungssatzPatchEntry patch)
+        {
+            if (await ScopedSaetze().AllAsync(s => s.BuchungssatzId != id))
+            {
+                return await ctx.Buchungssaetze.AnyAsync(s => s.BuchungssatzId == id)
+                    ? Forbid()
+                    : NotFound();
+            }
+
+            var satz = await LadeSatzMitZeilen(id);
+            if (satz is null) return NotFound();
+
+            satz.Buchungsjahr = patch.Buchungsjahr;
+            satz.Beschreibung = patch.Beschreibung;
+            satz.Notiz = patch.Notiz;
+            await ctx.SaveChangesAsync();
+
+            var entry = new BuchungssatzEntry(satz);
+            var schutz = await schutzService.PruefeAsync(satz);
+            entry.KannStornieren = schutz.KannStornieren;
+            entry.KannLoeschen = schutz.KannLoeschen;
+            entry.Sperrgrund = schutz.Sperrgrund;
+            entry.Permissions = new Permissions(read: true) { Update = true };
+            return Ok(entry);
         }
 
         /// <summary>
