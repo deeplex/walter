@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx = ctx;
         }
 
-        public const string BeschreibungPrefix = "NK-Anteil: ";
+        public const string BeschreibungPrefix = NkAnteilMarker;
 
         /// <summary>
         /// Erstellt einen neuen Buchungssatz für einen manuellen Vertrags-NK-Anteil.

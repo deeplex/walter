@@ -115,5 +115,6 @@ export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.sv
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
 export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';
 export { default as WalterMietOpos } from './lists/WalterMietOpos.svelte';
+export { default as WalterJahresabschlussKontrolle } from './lists/WalterJahresabschlussKontrolle.svelte';
 export { default as WalterSimpleList } from './lists/WalterSimpleList.svelte';
 export { default as WalterVertragsNkAnteile } from './lists/WalterVertragsNkAnteile.svelte';

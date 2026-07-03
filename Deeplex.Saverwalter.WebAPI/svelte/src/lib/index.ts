@@ -57,6 +57,14 @@ export {
     type WalterTransaktionLink
 } from './WalterBuchungssatz';
 export {
+    getJahresUebersicht,
+    getJahresabschluss,
+    type WalterJahresUebersicht,
+    type WalterJahresabschluss,
+    type WalterKontoJahres,
+    type WalterAbrechnungsstatus
+} from './WalterJahresabschluss';
+export {
     WalterKontaktEntry,
     type WalterMitgliedschaftEntry
 } from './WalterKontakt';

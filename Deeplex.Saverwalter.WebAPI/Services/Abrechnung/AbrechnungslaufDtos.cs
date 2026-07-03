@@ -25,6 +25,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public string Einheit { get; init; } = "";
     }
 
+    /// <summary>
+    /// Eingangswerte der §9(2)-Berechnung: P = 2,5 × V × (Tw − 10) / Q.
+    /// </summary>
+    public class P9DetailsInfo
+    {
+        /// <summary>Summe der Wohnungs-Warmwasserzähler über den Abrechnungszeitraum (m³).</summary>
+        public decimal V { get; init; }
+        /// <summary>Verbrauch des Allgemein-Wärmezählers (kWh).</summary>
+        public decimal Q { get; init; }
+        /// <summary>Angenommene Warmwassertemperatur (°C).</summary>
+        public decimal Tw { get; init; }
+        public string AllgemeinZaehler { get; init; } = "";
+        /// <summary>Messfenster des Allgemeinzählers.</summary>
+        public DateOnly QAnfangsdatum { get; init; }
+        public DateOnly QEnddatum { get; init; }
+        /// <summary>Warmwasserzähler, aus denen V summiert wird (voller Abrechnungszeitraum).</summary>
+        public List<ZaehlerVerbrauchInfo> WwZaehler { get; init; } = [];
+    }
+
     /// <summary>Einzelner NK-Anteil einer Betriebskostenrechnung je Partei.</summary>
     public class NkAnteilInfo
     {
@@ -65,6 +84,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<NkAnteilInfo> Anteile { get; init; } = [];
         /// <summary>Gesetzt wenn diese Zeile eine HKVO-Umlage (warme Betriebskosten) ist.</summary>
         public decimal? Para9_2 { get; init; }
+        /// <summary>Eingangswerte der §9(2)-Berechnung. Nur gesetzt, wenn ein Allgemeinzähler konfiguriert ist.</summary>
+        public P9DetailsInfo? P9Details { get; init; }
         public decimal? P7 { get; init; }
         public decimal? P8 { get; init; }
         /// <summary>Gesamtwärmeverbrauch aller Parteien in kWh. Nur für HKVO-Umlagen.</summary>

@@ -312,7 +312,7 @@ namespace Deeplex.Saverwalter.PrintService
         public required decimal Q { get; init; }
         /// <summary>Geschätzte Warmwassertemperatur in °C (HKVO: 60 °C).</summary>
         public required decimal Tw { get; init; }
-        /// <summary>Berechneter Warmwasseranteil: 2,5 × (V/Q) × (Tw − 10).</summary>
+        /// <summary>Berechneter Warmwasseranteil: 2,5 × V × (Tw − 10) / Q.</summary>
         public required decimal Para9_2 { get; init; }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace Deeplex.Saverwalter.PrintService
             var Q = new Verbrauch(hkvo.AllgemeinWaerme, beginn, ende, notes).Delta;
             var V = wohnungWWZaehler.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
 
-            if (Q == 0 || V == 0) return null;
+            if (Q <= 0 || V <= 0) return null;
 
             const decimal WarmwassertemperaturGrad = 60m; // §9 Abs. 2 HKVO
             return new HkvoP9_2Berechnung
@@ -337,7 +337,8 @@ namespace Deeplex.Saverwalter.PrintService
                 V = V,
                 Q = Q,
                 Tw = WarmwassertemperaturGrad,
-                Para9_2 = 2.5m * (V / Q) * (WarmwassertemperaturGrad - 10m),
+                Para9_2 = Math.Min(1m,
+                    2.5m * V * (WarmwassertemperaturGrad - 10m) / Q),
             };
         }
     }

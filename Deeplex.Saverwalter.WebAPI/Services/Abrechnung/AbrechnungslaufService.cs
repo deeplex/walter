@@ -484,14 +484,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         {
             return await _ctx.Umlagen
                 .Include(u => u.Typ)
-                // BK-Forderungs-Buchungszeilen (Haben auf NkVK) für das Abrechnungsjahr
+                // NkVK-Buchungszeilen des Abrechnungsjahrs (Buchungsjahr, NICHT
+                // Buchungsdatum — Vorjahresrechnungen werden oft erst im Folgejahr
+                // bezahlt): Forderungen (Haben) UND Gutschriften/Zahlungen (Soll) —
+                // die Rechnungs-/Zahlungs-Unterscheidung trifft
+                // NkGruppenAbrechnungsService über den OPOS-Ausgleich (AlsSollZeile).
                 .Include(u => u.NkVerrechnungsKonto)
                     .ThenInclude(k => k.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben
-                                 && z.Buchungssatz.Buchungsjahr == jahr))
+                        .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                     .ThenInclude(z => z.Buchungssatz)
                         .ThenInclude(s => s.Buchungszeilen)
                             .ThenInclude(z => z.Buchungskonto)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen
+                        .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
+                    .ThenInclude(z => z.AlsSollZeile)
                 // Wohnungen-Stammdaten
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.AufwandsKonto)
@@ -590,7 +597,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .GroupBy(a => a.Partei.Vertrag is not null ? (object)a.Partei.Vertrag : a.Partei)
                 .Select(gruppe =>
                 {
-                    var partei = gruppe.First().Partei;
+                    // Ein Vertrag hat je Einheit eine eigene NkPartei. Für die Anzeige
+                    // der Personen-Intervalle die Partei aus der größten Einheit nehmen
+                    // (max. GesamtPersonenzahl) — sonst zeigt ein Vertrag mit einer
+                    // Einzel-Wohnungs-Umlage (z.B. Grundsteuer) fälschlich "1/1".
+                    var partei = gruppe
+                        .Select(a => a.Partei)
+                        .OrderByDescending(p => p.PersonenZeitanteile.Sum(z => z.GesamtPersonenzahl))
+                        .First();
                     var rechnungsbetrag = gruppe.Sum(a => a.Betrag);
                     var info = partei.VertragInfo;
 
@@ -721,21 +735,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .GroupBy(x => x.KontoId)
                         .ToDictionary(g => g.Key, g => g.ToList());
 
-                    // Bereits gebuchte Soll-Zeilen (Transfer-/Umbuchungszeilen auf
+                    // Bereits gebuchte Anteil-Zeilen (Transfer-/Umbuchungszeilen auf
                     // Verrechnungskonten ausgeschlossen – das sind keine Anteile).
+                    // Soll positiv, Haben negativ — Gutschrift-Anteile werden als
+                    // Haben-Zeilen gebucht und müssen negativ gegen den Plan stehen.
                     var bookedByKonto = buchungssatz.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Soll
-                                 && !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                        .Where(z => !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
                         .GroupBy(z => z.Buchungskonto.BuchungskontoId)
-                        .ToDictionary(g => g.Key, g => g.ToList());
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag));
 
                     var mergedAnteile = new List<NkAnteilInfo>();
                     foreach (var kontoId in bookedByKonto.Keys.Union(plannedByKonto.Keys).OrderBy(k => k))
                     {
-                        var hasBooked = bookedByKonto.TryGetValue(kontoId, out var bookedList);
+                        var hasBooked = bookedByKonto.TryGetValue(kontoId, out var booked);
                         var hasPlanned = plannedByKonto.TryGetValue(kontoId, out var plannedList);
 
-                        var bookedSum = hasBooked ? bookedList!.Sum(x => x.Betrag) : (decimal?)null;
+                        var bookedSum = hasBooked ? booked : (decimal?)null;
                         var plannedSum = hasPlanned ? plannedList!.Sum(x => x.Betrag) : (decimal?)null;
 
                         // Partei bestimmen: aus Plan oder aus booked-Konto-Lookup
@@ -809,11 +826,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         });
                     }
 
-                    var habenSum = buchungssatz.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
-                    var sollSum = buchungssatz.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-                    bool istVollstaendigGebucht = habenSum > 0 && sollSum >= habenSum;
+                    // Vollständig gebucht = jeder geplante Anteil ist als Zeile gebucht.
+                    // Bewusst NICHT über den Satz-Ausgleich (Soll >= Haben) definiert:
+                    // beim Betriebsstrom wandert die Strompauschale in eine separate
+                    // Umbuchung, der Forderungssatz selbst gleicht sich nie aus.
+                    bool istVollstaendigGebucht = mergedAnteile.Count > 0
+                        && mergedAnteile.All(a =>
+                            a.GebuchterBetrag.HasValue
+                            && (!a.GeplanterBetrag.HasValue
+                                || Math.Abs(a.GebuchterBetrag.Value - a.GeplanterBetrag.Value) <= 0.005m));
 
                     decimal? gesamtVerbrauch = null;
                     string? verbrauchEinheit = null;
@@ -846,6 +867,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         IstVollstaendigGebucht = istVollstaendigGebucht,
                         Anteile = mergedAnteile,
                         Para9_2 = plan.Para9_2,
+                        P9Details = plan.P9Details is { } p9 ? new P9DetailsInfo
+                        {
+                            V = p9.V,
+                            Q = p9.Q,
+                            Tw = p9.Tw,
+                            AllgemeinZaehler = p9.AllgemeinZaehlerKennnummer,
+                            QAnfangsdatum = p9.QAnfangsdatum,
+                            QEnddatum = p9.QEnddatum,
+                            WwZaehler = p9.WwZaehler.Select(x => new ZaehlerVerbrauchInfo
+                            {
+                                ZaehlerId = x.Zaehler.ZaehlerId,
+                                Kennnummer = x.Zaehler.Kennnummer,
+                                Verbrauch = x.Verbrauch,
+                                Einheit = "m³",
+                            }).ToList(),
+                        } : null,
                         P7 = plan.Umlage.HkvoAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31))?.HKVO_P7,
                         P8 = plan.Umlage.HkvoAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31))?.HKVO_P8,
                         GesamtWaerme = plan.GesamtWaerme,

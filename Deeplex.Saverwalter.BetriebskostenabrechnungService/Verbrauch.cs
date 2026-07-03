@@ -54,6 +54,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (anfangsstand != null && endstand != null)
             {
                 Delta = endstand.Stand - anfangsstand.Stand;
+
+                // Ein stark abweichendes Messfenster verfälscht Verbrauchsanteile
+                // (z.B. §9(2)-V/Q) still — deshalb warnen statt schweigen.
+                if (anfangsstand.Datum.DayNumber - beginn.DayNumber > 14
+                    || ende.DayNumber - endstand.Datum.DayNumber > 14)
+                {
+                    notes.Add($"Messfenster von Zähler {zaehler.Kennnummer} ({zaehler.Typ}) weicht vom " +
+                        $"Zeitraum ab: gemessen {anfangsstand.Datum:dd.MM.yyyy} - {endstand.Datum:dd.MM.yyyy}, " +
+                        $"Zeitraum {beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}.",
+                        Severity.Warning);
+                }
             }
             else
             {
@@ -68,12 +79,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     .LastOrDefault(zaehlerstand => zaehlerstand.Datum <= ende);
         }
 
+        /// <summary>
+        /// Stand, der dem Periodenbeginn am nächsten liegt (frühestens 14 Tage davor).
+        /// Nicht den ersten Stand ab beginn−14 nehmen: Gibt es z.B. Stände am 20.12.
+        /// und 31.12., ist der 31.12. der richtige Anfangsstand für den 01.01. —
+        /// sonst zählen Tage des Vorjahres in den Verbrauch hinein.
+        /// </summary>
         private static Zaehlerstand? GetZaehlerAnfangsStand(Zaehler zaehler, DateOnly beginn)
         {
             var earliest = beginn.AddDays(-14).DayNumber;
             return zaehler.Staende
-                .OrderBy(zaehlerstand => zaehlerstand.Datum)
-                .FirstOrDefault(zaehlerstand => earliest <= zaehlerstand.Datum.DayNumber);
+                .Where(zaehlerstand => earliest <= zaehlerstand.Datum.DayNumber)
+                .OrderBy(zaehlerstand => Math.Abs(zaehlerstand.Datum.DayNumber - beginn.DayNumber))
+                .ThenBy(zaehlerstand => zaehlerstand.Datum)
+                .FirstOrDefault();
         }
     }
 }

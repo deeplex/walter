@@ -261,7 +261,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void VollstaendigVerteilterBS_WirdNichtNochmalVerteilt()
+        public void VollstaendigVerteilterBS_WirdIdentischNeuGeplant()
         {
             var w1 = MakeWohnung("W1");
             var w2 = MakeWohnung("W2");
@@ -270,7 +270,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
             umlage.Wohnungen.AddRange([w1, w2]);
 
-            // Forderungs-BS: 1000 € Haben, 500 + 500 € Soll → ausgeglichen
+            // Forderungs-BS: 1000 € Haben, 500 + 500 € Soll → ausgeglichen (gebucht)
             var satz = new Buchungssatz(new DateOnly(2021, 12, 31), "BK-Forderung Test 2021") { Buchungsjahr = 2021 };
             var haben = new Buchungszeile(SollHaben.Haben, 1000m) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
             satz.Buchungszeilen.Add(haben);
@@ -280,8 +280,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var einheiten = ComputeEinheiten([umlage], 2021);
 
-            // SollSumme(1000) == HabenSumme(1000) → vollständig verteilt, nichts mehr zu tun
-            einheiten.Single().Rechnungsplaene.Should().BeEmpty();
+            // Auch ein bereits vollständig gebuchter Satz wird geplant — mit denselben
+            // Anteilen wie gebucht. Der Preview zeigt darüber geplant vs. gebucht;
+            // erneutes Buchen ist idempotent (NkAnteilBuchungsService überspringt
+            // bereits bebuchte Konten).
+            var plan = einheiten.Single().Rechnungsplaene.Single();
+            plan.Betrag.Should().Be(1000m);
+            plan.Anteile.Single(a => a.Partei.Wohnung == w1).Betrag.Should().Be(500m);
+            plan.Anteile.Single(a => a.Partei.Wohnung == w2).Betrag.Should().Be(500m);
         }
 
         // ── Gutschrift ────────────────────────────────────────────────────────
@@ -327,6 +333,100 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             plaene.Should().HaveCount(2);
             plaene.Sum(p => p.Betrag).Should().Be(800m);
             plaene.Sum(p => p.Anteile.Sum(a => a.Betrag)).Should().Be(800m);
+        }
+
+        // ── Preview nach Buchung / Zahlungen ──────────────────────────────────
+
+        [Fact]
+        public void GebuchterForderungssatz_BleibtImRechnungsplan()
+        {
+            // Nach dem Buchen der NK-Anteile ist der Forderungssatz ausgeglichen
+            // (Haben NkVK + Soll Mieterkonto). Der Preview muss ihn weiterhin
+            // planen, sonst kippt das Ergebnis nach dem Buchen.
+            var wohnung = MakeWohnung("W1");
+            var vertrag = MakeVertrag(wohnung);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+
+            var satz = umlage.NkVerrechnungsKonto!.Buchungszeilen.Single().Buchungssatz;
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 1000m)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = vertrag.NkBuchungskonto
+            });
+
+            var plan = ComputeEinheiten([umlage], 2021).Single().Rechnungsplaene.Single();
+
+            plan.Betrag.Should().Be(1000m);
+            plan.Anteile.Sum(a => a.Betrag).Should().Be(1000m);
+        }
+
+        [Fact]
+        public void Zahlungssatz_WirdNichtAlsForderungGeplant()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+            var forderungsHaben = umlage.NkVerrechnungsKonto!.Buchungszeilen
+                .Single(z => z.SollHaben == SollHaben.Haben);
+
+            // Zahlung an den Dienstleister: Soll NkVK / Haben Zahlungskonto,
+            // mit OPOS-Ausgleich gegen die Forderungs-Haben-Zeile.
+            var zahlungsSatz = new Buchungssatz(new DateOnly(2021, 12, 31), "Zahlung Betriebskosten Test 2021");
+            var sollZeile = new Buchungszeile(SollHaben.Soll, 1000m)
+            {
+                Buchungssatz = zahlungsSatz,
+                Buchungskonto = umlage.NkVerrechnungsKonto
+            };
+            sollZeile.AlsSollZeile.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = sollZeile,
+                HabenZeile = forderungsHaben
+            });
+            zahlungsSatz.Buchungszeilen.Add(sollZeile);
+            zahlungsSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 1000m)
+            {
+                Buchungssatz = zahlungsSatz,
+                Buchungskonto = new Buchungskonto("1900", "Bank", BuchungskontoTyp.Aktiv)
+            });
+            umlage.NkVerrechnungsKonto!.Buchungszeilen.Add(sollZeile);
+
+            var plaene = ComputeEinheiten([umlage], 2021).Single().Rechnungsplaene;
+
+            plaene.Should().ContainSingle().Which.Betrag.Should().Be(1000m);
+        }
+
+        [Fact]
+        public void StrompauschaleUmbuchung_WirdNichtAlsForderungGeplant()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+
+            // Persistierte Strompauschale-Umbuchung: Haben auf diesem NkVK.
+            var umbuchung = new Buchungssatz(new DateOnly(2021, 12, 31), $"{StrompauschaleMarker} Heizkosten 2021")
+            {
+                Buchungsjahr = 2021
+            };
+            var habenZeile = new Buchungszeile(SollHaben.Haben, 50m)
+            {
+                Buchungssatz = umbuchung,
+                Buchungskonto = umlage.NkVerrechnungsKonto
+            };
+            umbuchung.Buchungszeilen.Add(habenZeile);
+            umlage.NkVerrechnungsKonto!.Buchungszeilen.Add(habenZeile);
+
+            var plaene = ComputeEinheiten([umlage], 2021).Single().Rechnungsplaene;
+
+            plaene.Should().ContainSingle().Which.Betrag.Should().Be(1000m);
         }
 
         // ── Rechnungsplaene ───────────────────────────────────────────────────
@@ -529,6 +629,181 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             a1.Should().BeApproximately(600m, 0.05m); // NF 200/300 × 900
             a2.Should().BeApproximately(300m, 0.05m); // NF 100/300 × 900
+        }
+
+        // ── §9(2) Warmwasseranteil ────────────────────────────────────────────
+
+        private static Zaehler MakeZaehler(
+            string kennnummer, Zaehlertyp typ, int jahr, decimal delta, Wohnung? wohnung = null)
+        {
+            var zaehler = new Zaehler(kennnummer, typ) { Wohnung = wohnung };
+            zaehler.Staende.Add(new Zaehlerstand(new DateOnly(jahr - 1, 12, 31), 0) { Zaehler = zaehler });
+            zaehler.Staende.Add(new Zaehlerstand(new DateOnly(jahr, 12, 31), delta) { Zaehler = zaehler });
+            return zaehler;
+        }
+
+        private static Umlage MakeP9Setup(Wohnung wohnung, decimal q, decimal v, int jahr)
+        {
+            var heiz = MakeUmlage(Umlageschluessel.NachVerbrauch, "Heizkosten",
+                new Buchungskonto("2000", "Heiz-NkVK", BuchungskontoTyp.Passiv));
+            heiz.UmlageId = 9201;
+            heiz.Wohnungen.Add(wohnung);
+            AddBkForderung(heiz, 1000m, new DateOnly(jahr, 12, 31), jahr);
+
+            heiz.Zaehler.Add(MakeZaehler("WW-1", Zaehlertyp.Warmwasser, jahr, v, wohnung));
+            heiz.HeizkostenHKVOs.Add(new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
+            {
+                Heizkosten = heiz,
+                Betriebsstrom = MakeUmlage(Umlageschluessel.NachWohnflaeche, "Allgemeinstrom",
+                    new Buchungskonto("2001", "Betr-NkVK", BuchungskontoTyp.Passiv)),
+                AllgemeinWaerme = MakeZaehler("ALLG-1", Zaehlertyp.Gas, jahr, q)
+            });
+            return heiz;
+        }
+
+        [Fact]
+        public void P9_2_EntsprichtSatz2Formel_MitDetails()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            // P = 2,5 × 100 × (60 − 10) / 25000 = 0,5
+            var heiz = MakeP9Setup(wohnung, q: 25000m, v: 100m, jahr: 2021);
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            plan.Para9_2.Should().Be(0.5m);
+            plan.P9Details.Should().NotBeNull();
+            plan.P9Details!.V.Should().Be(100m);
+            plan.P9Details.Q.Should().Be(25000m);
+            plan.P9Details.AllgemeinZaehlerKennnummer.Should().Be("ALLG-1");
+            plan.P9Details.QAnfangsdatum.Should().Be(new DateOnly(2020, 12, 31));
+            plan.P9Details.QEnddatum.Should().Be(new DateOnly(2021, 12, 31));
+            plan.P9Details.WwZaehler.Should().ContainSingle(x => x.Verbrauch == 100m);
+        }
+
+        [Fact]
+        public void P9_2_Ueber100Prozent_WirdBegrenztUndGewarnt()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            // P = 2,5 × 100 × 50 / 10000 = 1,25 → auf 1 begrenzt + Fehler-Warnung
+            var heiz = MakeP9Setup(wohnung, q: 10000m, v: 100m, jahr: 2021);
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            plan.Para9_2.Should().Be(1m);
+            plan.Warnungen.Should().Contain(w => w.Contains("100 %"));
+        }
+
+        [Fact]
+        public void HkvoUmlage_VorjahresrechnungMitZahldatumImJahr_WirdNichtGeplant()
+        {
+            // Rechnung für 2020, aber erst 2021 gebucht/bezahlt (Buchungsdatum 2021):
+            // maßgeblich ist das Buchungsjahr — sie gehört NICHT in die 2021er Abrechnung.
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var heiz = MakeP9Setup(wohnung, q: 25000m, v: 100m, jahr: 2021);
+
+            var vorjahr = new Buchungssatz(new DateOnly(2021, 2, 3), "Betriebskosten Heizkosten 2020")
+            {
+                Buchungsjahr = 2020
+            };
+            var zeile = new Buchungszeile(SollHaben.Haben, 500m)
+            {
+                Buchungssatz = vorjahr,
+                Buchungskonto = heiz.NkVerrechnungsKonto
+            };
+            vorjahr.Buchungszeilen.Add(zeile);
+            heiz.NkVerrechnungsKonto!.Buchungszeilen.Add(zeile);
+
+            var plaene = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene;
+
+            plaene.Should().ContainSingle().Which.Betrag.Should().Be(1000m);
+        }
+
+        [Fact]
+        public void P9_2_OhneAllgemeinzaehlerVerbrauch_NullMitWarnung()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var heiz = MakeP9Setup(wohnung, q: 0m, v: 100m, jahr: 2021);
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            plan.Para9_2.Should().Be(0m);
+            plan.Warnungen.Should().Contain(w => w.Contains("ALLG-1"));
+        }
+    }
+
+    public class VerbrauchTests
+    {
+        private static Zaehler MakeZaehlerMitStaenden(params (DateOnly Datum, decimal Stand)[] staende)
+        {
+            var zaehler = new Zaehler("Z-1", Zaehlertyp.Gas);
+            foreach (var (datum, stand) in staende)
+            {
+                zaehler.Staende.Add(new Zaehlerstand(datum, stand) { Zaehler = zaehler });
+            }
+            return zaehler;
+        }
+
+        [Fact]
+        public void Anfangsstand_NimmtDenStandAmNaechstenZumBeginn()
+        {
+            // Stände am 20.12. UND 31.12.: der 31.12. ist der richtige Anfangsstand
+            // für den 01.01. — sonst zählen 11 Tage des Vorjahres mit.
+            var zaehler = MakeZaehlerMitStaenden(
+                (new DateOnly(2020, 12, 20), 100m),
+                (new DateOnly(2020, 12, 31), 110m),
+                (new DateOnly(2021, 12, 31), 210m));
+            var notes = new List<Note>();
+
+            var verbrauch = new Verbrauch(zaehler, new DateOnly(2021, 1, 1), new DateOnly(2021, 12, 31), notes);
+
+            verbrauch.Delta.Should().Be(100m);
+            verbrauch.Anfangsdatum.Should().Be(new DateOnly(2020, 12, 31));
+            notes.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Anfangsstand_KurzNachBeginn_WirdGenommen()
+        {
+            var zaehler = MakeZaehlerMitStaenden(
+                (new DateOnly(2021, 1, 5), 100m),
+                (new DateOnly(2021, 12, 28), 200m));
+            var notes = new List<Note>();
+
+            var verbrauch = new Verbrauch(zaehler, new DateOnly(2021, 1, 1), new DateOnly(2021, 12, 31), notes);
+
+            verbrauch.Delta.Should().Be(100m);
+            notes.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void AbweichendesMessfenster_ErzeugtWarnung()
+        {
+            // Erster Stand erst im März: Delta deckt nur ein Teiljahr ab → Warnung.
+            var zaehler = MakeZaehlerMitStaenden(
+                (new DateOnly(2021, 3, 1), 0m),
+                (new DateOnly(2021, 12, 31), 50m));
+            var notes = new List<Note>();
+
+            var verbrauch = new Verbrauch(zaehler, new DateOnly(2021, 1, 1), new DateOnly(2021, 12, 31), notes);
+
+            verbrauch.Delta.Should().Be(50m);
+            notes.Should().Contain(n => n.Severity == Severity.Warning && n.Message.Contains("Messfenster"));
+        }
+
+        [Fact]
+        public void FehlenderAnfangsstand_ErzeugtFehler()
+        {
+            var zaehler = MakeZaehlerMitStaenden((new DateOnly(2020, 6, 1), 100m));
+            var notes = new List<Note>();
+
+            var verbrauch = new Verbrauch(zaehler, new DateOnly(2021, 1, 1), new DateOnly(2021, 12, 31), notes);
+
+            verbrauch.Delta.Should().Be(0m);
+            notes.Should().Contain(n => n.Severity == Severity.Error);
         }
     }
 }

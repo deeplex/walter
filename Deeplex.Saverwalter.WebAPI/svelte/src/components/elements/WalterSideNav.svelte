@@ -37,6 +37,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Logout,
         Meter,
         NetworkAdminControl,
+        TaskComplete,
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
@@ -88,6 +89,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     icon={ArrowsHorizontal}
                     text="Transaktionen"
                     href="/transaktionen"
+                />
+                <WalterSideNavLink
+                    icon={TaskComplete}
+                    text="Jahresabschluss"
+                    href="/jahresabschlusskontrolle"
                 />
                 <WalterSideNavLink
                     icon={ChartRelationship}

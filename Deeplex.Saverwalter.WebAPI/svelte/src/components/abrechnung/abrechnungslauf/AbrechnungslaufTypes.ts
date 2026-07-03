@@ -36,6 +36,17 @@ export type NkAnteilInfo = {
     verbrauchZaehler: ZaehlerVerbrauchInfo[];
 };
 
+/** Eingangswerte der §9(2)-Berechnung: P = 2,5 × V × (Tw − 10) / Q. */
+export type P9DetailsInfo = {
+    v: number;
+    q: number;
+    tw: number;
+    allgemeinZaehler: string;
+    qAnfangsdatum: string;
+    qEnddatum: string;
+    wwZaehler: ZaehlerVerbrauchInfo[];
+};
+
 export type NkZeileInfo = {
     umlageId: number;
     bezeichnung: string;
@@ -48,6 +59,7 @@ export type NkZeileInfo = {
     istVollstaendigGebucht: boolean;
     anteile: NkAnteilInfo[];
     para9_2: number | null;
+    p9Details: P9DetailsInfo | null;
     p7: number | null;
     p8: number | null;
     gesamtWaerme: number | null;

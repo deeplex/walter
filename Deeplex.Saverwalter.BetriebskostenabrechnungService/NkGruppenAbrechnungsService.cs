@@ -178,6 +178,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             /// <summary>§9(2)-Warmwasseranteil. Nur für HKVO-Umlagen gesetzt.</summary>
             public decimal? Para9_2 { get; init; }
+            /// <summary>Eingangswerte der §9(2)-Berechnung. Nur gesetzt, wenn ein Allgemeinzähler konfiguriert ist.</summary>
+            public NkP9Details? P9Details { get; init; }
             /// <summary>Gesamtverbrauch Wärme aller Parteien (kWh). Nur für HKVO-Umlagen.</summary>
             public decimal? GesamtWaerme { get; init; }
             /// <summary>Gesamtverbrauch Warmwasser aller Parteien (m³). Nur für HKVO-Umlagen.</summary>
@@ -196,6 +198,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             /// </summary>
             public bool IstStrompauschale { get; init; }
         }
+
+        /// <summary>
+        /// Eingangswerte der §9(2)-Berechnung: P = 2,5 × V × (Tw − 10) / Q.
+        /// V = Summe der Wohnungs-Warmwasserzähler (m³) über den Abrechnungszeitraum,
+        /// Q = Verbrauch des Allgemein-Wärmezählers (kWh), Messfenster in QAnfangsdatum/QEnddatum.
+        /// </summary>
+        public sealed record NkP9Details(
+            decimal V,
+            decimal Q,
+            decimal Tw,
+            string AllgemeinZaehlerKennnummer,
+            DateOnly QAnfangsdatum,
+            DateOnly QEnddatum,
+            IReadOnlyList<(Zaehler Zaehler, decimal Verbrauch)> WwZaehler);
 
         /// <summary>
         /// Verbrauchsanteile und Zähler-Einzelwerte einer Partei für eine HKVO-Umlage.
@@ -510,7 +526,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 var schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel;
                 var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                     .Where(z => z.Buchungssatz.Buchungsjahr == jahr
-                             && !IstVollstaendigVerteilt(z.Buchungssatz))
+                             && IstRechnungsZeile(z))
                     .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                     .ToList() ?? [];
 
@@ -551,6 +567,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         /// <summary>Beschreibungs-Marker der Strompauschale-Umbuchung (HeizkostenV).</summary>
         public const string StrompauschaleMarker = "Strompauschale-Umbuchung";
+
+        /// <summary>
+        /// Beschreibungs-Marker manueller NK-Anteil-Sätze (Soll NkBuchungskonto /
+        /// Haben NkVerrechnungsKonto). Wird von NkAnteilBuchungsService verwendet.
+        /// </summary>
+        public const string NkAnteilMarker = "NK-Anteil: ";
 
         /// <summary>
         /// Wendet die Strompauschale (HeizkostenV) an: delta = Heizkosten × Strompauschale wird
@@ -684,6 +706,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Anteile = anteile,
                 Warnungen = warnungen ?? plan.Warnungen,
                 Para9_2 = plan.Para9_2,
+                P9Details = plan.P9Details,
                 GesamtWaerme = plan.GesamtWaerme,
                 GesamtWW = plan.GesamtWW,
                 HkvoVerbrauchAnteile = plan.HkvoVerbrauchAnteile,
@@ -726,19 +749,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Where(z => z.Wohnung != null && z.Typ == Zaehlertyp.Warmwasser)
                 .ToList();
 
-            // §9(2): Q vom HKVO-Allgemeinzähler, V = Summe aller Wohnungs-WW-Zähler
-            decimal para9_2 = 0;
-            if (hkvo.AllgemeinWaerme != null)
-            {
-                var Q = new Verbrauch(hkvo.AllgemeinWaerme, beginn, ende, notes).Delta;
-                var V = wohnungWW.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
-                if (Q > 0 && V > 0)
-                {
-                    const decimal tw = 60m;
-                    para9_2 = 2.5m * (V / Q) * (tw - 10m);
-                }
-            }
-
             // Verbrauch pro Partei – je Zähler einzeln (Nutzungszeitraum der Partei als Messfenster)
             var waermeZaehlerByPartei = parteien.ToDictionary(
                 p => p,
@@ -756,6 +766,55 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var totalWaerme = waermeZaehlerByPartei.Values.SelectMany(x => x).Sum(x => x.Item2);
             var totalWW = wwZaehlerByPartei.Values.SelectMany(x => x).Sum(x => x.Item2);
 
+            // §9(2): Q vom HKVO-Allgemeinzähler, V = Summe aller Wohnungs-WW-Zähler.
+            // Anteil P = 2,5 × V × (Tw − 10) / Q.
+            const decimal tw = 60m;
+            decimal para9_2 = 0;
+            NkP9Details? p9Details = null;
+            if (hkvo.AllgemeinWaerme != null)
+            {
+                var qVerbrauch = new Verbrauch(hkvo.AllgemeinWaerme, beginn, ende, notes);
+                var Q = qVerbrauch.Delta;
+                var wwVerbrauche = wohnungWW
+                    .Select(z => (Zaehler: z, Verbrauch: new Verbrauch(z, beginn, ende, notes).Delta))
+                    .ToList();
+                var V = wwVerbrauche.Sum(x => x.Verbrauch);
+
+                if (Q <= 0)
+                {
+                    notes.Add($"Allgemein-Wärmezähler {hkvo.AllgemeinWaerme.Kennnummer} hat keinen Verbrauch " +
+                        $"im Zeitraum {beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy} — kein §9(2)-Warmwasseranteil, " +
+                        "der gesamte Betrag wird als Heizung (§7) verteilt.", Severity.Warning);
+                }
+                else if (V <= 0)
+                {
+                    notes.Add("Kein Warmwasser-Verbrauch auf den Wohnungszählern gefunden — kein §9(2)-" +
+                        "Warmwasseranteil, der gesamte Betrag wird als Heizung (§7) verteilt.", Severity.Warning);
+                }
+                else
+                {
+                    para9_2 = 2.5m * V * (tw - 10m) / Q;
+                    if (para9_2 > 1)
+                    {
+                        notes.Add($"§9(2)-Warmwasseranteil liegt über 100 % ({para9_2:P1}) und wird auf 100 % " +
+                            "begrenzt — V, Q und Einheiten prüfen.", Severity.Error);
+                        para9_2 = 1m;
+                    }
+                }
+
+                if (Q > 0 && totalWaerme > Q)
+                {
+                    notes.Add($"Summe der Wohnungs-Wärmezähler ({totalWaerme}) übersteigt den " +
+                        $"Allgemeinzähler {hkvo.AllgemeinWaerme.Kennnummer} ({Q}).", Severity.Warning);
+                }
+
+                p9Details = new NkP9Details(
+                    V, Q, tw,
+                    hkvo.AllgemeinWaerme.Kennnummer,
+                    qVerbrauch.Anfangsdatum, qVerbrauch.Enddatum,
+                    wwVerbrauche);
+            }
+
             // Individuelle Verbrauchsanteile und Zähler-Einzelwerte je Partei
             var hkvoVerbrauchAnteile = parteien.ToDictionary(
                 p => p,
@@ -770,10 +829,19 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         WwZaehler: wwZaehlerByPartei[p]);
                 });
 
+            // Notes (fehlende/abweichende Zählerstände, §9(2)-Plausibilität) als
+            // Warnungen an alle Pläne dieser Umlage hängen — vorher gingen sie verloren.
+            var warnungen = notes
+                .Distinct()
+                .Select(n => n.Severity == Severity.Error ? $"Fehler: {n.Message}" : n.Message)
+                .ToList();
+
+            // Maßgeblich ist ausschließlich das Buchungsjahr (Wirtschaftsjahr) — das
+            // Buchungsdatum darf davon abweichen (z.B. Vorjahresrechnung, die erst im
+            // Folgejahr bezahlt wird) und würde die Rechnung sonst doppelt zuordnen.
             var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
-                .Where(z => (z.Buchungssatz.Buchungsjahr == jahr
-                             || z.Buchungssatz.Buchungsdatum.Year == jahr)
-                         && !IstVollstaendigVerteilt(z.Buchungssatz))
+                .Where(z => z.Buchungssatz.Buchungsjahr == jahr
+                         && IstRechnungsZeile(z))
                 .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                 .ToList() ?? [];
 
@@ -811,12 +879,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     Betrag = betrag,
                     Umlage = umlage,
                     Anteile = anteile,
-                    Warnungen = [],
+                    Warnungen = warnungen,
                     // Immer setzen (0, wenn kein §9(2)-Warmwasserzähler): markiert die Zeile
                     // als HKVO-Zeile. null bleibt den kalten Betriebskosten vorbehalten —
                     // sonst würde eine Heizkostenzeile ohne §9(2) im Frontend als kalt gelten
                     // und die §7/§8-Aufteilung nicht angezeigt.
                     Para9_2 = para9_2,
+                    P9Details = p9Details,
                     GesamtWaerme = totalWaerme > 0 ? totalWaerme : null,
                     GesamtWW = totalWW > 0 ? totalWW : null,
                     HkvoVerbrauchAnteile = hkvoVerbrauchAnteile,
@@ -824,13 +893,25 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
         }
 
-        // Ein ausgeglichener Buchungssatz (SollSumme == HabenSumme) ist bereits vollständig verteilt.
-        private static bool IstVollstaendigVerteilt(Buchungssatz satz)
-        {
-            var sollSum = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-            var habenSum = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
-            return sollSum == habenSum;
-        }
+        /// <summary>
+        /// Rechnungs-/Gutschriftszeilen auf dem NkVerrechnungskonto sind zu verteilende
+        /// Forderungen: Haben-Zeilen (Rechnungen) und Soll-Zeilen ohne OPOS-Ausgleich
+        /// (Gutschriften, Stornos). Keine Forderungen sind:
+        ///   - Zahlungs-Soll-Zeilen — sie tragen immer einen OffenerPostenAusgleich
+        ///     zur Forderungs-Haben-Zeile (TransaktionBuchungsService),
+        ///   - die Strompauschale-Umbuchung (wird als eigener transienter Plan erzeugt),
+        ///   - manuelle NK-Anteil-Sätze (Haben NkVK ist dort die Verteil-Gegenseite).
+        /// Der Ausgleichszustand des Satzes ist bewusst KEIN Kriterium: Nach dem Buchen
+        /// der NK-Anteile ist der Forderungssatz ausgeglichen, muss aber im Preview
+        /// weiterhin als (gebuchte) Rechnung erscheinen — sonst kippen die Ergebnisse
+        /// nach dem Buchen und die Zeilen gelten fälschlich als fehlend. Ebenso ist
+        /// Buchungssatz.Transaktion KEIN Kriterium: importierte Forderungssätze können
+        /// eine Transaktion tragen.
+        /// </summary>
+        private static bool IstRechnungsZeile(Buchungszeile zeile) =>
+            !zeile.Buchungssatz.Beschreibung.StartsWith(StrompauschaleMarker)
+            && !zeile.Buchungssatz.Beschreibung.StartsWith(NkAnteilMarker)
+            && (zeile.SollHaben == SollHaben.Haben || zeile.AlsSollZeile.Count == 0);
 
         // Bevorzugt letzten Eigenanteil als Träger der Rundungsdifferenz.
         private static void ApplyRundungskorrektur(decimal sollBetrag, List<NkRechnungsAnteil> anteile)
