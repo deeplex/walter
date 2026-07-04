@@ -35,7 +35,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 jahr: row.jahr,
                 saldo: row.saldo,
                 istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
-                istBeglichen: row.saldo === 0 ? 'Ja' : 'Nein'
+                istBeglichen: row.ausgeglichen
+                    ? 'Ja'
+                    : `Nein (offen: ${row.offenerBetrag.toFixed(2)} €)`
             };
         })
         .sort((a, b) => b.jahr - a.jahr);

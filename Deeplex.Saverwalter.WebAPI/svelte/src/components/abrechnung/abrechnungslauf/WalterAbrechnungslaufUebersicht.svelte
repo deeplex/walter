@@ -32,11 +32,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     const resultatStatus = (r: AbrechnungsresultatInfo): string => {
-        if (r.gebuchtesAbrechnungsResultat === null) return 'Nicht gebucht';
-        if (
-            Math.abs(r.gebuchtesAbrechnungsResultat - r.rechnungsbetrag) > 0.005
-        )
-            return `Gebucht: ${euro(r.gebuchtesAbrechnungsResultat)}`;
+        if (r.gebuchterSaldo === null) return 'Nicht gebucht';
+        if (Math.abs(r.gebuchterSaldo - r.saldo) > 0.005)
+            return `Gebucht: ${euro(r.gebuchterSaldo)}`;
         if (r.abgesendet) return 'Abgesendet';
         return 'Gebucht';
     };
@@ -156,9 +154,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             saldo: { value: r.saldo, formatted: euro(r.saldo) },
             status: resultatStatus(r),
             statusVeraltet:
-                r.gebuchtesAbrechnungsResultat !== null &&
-                Math.abs(r.gebuchtesAbrechnungsResultat - r.rechnungsbetrag) >
-                    0.005
+                r.gebuchterSaldo !== null &&
+                Math.abs(r.gebuchterSaldo - r.saldo) > 0.005
         }))}
         size="short"
         style="margin-bottom: 1rem;"
@@ -215,9 +212,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             kosten: euro(r.rechnungsbetrag),
             status: resultatStatus(r),
             statusVeraltet:
-                r.gebuchtesAbrechnungsResultat !== null &&
-                Math.abs(r.gebuchtesAbrechnungsResultat - r.rechnungsbetrag) >
-                    0.005
+                r.gebuchterSaldo !== null &&
+                Math.abs(r.gebuchterSaldo - r.saldo) > 0.005
         }))}
         size="short"
         style="margin-bottom: 0.5rem;"

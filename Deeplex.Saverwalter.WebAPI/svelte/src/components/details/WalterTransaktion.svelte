@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
     import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
     import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
+    import WalterTransaktionPositionAbrechnung from './WalterTransaktionPositionAbrechnung.svelte';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
@@ -51,7 +52,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     // Objektidentität (Referenzen) synchron gehalten — kein Index-Mapping nötig.
-    type BkTile = { bk: BetriebskostenEingangInput; nk: NkAnteilEingangInput; isDirekt: boolean };
+    type BkTile = {
+        bk: BetriebskostenEingangInput;
+        nk: NkAnteilEingangInput;
+        isDirekt: boolean;
+    };
     let bkTiles: BkTile[] = [];
     let bkTileInvalids: boolean[] = [];
 
@@ -66,19 +71,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ) +
         (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) ||
             0) +
-        bkTiles.filter(t => !t.isDirekt).reduce((s, t) => s + (t.bk.betrag || 0), 0) +
+        bkTiles
+            .filter((t) => !t.isDirekt)
+            .reduce((s, t) => s + (t.bk.betrag || 0), 0) +
         buchung.erhaltungsaufwendungen.reduce(
             (s, e) => s + (e.betrag || 0),
             0
         ) +
-        buchung.sonstige.reduce((s, s2) => s + (s2.betrag || 0), 0);
+        buchung.sonstige.reduce((s, s2) => s + (s2.betrag || 0), 0) +
+        (buchung.abrechnungsAusgleiche?.reduce(
+            (s, a) => s + (a.betrag || 0),
+            0
+        ) || 0);
 
     $: totalPositions =
         buchung.mieten.length +
         (buchung.garagenEingaenge?.length || 0) +
         bkTiles.length +
         buchung.erhaltungsaufwendungen.length +
-        buchung.sonstige.length;
+        buchung.sonstige.length +
+        (buchung.abrechnungsAusgleiche?.length || 0);
 
     $: isSinglePosition = totalPositions === 1;
 
@@ -88,22 +100,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let mieteStatusTexts: string[] = [];
     let garageInvalids: boolean[] = [];
     let eaInvalids: boolean[] = [];
+    let ausgleichInvalids: boolean[] = [];
 
     $: hasCashPositions =
         buchung.mieten.length > 0 ||
         (buchung.garagenEingaenge?.length || 0) > 0 ||
-        bkTiles.some(t => !t.isDirekt) ||
+        bkTiles.some((t) => !t.isDirekt) ||
         buchung.erhaltungsaufwendungen.length > 0 ||
-        buchung.sonstige.length > 0;
+        buchung.sonstige.length > 0 ||
+        (buchung.abrechnungsAusgleiche?.length || 0) > 0;
 
     $: isValid =
         (hasCashPositions
             ? buchung.betrag > 0 && Math.abs(offenerBetrag) < 0.005
-            : bkTiles.some(t => t.isDirekt)) &&
+            : bkTiles.some((t) => t.isDirekt)) &&
         !mieteInvalids.some(Boolean) &&
         !garageInvalids.some(Boolean) &&
         !bkTileInvalids.some(Boolean) &&
-        !eaInvalids.some(Boolean);
+        !eaInvalids.some(Boolean) &&
+        !ausgleichInvalids.some(Boolean);
 
     function addWohnungsmiete() {
         const available = Math.max(0, offenerBetrag);
@@ -128,15 +143,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         };
         bkTiles = [...bkTiles, { bk: bkEntry, nk: nkEntry, isDirekt: false }];
         bkTileInvalids = [...bkTileInvalids, true];
-        buchung.betriebskostenEingaenge = [...buchung.betriebskostenEingaenge, bkEntry];
+        buchung.betriebskostenEingaenge = [
+            ...buchung.betriebskostenEingaenge,
+            bkEntry
+        ];
     }
 
     function removeBkTile(i: number) {
         const tile = bkTiles[i];
         if (tile.isDirekt) {
-            buchung.nkAnteilEingaenge = (buchung.nkAnteilEingaenge ?? []).filter(n => n !== tile.nk);
+            buchung.nkAnteilEingaenge = (
+                buchung.nkAnteilEingaenge ?? []
+            ).filter((n) => n !== tile.nk);
         } else {
-            buchung.betriebskostenEingaenge = buchung.betriebskostenEingaenge.filter(b => b !== tile.bk);
+            buchung.betriebskostenEingaenge =
+                buchung.betriebskostenEingaenge.filter((b) => b !== tile.bk);
         }
         bkTiles = bkTiles.filter((_, idx) => idx !== i);
         bkTileInvalids = bkTileInvalids.filter((_, idx) => idx !== i);
@@ -146,11 +167,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const tile = bkTiles[i];
         if (isDirekt === tile.isDirekt) return;
         if (isDirekt) {
-            buchung.betriebskostenEingaenge = buchung.betriebskostenEingaenge.filter(b => b !== tile.bk);
-            buchung.nkAnteilEingaenge = [...(buchung.nkAnteilEingaenge ?? []), tile.nk];
+            buchung.betriebskostenEingaenge =
+                buchung.betriebskostenEingaenge.filter((b) => b !== tile.bk);
+            buchung.nkAnteilEingaenge = [
+                ...(buchung.nkAnteilEingaenge ?? []),
+                tile.nk
+            ];
         } else {
-            buchung.nkAnteilEingaenge = (buchung.nkAnteilEingaenge ?? []).filter(n => n !== tile.nk);
-            buchung.betriebskostenEingaenge = [...buchung.betriebskostenEingaenge, tile.bk];
+            buchung.nkAnteilEingaenge = (
+                buchung.nkAnteilEingaenge ?? []
+            ).filter((n) => n !== tile.nk);
+            buchung.betriebskostenEingaenge = [
+                ...buchung.betriebskostenEingaenge,
+                tile.bk
+            ];
         }
         bkTiles[i] = { ...tile, isDirekt };
         bkTiles = bkTiles;
@@ -177,6 +207,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function addSonstiges() {
         const available = Math.max(0, offenerBetrag);
         buchung.sonstige = [...buchung.sonstige, { betrag: available }];
+    }
+
+    function addAbrechnungsAusgleich() {
+        buchung.abrechnungsAusgleiche = [
+            ...(buchung.abrechnungsAusgleiche ?? []),
+            { betrag: 0 }
+        ];
+    }
+
+    function removeAbrechnungsAusgleich(i: number) {
+        buchung.abrechnungsAusgleiche = buchung.abrechnungsAusgleiche.filter(
+            (_, idx) => idx !== i
+        );
+        ausgleichInvalids = ausgleichInvalids.filter((_, idx) => idx !== i);
     }
 
     function addGarage() {
@@ -211,6 +255,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function onZahlerResolved(e: CustomEvent<number | undefined>) {
         if (buchung.zahlerId) return; // don't overwrite explicit user selection
         buchung.zahlerId = e.detail;
+    }
+
+    function onZahlungsempfaengerResolved(e: CustomEvent<number | undefined>) {
+        if (buchung.zahlungsempfaengerId) return;
+        buchung.zahlungsempfaengerId = e.detail;
     }
 
     function onZahlungsempfaengerChange(e: CustomEvent) {
@@ -307,7 +356,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
         >
-            <strong>{tile.isDirekt ? 'Vertrag-Direktzuweisung' : 'Betriebskostenrechnung'}</strong>
+            <strong
+                >{tile.isDirekt
+                    ? 'Vertrag-Direktzuweisung'
+                    : 'Betriebskostenrechnung'}</strong
+            >
             <Button
                 kind="ghost"
                 size="small"
@@ -351,6 +404,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             availableBetrag={buchung.betrag ?? 0}
             bind:invalid={eaInvalids[i]}
             {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- NK-Abrechnungsausgleich (Nachzahlung/Erstattung) -->
+{#each buchung.abrechnungsAusgleiche ?? [] as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>NK-Abrechnung (Nachzahlung/Erstattung)</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeAbrechnungsAusgleich(i)}
+            />
+        </div>
+        <WalterTransaktionPositionAbrechnung
+            {fetchImpl}
+            bind:ausgleich={buchung.abrechnungsAusgleiche[i]}
+            bind:invalid={ausgleichInvalids[i]}
+            on:zahlerResolved={onZahlerResolved}
+            on:zahlungsempfaengerResolved={onZahlungsempfaengerResolved}
         />
     </Tile>
 {/each}
@@ -403,6 +481,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </Button>
             <Button kind="tertiary" size="small" icon={Add} on:click={addEA}>
                 Erhaltungsaufwendung
+            </Button>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addAbrechnungsAusgleich}
+            >
+                NK-Abrechnung
             </Button>
             <Button
                 kind="tertiary"

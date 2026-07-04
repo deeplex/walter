@@ -84,13 +84,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
+    // Erste Zeile mit einem Anteil DIESES Vertrags nehmen — die erste Zeile des
+    // Schlüssels kann eine fehlende Umlage ohne Anteile sein (→ fälschlich 0).
     $: anteilFaktorFuerSchluessel = (schluessel: string): number => {
-        const zeile = einheit.nkZeilen.find((z) => z.schluessel === schluessel);
+        const zeile = einheit.nkZeilen.find(
+            (z) =>
+                z.schluessel === schluessel &&
+                z.anteile.some((a) => a.vertragId === vertragId)
+        );
         return (
             zeile?.anteile.find((a) => a.vertragId === vertragId)
                 ?.anteilFaktor ?? 0
         );
     };
+
+    // Ganze Zahlen ohne Nachkommastellen (Nutzeinheiten), sonst 2 Stellen.
+    const formatAnzahl = (n: number) =>
+        Number(n.toFixed(2)) % 1 === 0 ? String(Math.round(n)) : n.toFixed(2);
 
     $: wfZeitanteil = anteilFaktorFuerSchluessel('n. WF');
     $: nfZeitanteil = anteilFaktorFuerSchluessel('n. NF');
@@ -316,14 +326,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     </StructuredListRow>
                     <StructuredListRow>
                         <StructuredListCell>
-                            {zeitanteil > 0
-                                ? (
-                                      (einheit.gesamtNutzeinheit *
+                            {formatAnzahl(
+                                zeitanteil > 0
+                                    ? (einheit.gesamtNutzeinheit *
                                           neZeitanteil) /
-                                      zeitanteil
-                                  ).toFixed(2)
-                                : 0}
-                            / {einheit.gesamtNutzeinheit}
+                                          zeitanteil
+                                    : 0
+                            )}
+                            / {formatAnzahl(einheit.gesamtNutzeinheit)}
                         </StructuredListCell>
                         <StructuredListCell
                             >{formatDate(vonInJahr)} – {formatDate(
@@ -369,7 +379,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <StructuredList condensed style="margin: 2em">
             <StructuredListHead>
                 <StructuredListRow>
-                    <StructuredListCell head>Verbrauch (n. Verb.)</StructuredListCell>
+                    <StructuredListCell head
+                        >Verbrauch (n. Verb.)</StructuredListCell
+                    >
                     <StructuredListCell head>Zähler</StructuredListCell>
                     <StructuredListCell head>Mein Verbrauch</StructuredListCell>
                     <StructuredListCell head>Gesamt</StructuredListCell>
@@ -379,7 +391,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <StructuredListBody>
                 {#each verbrauchZeilen as vz}
                     <StructuredListRow>
-                        <StructuredListCell head>{vz.bezeichnung}</StructuredListCell>
+                        <StructuredListCell head
+                            >{vz.bezeichnung}</StructuredListCell
+                        >
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell></StructuredListCell>
                         <StructuredListCell>
@@ -387,13 +401,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 {vz.gesamtVerbrauch.toFixed(2)} {vz.einheit}
                             {/if}
                         </StructuredListCell>
-                        <StructuredListCell>{convertPercent(vz.anteilFaktor)}</StructuredListCell>
+                        <StructuredListCell
+                            >{convertPercent(
+                                vz.anteilFaktor
+                            )}</StructuredListCell
+                        >
                     </StructuredListRow>
                     {#each vz.zaehler as z}
                         <StructuredListRow>
                             <StructuredListCell></StructuredListCell>
-                            <StructuredListCell>Zähler {z.kennnummer}</StructuredListCell>
-                            <StructuredListCell>{z.verbrauch.toFixed(2)} {z.einheit}</StructuredListCell>
+                            <StructuredListCell
+                                >Zähler {z.kennnummer}</StructuredListCell
+                            >
+                            <StructuredListCell
+                                >{z.verbrauch.toFixed(2)}
+                                {z.einheit}</StructuredListCell
+                            >
                             <StructuredListCell></StructuredListCell>
                             <StructuredListCell></StructuredListCell>
                         </StructuredListRow>

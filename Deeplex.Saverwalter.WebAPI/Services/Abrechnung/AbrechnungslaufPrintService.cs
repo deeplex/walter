@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
             var gebucht = preview.Resultate
                 .Where(r => r.VertragId.HasValue)
-                .ToDictionary(r => r.VertragId!.Value, r => r.GebuchtesAbrechnungsResultat);
+                .ToDictionary(r => r.VertragId!.Value, r => r.GebuchterSaldo);
 
             var mieterParteien = alleEinheiten
                 .SelectMany(e => e.Parteien)
@@ -71,10 +71,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 }
 
                 var vid = partei.Vertrag!.VertragId;
-                var gebuchterBetrag = gebucht.GetValueOrDefault(vid);
-                var istEntwurf = !gebuchterBetrag.HasValue
-                    || Math.Abs(gebuchterBetrag.Value - druckdaten.Rechnungsbetrag) > 0.005m;
-                var entwurfGrund = !gebuchterBetrag.HasValue
+                var gebuchterSaldo = gebucht.GetValueOrDefault(vid);
+                // druckdaten.Saldo = Vorauszahlung − Rechnungsbetrag; der gebuchte
+                // Saldo hat die umgekehrte Vorzeichenkonvention (Rechnungsbetrag − VZ).
+                var berechneterSaldo = druckdaten.Rechnungsbetrag - druckdaten.Vorauszahlung;
+                var istEntwurf = !gebuchterSaldo.HasValue
+                    || Math.Abs(gebuchterSaldo.Value - berechneterSaldo) > 0.005m;
+                var entwurfGrund = !gebuchterSaldo.HasValue
                     ? "Noch nicht gebucht"
                     : "Buchungsstand stimmt nicht überein";
 

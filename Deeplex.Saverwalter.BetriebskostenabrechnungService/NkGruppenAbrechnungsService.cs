@@ -86,10 +86,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             public Abrechnungsresultat? ExistingResultat { get; init; }
 
             /// <summary>
-            /// Bereits gebuchter Rechnungsbetrag (Haben auf BkAbrechnungsKonto), oder null wenn noch nicht gebucht.
-            /// Ermöglicht Vergleich mit dem aktuell berechneten Rechnungsbetrag.
+            /// Bereits gebuchter Abrechnungs-Saldo (Glattstellung auf dem
+            /// BkAbrechnungsKonto: Soll = Nachzahlung, Haben = Guthaben), oder null
+            /// wenn noch nicht gebucht. Ermöglicht Vergleich mit dem aktuell
+            /// berechneten Saldo (Rechnungsbetrag − Vorauszahlung).
             /// </summary>
-            public decimal? GebuchtesAbrechnungsResultat { get; init; }
+            public decimal? GebuchterSaldo { get; init; }
         }
 
         /// <summary>
@@ -466,20 +468,27 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             // Buchungszeilen sind durch den Include bereits auf das Abrechnungsjahr gefiltert.
             var existing = vertrag.Abrechnungsresultate
                 .FirstOrDefault(r => r.Buchungssatz.Buchungsjahr == jahr);
-            var gebuchtesResultat = existing?.Buchungssatz.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben
-                            && z.Buchungskonto.BuchungskontoId == vertrag.BkAbrechnungsKonto.BuchungskontoId)
-                .Sum(z => z.Betrag);
+            // Glattstellungs-Saldo auf dem BkAbrechnungsKonto: Soll = Nachzahlung,
+            // Haben = Guthaben. Leerer Satz (saldo 0) ergibt 0.
+            var gebuchterSaldo = existing?.Buchungssatz.Buchungszeilen
+                .Where(z => z.Buchungskonto.BuchungskontoId == vertrag.BkAbrechnungsKonto.BuchungskontoId)
+                .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
+            var abrechnungsSatzId = existing?.Buchungssatz.BuchungssatzId;
             var vertragInfo = new NkVertragInfo
             {
+                // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto); die
+                // eigene Glattstellungs-Haben-Zeile der Abrechnung ausklammern, sonst
+                // würde der Saldo nach dem Buchen fälschlich als Konflikt erkannt.
                 Vorauszahlung = vertrag.NkBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag),
+                    .Where(z => z.SollHaben == SollHaben.Haben
+                             && z.Buchungssatz.BuchungssatzId != abrechnungsSatzId)
+                    .Sum(z => z.Betrag),
                 MietSaldo = vertrag.MietBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag)
                     - vertrag.MietBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag),
                 ExistingResultat = existing,
-                GebuchtesAbrechnungsResultat = gebuchtesResultat,
+                GebuchterSaldo = gebuchterSaldo,
             };
 
             return new NkPartei

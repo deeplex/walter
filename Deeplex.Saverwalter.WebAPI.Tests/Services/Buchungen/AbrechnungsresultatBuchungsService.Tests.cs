@@ -33,52 +33,60 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
         }
 
         [Fact]
-        public void NachzahlungBuchtSaldoAlsSollAufZahlungskonto()
+        public void NachzahlungGlattstelltAufBkAbrechnungskontoGegenNkKonto()
         {
             var (ctx, resultat) = Setup();
             var service = new AbrechnungsresultatBuchungsService(ctx);
 
-            // saldo > 0 → Nachzahlung (Mieter zahlt) → Soll Zahlungskonto
-            service.BucheAbrechnung(resultat, 2024, vorauszahlung: 1000m, rechnungsbetrag: 1200m, saldo: 200m);
+            // saldo > 0 → Nachzahlung: Soll BkAbrechnungsKonto / Haben NkBuchungskonto.
+            service.BucheAbrechnung(resultat, 2024, saldo: 200m);
 
             resultat.Buchungssatz.Should().NotBeNull();
             var satz = resultat.Buchungssatz;
             satz.Buchungsdatum.Should().Be(new DateOnly(2024, 12, 31));
-            satz.Buchungszeilen.Should().HaveCount(3);
-            satz.Buchungszeilen.Single(z => z.Buchungskonto == resultat.Vertrag.ZahlungsKonto)
-                .SollHaben.Should().Be(SollHaben.Soll);
-            // Soll == Haben (doppelte Buchführung)
-            var soll = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-            var haben = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
-            soll.Should().Be(haben);
+            satz.Buchungszeilen.Should().HaveCount(2);
+            satz.Buchungszeilen.Single(z =>
+                z.SollHaben == SollHaben.Soll
+                && z.Buchungskonto == resultat.Vertrag.BkAbrechnungsKonto)
+                .Betrag.Should().Be(200m);
+            satz.Buchungszeilen.Single(z =>
+                z.SollHaben == SollHaben.Haben
+                && z.Buchungskonto == resultat.Vertrag.NkBuchungskonto)
+                .Betrag.Should().Be(200m);
         }
 
         [Fact]
-        public void ErstattungBuchtSaldoAlsHabenAufZahlungskonto()
+        public void GuthabenGlattstelltAufBkAbrechnungskontoGegenNkKonto()
         {
             var (ctx, resultat) = Setup();
             var service = new AbrechnungsresultatBuchungsService(ctx);
 
-            // saldo < 0 → Erstattung (Vermieter zahlt) → Haben Zahlungskonto
-            service.BucheAbrechnung(resultat, 2024, vorauszahlung: 1200m, rechnungsbetrag: 1000m, saldo: -200m);
+            // saldo < 0 → Guthaben: Soll NkBuchungskonto / Haben BkAbrechnungsKonto.
+            service.BucheAbrechnung(resultat, 2024, saldo: -200m);
 
             var satz = resultat.Buchungssatz;
-            satz.Buchungszeilen.Single(z => z.Buchungskonto == resultat.Vertrag.ZahlungsKonto)
-                .SollHaben.Should().Be(SollHaben.Haben);
-            var soll = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag);
-            var haben = satz.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag);
-            soll.Should().Be(haben);
+            satz.Buchungszeilen.Should().HaveCount(2);
+            satz.Buchungszeilen.Single(z =>
+                z.SollHaben == SollHaben.Haben
+                && z.Buchungskonto == resultat.Vertrag.BkAbrechnungsKonto)
+                .Betrag.Should().Be(200m);
+            satz.Buchungszeilen.Single(z =>
+                z.SollHaben == SollHaben.Soll
+                && z.Buchungskonto == resultat.Vertrag.NkBuchungskonto)
+                .Betrag.Should().Be(200m);
+            satz.Buchungszeilen.Should().NotContain(z =>
+                z.Buchungskonto == resultat.Vertrag.ZahlungsKonto);
         }
 
         [Fact]
-        public void NullSaldoErzeugtNurZweiZeilen()
+        public void NullSaldoErzeugtLeerenBeleg()
         {
             var (ctx, resultat) = Setup();
             var service = new AbrechnungsresultatBuchungsService(ctx);
 
-            service.BucheAbrechnung(resultat, 2024, vorauszahlung: 1000m, rechnungsbetrag: 1000m, saldo: 0m);
+            service.BucheAbrechnung(resultat, 2024, saldo: 0m);
 
-            resultat.Buchungssatz.Buchungszeilen.Should().HaveCount(2);
+            resultat.Buchungssatz.Buchungszeilen.Should().BeEmpty();
         }
 
         [Fact]
@@ -87,9 +95,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             var (ctx, resultat) = Setup();
             var service = new AbrechnungsresultatBuchungsService(ctx);
 
-            service.BucheAbrechnung(resultat, 2024, 1000m, 1200m, 200m);
+            service.BucheAbrechnung(resultat, 2024, 200m);
             var ersterSatz = resultat.Buchungssatz;
-            service.BucheAbrechnung(resultat, 2024, 9999m, 9999m, 9999m);
+            service.BucheAbrechnung(resultat, 2024, 9999m);
 
             resultat.Buchungssatz.Should().BeSameAs(ersterSatz);
         }

@@ -234,5 +234,164 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             satz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).Buchungskonto
                 .Should().Be(zahler.BuchungsKonto);
         }
+
+        // ── AbrechnungsAusgleich (NK-Abrechnung Nachzahlung/Erstattung) ────────
+
+        private static async Task<(SaverwalterContext ctx, Abrechnungsresultat resultat)>
+            SetupAbrechnung(decimal saldo, bool abgesendet = true)
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var resultat = new Abrechnungsresultat { Vertrag = vertrag, Abgesendet = abgesendet };
+            ctx.Abrechnungsresultate.Add(resultat);
+            new AbrechnungsresultatBuchungsService(ctx).BucheAbrechnung(resultat, 2024, saldo);
+            await ctx.SaveChangesAsync();
+            return (ctx, resultat);
+        }
+
+        private static TransaktionBuchungsService.TransaktionsInput AusgleichsInput(
+            Abrechnungsresultat resultat, decimal betrag, int? zahlerId = null) => new()
+        {
+            Betrag = betrag,
+            Zahlungsdatum = new DateOnly(2025, 3, 10),
+            Verwendungszweck = "NK-Abrechnung",
+            ZahlerId = zahlerId,
+            AbrechnungsAusgleiche =
+            {
+                new TransaktionBuchungsService.AbrechnungsAusgleichInput
+                {
+                    AbrechnungsresultatId = resultat.AbrechnungsresultatId,
+                    Betrag = betrag
+                }
+            }
+        };
+
+        [Fact]
+        public async Task AbrechnungsAusgleichNachzahlungGleichtForderungAus()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: 200m);
+            var service = new TransaktionBuchungsService(ctx);
+
+            await service.BucheAsync(AusgleichsInput(resultat, 200m));
+
+            var zahlung = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .SingleAsync(s => s.Beschreibung.Contains("Zahlung BK-Abrechnung"));
+            zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll).Buchungskonto
+                .Should().Be(resultat.Vertrag.ZahlungsKonto);
+            zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).Buchungskonto
+                .Should().Be(resultat.Vertrag.BkAbrechnungsKonto);
+
+            var ausgleich = await ctx.OffenePostenAusgleiche
+                .Include(o => o.SollZeile).Include(o => o.HabenZeile)
+                .SingleAsync();
+            ausgleich.SollZeile.Buchungssatz.Should().Be(resultat.Buchungssatz);
+            ausgleich.HabenZeile.Betrag.Should().Be(200m);
+        }
+
+        [Fact]
+        public async Task AbrechnungsAusgleichTeilzahlungenBisVollstaendig()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: 200m);
+            var service = new TransaktionBuchungsService(ctx);
+
+            await service.BucheAsync(AusgleichsInput(resultat, 150m));
+            await service.BucheAsync(AusgleichsInput(resultat, 50m));
+
+            (await ctx.OffenePostenAusgleiche.CountAsync()).Should().Be(2);
+
+            // Überzahlung nach vollständigem Ausgleich → Fehler
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.BucheAsync(AusgleichsInput(resultat, 1m)));
+        }
+
+        [Fact]
+        public async Task AbrechnungsAusgleichUeberzahlungWirdAbgelehnt()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: 200m);
+            var service = new TransaktionBuchungsService(ctx);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.BucheAsync(AusgleichsInput(resultat, 250m)));
+        }
+
+        [Fact]
+        public async Task AbrechnungsAusgleichNichtAbgesendetWirdAbgelehnt()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: 200m, abgesendet: false);
+            var service = new TransaktionBuchungsService(ctx);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.BucheAsync(AusgleichsInput(resultat, 200m)));
+        }
+
+        [Fact]
+        public async Task AbrechnungsAusgleichErstattungOhneZahlerBuchtAufZahlungskonto()
+        {
+            // Ohne erfasstes Bankkonto: Soll BkAbrechnungsKonto (tilgt die Guthaben-
+            // Verbindlichkeit per OPOS) / Haben ZahlungsKonto (Geldabfluss).
+            var (ctx, resultat) = await SetupAbrechnung(saldo: -200m);
+            var service = new TransaktionBuchungsService(ctx);
+
+            await service.BucheAsync(AusgleichsInput(resultat, 200m));
+
+            var erstattung = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .SingleAsync(s => s.Beschreibung.Contains("Erstattung BK-Abrechnung"));
+            erstattung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll).Buchungskonto
+                .Should().Be(resultat.Vertrag.BkAbrechnungsKonto);
+            erstattung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).Buchungskonto
+                .Should().Be(resultat.Vertrag.ZahlungsKonto);
+
+            // OPOS tilgt die Guthaben-Haben-Zeile des ABRECHNUNGSsatzes.
+            var ausgleich = await ctx.OffenePostenAusgleiche
+                .Include(o => o.SollZeile).Include(o => o.HabenZeile)
+                .SingleAsync();
+            ausgleich.HabenZeile.Buchungssatz.Should().Be(resultat.Buchungssatz);
+            ausgleich.SollZeile.Betrag.Should().Be(200m);
+        }
+
+        [Fact]
+        public async Task AbrechnungsAusgleichErstattungMitZahlerBuchtAufBankkonto()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: -200m);
+            var zahler = MakeBankkonto("100");
+            ctx.Bankkontos.Add(zahler);
+            await ctx.SaveChangesAsync();
+            var service = new TransaktionBuchungsService(ctx);
+
+            await service.BucheAsync(AusgleichsInput(resultat, 200m, zahler.BankkontoId));
+
+            var erstattung = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .SingleAsync(s => s.Beschreibung.Contains("Erstattung BK-Abrechnung"));
+            erstattung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll).Buchungskonto
+                .Should().Be(resultat.Vertrag.BkAbrechnungsKonto);
+            erstattung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).Buchungskonto
+                .Should().Be(zahler.BuchungsKonto);
+
+            var ausgleich = await ctx.OffenePostenAusgleiche
+                .Include(o => o.SollZeile).Include(o => o.HabenZeile)
+                .SingleAsync();
+            ausgleich.HabenZeile.Buchungssatz.Should().Be(resultat.Buchungssatz);
+            ausgleich.SollZeile.Betrag.Should().Be(200m);
+        }
+
+        [Fact]
+        public async Task StornoDerAbrechnungEntferntAusgleichsOpos()
+        {
+            var (ctx, resultat) = await SetupAbrechnung(saldo: 200m);
+            var service = new TransaktionBuchungsService(ctx);
+            await service.BucheAsync(AusgleichsInput(resultat, 200m));
+            (await ctx.OffenePostenAusgleiche.CountAsync()).Should().Be(1);
+
+            await new StornoBuchungsService(ctx)
+                .StornierenAsync(resultat.Buchungssatz.BuchungssatzId);
+
+            // OPOS wird bereinigt; der Zahlungssatz (echtes Geld) bleibt bestehen.
+            (await ctx.OffenePostenAusgleiche.CountAsync()).Should().Be(0);
+            (await ctx.Buchungssaetze.CountAsync(s =>
+                s.Beschreibung.Contains("Zahlung BK-Abrechnung"))).Should().Be(1);
+        }
     }
 }

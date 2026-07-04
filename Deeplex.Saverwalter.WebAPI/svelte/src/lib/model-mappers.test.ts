@@ -48,7 +48,6 @@ describe('model mapper helpers', () => {
             saldo: 10,
             notiz: 'ready',
             buchungssatzId: 'bs-1',
-            nkKontoZeilen: [],
             createdAt: new Date('2026-04-25T10:00:00Z'),
             lastModified: new Date('2026-04-25T11:00:00Z'),
             permissions: { read: true, update: false, remove: false }

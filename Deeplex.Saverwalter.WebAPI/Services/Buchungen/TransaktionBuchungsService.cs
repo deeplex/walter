@@ -93,6 +93,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public string? Notiz { get; set; }
         }
 
+        /// <summary>
+        /// Ausgleich einer abgesendeten NK-Jahresabrechnung: Nachzahlung des Mieters
+        /// (eingehend) oder Erstattung an den Mieter (ausgehend). Die Richtung ergibt
+        /// sich aus dem Saldo des Abrechnungsresultats; Teilzahlungen sind erlaubt.
+        /// </summary>
+        public class AbrechnungsAusgleichInput
+        {
+            public Guid AbrechnungsresultatId { get; set; }
+            public decimal Betrag { get; set; }
+        }
+
         public class TransaktionsInput
         {
             public decimal Betrag { get; set; }
@@ -107,6 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public List<ErhaltungsaufwendungsInput> Erhaltungsaufwendungen { get; set; } = [];
             public List<SonstigerBuchungssatzInput> Sonstige { get; set; } = [];
             public List<NkAnteilEingangInput> NkAnteilEingaenge { get; set; } = [];
+            public List<AbrechnungsAusgleichInput> AbrechnungsAusgleiche { get; set; } = [];
         }
 
         // ── Hauptmethode ─────────────────────────────────────────────────────────
@@ -118,7 +130,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 input.GaragenEingaenge.Sum(g => g.Betrag) +
                 input.BetriebskostenEingaenge.Sum(b => b.Betrag) +
                 input.Erhaltungsaufwendungen.Sum(e => e.Betrag) +
-                input.Sonstige.Sum(s => s.Betrag);
+                input.Sonstige.Sum(s => s.Betrag) +
+                input.AbrechnungsAusgleiche.Sum(a => a.Betrag);
 
             if (totalBetrag <= 0)
                 throw new ArgumentException("Mindestens eine Position mit Betrag > 0 erforderlich.");
@@ -178,6 +191,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             foreach (var ea in input.Erhaltungsaufwendungen)
             {
                 var satz = await ErstelleErhaltungsaufwendungAsync(ea, input.Zahlungsdatum, transaktion);
+                satz.Notiz = input.Notiz;
+                satz.Transaktion = transaktion;
+                _ctx.Buchungssaetze.Add(satz);
+            }
+
+            foreach (var ausgleich in input.AbrechnungsAusgleiche)
+            {
+                var satz = await ErstelleAbrechnungsAusgleichAsync(ausgleich, input.Zahlungsdatum, transaktion);
                 satz.Notiz = input.Notiz;
                 satz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(satz);
@@ -397,6 +418,100 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             });
 
             return neuerZahlungsSatz;
+        }
+
+        /// <summary>
+        /// Gleicht den Saldo einer abgesendeten NK-Jahresabrechnung aus. Der Saldo
+        /// steht als offener Posten auf dem BkAbrechnungsKonto (Glattstellung):
+        ///   Nachzahlung (Soll-Forderung): Soll ZahlungsKonto / Haben BkAbrechnungsKonto,
+        ///     OPOS gegen die Nachzahlungs-Soll-Zeile des Abrechnungssatzes.
+        ///   Erstattung (Haben-Verbindlichkeit): Soll BkAbrechnungsKonto / Haben
+        ///     ZahlungsKonto (oder Zahler-Bankkonto, falls erfasst),
+        ///     OPOS der neuen Soll-Zeile gegen die Guthaben-Haben-Zeile.
+        /// </summary>
+        private async Task<Buchungssatz> ErstelleAbrechnungsAusgleichAsync(
+            AbrechnungsAusgleichInput input, DateOnly zahlungsdatum, Transaktion transaktion)
+        {
+            if (input.Betrag <= 0)
+                throw new ArgumentException($"Betrag muss größer als 0 sein (aktuell: {input.Betrag:C}).");
+
+            var resultat = await _ctx.Abrechnungsresultate
+                .Include(r => r.Vertrag).ThenInclude(v => v.ZahlungsKonto)
+                .Include(r => r.Vertrag).ThenInclude(v => v.BkAbrechnungsKonto)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.StornoNach)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
+                .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == input.AbrechnungsresultatId)
+                ?? throw new ArgumentException($"Abrechnungsresultat {input.AbrechnungsresultatId} nicht gefunden.");
+
+            if (!resultat.Abgesendet)
+                throw new InvalidOperationException(
+                    "Die Abrechnung wurde noch nicht abgesendet — Ausgleich erst nach dem Absenden möglich.");
+            if (resultat.Buchungssatz.StornoNach != null)
+                throw new InvalidOperationException("Der Abrechnungssatz wurde storniert.");
+
+            var vertrag = resultat.Vertrag;
+            var jahr = resultat.Buchungssatz.Buchungsjahr;
+            var bkAbrId = vertrag.BkAbrechnungsKonto.BuchungskontoId;
+            var zeilen = resultat.Buchungssatz.Buchungszeilen;
+
+            // Nachzahlung: offene Soll-Forderung auf dem BkAbrechnungsKonto.
+            var nachzahlungsZeile = zeilen.FirstOrDefault(z =>
+                z.SollHaben == SollHaben.Soll && z.Buchungskonto.BuchungskontoId == bkAbrId);
+            if (nachzahlungsZeile != null)
+            {
+                var gedeckt = nachzahlungsZeile.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
+                var verbleibend = nachzahlungsZeile.Betrag - gedeckt;
+                if (input.Betrag > verbleibend + 0.005m)
+                    throw new InvalidOperationException(
+                        $"Zahlungsbetrag ({input.Betrag:C}) übersteigt die verbleibende Nachzahlung ({verbleibend:C}).");
+
+                var satz = new Buchungssatz(zahlungsdatum, $"Zahlung BK-Abrechnung {jahr}");
+                AddZeile(satz, SollHaben.Soll, input.Betrag, vertrag.ZahlungsKonto);
+                AddZeile(satz, SollHaben.Haben, input.Betrag, vertrag.BkAbrechnungsKonto);
+                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                {
+                    SollZeile = nachzahlungsZeile,
+                    HabenZeile = satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
+                });
+                return satz;
+            }
+
+            // Erstattung: offene Haben-Verbindlichkeit auf dem BkAbrechnungsKonto.
+            var erstattungsZeile = zeilen.FirstOrDefault(z =>
+                z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == bkAbrId);
+            if (erstattungsZeile != null)
+            {
+                var gedeckt = erstattungsZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                var verbleibend = erstattungsZeile.Betrag - gedeckt;
+                if (input.Betrag > verbleibend + 0.005m)
+                    throw new InvalidOperationException(
+                        $"Erstattungsbetrag ({input.Betrag:C}) übersteigt das verbleibende Guthaben ({verbleibend:C}).");
+
+                var satz = new Buchungssatz(zahlungsdatum, $"Erstattung BK-Abrechnung {jahr}");
+                var sollZeile = new Buchungszeile(SollHaben.Soll, input.Betrag)
+                {
+                    Buchungssatz = satz,
+                    Buchungskonto = vertrag.BkAbrechnungsKonto
+                };
+                satz.Buchungszeilen.Add(sollZeile);
+                // Geld-Gegenseite: Zahler-Bankkonto wenn erfasst, sonst das
+                // Vertrags-ZahlungsKonto (dort mindert die Auszahlung den Bestand).
+                AddZeile(satz, SollHaben.Haben, input.Betrag,
+                    transaktion.Zahler?.BuchungsKonto ?? vertrag.ZahlungsKonto);
+                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                {
+                    SollZeile = sollZeile,
+                    HabenZeile = erstattungsZeile
+                });
+                return satz;
+            }
+
+            throw new InvalidOperationException("Die Abrechnung hat keinen offenen Saldo.");
         }
 
         private async Task<Buchungssatz> ErstelleErhaltungsaufwendungAsync(

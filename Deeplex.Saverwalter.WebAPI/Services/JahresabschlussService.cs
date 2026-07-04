@@ -60,6 +60,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             public string Bezeichnung { get; set; } = "";
             public bool ResultatVorhanden { get; set; }
             public bool Abgesendet { get; set; }
+            /// <summary>Saldo per OPOS gedeckt (oder 0). Nur aussagekräftig wenn ResultatVorhanden.</summary>
+            public bool Ausgeglichen { get; set; }
             public Guid? BuchungssatzId { get; set; }
         }
 
@@ -157,6 +159,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .Include(v => v.Mieter)
                 .Include(v => v.MietBuchungskonto)
+                .Include(v => v.ZahlungsKonto)
+                .Include(v => v.BkAbrechnungsKonto)
                 .Where(v => scopedKontoIds == null
                     || scopedKontoIds.Contains(v.MietBuchungskonto.BuchungskontoId))
                 .ToListAsync();
@@ -165,6 +169,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var resultate = (await ctx.Abrechnungsresultate
                 .Include(r => r.Vertrag)
                 .Include(r => r.Buchungssatz).ThenInclude(s => s.StornoNach)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
+                .Include(r => r.Buchungssatz).ThenInclude(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile).ThenInclude(a => a.SollZeile)
                 .ToListAsync())
                 .Where(r => vertragIds.Contains(r.Vertrag.VertragId))
                 .ToList();
@@ -257,6 +267,36 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             };
         }
 
+        /// <summary>
+        /// True wenn der Abrechnungs-Saldo per OPOS gedeckt ist (bzw. 0 war). Der
+        /// Saldo steht auf dem BkAbrechnungsKonto: Soll = Nachzahlungs-Forderung
+        /// (gedeckt durch Zahlungs-Haben-Zeilen), Haben = Guthaben-Verbindlichkeit
+        /// (gedeckt durch Auszahlungs-Soll-Zeilen).
+        /// </summary>
+        private static bool SaldoAusgeglichen(Abrechnungsresultat resultat, Vertrag vertrag)
+        {
+            var bkAbrKontoId = vertrag.BkAbrechnungsKonto.BuchungskontoId;
+            var saldoZeilen = resultat.Buchungssatz.Buchungszeilen
+                .Where(z => z.Buchungskonto.BuchungskontoId == bkAbrKontoId)
+                .ToList();
+
+            var nachzahlungsZeile = saldoZeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Soll);
+            if (nachzahlungsZeile != null)
+            {
+                var gedeckt = nachzahlungsZeile.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
+                return nachzahlungsZeile.Betrag - gedeckt <= 0.005m;
+            }
+
+            var guthabenZeile = saldoZeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
+            if (guthabenZeile != null)
+            {
+                var gedeckt = guthabenZeile.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                return guthabenZeile.Betrag - gedeckt <= 0.005m;
+            }
+
+            return true; // kein Saldo-Leg → Saldo 0
+        }
+
         private static List<AbrechnungsstatusEntry> BerechneAbrechnungen(Daten daten, int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
@@ -279,6 +319,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                         Bezeichnung = KontoVerknuepfungService.GetVertragName(v),
                         ResultatVorhanden = resultat != null,
                         Abgesendet = resultat?.Abgesendet ?? false,
+                        Ausgeglichen = resultat != null && SaldoAusgeglichen(resultat, v),
                         BuchungssatzId = resultat?.Buchungssatz.BuchungssatzId
                     };
                 })

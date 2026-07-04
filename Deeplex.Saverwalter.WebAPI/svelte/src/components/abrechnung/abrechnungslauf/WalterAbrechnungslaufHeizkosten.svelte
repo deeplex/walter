@@ -109,38 +109,59 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if showP9}
         {@const _add = gezeigteUmlageIds.add(hz.zeile.umlageId)}
         {#if hz.para9_2 > 0}
-            <p style="padding: 0.5rem 1rem;">
-                <strong>§9 Abs. 2 HKVO</strong> – Warmwasseranteil: 2,5 × V/Q ×
-                (t<sub>w</sub>
-                − 10 °C) = <strong>{convertPercent(hz.para9_2)}</strong>
-            </p>
-            {#if hz.p9Details}
-                {@const p9 = hz.p9Details}
-                <div
-                    style="padding: 0 1rem 0.5rem; color: var(--cds-text-helper); font-size: 0.875rem;"
-                >
-                    <p>
-                        = 2,5 × {formatKommazahl(p9.v)} m³ / {formatKommazahl(
-                            p9.q
-                        )} kWh × ({p9.tw} − 10) °C
-                    </p>
-                    <p>
-                        Q = {formatKommazahl(p9.q)} kWh — Allgemeinzähler {p9.allgemeinZaehler}
-                        ({formatDate(p9.qAnfangsdatum)} – {formatDate(
-                            p9.qEnddatum
-                        )})
-                    </p>
-                    <p>
-                        V = {formatKommazahl(p9.v)} m³ — Warmwasserzähler:
-                        {#each p9.wwZaehler as z, i}
-                            {i > 0 ? ', ' : ''}{z.kennnummer} ({formatKommazahl(
-                                z.verbrauch
-                            )}
-                            {z.einheit})
-                        {/each}
-                    </p>
+            <div class="p9-block">
+                <strong>§9 Abs. 2 HKVO – Warmwasseranteil</strong>
+                <div class="p9-formel">
+                    <span>2,5</span>
+                    <span class="frac frac--einheit">
+                        <span>kWh</span>
+                        <span>m³ · K</span>
+                    </span>
+                    <span>×</span>
+                    <span class="frac">
+                        <span>V</span>
+                        <span>Q</span>
+                    </span>
+                    <span>× (t<sub>w</sub> − 10 °C)</span>
+                    {#if hz.p9Details}
+                        {@const p9 = hz.p9Details}
+                        <span>&nbsp;=&nbsp; 2,5 ×</span>
+                        <span class="frac">
+                            <span>{formatKommazahl(p9.v)} m³</span>
+                            <span>{formatKommazahl(p9.q)} kWh</span>
+                        </span>
+                        <span>× ({p9.tw} − 10) °C</span>
+                    {/if}
+                    <span>&nbsp;=&nbsp;</span>
+                    <strong class="p9-ergebnis"
+                        >{convertPercent(hz.para9_2)}</strong
+                    >
                 </div>
-            {/if}
+                {#if hz.p9Details}
+                    {@const p9 = hz.p9Details}
+                    <div class="p9-legende">
+                        <span>
+                            <strong>Q</strong> = {formatKommazahl(p9.q)} kWh — Allgemeinzähler
+                            {p9.allgemeinZaehler} ({formatDate(
+                                p9.qAnfangsdatum
+                            )} – {formatDate(p9.qEnddatum)})
+                        </span>
+                        <span>
+                            <strong>V</strong> = {formatKommazahl(p9.v)} m³ — Warmwasserzähler:
+                            {#each p9.wwZaehler as z, i}
+                                {i > 0 ? ', ' : ''}{z.kennnummer} ({formatKommazahl(
+                                    z.verbrauch
+                                )}
+                                {z.einheit})
+                            {/each}
+                        </span>
+                        <span>
+                            <strong>t<sub>w</sub></strong> = {p9.tw} °C — angenommene
+                            Warmwassertemperatur
+                        </span>
+                    </div>
+                {/if}
+            </div>
         {:else}
             <p style="padding: 0.5rem 1rem; color: var(--cds-text-helper);">
                 {#if hz.p9Details}
@@ -211,22 +232,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         )}</StructuredListCell
                     >
                 </StructuredListRow>
-                {#each hz.heizZaehler as z}
-                    <StructuredListRow>
-                        <StructuredListCell style="padding-left: 2rem"
-                            >Zähler {z.kennnummer}</StructuredListCell
-                        >
-                        <StructuredListCell></StructuredListCell>
-                        <StructuredListCell></StructuredListCell>
-                        <StructuredListCell></StructuredListCell>
-                        <StructuredListCell></StructuredListCell>
-                        <StructuredListCell
-                            >{z.verbrauch.toFixed(2)}
-                            {z.einheit}</StructuredListCell
-                        >
-                        <StructuredListCell></StructuredListCell>
-                    </StructuredListRow>
-                {/each}
             {/if}
             <StructuredListRow>
                 <StructuredListCell>nach Nutzfläche</StructuredListCell>
@@ -307,22 +312,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             )}</StructuredListCell
                         >
                     </StructuredListRow>
-                    {#each hz.wwZaehler as z}
-                        <StructuredListRow>
-                            <StructuredListCell style="padding-left: 2rem"
-                                >Zähler {z.kennnummer}</StructuredListCell
-                            >
-                            <StructuredListCell></StructuredListCell>
-                            <StructuredListCell></StructuredListCell>
-                            <StructuredListCell></StructuredListCell>
-                            <StructuredListCell></StructuredListCell>
-                            <StructuredListCell
-                                >{z.verbrauch.toFixed(2)}
-                                {z.einheit}</StructuredListCell
-                            >
-                            <StructuredListCell></StructuredListCell>
-                        </StructuredListRow>
-                    {/each}
                 {/if}
                 <StructuredListRow>
                     <StructuredListCell>nach Nutzfläche</StructuredListCell>
@@ -349,6 +338,87 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </StructuredList>
     {/if}
 
+    <!-- Zähler-Aufschlüsselung — gleiche Tabellenform wie bei den kalten Kosten -->
+    {#if hz.heizZaehler.length > 0 || hz.wwZaehler.length > 0}
+        <StructuredList condensed>
+            <StructuredListHead>
+                <StructuredListRow>
+                    <StructuredListCell head>Verbrauch</StructuredListCell>
+                    <StructuredListCell head>Zähler</StructuredListCell>
+                    <StructuredListCell head>Mein Verbrauch</StructuredListCell>
+                    <StructuredListCell head>Gesamt</StructuredListCell>
+                    <StructuredListCell head>Anteil</StructuredListCell>
+                </StructuredListRow>
+            </StructuredListHead>
+            <StructuredListBody>
+                {#if hz.heizZaehler.length > 0}
+                    <StructuredListRow>
+                        <StructuredListCell head>Wärme (§7)</StructuredListCell>
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell>
+                            {#if hz.zeile.gesamtWaerme != null}
+                                {hz.zeile.gesamtWaerme.toFixed(2)} kWh
+                            {/if}
+                        </StructuredListCell>
+                        <StructuredListCell
+                            >{convertPercent(
+                                hz.heizVerbrauchAnteil ?? 0
+                            )}</StructuredListCell
+                        >
+                    </StructuredListRow>
+                    {#each hz.heizZaehler as z}
+                        <StructuredListRow>
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell
+                                >Zähler {z.kennnummer}</StructuredListCell
+                            >
+                            <StructuredListCell
+                                >{z.verbrauch.toFixed(2)}
+                                {z.einheit}</StructuredListCell
+                            >
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell></StructuredListCell>
+                        </StructuredListRow>
+                    {/each}
+                {/if}
+                {#if hz.wwZaehler.length > 0}
+                    <StructuredListRow>
+                        <StructuredListCell head
+                            >Warmwasser (§8)</StructuredListCell
+                        >
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell></StructuredListCell>
+                        <StructuredListCell>
+                            {#if hz.zeile.gesamtWW != null}
+                                {hz.zeile.gesamtWW.toFixed(2)} m³
+                            {/if}
+                        </StructuredListCell>
+                        <StructuredListCell
+                            >{convertPercent(
+                                hz.wwVerbrauchAnteil ?? 0
+                            )}</StructuredListCell
+                        >
+                    </StructuredListRow>
+                    {#each hz.wwZaehler as z}
+                        <StructuredListRow>
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell
+                                >Zähler {z.kennnummer}</StructuredListCell
+                            >
+                            <StructuredListCell
+                                >{z.verbrauch.toFixed(2)}
+                                {z.einheit}</StructuredListCell
+                            >
+                            <StructuredListCell></StructuredListCell>
+                            <StructuredListCell></StructuredListCell>
+                        </StructuredListRow>
+                    {/each}
+                {/if}
+            </StructuredListBody>
+        </StructuredList>
+    {/if}
+
     <p style="padding: 0.5rem 1rem;">
         <strong>{hz.zeile.bezeichnung}:</strong>
         {convertEuro(hz.gesamtbetrag)} gesamt · Ihr Anteil: {convertEuro(
@@ -360,3 +430,54 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">
     Warme Betriebskosten: {convertEuro(betragWarm)}
 </p>
+
+<style>
+    .p9-block {
+        padding: 0.5rem 1rem 0.75rem;
+    }
+
+    .p9-formel {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.5rem 0;
+        font-size: 1rem;
+    }
+
+    /* Mathematischer Bruch: Zähler über Nenner mit Bruchstrich */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        line-height: 1.3;
+        text-align: center;
+    }
+
+    .frac > span {
+        padding: 0 0.4rem;
+        white-space: nowrap;
+    }
+
+    .frac > span:last-child {
+        border-top: 1px solid currentColor;
+    }
+
+    .frac--einheit {
+        font-size: 0.8rem;
+        color: var(--cds-text-helper);
+    }
+
+    .p9-ergebnis {
+        font-size: 1.1rem;
+    }
+
+    .p9-legende {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        color: var(--cds-text-helper);
+        font-size: 0.875rem;
+    }
+</style>

@@ -166,10 +166,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<MietZeileInfo> Mieten { get; init; } = [];
         public List<PersonenZeitanteilInfo> PersonenZeitanteile { get; init; } = [];
         /// <summary>
-        /// Bereits gebuchter Rechnungsbetrag, oder null wenn noch nicht gebucht.
-        /// Weicht von <see cref="Rechnungsbetrag"/> ab → Buchung ist veraltet.
+        /// Bereits gebuchter Abrechnungs-Saldo, oder null wenn noch nicht gebucht.
+        /// Weicht von <see cref="Saldo"/> ab → Buchung ist veraltet.
         /// </summary>
-        public decimal? GebuchtesAbrechnungsResultat { get; set; }
+        public decimal? GebuchterSaldo { get; set; }
         public bool? Abgesendet { get; init; }
     }
 

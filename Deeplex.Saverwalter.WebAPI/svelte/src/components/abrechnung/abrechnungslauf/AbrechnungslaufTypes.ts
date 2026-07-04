@@ -111,7 +111,7 @@ export type AbrechnungsresultatInfo = {
     wohnflaeche: number;
     mieten: MietZeileInfo[];
     personenZeitanteile: PersonenZeitanteilInfo[];
-    gebuchtesAbrechnungsResultat: number | null;
+    gebuchterSaldo: number | null;
     abgesendet: boolean | null;
 };
 

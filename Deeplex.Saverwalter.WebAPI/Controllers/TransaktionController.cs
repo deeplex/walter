@@ -20,6 +20,7 @@ using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
@@ -146,6 +147,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 var vertrag = await _ctx.Vertraege.FindAsync(nk.VertragId);
                 if (vertrag is null) return NotFound($"Vertrag {nk.VertragId} nicht gefunden.");
                 var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var ausgleich in input.AbrechnungsAusgleiche)
+            {
+                var resultat = await _ctx.Abrechnungsresultate
+                    .Include(r => r.Vertrag)
+                    .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == ausgleich.AbrechnungsresultatId);
+                if (resultat is null)
+                    return NotFound($"Abrechnungsresultat {ausgleich.AbrechnungsresultatId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, resultat.Vertrag, [Operations.SubCreate]);
                 if (!authRx.Succeeded) return Forbid();
             }
 

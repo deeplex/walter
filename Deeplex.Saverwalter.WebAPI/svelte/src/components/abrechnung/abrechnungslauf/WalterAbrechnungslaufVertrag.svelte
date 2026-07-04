@@ -157,7 +157,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     style="display: flex; align-items: stretch; gap: 0.5rem; margin-bottom: 0.5rem;"
 >
     <div style="flex: 1;">
-        {#if resultat.gebuchtesAbrechnungsResultat != null}
+        {#if resultat.gebuchterSaldo != null}
             <ClickableTile
                 href="/abrechnungsresultate/{resultat.abrechnungsresultatId}"
             >

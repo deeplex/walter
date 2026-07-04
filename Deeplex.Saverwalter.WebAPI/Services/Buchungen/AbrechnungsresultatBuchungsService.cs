@@ -19,7 +19,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 {
     /// <summary>
     /// Erstellt den Buchungssatz für ein Abrechnungsresultat (NK-Jahresabrechnung).
-    /// Wird beim Generieren der Abrechnungsvorschau (PreviewAsync) aufgerufen.
+    ///
+    /// Die Abrechnung ist eine reine Glattstellung: Die tatsächlichen Kosten wurden
+    /// dem Mieter bereits über die NK-Anteile (Soll auf dem NkBuchungskonto) belastet,
+    /// die Vorauszahlungen stehen dort im Haben. Der Restsaldo des NkBuchungskontos
+    /// wird auf das ausgleichbare BkAbrechnungsKonto umgebucht:
+    ///   Nachzahlung (saldo &gt; 0): Soll BkAbrechnungsKonto / Haben NkBuchungskonto
+    ///   Guthaben    (saldo &lt; 0): Soll NkBuchungskonto / Haben BkAbrechnungsKonto
+    /// Damit endet das NkBuchungskonto für das Jahr auf 0, und auf dem
+    /// BkAbrechnungsKonto steht genau das Resultat als offener Posten — bis die
+    /// Ausgleichszahlung (AbrechnungsAusgleich-Transaktion) es per OPOS tilgt.
     /// </summary>
     public class AbrechnungsresultatBuchungsService
     {
@@ -30,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx = ctx;
         }
 
-        public void BucheAbrechnung(Abrechnungsresultat resultat, int jahr, decimal vorauszahlung, decimal rechnungsbetrag, decimal saldo)
+        public void BucheAbrechnung(Abrechnungsresultat resultat, int jahr, decimal saldo)
         {
             if (resultat.Buchungssatz != null)
                 return; // Bereits gebucht — nicht doppelt buchen.
@@ -39,17 +48,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             var buchungsdatum = new DateOnly(jahr, 12, 31);
             var satz = new Buchungssatz(buchungsdatum, $"BK-Abrechnung {jahr}");
 
-            // Kernlogik:
-            // - Soll NK-Konto: bereits geleistete Vorauszahlungen
-            // - Haben BK-Abrechnungskonto: tatsächlicher Rechnungsbetrag
-            AddZeile(satz, SollHaben.Soll, vorauszahlung, vertrag.NkBuchungskonto);
-            AddZeile(satz, SollHaben.Haben, rechnungsbetrag, vertrag.BkAbrechnungsKonto);
-
-            // Ausgleich auf Zahlungskonto (Nachzahlung/Erstattung).
             if (saldo > 0)
-                AddZeile(satz, SollHaben.Soll, saldo, vertrag.ZahlungsKonto);
+            {
+                AddZeile(satz, SollHaben.Soll, saldo, vertrag.BkAbrechnungsKonto);
+                AddZeile(satz, SollHaben.Haben, saldo, vertrag.NkBuchungskonto);
+            }
             else if (saldo < 0)
-                AddZeile(satz, SollHaben.Haben, -saldo, vertrag.ZahlungsKonto);
+            {
+                AddZeile(satz, SollHaben.Soll, -saldo, vertrag.NkBuchungskonto);
+                AddZeile(satz, SollHaben.Haben, -saldo, vertrag.BkAbrechnungsKonto);
+            }
+            // saldo == 0: leerer Satz als Beleg — nichts glattzustellen.
 
             _ctx.Buchungssaetze.Add(satz);
             resultat.Buchungssatz = satz;

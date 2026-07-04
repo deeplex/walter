@@ -28,12 +28,19 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
         public jahr: number,
         public abgesendet: boolean,
         public saldo: number,
+        public rechnungsbetrag: number,
+        public vorauszahlung: number,
+        public offenerBetrag: number,
+        public ausgeglichen: boolean,
+        public ausgleichsZahlungen: AusgleichsZahlungInfo[],
         public notiz: string,
         public buchungssatzId: string,
-        public nkKontoZeilen: NkKontoZeileInfo[],
         public createdAt: Date,
         public lastModified: Date,
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        // Vermieter-Bankkonto für den Ausgleich: Zahler bei Erstattungen,
+        // Zahlungsempfänger bei Nachzahlungen.
+        public vermieterBankkontoId?: number
     ) {
         super();
     }
@@ -50,19 +57,23 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
             json.jahr,
             json.abgesendet,
             json.saldo,
+            json.rechnungsbetrag ?? 0,
+            json.vorauszahlung ?? 0,
+            json.offenerBetrag ?? 0,
+            json.ausgeglichen ?? false,
+            json.ausgleichsZahlungen ?? [],
             json.notiz,
             json.buchungssatzId,
-            json.nkKontoZeilen ?? [],
             json.createdAt,
             json.lastModified,
-            permissions
+            permissions,
+            json.vermieterBankkontoId ?? undefined
         );
     }
 }
 
-export type NkKontoZeileInfo = {
+export type AusgleichsZahlungInfo = {
     datum: string;
-    beschreibung: string;
-    istSoll: boolean;
     betrag: number;
+    buchungssatzId: string;
 };

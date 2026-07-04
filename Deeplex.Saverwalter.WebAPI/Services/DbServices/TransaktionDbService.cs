@@ -138,16 +138,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 entity.Betrag = entry.Betrag;
-                var zahler = entry.Zahler != null ? await Ctx.Bankkontos.FindAsync(entry.Zahler.Id) : null;
-                if (zahler == null)
+
+                // Zahler/Zahlungsempfänger sind optional (z.B. Abrechnungs-Ausgleich
+                // ohne erfasstes Bankkonto) und können einzeln nachgetragen werden.
+                Bankkonto? zahler = null;
+                if (entry.Zahler != null)
                 {
-                    throw new ArgumentException($"Ungültiger Zahler");
+                    zahler = await Ctx.Bankkontos.FindAsync(entry.Zahler.Id)
+                        ?? throw new ArgumentException("Ungültiger Zahler");
                 }
 
-                var empfaenger = entry.Zahlungsempfaenger != null ? await Ctx.Bankkontos.FindAsync(entry.Zahlungsempfaenger.Id) : null;
-                if (empfaenger == null)
+                Bankkonto? empfaenger = null;
+                if (entry.Zahlungsempfaenger != null)
                 {
-                    throw new ArgumentException($"Ungültiger Zahlungsempfänger");
+                    empfaenger = await Ctx.Bankkontos.FindAsync(entry.Zahlungsempfaenger.Id)
+                        ?? throw new ArgumentException("Ungültiger Zahlungsempfänger");
                 }
 
                 entity.Zahler = zahler;

@@ -95,6 +95,7 @@ export {
     type ErhaltungsaufwendungsInput,
     type SonstigerBuchungssatzInput,
     type NkAnteilEingangInput,
+    type AbrechnungsAusgleichInput,
     type TransaktionsInput,
     emptyMietzahlungsInput,
     emptyTransaktionsInput

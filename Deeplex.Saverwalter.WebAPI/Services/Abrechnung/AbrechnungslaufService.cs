@@ -153,8 +153,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             // In dem Fall: gar nichts buchen, erst stornieren.
             var resultatKonflikt = preview.Resultate.Any(r =>
                 r.VertragId.HasValue
-                && r.GebuchtesAbrechnungsResultat.HasValue
-                && Math.Abs(r.GebuchtesAbrechnungsResultat.Value - r.Rechnungsbetrag) > 0.005m);
+                && r.GebuchterSaldo.HasValue
+                && Math.Abs(r.GebuchterSaldo.Value - r.Saldo) > 0.005m);
 
             if (resultatKonflikt)
                 throw new InvalidOperationException(
@@ -193,15 +193,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .ToDictionary(g => g.Key, g => g.First());
 
             foreach (var resultat in preview.Resultate
-                .Where(r => r.VertragId.HasValue && !r.GebuchtesAbrechnungsResultat.HasValue))
+                .Where(r => r.VertragId.HasValue && !r.GebuchterSaldo.HasValue))
             {
                 if (!parteiByVertragId.TryGetValue(resultat.VertragId!.Value, out var partei))
                     continue;
 
                 try
                 {
-                    BucheAbrechnungsresultat(partei.Vertrag!, jahr, resultat.Rechnungsbetrag, partei.VertragInfo!.Vorauszahlung);
-                    resultat.GebuchtesAbrechnungsResultat = resultat.Rechnungsbetrag;
+                    BucheAbrechnungsresultat(partei.Vertrag!, jahr, resultat.Saldo);
+                    resultat.GebuchterSaldo = resultat.Saldo;
                 }
                 catch (Exception ex)
                 {
@@ -571,12 +571,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// bereits vor dem Aufruf erfolgt (Partei ohne <c>ExistingResultat</c>).
         /// <c>SaveChangesAsync</c> wird vom Caller einmalig für alle Verträge der Gruppe ausgeführt.
         /// </summary>
-        private void BucheAbrechnungsresultat(Vertrag vertrag, int jahr, decimal rechnungsbetrag, decimal vorauszahlung)
+        private void BucheAbrechnungsresultat(Vertrag vertrag, int jahr, decimal saldo)
         {
-            var saldo = rechnungsbetrag - vorauszahlung;
-
             var resultat = new Abrechnungsresultat { Vertrag = vertrag };
-            _buchungsService.BucheAbrechnung(resultat, jahr, vorauszahlung, rechnungsbetrag, saldo);
+            _buchungsService.BucheAbrechnung(resultat, jahr, saldo);
             _ctx.Abrechnungsresultate.Add(resultat);
         }
 
@@ -660,7 +658,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Nutzeinheiten = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzeinheit,
                         Mieten = mietZeilen,
                         PersonenZeitanteile = personenZeitanteile,
-                        GebuchtesAbrechnungsResultat = info?.GebuchtesAbrechnungsResultat,
+                        GebuchterSaldo = info?.GebuchterSaldo,
                         Abgesendet = info?.ExistingResultat?.Abgesendet,
                     };
                 })];

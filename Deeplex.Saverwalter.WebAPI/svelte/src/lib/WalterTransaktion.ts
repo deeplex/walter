@@ -114,6 +114,16 @@ export interface NkAnteilEingangInput {
     notiz?: string;
 }
 
+/**
+ * Ausgleich einer abgesendeten NK-Jahresabrechnung: Nachzahlung des Mieters
+ * (eingehend) oder Erstattung an den Mieter (ausgehend). Die Richtung ergibt
+ * sich aus dem Saldo des Abrechnungsresultats.
+ */
+export interface AbrechnungsAusgleichInput {
+    abrechnungsresultatId?: string;
+    betrag: number;
+}
+
 export interface TransaktionsInput {
     betrag: number;
     zahlungsdatum: string;
@@ -127,6 +137,7 @@ export interface TransaktionsInput {
     erhaltungsaufwendungen: ErhaltungsaufwendungsInput[];
     sonstige: SonstigerBuchungssatzInput[];
     nkAnteilEingaenge: NkAnteilEingangInput[];
+    abrechnungsAusgleiche: AbrechnungsAusgleichInput[];
 }
 
 export function emptyMietzahlungsInput(vertragId?: number): MietzahlungsInput {
@@ -143,6 +154,7 @@ export function emptyTransaktionsInput(): TransaktionsInput {
         betriebskostenEingaenge: [],
         erhaltungsaufwendungen: [],
         sonstige: [],
-        nkAnteilEingaenge: []
+        nkAnteilEingaenge: [],
+        abrechnungsAusgleiche: []
     };
 }

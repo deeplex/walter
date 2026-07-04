@@ -145,7 +145,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         id: a.vertragId,
         bezeichnung: a.bezeichnung,
         resultatVorhanden: a.resultatVorhanden,
-        abgesendet: a.abgesendet
+        abgesendet: a.abgesendet,
+        ausgeglichen: a.ausgeglichen
     }));
 
     const zeigeKonto = (e: CustomEvent<DataTableRow>) =>
@@ -234,6 +235,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                             <Tag size="sm" type="green"
                                                 >Abgesendet</Tag
                                             >
+                                            {#if row.ausgeglichen}
+                                                <Tag size="sm" type="green"
+                                                    >Ausgeglichen</Tag
+                                                >
+                                            {:else}
+                                                <Tag size="sm" type="red"
+                                                    >Saldo offen</Tag
+                                                >
+                                            {/if}
                                         {:else if row.resultatVorhanden}
                                             <Tag size="sm" type="gray"
                                                 >Erstellt</Tag

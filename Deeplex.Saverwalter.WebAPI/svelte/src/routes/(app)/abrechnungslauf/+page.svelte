@@ -238,7 +238,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
               .filter((r) => r.vertragId != null)
         : [];
     $: gebuchteResultate = vertragResultate.filter(
-        (r) => r.gebuchtesAbrechnungsResultat != null
+        (r) => r.gebuchterSaldo != null
     );
 
     // ── Rückabwicklung / Storno der gebuchten Abrechnung ────────────────────
@@ -312,12 +312,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
     $: fehlendeBuchungen = vertragResultate.filter(
-        (r) => r.gebuchtesAbrechnungsResultat == null
+        (r) => r.gebuchterSaldo == null
     ).length;
     $: inkonsistenteBuchungen = vertragResultate.filter(
         (r) =>
-            r.gebuchtesAbrechnungsResultat != null &&
-            Math.abs(r.gebuchtesAbrechnungsResultat - r.rechnungsbetrag) > 0.005
+            r.gebuchterSaldo != null &&
+            Math.abs(r.gebuchterSaldo - r.saldo) > 0.005
     ).length;
     $: abweichendeMieten = vertragResultate.filter(
         (r) => Math.abs(r.mietSaldo) > 0.005
@@ -450,10 +450,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <p style="margin-bottom: 1rem; color: var(--cds-text-secondary);">
             {result.gruppen
                 .flatMap((g) => g.resultate)
-                .filter((r) => r.gebuchtesAbrechnungsResultat == null).length} neu
-            · {result.gruppen
+                .filter((r) => r.gebuchterSaldo == null).length} neu · {result.gruppen
                 .flatMap((g) => g.resultate)
-                .filter((r) => r.gebuchtesAbrechnungsResultat != null).length}
+                .filter((r) => r.gebuchterSaldo != null).length}
             bereits gebucht
             {#if result.warnungen.length > 0}· {result.warnungen.length} Warnungen{/if}
         </p>

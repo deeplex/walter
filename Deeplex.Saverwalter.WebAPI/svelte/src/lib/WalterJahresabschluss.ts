@@ -41,6 +41,8 @@ export type WalterAbrechnungsstatus = {
     bezeichnung: string;
     resultatVorhanden: boolean;
     abgesendet: boolean;
+    /** Saldo per OPOS gedeckt (oder 0). Nur aussagekräftig wenn resultatVorhanden. */
+    ausgeglichen: boolean;
     buchungssatzId: string | undefined;
 };
 
