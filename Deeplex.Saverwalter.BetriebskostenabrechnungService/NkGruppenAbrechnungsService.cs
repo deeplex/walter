@@ -328,43 +328,66 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 // Personenzahl = 0 (leer → keine Personen).
                 // Verbrauch: wird über denselben Zeitraum aus den Zählern berechnet,
                 //   da z.B. Grundverbrauch oder Allgemeinstrom auch im Leerstand anfällt.
+                var mieterParteienDieserWohnung = parteien
+                    .Where(p => p.Vertrag != null && p.Wohnung.WohnungId == wohnung.WohnungId)
+                    .ToList();
                 var belegteIntervalle = parteien
                     .Where(p => p.Wohnung.WohnungId == wohnung.WohnungId)
                     .Select(p => (p.Nutzungsbeginn, p.Nutzungsende))
                     .ToList();
 
-                foreach (var (lsBeginn, lsEnde) in FindLeerstandIntervalle(
-                    belegteIntervalle, abrechnungsbeginn, abrechnungsende))
+                var leerstandIntervalle = FindLeerstandIntervalle(
+                    belegteIntervalle, abrechnungsbeginn, abrechnungsende).ToList();
+                if (leerstandIntervalle.Count == 0)
+                    continue;
+                var leerstandTageGesamt = leerstandIntervalle
+                    .Sum(iv => iv.Item2.DayNumber - iv.Item1.DayNumber + 1);
+
+                // Verbrauchs-Eigenanteil = Wohnungs-Ganzjahresverbrauch MINUS Summe der
+                // bereits gemessenen Mieterverbräuche. Anders als eine Messung über den
+                // Leerstand-Zeitraum (die bei fehlenden Zwischenständen 0 ergibt) stellt
+                // das sicher, dass kein Verbrauch unverteilt bleibt und deshalb — via
+                // Rundungskorrektur — fälschlich einem Mieter zugeschlagen wird. Der nicht
+                // messbare Rest (z.B. fehlender Einzugsstand des Nachmieters) landet so
+                // immer beim Eigenanteil.
+                var wohnungResidualAnteil = umlagenInGruppe
+                    .Where(u => u.VersionAt(abrechnungsende).Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
+                    .Select(u =>
+                    {
+                        var notes = new List<Note>();
+                        var zaehlerMitWohnung = u.Zaehler.Where(z => z.Wohnung != null).ToList();
+                        var alleVerbrauch = zaehlerMitWohnung
+                            .GroupBy(z => z.Typ.ToUnit())
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.Sum(z => new Verbrauch(z, abrechnungsbeginn, abrechnungsende, notes).Delta));
+                        var wohnungVerbrauch = zaehlerMitWohnung
+                            .Where(z => z.Wohnung == wohnung)
+                            .GroupBy(z => z.Typ.ToUnit())
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.Sum(z => new Verbrauch(z, abrechnungsbeginn, abrechnungsende, notes).Delta));
+                        var mieterVerbrauch = mieterParteienDieserWohnung
+                            .Where(p => p.VerbrauchAnteileDetail.ContainsKey(u.UmlageId))
+                            .SelectMany(p => p.VerbrauchAnteileDetail[u.UmlageId].DieseVerbrauch)
+                            .GroupBy(kv => kv.Key)
+                            .ToDictionary(g => g.Key, g => g.Sum(kv => kv.Value));
+                        var anteil = wohnungVerbrauch
+                            .Where(kv => alleVerbrauch.TryGetValue(kv.Key, out var alle) && alle > 0)
+                            .Sum(kv => Math.Max(0m, kv.Value - mieterVerbrauch.GetValueOrDefault(kv.Key)) / alleVerbrauch[kv.Key]);
+                        return (UmlageId: u.UmlageId, Anteil: anteil);
+                    })
+                    .Where(x => x.Anteil > 0)
+                    .ToDictionary(x => x.UmlageId, x => x.Anteil);
+
+                foreach (var (lsBeginn, lsEnde) in leerstandIntervalle)
                 {
                     var lsTage = lsEnde.DayNumber - lsBeginn.DayNumber + 1;
                     var lsZeitanteil = (decimal)lsTage / abrechnungstage;
-
-                    var notes = new List<Note>();
-                    var verbrauchAnteile = umlagenInGruppe
-                        .Where(u => u.VersionAt(abrechnungsende).Schluessel == Umlageschluessel.NachVerbrauch && u.Zaehler.Count > 0)
-                        .Select(u =>
-                        {
-                            // VerbrauchAnteil requires a Vertrag-based Zeitraum, which doesn't exist for Leerstand.
-                            // We compute the anteil inline: DieseVerbrauch / AlleVerbrauch per Einheit.
-                            var zaehlerMitWohnung = u.Zaehler.Where(z => z.Wohnung != null).ToList();
-                            var alleVerbrauch = zaehlerMitWohnung
-                                .GroupBy(z => z.Typ.ToUnit())
-                                .ToDictionary(
-                                    g => g.Key,
-                                    g => g.Sum(z => new Verbrauch(z, abrechnungsbeginn, abrechnungsende, notes).Delta));
-                            var dieseVerbrauch = zaehlerMitWohnung
-                                .Where(z => z.Wohnung == wohnung)
-                                .GroupBy(z => z.Typ.ToUnit())
-                                .ToDictionary(
-                                    g => g.Key,
-                                    g => g.Sum(z => new Verbrauch(z, lsBeginn, lsEnde, notes).Delta));
-                            var anteil = dieseVerbrauch
-                                .Where(kv => alleVerbrauch.TryGetValue(kv.Key, out var alle) && alle > 0)
-                                .Sum(kv => kv.Value / alleVerbrauch[kv.Key]);
-                            return (UmlageId: u.UmlageId, Anteil: anteil);
-                        })
-                        .Where(x => x.Anteil > 0)
-                        .ToDictionary(x => x.UmlageId, x => x.Anteil);
+                    // Residuum nach Tagen auf die Leerstand-Intervalle aufteilen.
+                    var intervallFaktor = (decimal)lsTage / leerstandTageGesamt;
+                    var verbrauchAnteile = wohnungResidualAnteil
+                        .ToDictionary(kv => kv.Key, kv => kv.Value * intervallFaktor);
 
                     parteien.Add(new NkPartei
                     {
@@ -539,10 +562,47 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                     .ToList() ?? [];
 
+                // Bei Verbrauchsumlagen: Mieter, deren Messfenster den Nutzungszeitraum
+                // klar verfehlt (fehlender Ein-/Auszugsstand) → der Verbrauch dieses
+                // Zeitraums kann nicht gemessen werden, landet (korrekt) beim Eigenanteil,
+                // muss aber vor dem Buchen bereinigt werden. Ein Zähler, der über den
+                // gesamten Zeitraum 0 misst, ist KEIN Fehler (echter Nullverbrauch).
+                var verbrauchsFehler = new List<string>();
+                if (schluessel == Umlageschluessel.NachVerbrauch)
+                {
+                    foreach (var mp in parteien.Where(p => p.Vertrag != null))
+                    {
+                        var zaehlerDerWohnung = umlage.Zaehler
+                            .Where(z => z.Wohnung == mp.Wohnung).ToList();
+                        if (zaehlerDerWohnung.Count == 0) continue;
+                        var nutzTage = mp.Nutzungsende.DayNumber - mp.Nutzungsbeginn.DayNumber + 1;
+                        if (nutzTage <= 30) continue;
+
+                        var messfensterFehlt = zaehlerDerWohnung.Any(z =>
+                        {
+                            if (z.Staende.Count == 0) return true;
+                            var v = new Verbrauch(z, mp.Nutzungsbeginn, mp.Nutzungsende, []);
+                            // Anfangs-/Endstand deutlich (>14 Tage) neben dem Zeitraum → Boundary-Stand fehlt.
+                            return v.Anfangsdatum.DayNumber - mp.Nutzungsbeginn.DayNumber > 14
+                                || mp.Nutzungsende.DayNumber - v.Enddatum.DayNumber > 14;
+                        });
+                        if (messfensterFehlt)
+                        {
+                            var name = mp.Vertrag!.Mieter.Any()
+                                ? string.Join(", ", mp.Vertrag.Mieter.Select(m => m.Bezeichnung))
+                                : $"Vertrag {mp.Vertrag.VertragId}";
+                            verbrauchsFehler.Add(
+                                $"{ZaehlerstandFehltMarker}Für '{name}' ({mp.Nutzungsbeginn:dd.MM.yyyy}–{mp.Nutzungsende:dd.MM.yyyy}) "
+                                + $"fehlt bei '{umlage.Typ.Bezeichnung}' ein Zählerstand zum Nutzungsbeginn/-ende — der Verbrauch "
+                                + "dieses Zeitraums kann nicht zugeordnet werden. Bitte Zählerstand ergänzen.");
+                        }
+                    }
+                }
+
                 foreach (var (zeile, betrag) in verrechnungsZeilen)
                 {
                     if (betrag == 0) continue;
-                    var warnungen = new List<string>();
+                    var warnungen = new List<string>(verbrauchsFehler);
                     var anteile = new List<NkRechnungsAnteil>();
 
                     foreach (var partei in parteien)
@@ -556,7 +616,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         anteile.Add(new NkRechnungsAnteil { Partei = partei, Betrag = anteil });
                     }
 
-                    ApplyRundungskorrektur(betrag, anteile);
+                    // Nur wenn wirklich Verbrauch nicht messbar ist (Zählerstand-Fehler oben
+                    // erkannt) UND kein Eigenanteil den Rest auffängt, bleibt der Rest bewusst
+                    // unverteilt — er darf NIE auf einen Mieter fallen. Der Fehler ist bereits
+                    // in verbrauchsFehler gemeldet und blockiert das Buchen.
+                    // In allen anderen Fällen (insbesondere normale Cent-Rundung) wird die
+                    // Rundungskorrektur angewandt (sie bevorzugt ohnehin einen Eigenanteil).
+                    var rest = betrag - anteile.Sum(a => a.Betrag);
+                    var hatEigenanteil = anteile.Any(a => a.Partei.Vertrag is null);
+                    var restNichtMessbar =
+                        verbrauchsFehler.Count > 0 && !hatEigenanteil && Math.Abs(rest) > 0.02m;
+                    if (!restNichtMessbar)
+                    {
+                        ApplyRundungskorrektur(betrag, anteile);
+                    }
 
                     result.Add(new NkRechnungsplan
                     {
@@ -576,6 +649,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         /// <summary>Beschreibungs-Marker der Strompauschale-Umbuchung (HeizkostenV).</summary>
         public const string StrompauschaleMarker = "Strompauschale-Umbuchung";
+
+        /// <summary>
+        /// Marker für den harten Fehler „Zählerstand fehlt / Verbrauch nicht zuordenbar".
+        /// Das Buchen wird ausschließlich bei genau diesem Fehler blockiert (nicht bei
+        /// sonstigen HKVO-Plausibilitätshinweisen).
+        /// </summary>
+        public const string ZaehlerstandFehltMarker = "Fehler: Zählerstand fehlt — ";
 
         /// <summary>
         /// Beschreibungs-Marker manueller NK-Anteil-Sätze (Soll NkBuchungskonto /

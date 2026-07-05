@@ -262,6 +262,92 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             erstellt.JahrAbgeschlossen.Should().BeFalse();
         }
 
+        private static void ErstelleVerzicht(SaverwalterContext ctx, Vertrag vertrag, int jahr, string grund)
+        {
+            ctx.Abrechnungsverzichte.Add(new Abrechnungsverzicht
+            {
+                Vertrag = vertrag,
+                Jahr = jahr,
+                Grund = grund,
+                Datum = new DateOnly(jahr + 1, 1, 15)
+            });
+            ctx.SaveChanges();
+        }
+
+        [Fact]
+        public async Task Abrechnungsverzicht_gilt_als_erledigt_und_schliesst_das_jahr_ab()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managed, _) = Seed(ctx);
+            var sollZeile = BucheForderung(ctx, managed, 2024, 500m);
+            BucheZahlung(ctx, managed, 2024, 500m, sollZeile);
+            ErstelleVerzicht(ctx, managed, 2024, "Zeitraum vor Programmeinführung");
+            var controller = WithUser(ctx, Principal(manager));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var status = abschluss.Abrechnungen.Single();
+            status.Verzichtet.Should().BeTrue();
+            status.VerzichtGrund.Should().Be("Zeitraum vor Programmeinführung");
+            status.Abgesendet.Should().BeFalse();
+            status.ResultatVorhanden.Should().BeFalse();
+            abschluss.AbrechnungenFertig.Should().Be(1);
+            abschluss.JahrAbgeschlossen.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Verzicht_wirkt_nur_im_betroffenen_jahr()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managed, _) = Seed(ctx);
+            var sollZeile = BucheForderung(ctx, managed, 2024, 500m);
+            BucheZahlung(ctx, managed, 2024, 500m, sollZeile);
+            ErstelleVerzicht(ctx, managed, 2023, "anderes Jahr");
+            var controller = WithUser(ctx, Principal(manager));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var status = abschluss.Abrechnungen.Single();
+            status.Verzichtet.Should().BeFalse();
+            abschluss.AbrechnungenFertig.Should().Be(0);
+            abschluss.JahrAbgeschlossen.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Verzicht_markiert_auch_die_offenen_Mietforderungen_als_verzichtet()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managed, _) = Seed(ctx);
+            BucheForderung(ctx, managed, 2024, 500m); // offene Mietforderung, keine Zahlung
+            ErstelleVerzicht(ctx, managed, 2024, "vor Programmeinführung");
+            var controller = WithUser(ctx, Principal(manager));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var mietKonto = abschluss.Konten.Single(k => k.Funktion == "Mietforderungen");
+            mietKonto.OffenePostenAnzahl.Should().Be(1); // Forderung ist real offen …
+            mietKonto.Verzichtet.Should().BeTrue();       // … zählt aber als verzichtet
+            mietKonto.Ausgeglichen.Should().BeTrue();
+            abschluss.KontenOffen.Should().Be(0);
+            abschluss.JahrAbgeschlossen.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Ohne_Verzicht_bleibt_offene_Mietforderung_ein_offener_Punkt()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managed, _) = Seed(ctx);
+            BucheForderung(ctx, managed, 2024, 500m);
+            var controller = WithUser(ctx, Principal(manager));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var mietKonto = abschluss.Konten.Single(k => k.Funktion == "Mietforderungen");
+            mietKonto.Verzichtet.Should().BeFalse();
+            mietKonto.Ausgeglichen.Should().BeFalse();
+            abschluss.KontenOffen.Should().Be(1);
+        }
+
         [Fact]
         public async Task Verwalter_sieht_nur_verwaltete_konten_und_vertraege()
         {

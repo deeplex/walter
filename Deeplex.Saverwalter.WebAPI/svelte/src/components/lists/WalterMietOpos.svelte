@@ -57,7 +57,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: offeneGesamt = rows.reduce((s, r) => s + r.offen, 0);
     $: tableRows = rows.map((r, i) => ({
         id: String(i),
-        periode: `${MONAT[r.monat - 1]} ${r.jahr}`,
+        // monat === 0 → Jahres-Summe, sonst einzelner Monat.
+        periode: r.monat === 0 ? `${r.jahr}` : `${MONAT[r.monat - 1]} ${r.jahr}`,
         soll: convertEuro(r.soll),
         ausgeglichen: convertEuro(r.ausgeglichen),
         offen: r.offen,
@@ -65,7 +66,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }));
 
     const headers = [
-        { key: 'periode', value: 'Monat' },
+        { key: 'periode', value: 'Zeitraum' },
         { key: 'soll', value: 'Soll' },
         { key: 'ausgeglichen', value: 'Ausgeglichen' },
         { key: 'offenFormatted', value: 'Offen' }

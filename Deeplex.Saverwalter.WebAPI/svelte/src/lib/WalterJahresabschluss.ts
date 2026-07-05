@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { walter_get } from '$walter/services/requests';
+import { walter_get, walter_post, walter_delete } from '$walter/services/requests';
 
 /** Ein Konto in der Jahressicht der Jahresabschlusskontrolle. */
 export type WalterKontoJahres = {
@@ -33,6 +33,8 @@ export type WalterKontoJahres = {
     offenePostenAnzahl: number;
     offenePostenBetrag: number;
     ausgeglichen: boolean;
+    /** Konto eines Vertrags mit Abrechnungsverzicht in diesem Jahr. */
+    verzichtet: boolean;
 };
 
 /** Status der Betriebskostenabrechnung eines Vertrags für ein Jahr. */
@@ -44,6 +46,10 @@ export type WalterAbrechnungsstatus = {
     /** Saldo per OPOS gedeckt (oder 0). Nur aussagekräftig wenn resultatVorhanden. */
     ausgeglichen: boolean;
     buchungssatzId: string | undefined;
+    /** Dokumentierter Abrechnungsverzicht — gilt als erledigt, ohne Buchung. */
+    verzichtet: boolean;
+    verzichtGrund: string | undefined;
+    verzichtId: string | undefined;
 };
 
 export type WalterJahresUebersicht = {
@@ -79,4 +85,23 @@ export async function getJahresabschluss(
         `${ApiURL}/${jahr}`,
         fetchImpl
     )) as WalterJahresabschluss;
+}
+
+const VerzichtURL = '/api/abrechnungsverzicht';
+
+/** Setzt einen dokumentierten Abrechnungsverzicht (Grund Pflicht). */
+export async function setzeAbrechnungsverzicht(
+    vertragId: number,
+    jahr: number,
+    grund: string
+): Promise<Response> {
+    return await walter_post(VerzichtURL, { vertragId, jahr, grund });
+}
+
+/** Hebt den Abrechnungsverzicht für Vertrag + Jahr wieder auf. */
+export async function hebeAbrechnungsverzichtAuf(
+    vertragId: number,
+    jahr: number
+): Promise<Response> {
+    return await walter_delete(`${VerzichtURL}/${vertragId}/${jahr}`);
 }

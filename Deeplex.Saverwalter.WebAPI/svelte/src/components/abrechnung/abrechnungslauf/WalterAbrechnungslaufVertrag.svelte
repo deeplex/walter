@@ -126,28 +126,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         .map(({ bezeichnung, warm }) => ({ bezeichnung, betrag: warm }));
 
     $: mietOposRows = (() => {
-        const byMonth = new Map<string, { soll: number; haben: number }>();
+        // Zuordnung über das BUCHUNGSJAHR des Satzes (nicht Buchungsdatum/Beschreibung):
+        // migrierte Zahlungen sind oft auf ein späteres Datum gebucht, gehören aber
+        // buchhalterisch ins Abrechnungsjahr. So werden bezahlte Mieten nicht mehr
+        // fälschlich als offen gezeigt.
+        const byJahr = new Map<number, { soll: number; haben: number }>();
         for (const m of resultat.mieten ?? []) {
-            if (!m.buchungsdatum.startsWith(String(jahr))) continue;
-            const d = new Date(m.buchungsdatum);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            const cur = byMonth.get(key) ?? { soll: 0, haben: 0 };
+            const cur = byJahr.get(m.buchungsjahr) ?? { soll: 0, haben: 0 };
             if (m.istSoll) cur.soll += m.betrag;
             else cur.haben += m.betrag;
-            byMonth.set(key, cur);
+            byJahr.set(m.buchungsjahr, cur);
         }
-        return [...byMonth.entries()]
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([key, { soll, haben }]): MietOposMonat => {
-                const [y, mo] = key.split('-');
-                return {
-                    jahr: Number(y),
-                    monat: Number(mo),
-                    soll,
-                    ausgeglichen: haben,
-                    offen: soll - haben
-                };
-            });
+        return [...byJahr.entries()]
+            .sort(([a], [b]) => a - b)
+            .map(([y, { soll, haben }]): MietOposMonat => ({
+                jahr: y,
+                monat: 0, // 0 = Jahres-Summe (kein einzelner Monat)
+                soll,
+                ausgeglichen: haben,
+                offen: soll - haben
+            }));
     })();
 </script>
 

@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                var sperre = await AbrechnungsschutzService.SperreWohnung(
+                    Ctx, entity.Wohnung.WohnungId, entity.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.WohnungVersionen.Remove(entity);
                 await Ctx.SaveChangesAsync();
                 return new OkResult();
@@ -68,6 +73,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 {
                     return new ForbidResult();
                 }
+
+                var sperre = await AbrechnungsschutzService.SperreWohnung(
+                    Ctx, entry.Wohnung!.Id, entry.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
 
                 return await Add(entry);
             }
@@ -101,6 +110,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Fläche/Einheiten/Beginn fließen in die Verteilung ein → bei Änderung sperren.
+                if (entity.Beginn != entry.Beginn
+                    || entity.Wohnflaeche != entry.Wohnflaeche
+                    || entity.Nutzflaeche != entry.Nutzflaeche
+                    || entity.Miteigentumsanteile != entry.Miteigentumsanteile
+                    || entity.Nutzeinheit != entry.Einheiten)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreWohnung(
+                        Ctx, entity.Wohnung.WohnungId,
+                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Beginn = entry.Beginn;
                 entity.Wohnflaeche = entry.Wohnflaeche;
                 entity.Nutzflaeche = entry.Nutzflaeche;

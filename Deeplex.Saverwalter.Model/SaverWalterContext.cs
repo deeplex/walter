@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class SaverwalterContext : DbContext
     {
         public DbSet<Abrechnungsresultat> Abrechnungsresultate { get; set; } = null!;
+        public DbSet<Abrechnungsverzicht> Abrechnungsverzichte { get; set; } = null!;
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<Buchungskonto> Buchungskonten { get; set; } = null!;
         public DbSet<Buchungssatz> Buchungssaetze { get; set; } = null!;
@@ -254,6 +255,17 @@ namespace Deeplex.Saverwalter.Model
 
             modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Abrechnungsverzicht>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Abrechnungsverzicht>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Abrechnungsverzicht>()
+                .HasOne(v => v.Vertrag)
+                .WithMany()
+                .HasForeignKey("VertragId")
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            modelBuilder.Entity<Abrechnungsverzicht>()
+                .HasIndex("VertragId", "Jahr")
+                .IsUnique();
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");

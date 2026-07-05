@@ -52,6 +52,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             public decimal OffenePostenBetrag { get; set; }
             /// <summary>Nicht ausgleichbare Konten gelten immer als ausgeglichen (Summenkonten).</summary>
             public bool Ausgeglichen { get; set; }
+            /// <summary>
+            /// Konto eines Vertrags, für den in diesem Jahr ein Abrechnungsverzicht
+            /// hinterlegt ist — offene Forderungen zählen dann nicht als offener Punkt.
+            /// </summary>
+            public bool Verzichtet { get; set; }
         }
 
         public class AbrechnungsstatusEntry
@@ -63,6 +68,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             /// <summary>Saldo per OPOS gedeckt (oder 0). Nur aussagekräftig wenn ResultatVorhanden.</summary>
             public bool Ausgeglichen { get; set; }
             public Guid? BuchungssatzId { get; set; }
+            /// <summary>Dokumentierter Abrechnungsverzicht — gilt als erledigt, ohne Buchung.</summary>
+            public bool Verzichtet { get; set; }
+            public string? VerzichtGrund { get; set; }
+            public Guid? VerzichtId { get; set; }
         }
 
         public class JahresabschlussEntry
@@ -125,7 +134,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             List<KontoVerknuepfungEntry> Verknuepfungen,
             Dictionary<Guid, List<OffenerPostenAusgleich>> AusgleicheBySollZeile,
             List<Vertrag> Vertraege,
-            List<Abrechnungsresultat> Resultate);
+            List<Abrechnungsresultat> Resultate,
+            List<Abrechnungsverzicht> Verzichte);
 
         private static async Task<Daten> LadeDaten(SaverwalterContext ctx, HashSet<int>? scopedKontoIds)
         {
@@ -159,6 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .Include(v => v.Mieter)
                 .Include(v => v.MietBuchungskonto)
+                .Include(v => v.NkBuchungskonto)
                 .Include(v => v.ZahlungsKonto)
                 .Include(v => v.BkAbrechnungsKonto)
                 .Where(v => scopedKontoIds == null
@@ -179,14 +190,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Where(r => vertragIds.Contains(r.Vertrag.VertragId))
                 .ToList();
 
-            return new Daten(konten, verknuepfungen, ausgleicheBySollZeile, vertraege, resultate);
+            var verzichte = (await ctx.Abrechnungsverzichte
+                .Include(v => v.Vertrag)
+                .ToListAsync())
+                .Where(v => vertragIds.Contains(v.Vertrag.VertragId))
+                .ToList();
+
+            return new Daten(konten, verknuepfungen, ausgleicheBySollZeile, vertraege, resultate, verzichte);
         }
 
         private static JahresabschlussEntry BerechneJahr(Daten daten, int jahr)
         {
+            // Konten von Verträgen mit Abrechnungsverzicht für dieses Jahr: deren offene
+            // Forderungen (Miete/NK) zählen dann nicht als offener Punkt.
+            var verzichteteVertragIds = daten.Verzichte
+                .Where(v => v.Jahr == jahr)
+                .Select(v => v.Vertrag.VertragId)
+                .ToHashSet();
+            var verzichteteKontoIds = daten.Vertraege
+                .Where(v => verzichteteVertragIds.Contains(v.VertragId))
+                .SelectMany(v => new[]
+                {
+                    v.MietBuchungskonto.BuchungskontoId,
+                    v.NkBuchungskonto.BuchungskontoId
+                })
+                .ToHashSet();
+
             var konten = daten.Konten
                 .Where(k => k.Buchungszeilen.Any(z => z.Buchungssatz.Buchungsjahr <= jahr))
-                .Select(k => BerechneKonto(daten, k, jahr))
+                .Select(k => BerechneKonto(daten, k, jahr, verzichteteKontoIds))
                 .OrderBy(k => k.Ausgleichbar ? 0 : 1)
                 .ThenBy(k => k.Funktion)
                 .ThenBy(k => k.Kontonummer)
@@ -195,7 +227,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var abrechnungen = BerechneAbrechnungen(daten, jahr);
 
             var kontenOffen = konten.Count(k => !k.Ausgeglichen);
-            var abrechnungenFertig = abrechnungen.Count(a => a.Abgesendet);
+            // Erledigt = abgesendet ODER bewusster Verzicht (dokumentiert, ohne Buchung).
+            var abrechnungenFertig = abrechnungen.Count(a => a.Abgesendet || a.Verzichtet);
             return new JahresabschlussEntry
             {
                 Jahr = jahr,
@@ -208,11 +241,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             };
         }
 
-        private static KontoJahresEntry BerechneKonto(Daten daten, Buchungskonto konto, int jahr)
+        private static KontoJahresEntry BerechneKonto(
+            Daten daten, Buchungskonto konto, int jahr, HashSet<int> verzichteteKontoIds)
         {
             var verknuepfung = daten.Verknuepfungen
                 .FirstOrDefault(v => v.KontoId == konto.BuchungskontoId);
             var ausgleichbar = verknuepfung?.Ausgleichbar ?? false;
+            var verzichtet = verzichteteKontoIds.Contains(konto.BuchungskontoId);
 
             decimal Saldo(Func<Buchungszeile, bool> filter) => konto.Buchungszeilen
                 .Where(filter)
@@ -262,7 +297,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 Endsaldo = endsaldo,
                 OffenePostenAnzahl = offenePosten.Count,
                 OffenePostenBetrag = offenePosten.Sum(),
-                Ausgeglichen = !ausgleichbar
+                Verzichtet = verzichtet,
+                // Verzichtete Konten zählen — wie Summenkonten — nicht als offener Punkt.
+                Ausgeglichen = verzichtet || !ausgleichbar
                     || (offenePosten.Count == 0 && Math.Abs(endsaldo) <= Epsilon)
             };
         }
@@ -313,6 +350,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                                  && r.Buchungssatz.Buchungsjahr == jahr
                                  && r.Buchungssatz.StornoNach == null)
                         .MaxBy(r => r.LastModified);
+                    var verzicht = daten.Verzichte
+                        .FirstOrDefault(vz => vz.Vertrag.VertragId == v.VertragId && vz.Jahr == jahr);
                     return new AbrechnungsstatusEntry
                     {
                         VertragId = v.VertragId,
@@ -320,7 +359,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                         ResultatVorhanden = resultat != null,
                         Abgesendet = resultat?.Abgesendet ?? false,
                         Ausgeglichen = resultat != null && SaldoAusgeglichen(resultat, v),
-                        BuchungssatzId = resultat?.Buchungssatz.BuchungssatzId
+                        BuchungssatzId = resultat?.Buchungssatz.BuchungssatzId,
+                        Verzichtet = verzicht != null,
+                        VerzichtGrund = verzicht?.Grund,
+                        VerzichtId = verzicht?.AbrechnungsverzichtId
                     };
                 })
                 .OrderBy(a => a.Bezeichnung)

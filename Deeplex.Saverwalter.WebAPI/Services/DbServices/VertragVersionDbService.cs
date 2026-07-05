@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                var sperre = await AbrechnungsschutzService.SperreVertrag(
+                    Ctx, entity.Vertrag.VertragId, entity.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.VertragVersionen.Remove(entity);
                 await Ctx.SaveChangesAsync();
 
@@ -70,6 +75,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 {
                     return new ForbidResult();
                 }
+
+                var sperre = await AbrechnungsschutzService.SperreVertrag(
+                    Ctx, entry.Vertrag!.Id, entry.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
 
                 return await Add(entry);
             }
@@ -99,6 +108,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Beginn/Personenzahl fließen in die Verteilung ein; ändern sie sich für
+                // ein bereits abgerechnetes Jahr, wird gesperrt. (Grundmiete/NK-VZ nicht.)
+                if (entity.Beginn != entry.Beginn || entity.Personenzahl != entry.Personenzahl)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreVertrag(
+                        Ctx, entity.Vertrag.VertragId,
+                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Beginn = entry.Beginn;
                 entity.Grundmiete = entry.Grundmiete;
                 entity.Personenzahl = entry.Personenzahl;

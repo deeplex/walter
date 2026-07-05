@@ -59,6 +59,8 @@ export {
 export {
     getJahresUebersicht,
     getJahresabschluss,
+    setzeAbrechnungsverzicht,
+    hebeAbrechnungsverzichtAuf,
     type WalterJahresUebersicht,
     type WalterJahresabschluss,
     type WalterKontoJahres,

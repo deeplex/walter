@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                var sperre = await AbrechnungsschutzService.SperreUmlage(
+                    Ctx, entity.Umlage.UmlageId, entity.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.UmlageVersionen.Remove(entity);
                 await Ctx.SaveChangesAsync();
                 return new OkResult();
@@ -68,6 +73,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 {
                     return new ForbidResult();
                 }
+
+                var sperre = await AbrechnungsschutzService.SperreUmlage(
+                    Ctx, entry.Umlage!.Id, entry.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
 
                 return await Add(entry);
             }
@@ -97,8 +106,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Schlüssel/Beginn bestimmen die Verteilung → bei Änderung sperren.
+                var neuerSchluessel = (Umlageschluessel)entry.Schluessel.Id;
+                if (entity.Beginn != entry.Beginn || entity.Schluessel != neuerSchluessel)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreUmlage(
+                        Ctx, entity.Umlage.UmlageId,
+                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Beginn = entry.Beginn;
-                entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
+                entity.Schluessel = neuerSchluessel;
 
                 SetOptionalValues(entity, entry);
                 Ctx.UmlageVersionen.Update(entity);

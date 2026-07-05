@@ -148,6 +148,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         {
             var (preview, einheiten) = await ComputeAsync(wohnungIds, jahr);
 
+            // Nicht zuordenbarer Verbrauch (fehlender Zählerstand) verhindert das Buchen
+            // komplett — erst den Zählerstand ergänzen. Andere Hinweise blockieren nicht.
+            var fehler = preview.Warnungen
+                .Where(w => w.Contains(ZaehlerstandFehltMarker, StringComparison.Ordinal))
+                .Distinct()
+                .ToList();
+            if (fehler.Count > 0)
+                throw new InvalidOperationException(
+                    "Abrechnung kann nicht gebucht werden:\n" + string.Join("\n", fehler));
+
             // Abbrechen wenn irgend ein bereits gebuchter Betrag vom berechneten abweicht —
             // das gilt für Abrechnungsresultate und NK-Anteile gleichermaßen.
             // In dem Fall: gar nichts buchen, erst stornieren.
@@ -170,6 +180,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             if (anteilKonflikt)
                 throw new InvalidOperationException(
                     "Bereits gebuchte NK-Anteile widersprechen der aktuellen Berechnung.");
+
+            // Verträge mit dokumentiertem Abrechnungsverzicht für dieses Jahr: nicht buchen.
+            var verzichtVertragIds = (await _ctx.Abrechnungsverzichte
+                .Where(v => v.Jahr == jahr && wohnungIds.Contains(v.Vertrag.Wohnung.WohnungId))
+                .Select(v => v.Vertrag.VertragId)
+                .ToListAsync())
+                .ToHashSet();
 
             // Verträge mit bereits abgesendetem Resultat: explizit warnen und überspringen.
             foreach (var partei in einheiten
@@ -195,6 +212,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             foreach (var resultat in preview.Resultate
                 .Where(r => r.VertragId.HasValue && !r.GebuchterSaldo.HasValue))
             {
+                if (verzichtVertragIds.Contains(resultat.VertragId!.Value))
+                {
+                    preview.Warnungen.Add(
+                        $"Vertrag {resultat.VertragId}: Abrechnungsverzicht für {jahr} hinterlegt — wird nicht gebucht.");
+                    continue;
+                }
+
                 if (!parteiByVertragId.TryGetValue(resultat.VertragId!.Value, out var partei))
                     continue;
 
@@ -299,7 +323,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 throw new InvalidOperationException(
                     "Mindestens eine Abrechnung wurde bereits versendet — die Gruppe kann nur noch storniert werden.");
 
-            var (vertragNkKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
+            var (verteilKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
 
             var zuLoeschen = new List<Buchungssatz>();
@@ -326,9 +350,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 }
 
                 // Rechnungssatz: nur die vom Lauf angefügten Verteil-Zeilen
-                // (Konten der Verträge) entfernen, die Rechnung selbst bleibt.
+                // (Vertrags-NK- und Eigenanteil-/AufwandsKonten) entfernen, die Rechnung bleibt.
                 var zeilen = satz.Buchungszeilen
-                    .Where(z => vertragNkKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
                     .ToList();
                 if (zeilen.Count == 0) continue;
                 anteilZeilen.AddRange(zeilen);
@@ -358,7 +382,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public async Task<RueckabwicklungResult> StornoAsync(List<int> wohnungIds, int jahr, string grund)
         {
             var resultate = await LadeResultate(wohnungIds, jahr);
-            var (vertragNkKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
+            var (verteilKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
 
             var stornierteResultate = 0;
@@ -381,7 +405,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 }
 
                 var zeilen = satz.Buchungszeilen
-                    .Where(z => vertragNkKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
                     .ToList();
                 if (zeilen.Count == 0) continue;
 
@@ -432,18 +456,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                          && r.Buchungssatz.Buchungsjahr == jahr)
                 .ToListAsync();
 
-        private async Task<(List<int> VertragNkKontoIds, List<int> UmlageNkVkIds)> LadeGruppenKonten(
+        private async Task<(List<int> VerteilKontoIds, List<int> UmlageNkVkIds)> LadeGruppenKonten(
             List<int> wohnungIds)
         {
+            // Der Lauf bucht Verteil-Zeilen auf die NK-Konten der Verträge UND — für
+            // Leerstand/Eigenanteil — auf die AufwandsKonten der Wohnungen. Beide müssen
+            // beim Zurücknehmen/Stornieren bereinigt werden, sonst bleibt der Eigenanteil stehen.
             var vertragNkKontoIds = await _ctx.Vertraege
                 .Where(v => wohnungIds.Contains(v.Wohnung.WohnungId))
                 .Select(v => v.NkBuchungskonto.BuchungskontoId)
+                .ToListAsync();
+            var aufwandsKontoIds = await _ctx.Wohnungen
+                .Where(w => wohnungIds.Contains(w.WohnungId))
+                .Select(w => w.AufwandsKonto.BuchungskontoId)
                 .ToListAsync();
             var umlageNkVkIds = await _ctx.Umlagen
                 .Where(u => u.Wohnungen.Any(w => wohnungIds.Contains(w.WohnungId)))
                 .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
                 .ToListAsync();
-            return (vertragNkKontoIds, umlageNkVkIds);
+            var verteilKontoIds = vertragNkKontoIds.Concat(aufwandsKontoIds).Distinct().ToList();
+            return (verteilKontoIds, umlageNkVkIds);
         }
 
         /// <summary>
@@ -611,6 +643,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .Select(z => new MietZeileInfo
                         {
                             Buchungsdatum = z.Buchungssatz.Buchungsdatum,
+                            Buchungsjahr = z.Buchungssatz.Buchungsjahr,
                             Beschreibung = z.Buchungssatz.Beschreibung,
                             IstSoll = z.SollHaben == SollHaben.Soll,
                             Betrag = z.Betrag,

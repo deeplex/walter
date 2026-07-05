@@ -330,6 +330,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: warnungenSonstige = warnungen.filter(
         (w) => !/z(a|ä)hler|zaehlerstand/i.test(w) && !/miet|kaltmiete/i.test(w)
     );
+    // Harte Fehler (fehlender Zählerstand → nicht zuordenbarer Verbrauch) sperren das Buchen.
+    $: fehler = warnungen.filter((w) => w.includes('Zählerstand fehlt —'));
     $: hatHinweise =
         fehlendeBuchungen > 0 ||
         inkonsistenteBuchungen > 0 ||
@@ -339,6 +341,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         vertragResultate.length > 0 &&
         fehlendeBuchungen === 0 &&
         inkonsistenteBuchungen === 0;
+    // Keine Betriebskosten im Jahr erfasst → keine NK-Zeilen in irgendeiner Gruppe.
+    $: nichtsAbzurechnen =
+        result != null &&
+        !(result.gruppen ?? []).some((g) =>
+            g.abrechnungseinheiten.some((e) => e.nkZeilen.length > 0)
+        );
     $: downloadModusText = alleVertraegeGebuchtUndKorrekt
         ? 'Final ohne ENTWURF'
         : 'ENTWURF';
@@ -478,6 +486,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {bookLoading}
             {alleVertraegeGebuchtUndKorrekt}
             {downloadModusText}
+            {nichtsAbzurechnen}
+            {fehler}
             bind:downloadFormat
             on:download={downloadAbrechnungen}
             on:book={book}

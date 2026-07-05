@@ -131,6 +131,59 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             updatedEntity.Ende.Should().Be(new DateOnly(2021, 12, 31));
         }
 
+        private static VertragDbService ServiceMitAuth(SaverwalterContext ctx, out ClaimsPrincipal user)
+        {
+            var u = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(u, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            user = u;
+            return new VertragDbService(ctx, auth);
+        }
+
+        private static void BucheAbrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr)
+        {
+            var satz = new Buchungssatz(new DateOnly(jahr + 1, 1, 1), $"BK-Abrechnung {jahr}") { Buchungsjahr = jahr };
+            ctx.Buchungssaetze.Add(satz);
+            ctx.Abrechnungsresultate.Add(new Abrechnungsresultat { Vertrag = vertrag, Buchungssatz = satz });
+            ctx.SaveChanges();
+        }
+
+        [Fact]
+        public async Task Put_blockt_Ende_Aenderung_wenn_Jahr_abgerechnet()
+        {
+            var ctx = TestUtils.GetContext();
+            var service = ServiceMitAuth(ctx, out var user);
+            var entity = TestUtils.GetVertragForAbrechnung(ctx);
+            BucheAbrechnung(ctx, entity, 2021);
+
+            var entry = new VertragEntry(entity, new());
+            entry.Ende = new DateOnly(2021, 6, 30); // ändert das abgerechnete Jahr 2021
+
+            var result = await service.Put(user, entity.VertragId, entry);
+
+            result.Result.Should().BeOfType<ConflictObjectResult>();
+            // Ende bleibt unverändert
+            ctx.Vertraege.Find(entity.VertragId)!.Ende.Should().NotBe(new DateOnly(2021, 6, 30));
+        }
+
+        [Fact]
+        public async Task Put_erlaubt_Ende_Aenderung_wenn_nur_nicht_abgerechnetes_Jahr_betroffen()
+        {
+            var ctx = TestUtils.GetContext();
+            var service = ServiceMitAuth(ctx, out var user);
+            var entity = TestUtils.GetVertragForAbrechnung(ctx);
+            BucheAbrechnung(ctx, entity, 2021);
+
+            var entry = new VertragEntry(entity, new());
+            entry.Ende = new DateOnly(2023, 6, 30); // betrifft nur 2023 (nicht abgerechnet)
+
+            var result = await service.Put(user, entity.VertragId, entry);
+
+            result.Value.Should().NotBeNull();
+            ctx.Vertraege.Find(entity.VertragId)!.Ende.Should().Be(new DateOnly(2023, 6, 30));
+        }
+
         [Fact]
         public async Task PutFailedTest()
         {

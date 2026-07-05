@@ -16,6 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -75,6 +76,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                // Löschen entfernt die Zählerdaten aus allen Abrechnungen → sperren, wenn
+                // für den Zähler überhaupt ein Jahr abgerechnet ist.
+                var sperre = await AbrechnungsschutzService.SperreZaehlerAbJahr(Ctx, id, 0);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.ZaehlerSet.Remove(entity);
                 await Ctx.SaveChangesAsync();
 
@@ -142,6 +148,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Ein geändertes Zähler-Ende verschiebt, welche Jahre den Zähler nutzen.
+                if (entity.Ende != entry.Ende)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreZaehlerAbJahr(
+                        Ctx, id, AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Ende, entry.Ende));
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Kennnummer = entry.Kennnummer;
                 entity.Typ = (Zaehlertyp)entry.Typ.Id;
 

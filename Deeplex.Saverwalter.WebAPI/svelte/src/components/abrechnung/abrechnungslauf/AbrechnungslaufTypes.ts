@@ -80,6 +80,7 @@ export type AbrechnungseinheitInfo = {
 
 export type MietZeileInfo = {
     buchungsdatum: string;
+    buchungsjahr: number;
     beschreibung: string;
     istSoll: boolean;
     betrag: number;

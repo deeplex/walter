@@ -34,7 +34,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { fileURL } from '$walter/services/files';
     import type { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
-    import { convertEuro } from '$walter/services/utils';
+    import {
+        convertEuro,
+        walter_subscribe_reset_changeTracker
+    } from '$walter/services/utils';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput
@@ -48,6 +51,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         readonly =
             entry?.permissions?.update === false || entry?.abgesendet === true;
     }
+
+    // Persistierter (in der DB gespeicherter) Abgesendet-Zustand — NICHT der bloß
+    // lokal angehakte. Der Ausgleich darf erst nach dem Speichern erfasst werden.
+    let abgesendetPersistiert = entry?.abgesendet === true;
+    walter_subscribe_reset_changeTracker(() => {
+        abgesendetPersistiert = entry?.abgesendet === true;
+    });
 
     const abgesendet = (e: Event) => {
         entry.abgesendet = (e.target as HTMLInputElement).checked;
@@ -154,7 +164,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 bind:checked={entry.abgesendet}
                 on:change={abgesendet}
             />
-            {#if entry.abgesendet && !entry.ausgeglichen && entry.saldo !== 0}
+            {#if abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
                 <Button
                     kind="tertiary"
                     size="small"
@@ -164,6 +174,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 >
                     Ausgleich als Transaktion erfassen
                 </Button>
+            {:else if entry.abgesendet && !abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
+                <p
+                    style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--cds-text-secondary);"
+                >
+                    Zum Erfassen des Ausgleichs bitte zuerst speichern.
+                </p>
             {/if}
         </Tile>
     </Column>

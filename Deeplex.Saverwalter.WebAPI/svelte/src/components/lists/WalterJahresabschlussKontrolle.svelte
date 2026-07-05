@@ -18,11 +18,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         Accordion,
         AccordionItem,
+        Button,
         Content,
         DataTable,
         DataTableSkeleton,
         Dropdown,
+        Modal,
         Tag,
+        TextArea,
         Tile
     } from 'carbon-components-svelte';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
@@ -30,6 +33,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         getJahresUebersicht,
         getJahresabschluss,
+        setzeAbrechnungsverzicht,
+        hebeAbrechnungsverzichtAuf,
         type WalterJahresUebersicht,
         type WalterJahresabschluss,
         type WalterKontoJahres
@@ -61,6 +66,53 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             // Antwort verwerfen, wenn inzwischen ein anderes Jahr gewählt wurde.
             if (a.jahr === selectedJahr) abschluss = a;
         });
+    }
+
+    // Nach einer Verzicht-Änderung Jahr + Übersicht neu laden.
+    async function reload() {
+        if (selectedJahr === undefined) return;
+        const jahr = selectedJahr;
+        const [a, u] = await Promise.all([
+            getJahresabschluss(jahr, fetchImpl),
+            getJahresUebersicht(fetchImpl)
+        ]);
+        if (a.jahr === selectedJahr) abschluss = a;
+        uebersicht = u;
+    }
+
+    // Verzicht-Dialog
+    let verzichtModalOpen = false;
+    let verzichtVertragId: number | undefined;
+    let verzichtBezeichnung = '';
+    let verzichtGrund = '';
+
+    function oeffneVerzichtDialog(vertragId: number, bezeichnung: string) {
+        verzichtVertragId = vertragId;
+        verzichtBezeichnung = bezeichnung;
+        verzichtGrund = '';
+        verzichtModalOpen = true;
+    }
+
+    async function bestaetigeVerzicht() {
+        if (
+            verzichtVertragId === undefined ||
+            selectedJahr === undefined ||
+            !verzichtGrund.trim()
+        )
+            return;
+        await setzeAbrechnungsverzicht(
+            verzichtVertragId,
+            selectedJahr,
+            verzichtGrund.trim()
+        );
+        verzichtModalOpen = false;
+        await reload();
+    }
+
+    async function verzichtAufheben(vertragId: number) {
+        if (selectedJahr === undefined) return;
+        await hebeAbrechnungsverzichtAuf(vertragId, selectedJahr);
+        await reload();
     }
 
     $: dropdownItems = uebersicht.map((u) => ({
@@ -132,13 +184,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     ? `${k.offenePostenAnzahl} (${convertEuro(k.offenePostenBetrag)})`
                     : '—',
             ausgleichbar: k.ausgleichbar,
-            ausgeglichen: k.ausgeglichen
+            ausgeglichen: k.ausgeglichen,
+            verzichtet: k.verzichtet
         }));
     }
 
     const abrechnungHeaders = [
         { key: 'bezeichnung', value: 'Vertrag' },
-        { key: 'status', value: 'Status' }
+        { key: 'status', value: 'Status' },
+        { key: 'aktion', value: '' }
     ];
 
     $: abrechnungRows = (abschluss?.abrechnungen ?? []).map((a) => ({
@@ -146,7 +200,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bezeichnung: a.bezeichnung,
         resultatVorhanden: a.resultatVorhanden,
         abgesendet: a.abgesendet,
-        ausgeglichen: a.ausgeglichen
+        ausgeglichen: a.ausgeglichen,
+        verzichtet: a.verzichtet,
+        verzichtGrund: a.verzichtGrund
     }));
 
     const zeigeKonto = (e: CustomEvent<DataTableRow>) =>
@@ -206,7 +262,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 >
                     <svelte:fragment slot="title">
                         Betriebskostenabrechnungen ({abschluss.abrechnungenFertig}/{abschluss.abrechnungenGesamt}
-                        abgesendet)
+                        erledigt)
                         {#if abschluss.abrechnungenFertig < abschluss.abrechnungenGesamt}
                             <Tag type="red" style="margin-left: 0.5rem;">
                                 {abschluss.abrechnungenGesamt -
@@ -231,7 +287,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             >
                                 <svelte:fragment slot="cell" let:row let:cell>
                                     {#if cell.key === 'status'}
-                                        {#if row.abgesendet}
+                                        {#if row.verzichtet}
+                                            <Tag
+                                                size="sm"
+                                                type="teal"
+                                                title={row.verzichtGrund ?? ''}
+                                                >Nicht erforderlich</Tag
+                                            >
+                                        {:else if row.abgesendet}
                                             <Tag size="sm" type="green"
                                                 >Abgesendet</Tag
                                             >
@@ -250,6 +313,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                             >
                                         {:else}
                                             <Tag size="sm" type="red">Fehlt</Tag
+                                            >
+                                        {/if}
+                                    {:else if cell.key === 'aktion'}
+                                        {#if row.verzichtet}
+                                            <Button
+                                                size="small"
+                                                kind="ghost"
+                                                on:click={(e) => {
+                                                    e.stopPropagation();
+                                                    verzichtAufheben(
+                                                        Number(row.id)
+                                                    );
+                                                }}>Verzicht aufheben</Button
+                                            >
+                                        {:else if !row.abgesendet}
+                                            <Button
+                                                size="small"
+                                                kind="ghost"
+                                                on:click={(e) => {
+                                                    e.stopPropagation();
+                                                    oeffneVerzichtDialog(
+                                                        Number(row.id),
+                                                        String(row.bezeichnung)
+                                                    );
+                                                }}
+                                                >Keine Abrechnung nötig</Button
                                             >
                                         {/if}
                                     {:else}
@@ -291,6 +380,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                             <Tag size="sm" type="cool-gray"
                                                 >Summenkonto</Tag
                                             >
+                                        {:else if row.verzichtet}
+                                            <Tag size="sm" type="teal"
+                                                >Verzichtet</Tag
+                                            >
                                         {:else if row.ausgeglichen}
                                             <Tag size="sm" type="green"
                                                 >Ausgeglichen</Tag
@@ -320,3 +413,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     {/if}
 </Content>
+
+<Modal
+    bind:open={verzichtModalOpen}
+    modalHeading="Keine Abrechnung erforderlich"
+    primaryButtonText="Verzicht festhalten"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={!verzichtGrund.trim()}
+    on:click:button--secondary={() => (verzichtModalOpen = false)}
+    on:submit={bestaetigeVerzicht}
+>
+    <p style="margin-bottom: 1rem;">
+        Für <strong>{verzichtBezeichnung}</strong> wird für das Jahr
+        {selectedJahr} bewusst keine Betriebskostenabrechnung erstellt. Es wird
+        nichts gebucht — der Verzicht wird nur dokumentiert.
+    </p>
+    <TextArea
+        labelText="Grund (Pflicht)"
+        placeholder="z.B. Bestandsübernahme, Zeitraum vor Programmeinführung, kein Vorschuss vereinnahmt …"
+        bind:value={verzichtGrund}
+    />
+</Modal>

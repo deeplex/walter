@@ -115,6 +115,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
     public class MietZeileInfo
     {
         public DateOnly Buchungsdatum { get; init; }
+        /// <summary>Abrechnungs-/Buchungsjahr des Satzes (maßgeblich für die Zuordnung).</summary>
+        public int Buchungsjahr { get; init; }
         public string Beschreibung { get; init; } = "";
         public bool IstSoll { get; init; }
         public decimal Betrag { get; init; }

@@ -141,6 +141,32 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task Delete_entfernt_auch_Eigenanteil_auf_AufwandsKonto()
+        {
+            var ctx = TestUtils.GetContext();
+            var (vertrag, _, rechnung, _, _) = Seed(ctx);
+
+            // Zusätzliche Eigenanteil-Verteilzeile (Leerstand) auf dem AufwandsKonto der Wohnung.
+            rechnung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 200m)
+            {
+                Buchungssatz = rechnung,
+                Buchungskonto = vertrag.Wohnung.AufwandsKonto
+            });
+            ctx.SaveChanges();
+
+            await Service(ctx).DeleteAsync([vertrag.Wohnung.WohnungId], Jahr);
+
+            // Rechnung bleibt, aber BEIDE Verteil-Zeilen (Vertrag-NK + Eigenanteil) sind weg.
+            var verbleibend = await ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .SingleAsync(s => s.BuchungssatzId == rechnung.BuchungssatzId);
+            verbleibend.Buchungszeilen.Should().ContainSingle()
+                .Which.SollHaben.Should().Be(SollHaben.Haben);
+            verbleibend.Buchungszeilen.Should().NotContain(z =>
+                z.Buchungskonto.BuchungskontoId == vertrag.Wohnung.AufwandsKonto.BuchungskontoId);
+        }
+
+        [Fact]
         public async Task Delete_ist_bei_abgesendetem_resultat_gesperrt()
         {
             var ctx = TestUtils.GetContext();

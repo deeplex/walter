@@ -16,7 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import { Button, Row, Tile } from 'carbon-components-svelte';
+    import {
+        Button,
+        InlineNotification,
+        Row,
+        Tile
+    } from 'carbon-components-svelte';
 
     export let hatHinweise = false;
     export let fehlendeBuchungen = 0;
@@ -31,6 +36,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let alleVertraegeGebuchtUndKorrekt = false;
     export let downloadModusText = 'ENTWURF';
     export let downloadFormat: 'pdf' | 'docx' = 'pdf';
+    /** Keine Betriebskosten im Jahr erfasst → es gibt nichts zu buchen. */
+    export let nichtsAbzurechnen = false;
+    /** Harte Fehler (z.B. fehlender Zählerstand) → Buchen gesperrt. */
+    export let fehler: string[] = [];
 
     const dispatch = createEventDispatcher<{
         download: undefined;
@@ -43,6 +52,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Tile>
     <h4>Hinweise</h4>
+
+    {#if fehler.length > 0}
+        <InlineNotification
+            kind="error"
+            lowContrast
+            hideCloseButton
+            title="Abrechnung nicht buchbar:"
+            style="margin-bottom: 1rem;"
+        >
+            <div slot="subtitle">
+                <ul style="margin: 0.25rem 0 0 1.1rem;">
+                    {#each fehler as f}
+                        <li style="margin: 0.15rem 0;">{f.replace(/^.*?Fehler:\s*/, '')}</li>
+                    {/each}
+                </ul>
+            </div>
+        </InlineNotification>
+    {/if}
+
+    {#if nichtsAbzurechnen}
+        <InlineNotification
+            kind="info"
+            lowContrast
+            hideCloseButton
+            title="Nichts abzurechnen:"
+            subtitle="Für dieses Jahr sind keine Betriebskosten erfasst — es gibt nichts zu buchen. Falls für diesen Zeitraum bewusst nicht abgerechnet wird, kannst du in der Jahresabschlusskontrolle einen Abrechnungsverzicht setzen."
+            style="margin-bottom: 1rem;"
+        />
+    {/if}
 
     {#if hatHinweise}
         <p style="margin: 0.2rem 0; color: var(--cds-text-primary);">
@@ -125,8 +163,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         <Button
             kind="danger"
-            disabled={selectedWohnungIdsFlat.length === 0 || bookLoading}
+            disabled={selectedWohnungIdsFlat.length === 0 ||
+                bookLoading ||
+                nichtsAbzurechnen ||
+                fehler.length > 0}
             on:click={onBook}
+            title={fehler.length > 0
+                ? 'Fehler in der Abrechnung — Buchen gesperrt.'
+                : nichtsAbzurechnen
+                  ? 'Keine Betriebskosten erfasst — nichts zu buchen.'
+                  : undefined}
         >
             Buchungen erstellen
         </Button>

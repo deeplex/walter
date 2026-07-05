@@ -180,7 +180,56 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             umlage.NkVerrechnungsKonto.Buchungszeilen.Add(zeile);
         }
 
+        private static Zaehler ZaehlerMitStaenden(Zaehlertyp typ, Wohnung w,
+            params (DateOnly d, decimal s)[] staende)
+        {
+            var z = new Zaehler("Z", typ) { Wohnung = w };
+            foreach (var (d, s) in staende)
+                z.Staende.Add(new Zaehlerstand(d, s) { Zaehler = z });
+            return z;
+        }
+
         // ── Mieterwechsel ─────────────────────────────────────────────────────
+
+        [Fact]
+        public void Verbrauch_FehlenderEinzugsstand_NachmieterRestBleibtBeimEigenanteil_UndFehler()
+        {
+            // W1: MieterA 01.01.–31.07. (Auszugsstand vorhanden), danach Leerstand,
+            //     dann Nachmieter MieterB ab 15.10. OHNE Einzugsstand.
+            // W2: MieterC ganzjährig.
+            // W1-Zähler: Ganzjahr 73, MieterA (bis 31.07.) 44 → Rest 29 nicht messbar.
+            // W2-Zähler: 130. Gesamt 203, Rechnung 203 € (1 €/m³).
+            var w1 = MakeWohnung("W1");
+            var w2 = MakeWohnung("W2");
+            var mieterA = MakeVertrag(w1, start: new DateOnly(2020, 1, 1), end: new DateOnly(2020, 7, 31));
+            var mieterB = MakeVertrag(w1, start: new DateOnly(2020, 10, 15));
+            MakeVertrag(w2);
+
+            var umlage = MakeUmlage(Umlageschluessel.NachVerbrauch,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.AddRange([w1, w2]);
+            umlage.Zaehler.Add(ZaehlerMitStaenden(Zaehlertyp.Kaltwasser, w1,
+                (new DateOnly(2019, 12, 31), 0), (new DateOnly(2020, 7, 31), 44), (new DateOnly(2020, 12, 31), 73)));
+            umlage.Zaehler.Add(ZaehlerMitStaenden(Zaehlertyp.Kaltwasser, w2,
+                (new DateOnly(2019, 12, 31), 0), (new DateOnly(2020, 12, 31), 130)));
+            AddBkForderung(umlage, 203m, new DateOnly(2020, 12, 31), 2020);
+
+            var einheit = ComputeEinheiten([umlage], 2020).Single();
+            var plan = einheit.Rechnungsplaene.Single(p => !p.IstStrompauschale);
+
+            decimal AnteilVon(Vertrag v) => plan.Anteile
+                .Where(a => a.Partei.Vertrag == v).Sum(a => a.Betrag);
+
+            // MieterA zahlt NUR seinen gemessenen Verbrauch (44), NICHT 44+29.
+            AnteilVon(mieterA).Should().BeApproximately(44m, 0.5m);
+            // Der nicht messbare Rest (29) landet beim Eigenanteil (Vertrag == null).
+            plan.Anteile.Where(a => a.Partei.Vertrag is null).Sum(a => a.Betrag)
+                .Should().BeApproximately(29m, 0.5m);
+            // Summe bleibt vollständig verteilt.
+            plan.Anteile.Sum(a => a.Betrag).Should().BeApproximately(203m, 0.02m);
+            // Fehlender Einzugsstand für den Nachmieter wird als Fehler gemeldet.
+            plan.Warnungen.Should().Contain(w => w.Contains("Fehler:"));
+        }
 
         [Fact]
         public void Mieterwechsel_BetragWirdNachZeitanteilAufgeteilt()

@@ -16,6 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -141,6 +142,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 if (entry.Wohnung == null)
                 {
                     throw new ArgumentException("entry has no Wohnung.");
+                }
+
+                // Abrechnungsschutz: Eine geänderte Vertragsdauer (Ende) verfälscht die
+                // Zeitanteile in allen betroffenen Jahren. Ist eines davon bereits gebucht
+                // abgerechnet, wird blockiert (erst Abrechnung zurücknehmen).
+                if (entity.Ende != entry.Ende)
+                {
+                    var abgerechnet = await AbrechnungsschutzService
+                        .AbgerechneteJahreVertrag(Ctx, id);
+                    var betroffen = AbrechnungsschutzService.BetroffeneAbgerechneteJahre(
+                        abgerechnet,
+                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Ende, entry.Ende));
+                    if (betroffen.Count > 0)
+                        return new ConflictObjectResult(
+                            AbrechnungsschutzService.Sperrmeldung(betroffen));
                 }
 
                 var beginn = await Ctx.VertragVersionen
