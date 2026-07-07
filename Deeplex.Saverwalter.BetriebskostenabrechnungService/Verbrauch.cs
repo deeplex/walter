@@ -27,13 +27,22 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Verbrauch(Zaehler zaehler, DateOnly beginn, DateOnly ende, List<Note> notes)
         {
             Zaehler = zaehler;
+
+            // Zähler, der schon außer Betrieb war oder dessen erster Stand noch nach
+            // dem Zeitraum liegt, war im Zeitraum gar nicht aktiv — dafür fehlende
+            // Stände zu bemängeln wäre falscher Alarm.
+            var zaehlerAusserhalbZeitraum =
+                (zaehler.Ende.HasValue && zaehler.Ende.Value < beginn)
+                || (zaehler.Staende.Count > 0 && zaehler.Staende.Min(s => s.Datum) > ende);
+
             var endstand = GetZaehlerEndStand(zaehler, ende);
             var anfangsstand = GetZaehlerAnfangsStand(zaehler, beginn);
             if (anfangsstand == null)
             {
-                notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
-                    $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
-                    Severity.Error);
+                if (!zaehlerAusserhalbZeitraum)
+                    notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
+                        $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
+                        Severity.Error);
             }
             else
             {
@@ -42,9 +51,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (endstand == null)
             {
-                notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
-                    $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
-                    Severity.Error);
+                if (!zaehlerAusserhalbZeitraum)
+                    notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
+                        $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
+                        Severity.Error);
             }
             else
             {

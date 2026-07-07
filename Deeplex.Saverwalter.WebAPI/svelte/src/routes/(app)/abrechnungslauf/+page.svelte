@@ -455,16 +455,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {/if}
 
     {#if result}
-        <p style="margin-bottom: 1rem; color: var(--cds-text-secondary);">
-            {result.gruppen
-                .flatMap((g) => g.resultate)
-                .filter((r) => r.gebuchterSaldo == null).length} neu · {result.gruppen
-                .flatMap((g) => g.resultate)
-                .filter((r) => r.gebuchterSaldo != null).length}
-            bereits gebucht
-            {#if result.warnungen.length > 0}· {result.warnungen.length} Warnungen{/if}
-        </p>
-
         {#each result.gruppen as gruppe}
             <WalterAbrechnungslaufGruppe
                 {gruppe}

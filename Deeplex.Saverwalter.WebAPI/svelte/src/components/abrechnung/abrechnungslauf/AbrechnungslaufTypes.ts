@@ -124,6 +124,7 @@ export type AbrechnungsresultatInfo = {
     personenZeitanteile: PersonenZeitanteilInfo[];
     gebuchterSaldo: number | null;
     abgesendet: boolean | null;
+    verzichtet: boolean;
 };
 
 export type AbrechnungslaufGruppeResult = {

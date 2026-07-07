@@ -188,6 +188,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// </summary>
         public decimal? GebuchterSaldo { get; set; }
         public bool? Abgesendet { get; init; }
+        /// <summary>Abrechnungsverzicht für diesen Vertrag/Jahr dokumentiert.</summary>
+        public bool Verzichtet { get; init; }
     }
 
     /// <summary>Vollständige Vorschau-/Buchungsantwort über mehrere Gruppen hinweg.</summary>

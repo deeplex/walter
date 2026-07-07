@@ -113,7 +113,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var warnungen = new List<string>();
             var einheitenInfos = BuildAbrechnungseinheitenInfos(einheiten, warnungen, prevYearBetragByUmlage, jahr);
 
-            var resultate = BuildResultate(einheiten, jahr);
+            var verzichtVertragIds = (await _ctx.Abrechnungsverzichte
+                .Where(v => v.Jahr == jahr && selectedGruppe.WohnungIds.Contains(v.Vertrag.Wohnung.WohnungId))
+                .Select(v => v.Vertrag.VertragId)
+                .ToListAsync())
+                .ToHashSet();
+
+            var resultate = BuildResultate(einheiten, jahr, verzichtVertragIds);
 
             var preview = new AbrechnungslaufGruppeResult
             {
@@ -624,7 +630,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// </summary>
         private static List<AbrechnungsresultatInfo> BuildResultate(
             List<NkEinheit> einheiten,
-            int jahr)
+            int jahr,
+            HashSet<int> verzichtVertragIds)
         {
             return [.. einheiten
                 .SelectMany(e => e.Rechnungsplaene)
@@ -698,6 +705,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         PersonenZeitanteile = personenZeitanteile,
                         GebuchterSaldo = info?.GebuchterSaldo,
                         Abgesendet = info?.ExistingResultat?.Abgesendet,
+                        Verzichtet = partei.Vertrag is { } v3 && verzichtVertragIds.Contains(v3.VertragId),
                     };
                 })];
         }

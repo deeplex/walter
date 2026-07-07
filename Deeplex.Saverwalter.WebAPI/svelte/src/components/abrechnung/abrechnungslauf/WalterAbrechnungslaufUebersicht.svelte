@@ -32,7 +32,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     const resultatStatus = (r: AbrechnungsresultatInfo): string => {
-        if (r.gebuchterSaldo === null) return 'Nicht gebucht';
+        if (r.gebuchterSaldo === null)
+            return r.verzichtet ? 'Verzichtet' : 'Nicht gebucht';
         if (Math.abs(r.gebuchterSaldo - r.saldo) > 0.005)
             return `Gebucht: ${euro(r.gebuchterSaldo)}`;
         if (r.abgesendet) return 'Abgesendet';
