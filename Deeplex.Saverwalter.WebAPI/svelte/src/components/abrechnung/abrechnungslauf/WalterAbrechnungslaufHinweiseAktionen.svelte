@@ -94,15 +94,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </p>
 
         {#if warnungenZaehlerstaende.length > 0}
-            <p style="margin: 0.2rem 0; color: var(--cds-text-primary);">
+            <p style="margin: 0.5rem 0 0.2rem; color: var(--cds-text-primary);">
                 Zählerstände: {warnungenZaehlerstaende.length} Hinweis(e)
             </p>
+            <ul
+                style="margin: 0.1rem 0 0 1.25rem; color: var(--cds-text-secondary);"
+            >
+                {#each warnungenZaehlerstaende as warnung}
+                    <li style="margin: 0.15rem 0;">{warnung}</li>
+                {/each}
+            </ul>
         {/if}
 
         {#if warnungenMieten.length > 0}
-            <p style="margin: 0.2rem 0; color: var(--cds-text-primary);">
+            <p style="margin: 0.5rem 0 0.2rem; color: var(--cds-text-primary);">
                 Mieten: {warnungenMieten.length} Hinweis(e)
             </p>
+            <ul
+                style="margin: 0.1rem 0 0 1.25rem; color: var(--cds-text-secondary);"
+            >
+                {#each warnungenMieten as warnung}
+                    <li style="margin: 0.15rem 0;">{warnung}</li>
+                {/each}
+            </ul>
         {/if}
 
         {#if warnungenSonstige.length > 0}

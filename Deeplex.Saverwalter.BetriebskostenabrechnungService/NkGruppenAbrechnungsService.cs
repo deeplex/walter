@@ -66,7 +66,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             public IReadOnlyList<Umlage> Umlagen { get; init; } = [];
             public IReadOnlyList<NkPartei> Parteien { get; init; } = [];
             public IReadOnlyList<NkRechnungsplan> Rechnungsplaene { get; init; } = [];
+            public IReadOnlyList<NkStrompauschaleInfo> Strompauschalen { get; init; } = [];
         }
+
+        /// <summary>
+        /// Eine Strompauschale-Verrechnung (HeizkostenV): <see cref="Delta"/> wird vom
+        /// Allgemeinstrom/Betriebsstrom abgezogen und auf die Heizkosten umgelegt.
+        /// </summary>
+        public sealed record NkStrompauschaleInfo(
+            int HeizUmlageId,
+            string HeizBezeichnung,
+            int BetriebsstromUmlageId,
+            string BetriebsstromBezeichnung,
+            decimal Delta,
+            IReadOnlyList<string> Warnungen);
 
         /// <summary>
         /// Finanzielle Kennzahlen eines Vertrags im Abrechnungsjahr.
@@ -290,14 +303,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr,
                 gruppenVerrechnungsKontoIds);
 
-            var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr, abrechnungsende);
+            var (rechnungsplaene, strompauschalen) = BuildRechnungsplaene(
+                umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr, abrechnungsende);
 
             return new NkEinheit
             {
                 Bezeichnung = wohnungen.GetWohnungenBezeichnung(),
                 Umlagen = umlagenInGruppe,
                 Parteien = parteien,
-                Rechnungsplaene = rechnungsplaene
+                Rechnungsplaene = rechnungsplaene,
+                Strompauschalen = strompauschalen
             };
         }
 
@@ -566,7 +581,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         /// Alle Parteien (Mieter + Eigenanteil) werden einheitlich behandelt.
         /// HKVO-Umlagen (§7/§8/§9) erhalten eine spezielle Verteilung.
         /// </summary>
-        private static List<NkRechnungsplan> BuildRechnungsplaene(
+        private static (List<NkRechnungsplan> Plaene, List<NkStrompauschaleInfo> Strompauschalen) BuildRechnungsplaene(
             List<Umlage> umlagen,
             List<NkPartei> parteien,
             DateOnly beginn,
@@ -688,9 +703,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }
             }
 
-            ApplyStrompauschale(umlagen, parteien, result, jahr);
+            var strompauschalen = ApplyStrompauschale(umlagen, result, jahr);
 
-            return result;
+            return (result, strompauschalen);
         }
 
         /// <summary>Beschreibungs-Marker der Strompauschale-Umbuchung (HeizkostenV).</summary>
@@ -718,11 +733,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         /// Haben Heizkosten-NkVK). Heizkosten- und Betriebsstrom-Umlage müssen dieselben
         /// Wohnungen (= dieselbe Einheit) haben.
         /// </summary>
-        private static void ApplyStrompauschale(
-            List<Umlage> umlagen, List<NkPartei> parteien, List<NkRechnungsplan> plaene, int jahr)
+        private static List<NkStrompauschaleInfo> ApplyStrompauschale(
+            List<Umlage> umlagen, List<NkRechnungsplan> plaene, int jahr)
         {
             var endeJahr = new DateOnly(jahr, 12, 31);
             var umlageIds = umlagen.Select(u => u.UmlageId).ToHashSet();
+            var strompauschalen = new List<NkStrompauschaleInfo>();
 
             foreach (var heiz in umlagen)
             {
@@ -756,6 +772,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         Warnungen = [$"Strompauschale kann nicht angewandt werden: '{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}."],
                         IstStrompauschale = true
                     });
+                    strompauschalen.Add(new NkStrompauschaleInfo(
+                        heiz.UmlageId, heiz.Typ.Bezeichnung,
+                        betrId, hkvo.Betriebsstrom.Typ.Bezeichnung,
+                        0,
+                        [$"Strompauschale kann nicht angewandt werden: '{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}."]));
                     continue;
                 }
 
@@ -827,7 +848,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     Warnungen = warnungen,
                     IstStrompauschale = true
                 });
+
+                strompauschalen.Add(new NkStrompauschaleInfo(
+                    heiz.UmlageId, heiz.Typ.Bezeichnung,
+                    betrId, hkvo.Betriebsstrom.Typ.Bezeichnung,
+                    delta, warnungen));
             }
+
+            return strompauschalen;
         }
 
         private static NkRechnungsplan CopyPlanMitAnteilen(

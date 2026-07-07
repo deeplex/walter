@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type {
         NkZeileInfo,
         P9DetailsInfo,
+        StrompauschaleInfo,
         ZaehlerVerbrauchInfo
     } from './AbrechnungslaufTypes';
     import { hkvoKosten } from './AbrechnungslaufTypes';
@@ -36,6 +37,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let nutzungBis: string;
     export let nutzungstage: number;
     export let abrechnungstage: number;
+    export let strompauschalen: StrompauschaleInfo[] = [];
 
     const formatDate = (d: string) => {
         const [y, m, day] = d.split('-');
@@ -89,15 +91,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Dedupliziert nach umlageId: eine HKVO-Zeile pro Rechnung, aber §9(2) einmal pro Umlage zeigen
     const gezeigteUmlageIds = new Set<number>();
 
-    const betragWarm = hkvoZeilen.reduce(
-        (s, hz) =>
-            s +
-            hkvoKosten(
-                hz.zeile,
-                hz.zeile.anteile.find((a) => a.vertragId === vertragId)!
-            ),
-        0
-    );
+    const betragWarm = hkvoZeilen.reduce((s, hz) => s + hz.meinBetrag, 0);
 </script>
 
 <div style="padding: 1rem 1rem 0;">
@@ -425,6 +419,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             hz.meinBetrag
         )}
     </p>
+    {#each strompauschalen.filter((sp) => sp.heizUmlageId === hz.zeile.umlageId) as sp}
+        <p
+            style="padding: 0 1rem 0.5rem; color: var(--cds-text-secondary); font-size: 0.875rem;"
+        >
+            davon {convertEuro(sp.delta)} aus {sp.betriebsstromBezeichnung} verrechnet
+        </p>
+        {#each sp.warnungen as w}
+            <p
+                style="padding: 0 1rem 0.5rem; color: var(--cds-support-warning);"
+            >
+                {w}
+            </p>
+        {/each}
+    {/each}
 {/each}
 
 <p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">

@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             public decimal Saldovortrag { get; set; }
             /// <summary>Saldovortrag + SollJahr - HabenJahr.</summary>
             public decimal Endsaldo { get; set; }
-            /// <summary>Ungedeckte Soll-Zeilen bis einschließlich jahr (OPOS-Sicht zum Jahresende).</summary>
+            /// <summary>Ungedeckte Zeilen mit Buchungsjahr == jahr.</summary>
             public int OffenePostenAnzahl { get; set; }
             public decimal OffenePostenBetrag { get; set; }
             /// <summary>Nicht ausgleichbare Konten gelten immer als ausgeglichen (Summenkonten).</summary>
@@ -223,7 +223,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 {
                     v.MietBuchungskonto.BuchungskontoId,
                     v.NkBuchungskonto.BuchungskontoId,
-                    v.BkAbrechnungsKonto.BuchungskontoId
+                    v.BkAbrechnungsKonto.BuchungskontoId,
+                    v.ZahlungsKonto.BuchungskontoId,
+                    v.MietminderungsKonto.BuchungskontoId
                 })
                 .ToHashSet();
 
@@ -285,12 +287,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             }
 
             var offeneSoll = konto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr <= jahr)
+                .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr == jahr)
                 .Select(z => OffenerRest(z, daten.AusgleicheBySollZeile, a => a.HabenZeile.Betrag))
                 .Where(offen => offen > Epsilon)
                 .ToList();
             var offeneHaben = konto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr <= jahr)
+                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr == jahr)
                 .Select(z => OffenerRest(z, daten.AusgleicheByHabenZeile, a => a.SollZeile.Betrag))
                 .Where(offen => offen > Epsilon)
                 .ToList();

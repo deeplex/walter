@@ -107,9 +107,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
     $: neZeitanteil = anteilFaktorFuerSchluessel('n. NE');
 
-    $: alleZeilen = einheit.nkZeilen.filter(
-        (z) => z.istFehlend || z.anteile.some((a) => a.vertragId === vertragId)
-    );
+    $: alleZeilen = einheit.nkZeilen;
     $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
     $: hkvoZeilen = alleZeilen.filter((z) => z.para9_2 != null);
 
@@ -465,6 +463,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     >{cell.value}</button
                 >
             {/if}
+            {#each einheit.strompauschalen.filter((sp) => sp.betriebsstromUmlageId === row.umlageId) as sp}
+                <div
+                    style="font-size: 0.75rem; color: var(--cds-text-secondary);"
+                >
+                    → {convertEuro(sp.delta)} an {sp.heizBezeichnung} abgegeben
+                </div>
+            {/each}
         {:else if cell.key === 'schluessel'}
             <span title={schluesselLabel[cell.value] ?? cell.value}
                 >{cell.value}</span
@@ -496,5 +501,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         nutzungBis={bisInJahr}
         {nutzungstage}
         {abrechnungstage}
+        strompauschalen={einheit.strompauschalen}
     />
 {/if}

@@ -69,6 +69,15 @@ export type NkZeileInfo = {
     istFehlend: boolean;
 };
 
+export type StrompauschaleInfo = {
+    heizUmlageId: number;
+    heizBezeichnung: string;
+    betriebsstromUmlageId: number;
+    betriebsstromBezeichnung: string;
+    delta: number;
+    warnungen: string[];
+};
+
 export type AbrechnungseinheitInfo = {
     wohnungNamen: string;
     nkZeilen: NkZeileInfo[];
@@ -76,6 +85,7 @@ export type AbrechnungseinheitInfo = {
     gesamtNutzflaeche: number;
     gesamtNutzeinheit: number;
     gesamtMiteigentumsanteile: number;
+    strompauschalen: StrompauschaleInfo[];
 };
 
 export type MietZeileInfo = {

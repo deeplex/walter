@@ -714,7 +714,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             int jahr)
         {
             var einheitenByKey =
-                new Dictionary<string, (string Namen, List<NkZeileInfo> Zeilen, decimal GesamtWF, decimal GesamtNF, decimal GesamtNE, decimal GesamtMEA)>();
+                new Dictionary<string, (string Namen, List<NkZeileInfo> Zeilen, decimal GesamtWF, decimal GesamtNF, decimal GesamtNE, decimal GesamtMEA, List<StrompauschaleInfo> Strompauschalen)>();
 
             foreach (var einheit in einheiten)
             {
@@ -736,8 +736,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     var gNF = wohnungenInEinheit.Sum(w => w.VersionAt(abrechnungsEnde).Nutzflaeche);
                     var gNE = wohnungenInEinheit.Sum(w => (decimal)w.VersionAt(abrechnungsEnde).Nutzeinheit);
                     var gMEA = wohnungenInEinheit.Sum(w => w.VersionAt(abrechnungsEnde).Miteigentumsanteile);
-                    einheitenByKey[einheitKey] = (einheit.Bezeichnung, [], gWF, gNF, gNE, gMEA);
+                    einheitenByKey[einheitKey] = (einheit.Bezeichnung, [], gWF, gNF, gNE, gMEA, []);
                 }
+
+                einheitenByKey[einheitKey].Strompauschalen.AddRange(einheit.Strompauschalen.Select(sp =>
+                    new StrompauschaleInfo
+                    {
+                        HeizUmlageId = sp.HeizUmlageId,
+                        HeizBezeichnung = sp.HeizBezeichnung,
+                        BetriebsstromUmlageId = sp.BetriebsstromUmlageId,
+                        BetriebsstromBezeichnung = sp.BetriebsstromBezeichnung,
+                        Delta = sp.Delta,
+                        Warnungen = [.. sp.Warnungen]
+                    }));
 
                 // KontoId → Partei-Lookup für Merge (planned vs booked); nur Vertrags-Parteien.
                 var kontoIdToPartei = new Dictionary<int, NkPartei>();
@@ -964,6 +975,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     GesamtNutzflaeche = kvp.Value.GesamtNF,
                     GesamtNutzeinheit = kvp.Value.GesamtNE,
                     GesamtMiteigentumsanteile = kvp.Value.GesamtMEA,
+                    Strompauschalen = kvp.Value.Strompauschalen,
                 })];
         }
 

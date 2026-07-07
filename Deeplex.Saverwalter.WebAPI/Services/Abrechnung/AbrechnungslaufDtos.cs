@@ -100,6 +100,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public bool IstFehlend { get; init; }
     }
 
+    /// <summary>
+    /// Strompauschale-Verrechnung (HeizkostenV): <see cref="Delta"/> wird vom
+    /// Allgemeinstrom/Betriebsstrom abgezogen und auf die Heizkosten umgelegt.
+    /// </summary>
+    public class StrompauschaleInfo
+    {
+        public int HeizUmlageId { get; init; }
+        public string HeizBezeichnung { get; init; } = "";
+        public int BetriebsstromUmlageId { get; init; }
+        public string BetriebsstromBezeichnung { get; init; } = "";
+        public decimal Delta { get; init; }
+        public List<string> Warnungen { get; init; } = [];
+    }
+
     /// <summary>Zusammenfassung je Wohnungskombination (Umlage-Einheit).</summary>
     public class AbrechnungseinheitInfo
     {
@@ -109,6 +123,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public decimal GesamtNutzflaeche { get; init; }
         public decimal GesamtNutzeinheit { get; init; }
         public decimal GesamtMiteigentumsanteile { get; init; }
+        public List<StrompauschaleInfo> Strompauschalen { get; init; } = [];
     }
 
     /// <summary>Miet-Buchungszeile (Soll oder Haben) auf dem MietBuchungskonto eines Vertrags.</summary>

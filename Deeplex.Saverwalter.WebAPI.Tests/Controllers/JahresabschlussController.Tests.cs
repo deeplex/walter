@@ -159,7 +159,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task Offene_forderung_traegt_sich_ins_folgejahr_vor()
+        public async Task Offene_forderung_ist_nur_im_eigenen_buchungsjahr_offen()
         {
             var ctx = TestUtils.GetContext();
             var (manager, managed, _) = Seed(ctx);
@@ -177,11 +177,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             abschluss2024.KontenOffen.Should().Be(1);
             abschluss2024.JahrAbgeschlossen.Should().BeFalse();
 
+            // Saldovortrag/Endsaldo tragen den unbezahlten Betrag weiter (echte
+            // Kontostände) — OffenePostenAnzahl/Ausgeglichen sind aber strikt auf das
+            // Buchungsjahr der jeweiligen Zeile begrenzt und zählen die alte 2024er
+            // Forderung in 2025 nicht erneut als offenen Punkt.
             var konto2025 = abschluss2025.Konten.Single(k => k.Funktion == "Mietforderungen");
             konto2025.Saldovortrag.Should().Be(500m);
             konto2025.SollJahr.Should().Be(0m);
             konto2025.Endsaldo.Should().Be(500m);
-            konto2025.Ausgeglichen.Should().BeFalse();
+            konto2025.OffenePostenAnzahl.Should().Be(0);
+            konto2025.Ausgeglichen.Should().BeTrue();
         }
 
         [Fact]
