@@ -22,13 +22,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class AbrechnungsschutzServiceTests
     {
         [Theory]
-        [InlineData(6, new[] { 2024 })]        // Mitte des Jahres → nur dieses Jahr
-        [InlineData(12, new[] { 2024, 2025 })] // Dezember → auch Anfangsstand des Folgejahres
-        [InlineData(1, new[] { 2024, 2023 })]  // Januar → auch Endstand-Ersatz des Vorjahres
-        public void StandBetroffeneJahre_BeachtetJahresgrenzen(int monat, int[] erwartet)
+        [InlineData(6, 15, new[] { 2024 })]        // Mitte des Jahres → nur dieses Jahr
+        [InlineData(12, 15, new[] { 2024 })]       // früher Dezember → noch nicht im Anfangsstand-Fenster
+        [InlineData(12, 31, new[] { 2024, 2025 })] // später Dezember → auch Anfangsstand des Folgejahres
+        [InlineData(1, 1, new[] { 2024 })]         // 01.01. → nur eigenes Jahr (nie Endstand des Vorjahres)
+        public void StandBetroffeneJahre_BeachtetJahresgrenzen(int monat, int tag, int[] erwartet)
         {
             var jahre = AbrechnungsschutzService
-                .StandBetroffeneJahre(new DateOnly(2024, monat, 15)).ToHashSet();
+                .StandBetroffeneJahre(new DateOnly(2024, monat, tag)).ToHashSet();
             jahre.Should().BeEquivalentTo(erwartet);
         }
 
@@ -42,6 +43,48 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             // Änderung nur ab 2025 → nichts betroffen.
             AbrechnungsschutzService.BetroffeneAbgerechneteJahre(abgerechnet, 2025)
                 .Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Grenzverschiebung_BetrifftNurBereichZwischenAltUndNeu()
+        {
+            var abgerechnet = new HashSet<int> { 2023, 2024 };
+            // Beginn 15.09.2023 → 01.10.2023: nur 2023 betroffen, 2024 bleibt unberührt.
+            AbrechnungsschutzService.BetroffeneJahreGrenzverschiebung(
+                abgerechnet, new DateOnly(2023, 9, 15), new DateOnly(2023, 10, 1))
+                .Should().Equal(2023);
+            // Beginn nach vorne 2024 → 2022: Bereich 2022–2024 → nur abgerechnete 2023, 2024.
+            AbrechnungsschutzService.BetroffeneJahreGrenzverschiebung(
+                abgerechnet, new DateOnly(2024, 3, 1), new DateOnly(2022, 3, 1))
+                .Should().Equal(2023, 2024);
+        }
+
+        [Fact]
+        public void Grenzverschiebung_OffeneSeiteWirktBisInDieZukunft()
+        {
+            var abgerechnet = new HashSet<int> { 2023, 2024, 2025 };
+            // Ende von unbefristet (null) auf 2023: ab 2023 fällt der Mieter weg → 2023–2025.
+            AbrechnungsschutzService.BetroffeneJahreGrenzverschiebung(
+                abgerechnet, null, new DateOnly(2023, 12, 31))
+                .Should().Equal(2023, 2024, 2025);
+            // Ende 2024 → 2025: nur der Bereich 2024–2025.
+            AbrechnungsschutzService.BetroffeneJahreGrenzverschiebung(
+                abgerechnet, new DateOnly(2024, 6, 1), new DateOnly(2025, 6, 1))
+                .Should().Equal(2024, 2025);
+        }
+
+        [Fact]
+        public void Versionsaenderung_WertWirktVorwaertsGrenzeNurImBereich()
+        {
+            var abgerechnet = new HashSet<int> { 2023, 2024, 2025 };
+            // Nur Beginn 15.09.2023 → 01.10.2023 verschoben (kein Wert): nur 2023.
+            AbrechnungsschutzService.BetroffeneJahreVersionsaenderung(
+                abgerechnet, new DateOnly(2023, 9, 15), new DateOnly(2023, 10, 1), wertGeaendert: false)
+                .Should().Equal(2023);
+            // Wertänderung (z.B. Personenzahl) ab Versionsbeginn 2023 → 2023, 2024, 2025.
+            AbrechnungsschutzService.BetroffeneJahreVersionsaenderung(
+                abgerechnet, new DateOnly(2023, 9, 15), new DateOnly(2023, 9, 15), wertGeaendert: true)
+                .Should().Equal(2023, 2024, 2025);
         }
 
         [Fact]

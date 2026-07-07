@@ -17,11 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterComboBox,
+        WalterMultiSelect,
         WalterDatePicker
     } from '$walter/components';
     import WalterSlider from '$walter/components/elements/WalterSlider.svelte';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterHKVOEntry } from '$walter/lib';
+    import type { WalterHKVOEntry, WalterSelectionEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterHKVOEntry> = {};
@@ -29,9 +30,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: readonly = entry?.permissions?.update === false;
 
     const selectableUmlagen = walter_selection.umlagen(fetchImpl!);
-    $: selectableWaermezaehler = entry.umlageId !== undefined
-        ? walter_selection.waermezaehler(entry.umlageId, fetchImpl!)
-        : Promise.resolve([]);
+    // Nur nachladen, wenn sich die Umlage ändert — NICHT bei jeder Auswahländerung.
+    // (Sonst invalidiert die MultiSelect via bind:value das entry, das reaktive
+    //  Statement fetcht neu, die MultiSelect feuert erneut → Endlosschleife.)
+    let selectableWaermezaehler: Promise<WalterSelectionEntry[]> = Promise.resolve([]);
+    let letzteUmlageId: number | undefined;
+    $: if (entry.umlageId !== letzteUmlageId) {
+        letzteUmlageId = entry.umlageId;
+        selectableWaermezaehler = entry.umlageId !== undefined
+            ? walter_selection.waermezaehler(entry.umlageId, fetchImpl!)
+            : Promise.resolve([]);
+    }
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(fetchImpl!);
 </script>
 
@@ -52,11 +61,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             bind:value={entry.stromrechnung}
             titleText="Stromrechnung (Betriebsstrom)"
         />
-        <WalterComboBox
-            {readonly}
+        <WalterMultiSelect
+            disabled={readonly}
             entries={selectableWaermezaehler}
             bind:value={entry.allgemeinWaerme}
-            titleText="AllgemeinWärme-Zähler (§9 Abs. 2)"
+            titleText="AllgemeinWärme-Zähler für Q (§9 Abs. 2)"
         />
     </Row>
     <Row>

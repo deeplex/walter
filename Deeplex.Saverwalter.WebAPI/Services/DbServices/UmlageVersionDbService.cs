@@ -110,9 +110,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 var neuerSchluessel = (Umlageschluessel)entry.Schluessel.Id;
                 if (entity.Beginn != entry.Beginn || entity.Schluessel != neuerSchluessel)
                 {
-                    var sperre = await AbrechnungsschutzService.SperreUmlage(
-                        Ctx, entity.Umlage.UmlageId,
-                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    var sperre = await AbrechnungsschutzService.SperreUmlageVersion(
+                        Ctx, entity.Umlage.UmlageId, entity.Beginn, entry.Beginn,
+                        wertGeaendert: entity.Schluessel != neuerSchluessel);
                     if (sperre != null) return new ConflictObjectResult(sperre);
                 }
 

@@ -321,12 +321,13 @@ namespace Deeplex.Saverwalter.PrintService
         /// </summary>
         public static HkvoP9_2Berechnung? Compute(HKVO hkvo, IEnumerable<Zaehler> wohnungWWZaehler, int jahr, List<Note> notes)
         {
-            if (hkvo.AllgemeinWaerme == null) return null;
+            if (hkvo.AllgemeinWaermeZaehler.Count == 0) return null;
 
             var beginn = new DateOnly(jahr, 1, 1);
             var ende = new DateOnly(jahr, 12, 31);
 
-            var Q = new Verbrauch(hkvo.AllgemeinWaerme, beginn, ende, notes).Delta;
+            // Q = Summe der Verbräuche aller Allgemein-Wärmezähler (mehrere möglich).
+            var Q = hkvo.AllgemeinWaermeZaehler.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
             var V = wohnungWWZaehler.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
 
             if (Q <= 0 || V <= 0) return null;

@@ -151,8 +151,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 // Ein geändertes Zähler-Ende verschiebt, welche Jahre den Zähler nutzen.
                 if (entity.Ende != entry.Ende)
                 {
-                    var sperre = await AbrechnungsschutzService.SperreZaehlerAbJahr(
-                        Ctx, id, AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Ende, entry.Ende));
+                    var sperre = await AbrechnungsschutzService.SperreZaehlerEnde(
+                        Ctx, id, entity.Ende, entry.Ende);
                     if (sperre != null) return new ConflictObjectResult(sperre);
                 }
 

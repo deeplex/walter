@@ -112,9 +112,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 // ein bereits abgerechnetes Jahr, wird gesperrt. (Grundmiete/NK-VZ nicht.)
                 if (entity.Beginn != entry.Beginn || entity.Personenzahl != entry.Personenzahl)
                 {
-                    var sperre = await AbrechnungsschutzService.SperreVertrag(
-                        Ctx, entity.Vertrag.VertragId,
-                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    var sperre = await AbrechnungsschutzService.SperreVertragVersion(
+                        Ctx, entity.Vertrag.VertragId, entity.Beginn, entry.Beginn,
+                        wertGeaendert: entity.Personenzahl != entry.Personenzahl);
                     if (sperre != null) return new ConflictObjectResult(sperre);
                 }
 

@@ -192,6 +192,27 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         // ── Mieterwechsel ─────────────────────────────────────────────────────
 
         [Fact]
+        public void Verbrauch_ZaehlerExistierteImJahrNochNicht_KeinFehlenderStandFehler()
+        {
+            // Ganzjähriger Mieter 2020. Der Wasserzähler hat seinen ERSTEN Stand erst 2021
+            // (nach Abrechnungsende) — existierte 2020 also noch nicht. Kein Fehler.
+            var w1 = MakeWohnung("W1");
+            MakeVertrag(w1);
+            var umlage = MakeUmlage(Umlageschluessel.NachVerbrauch,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.Wohnungen.Add(w1);
+            umlage.Zaehler.Add(ZaehlerMitStaenden(Zaehlertyp.Kaltwasser, w1,
+                (new DateOnly(2021, 3, 1), 0), (new DateOnly(2021, 12, 31), 50)));
+            AddBkForderung(umlage, 100m, new DateOnly(2020, 12, 31), 2020);
+
+            var plaene = ComputeEinheiten([umlage], 2020).Single().Rechnungsplaene
+                .Where(p => !p.IstStrompauschale).ToList();
+
+            plaene.SelectMany(p => p.Warnungen)
+                .Should().NotContain(w => w.Contains("Zählerstand fehlt"));
+        }
+
+        [Fact]
         public void Verbrauch_FehlenderEinzugsstand_NachmieterRestBleibtBeimEigenanteil_UndFehler()
         {
             // W1: MieterA 01.01.–31.07. (Auszugsstand vorhanden), danach Leerstand,
@@ -700,13 +721,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             AddBkForderung(heiz, 1000m, new DateOnly(jahr, 12, 31), jahr);
 
             heiz.Zaehler.Add(MakeZaehler("WW-1", Zaehlertyp.Warmwasser, jahr, v, wohnung));
-            heiz.HeizkostenHKVOs.Add(new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
+            var hkvo = new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
             {
                 Heizkosten = heiz,
                 Betriebsstrom = MakeUmlage(Umlageschluessel.NachWohnflaeche, "Allgemeinstrom",
                     new Buchungskonto("2001", "Betr-NkVK", BuchungskontoTyp.Passiv)),
-                AllgemeinWaerme = MakeZaehler("ALLG-1", Zaehlertyp.Gas, jahr, q)
-            });
+            };
+            hkvo.AllgemeinWaermeZaehler.Add(MakeZaehler("ALLG-1", Zaehlertyp.Gas, jahr, q));
+            heiz.HeizkostenHKVOs.Add(hkvo);
             return heiz;
         }
 
@@ -728,6 +750,24 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             plan.P9Details.QAnfangsdatum.Should().Be(new DateOnly(2020, 12, 31));
             plan.P9Details.QEnddatum.Should().Be(new DateOnly(2021, 12, 31));
             plan.P9Details.WwZaehler.Should().ContainSingle(x => x.Verbrauch == 100m);
+        }
+
+        [Fact]
+        public void P9_2_Q_SummiertMehrereAllgemeinzaehler()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            // Zwei Allgemein-Wärmezähler: Q = 15000 + 10000 = 25000.
+            // P = 2,5 × 100 × (60 − 10) / 25000 = 0,5.
+            var heiz = MakeP9Setup(wohnung, q: 15000m, v: 100m, jahr: 2021);
+            heiz.HeizkostenHKVOs.Single().AllgemeinWaermeZaehler
+                .Add(MakeZaehler("ALLG-2", Zaehlertyp.Gas, 2021, 10000m));
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            plan.P9Details!.Q.Should().Be(25000m);
+            plan.Para9_2.Should().Be(0.5m);
+            plan.P9Details.AllgemeinZaehlerKennnummer.Should().Contain("ALLG-1").And.Contain("ALLG-2");
         }
 
         [Fact]

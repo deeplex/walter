@@ -59,12 +59,16 @@ export {
 export {
     getJahresUebersicht,
     getJahresabschluss,
+    getJahresabschlussKontrolle,
     setzeAbrechnungsverzicht,
     hebeAbrechnungsverzichtAuf,
     type WalterJahresUebersicht,
     type WalterJahresabschluss,
     type WalterKontoJahres,
-    type WalterAbrechnungsstatus
+    type WalterAbrechnungsstatus,
+    type WalterJahresabschlussKontrolle,
+    type WalterPruefPosition,
+    type WalterPruefStatus
 } from './WalterJahresabschluss';
 export {
     WalterKontaktEntry,

@@ -20,6 +20,7 @@ using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -115,6 +116,45 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 }
 
                 return results;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.GetBaseException().Message);
+            }
+        }
+
+        /// <summary>
+        /// Jahresabschluss-Kontrolle: prüft für ALLE sichtbaren Abrechnungsgruppen des
+        /// Jahres, ob eine erneute Abrechnung dasselbe ergäbe wie das Gebuchte. Nur lesend
+        /// (Preview je Gruppe), keine Buchung. Kann bei vielen Gruppen dauern → on-demand.
+        /// </summary>
+        [HttpGet("kontrolle/{jahr:int}")]
+        public async Task<ActionResult<JahresabschlussKontrolleResult>> Kontrolle(int jahr)
+        {
+            try
+            {
+                var verzichtet = (await _ctx.Abrechnungsverzichte
+                    .Where(v => v.Jahr == jahr)
+                    .Select(v => v.Vertrag.VertragId)
+                    .ToListAsync())
+                    .ToHashSet();
+
+                var result = new JahresabschlussKontrolleResult { Jahr = jahr };
+
+                foreach (var gruppe in await _service.GetGruppenAsync())
+                {
+                    // Nur Gruppen prüfen, die der Nutzer vollständig lesen darf.
+                    if (!await CanAccessAllWohnungen(
+                            _auth, _ctx, User!, gruppe.WohnungIds, Operations.Read))
+                        continue;
+
+                    var preview = await _service.PreviewAsync(gruppe.WohnungIds, jahr);
+                    result.Positionen.AddRange(
+                        JahresabschlussKontrolle.Klassifiziere(preview, gruppe.Bezeichnung, verzichtet));
+                }
+
+                JahresabschlussKontrolle.Aggregiere(result);
+                return result;
             }
             catch (Exception ex)
             {

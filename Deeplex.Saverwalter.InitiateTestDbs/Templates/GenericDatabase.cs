@@ -1345,8 +1345,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     Heizkosten = heizUmlage,
                     Betriebsstrom = betriebsstrom,
-                    AllgemeinWaerme = hauszaehler,
                 };
+                if (hauszaehler != null) hkvo.AllgemeinWaermeZaehler.Add(hauszaehler);
                 heizUmlage.HeizkostenHKVOs.Add(hkvo);
                 hkvoList.Add(hkvo);
             }

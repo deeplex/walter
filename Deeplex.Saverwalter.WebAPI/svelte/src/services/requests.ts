@@ -223,8 +223,24 @@ export const walter_put = (
         body: JSON.stringify(body)
     }).then((e) => finishPut(e, toast));
 
+/**
+ * Liest den Response-Body robust: ASP.NET liefert String-Ergebnisse (z.B. eine
+ * Konflikt-/Sperrmeldung in einem 409) als text/plain, nicht als JSON. Ein blindes
+ * `.json()` würde dann werfen und der Toast käme nie an. Daher: als Text lesen, JSON
+ * versuchen, sonst den rohen Text zurückgeben.
+ */
+export async function parseBody(response: Response): Promise<unknown> {
+    const text = await response.text();
+    if (!text) return undefined;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
 async function finishPut(e: Response, toast?: WalterToastContent) {
-    const j = await e.json();
+    const j = await parseBody(e);
 
     toast && addToast(toast, e.status === 200, j);
 

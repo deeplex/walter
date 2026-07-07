@@ -149,14 +149,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 // abgerechnet, wird blockiert (erst Abrechnung zurücknehmen).
                 if (entity.Ende != entry.Ende)
                 {
-                    var abgerechnet = await AbrechnungsschutzService
-                        .AbgerechneteJahreVertrag(Ctx, id);
-                    var betroffen = AbrechnungsschutzService.BetroffeneAbgerechneteJahre(
-                        abgerechnet,
-                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Ende, entry.Ende));
-                    if (betroffen.Count > 0)
-                        return new ConflictObjectResult(
-                            AbrechnungsschutzService.Sperrmeldung(betroffen));
+                    var sperre = await AbrechnungsschutzService.SperreVertragEnde(
+                        Ctx, id, entity.Ende, entry.Ende);
+                    if (sperre != null) return new ConflictObjectResult(sperre);
                 }
 
                 var beginn = await Ctx.VertragVersionen

@@ -104,6 +104,39 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
         }
 
         [Fact]
+        public async Task Buchungsjahr_FolgtDemBetreffendenJahr_NichtDemDatum()
+        {
+            var ctx = TestUtils.GetContext();
+            var umlage = MakeUmlage();
+            ctx.Umlagen.Add(umlage);
+            await ctx.SaveChangesAsync();
+
+            var service = new BetriebskostenrechnungBuchungsService(ctx);
+            // Beleg 2026 datiert, betrifft aber 2023 (z.B. QuickAdd mit Default-Datum heute).
+            var satz = await service.BucheRechnungAsync(umlage, 500m, new DateOnly(2026, 7, 6), 2023, null);
+
+            satz.Buchungsjahr.Should().Be(2023);
+            satz.Buchungsdatum.Should().Be(new DateOnly(2026, 7, 6));
+        }
+
+        [Fact]
+        public async Task Aktualisiere_SetztBuchungsjahrAufNeuesJahr()
+        {
+            var ctx = TestUtils.GetContext();
+            var umlage = MakeUmlage();
+            ctx.Umlagen.Add(umlage);
+            await ctx.SaveChangesAsync();
+
+            var service = new BetriebskostenrechnungBuchungsService(ctx);
+            var satz = await service.BucheRechnungAsync(umlage, 500m, new DateOnly(2026, 7, 6), 2026, null);
+
+            // Korrektur auf betreffendes Jahr 2023 (Datum bleibt 2026) → Buchungsjahr folgt.
+            await service.AktualisiereBuchungssatzAsync(satz, umlage, 500m, new DateOnly(2026, 7, 6), 2023, null);
+
+            satz.Buchungsjahr.Should().Be(2023);
+        }
+
+        [Fact]
         public async Task AktualisiereAendertSollHabenBeiBetragWechselZuGutschrift()
         {
             var ctx = TestUtils.GetContext();

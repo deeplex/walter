@@ -133,6 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             List<Buchungskonto> Konten,
             List<KontoVerknuepfungEntry> Verknuepfungen,
             Dictionary<Guid, List<OffenerPostenAusgleich>> AusgleicheBySollZeile,
+            Dictionary<Guid, List<OffenerPostenAusgleich>> AusgleicheByHabenZeile,
             List<Vertrag> Vertraege,
             List<Abrechnungsresultat> Resultate,
             List<Abrechnungsverzicht> Verzichte);
@@ -151,17 +152,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var kontoIds = konten.Select(k => k.BuchungskontoId).ToList();
             var verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
 
-            var sollZeileIds = konten
+            // OPOS-Ausgleiche für beide Richtungen: eine Soll-Forderung (z.B. Miete,
+            // Nachzahlung) wird von einer Haben-Zeile gedeckt, eine Haben-Forderung
+            // (z.B. Guthaben) von einer Soll-Zeile. Bewusst OHNE Jahresfilter — ein
+            // Ausgleich zählt unabhängig davon, in welchem Jahr er gebucht wurde.
+            var alleZeileIds = konten
                 .SelectMany(k => k.Buchungszeilen)
-                .Where(z => z.SollHaben == SollHaben.Soll)
                 .Select(z => z.BuchungszeileId)
                 .ToHashSet();
-            var ausgleicheBySollZeile = (await ctx.OffenePostenAusgleiche
-                .Include(o => o.SollZeile)
+            var alleAusgleiche = await ctx.OffenePostenAusgleiche
+                .Include(o => o.SollZeile).ThenInclude(z => z.Buchungssatz)
                 .Include(o => o.HabenZeile).ThenInclude(z => z.Buchungssatz)
-                .Where(o => sollZeileIds.Contains(o.SollZeile.BuchungszeileId))
-                .ToListAsync())
+                .Where(o => alleZeileIds.Contains(o.SollZeile.BuchungszeileId)
+                         || alleZeileIds.Contains(o.HabenZeile.BuchungszeileId))
+                .ToListAsync();
+            var ausgleicheBySollZeile = alleAusgleiche
                 .GroupBy(o => o.SollZeile.BuchungszeileId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            var ausgleicheByHabenZeile = alleAusgleiche
+                .GroupBy(o => o.HabenZeile.BuchungszeileId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var vertraege = await ctx.Vertraege
@@ -196,13 +205,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Where(v => vertragIds.Contains(v.Vertrag.VertragId))
                 .ToList();
 
-            return new Daten(konten, verknuepfungen, ausgleicheBySollZeile, vertraege, resultate, verzichte);
+            return new Daten(konten, verknuepfungen, ausgleicheBySollZeile, ausgleicheByHabenZeile, vertraege, resultate, verzichte);
         }
 
         private static JahresabschlussEntry BerechneJahr(Daten daten, int jahr)
         {
             // Konten von Verträgen mit Abrechnungsverzicht für dieses Jahr: deren offene
-            // Forderungen (Miete/NK) zählen dann nicht als offener Punkt.
+            // Forderungen (Miete/NK/BK-Abrechnung) zählen dann nicht als offener Punkt —
+            // auf die Abrechnung wird ja bewusst verzichtet.
             var verzichteteVertragIds = daten.Verzichte
                 .Where(v => v.Jahr == jahr)
                 .Select(v => v.Vertrag.VertragId)
@@ -212,7 +222,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .SelectMany(v => new[]
                 {
                     v.MietBuchungskonto.BuchungskontoId,
-                    v.NkBuchungskonto.BuchungskontoId
+                    v.NkBuchungskonto.BuchungskontoId,
+                    v.BkAbrechnungsKonto.BuchungskontoId
                 })
                 .ToHashSet();
 
@@ -262,23 +273,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var saldovortrag = Saldo(z => z.Buchungssatz.Buchungsjahr < jahr);
             var endsaldo = saldovortrag + sollJahr - habenJahr;
 
-            // OPOS-Sicht zum Jahresende: Ausgleiche aus Folgejahren zählen noch nicht,
-            // eine 2023 offene Forderung bleibt in der 2023er-Sicht offen, auch wenn
-            // sie 2024 beglichen wurde.
-            var offenePosten = konto.Buchungszeilen
+            // Ausgleichsbasierte Sicht: eine Forderung gilt als erledigt,
+            // sobald sie per OPOS gedeckt ist.
+            decimal OffenerRest(Buchungszeile z, Dictionary<Guid, List<OffenerPostenAusgleich>> ausgleiche,
+                Func<OffenerPostenAusgleich, decimal> gegenBetrag)
+            {
+                var gedeckt = ausgleiche.TryGetValue(z.BuchungszeileId, out var liste)
+                    ? liste.Sum(gegenBetrag)
+                    : 0m;
+                return z.Betrag - gedeckt;
+            }
+
+            var offeneSoll = konto.Buchungszeilen
                 .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr <= jahr)
-                .Select(z =>
-                {
-                    var gedeckt = daten.AusgleicheBySollZeile
-                        .TryGetValue(z.BuchungszeileId, out var ausgleiche)
-                        ? ausgleiche
-                            .Where(a => a.HabenZeile.Buchungssatz.Buchungsjahr <= jahr)
-                            .Sum(a => a.HabenZeile.Betrag)
-                        : 0m;
-                    return z.Betrag - gedeckt;
-                })
+                .Select(z => OffenerRest(z, daten.AusgleicheBySollZeile, a => a.HabenZeile.Betrag))
                 .Where(offen => offen > Epsilon)
                 .ToList();
+            var offeneHaben = konto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr <= jahr)
+                .Select(z => OffenerRest(z, daten.AusgleicheByHabenZeile, a => a.SollZeile.Betrag))
+                .Where(offen => offen > Epsilon)
+                .ToList();
+            var offenePosten = offeneSoll.Concat(offeneHaben).ToList();
 
             return new KontoJahresEntry
             {
@@ -298,9 +314,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 OffenePostenAnzahl = offenePosten.Count,
                 OffenePostenBetrag = offenePosten.Sum(),
                 Verzichtet = verzichtet,
-                // Verzichtete Konten zählen — wie Summenkonten — nicht als offener Punkt.
-                Ausgeglichen = verzichtet || !ausgleichbar
-                    || (offenePosten.Count == 0 && Math.Abs(endsaldo) <= Epsilon)
+                // Ausgeglichen, wenn keine ungedeckte Forderung (Soll oder Haben) mehr
+                // offen ist. Verzichtete Konten zählen — wie Summenkonten — nicht als
+                // offener Punkt.
+                Ausgeglichen = verzichtet || !ausgleichbar || offenePosten.Count == 0
             };
         }
 
@@ -334,14 +351,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return true; // kein Saldo-Leg → Saldo 0
         }
 
-        private static List<AbrechnungsstatusEntry> BerechneAbrechnungen(Daten daten, int jahr)
+        /// <summary>Vertrag ist in <paramref name="jahr"/> aktiv (Version begonnen, nicht vor Jahresbeginn beendet).</summary>
+        private static bool IstAktivImJahr(Vertrag vertrag, int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
+            return vertrag.Versionen.Any(ver => ver.Beginn <= endOfYear)
+                && (vertrag.Ende == null || vertrag.Ende >= startOfYear);
+        }
 
+        private static List<AbrechnungsstatusEntry> BerechneAbrechnungen(Daten daten, int jahr)
+        {
             return daten.Vertraege
-                .Where(v => v.Versionen.Any(ver => ver.Beginn <= endOfYear)
-                         && (v.Ende == null || v.Ende >= startOfYear))
+                .Where(v => IstAktivImJahr(v, jahr))
                 .Select(v =>
                 {
                     // Stornierte Abrechnungssätze zählen nicht als vorhanden.

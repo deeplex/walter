@@ -497,14 +497,30 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Where(z => z.Buchungskonto.BuchungskontoId == vertrag.BkAbrechnungsKonto.BuchungskontoId)
                 .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
             var abrechnungsSatzId = existing?.Buchungssatz.BuchungssatzId;
+
+            // NK-Verrechnungskonten der Einheit: Sätze, die eines davon berühren, sind
+            // Betriebskostenrechnungen/NK-Anteile. Eine dort gebuchte Haben-Zeile auf dem
+            // NkBuchungskonto ist eine Anteil-GUTSCHRIFT (negative Rechnung), KEINE echte
+            // Vorauszahlung — sie steckt bereits im Rechnungsbetrag und darf nicht noch
+            // einmal als Vorauszahlung abgezogen werden.
+            var verrechnungsKontoIds = umlagen
+                .Select(u => u.NkVerrechnungsKonto?.BuchungskontoId)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .ToHashSet();
+            bool IstAnteilGutschrift(Buchungszeile z) =>
+                z.Buchungssatz.Buchungszeilen.Any(
+                    gz => verrechnungsKontoIds.Contains(gz.Buchungskonto.BuchungskontoId));
+
             var vertragInfo = new NkVertragInfo
             {
-                // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto); die
-                // eigene Glattstellungs-Haben-Zeile der Abrechnung ausklammern, sonst
-                // würde der Saldo nach dem Buchen fälschlich als Konflikt erkannt.
+                // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto); die eigene
+                // Glattstellungs-Haben-Zeile der Abrechnung ausklammern (sonst Konflikt
+                // nach dem Buchen) und ebenso Anteil-Gutschriften negativer Rechnungen.
                 Vorauszahlung = vertrag.NkBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Haben
-                             && z.Buchungssatz.BuchungssatzId != abrechnungsSatzId)
+                             && z.Buchungssatz.BuchungssatzId != abrechnungsSatzId
+                             && !IstAnteilGutschrift(z))
                     .Sum(z => z.Betrag),
                 MietSaldo = vertrag.MietBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag)
@@ -580,7 +596,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                         var messfensterFehlt = zaehlerDerWohnung.Any(z =>
                         {
-                            if (z.Staende.Count == 0) return true;
+                            // Zähler ohne Stände tragen nichts bei → nicht einfordern.
+                            if (z.Staende.Count == 0) return false;
+                            // Zähler, der im Nutzungszeitraum noch gar nicht existierte
+                            // (erster Stand nach Nutzungsende) oder schon außer Betrieb war,
+                            // kann keinen fehlenden Stand haben.
+                            if (z.Staende.Min(s => s.Datum) > mp.Nutzungsende) return false;
+                            if (z.Ende.HasValue && z.Ende.Value < mp.Nutzungsbeginn) return false;
                             var v = new Verbrauch(z, mp.Nutzungsbeginn, mp.Nutzungsende, []);
                             // Anfangs-/Endstand deutlich (>14 Tage) neben dem Zeitraum → Boundary-Stand fehlt.
                             return v.Anfangsdatum.DayNumber - mp.Nutzungsbeginn.DayNumber > 14
@@ -603,6 +625,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 {
                     if (betrag == 0) continue;
                     var warnungen = new List<string>(verbrauchsFehler);
+
+                    // Negative Rechnung (Gutschrift/Korrektur): buchbar, aber ungewöhnlich.
+                    // Die Anteile werden den Parteien gutgeschrieben (Haben auf der
+                    // NK-Vorauszahlungs-Seite). Bewusst nicht-blockierend, nur Hinweis.
+                    if (betrag < 0)
+                        warnungen.Add(
+                            $"Rechnung '{umlage.Typ.Bezeichnung}' ist negativ ({betrag:0.00} €) — "
+                            + "Gutschrift/Korrektur. Der Betrag wird den Parteien als Gutschrift auf "
+                            + "die NK-Vorauszahlung gebucht. Bitte prüfen, ob das gewollt ist.");
+
                     var anteile = new List<NkRechnungsAnteil>();
 
                     foreach (var partei in parteien)
@@ -860,10 +892,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             const decimal tw = 60m;
             decimal para9_2 = 0;
             NkP9Details? p9Details = null;
-            if (hkvo.AllgemeinWaerme != null)
+            if (hkvo.AllgemeinWaermeZaehler.Count > 0)
             {
-                var qVerbrauch = new Verbrauch(hkvo.AllgemeinWaerme, beginn, ende, notes);
-                var Q = qVerbrauch.Delta;
+                // Q = Summe der Verbräuche aller Allgemein-Wärmezähler (mehrere möglich).
+                var qVerbraeuche = hkvo.AllgemeinWaermeZaehler
+                    .Select(z => new Verbrauch(z, beginn, ende, notes))
+                    .ToList();
+                var Q = qVerbraeuche.Sum(v => v.Delta);
+                var qKennnummern = string.Join(", ", hkvo.AllgemeinWaermeZaehler.Select(z => z.Kennnummer));
+                var qAnfang = qVerbraeuche.Min(v => v.Anfangsdatum);
+                var qEnde = qVerbraeuche.Max(v => v.Enddatum);
+
                 var wwVerbrauche = wohnungWW
                     .Select(z => (Zaehler: z, Verbrauch: new Verbrauch(z, beginn, ende, notes).Delta))
                     .ToList();
@@ -871,7 +910,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 if (Q <= 0)
                 {
-                    notes.Add($"Allgemein-Wärmezähler {hkvo.AllgemeinWaerme.Kennnummer} hat keinen Verbrauch " +
+                    notes.Add($"Allgemein-Wärmezähler ({qKennnummern}) haben keinen Verbrauch " +
                         $"im Zeitraum {beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy} — kein §9(2)-Warmwasseranteil, " +
                         "der gesamte Betrag wird als Heizung (§7) verteilt.", Severity.Warning);
                 }
@@ -893,15 +932,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 if (Q > 0 && totalWaerme > Q)
                 {
-                    notes.Add($"Summe der Wohnungs-Wärmezähler ({totalWaerme}) übersteigt den " +
-                        $"Allgemeinzähler {hkvo.AllgemeinWaerme.Kennnummer} ({Q}).", Severity.Warning);
+                    notes.Add($"Summe der Wohnungs-Wärmezähler ({totalWaerme}) übersteigt die " +
+                        $"Allgemeinzähler ({qKennnummern}: {Q}).", Severity.Warning);
                 }
 
-                p9Details = new NkP9Details(
-                    V, Q, tw,
-                    hkvo.AllgemeinWaerme.Kennnummer,
-                    qVerbrauch.Anfangsdatum, qVerbrauch.Enddatum,
-                    wwVerbrauche);
+                p9Details = new NkP9Details(V, Q, tw, qKennnummern, qAnfang, qEnde, wwVerbrauche);
             }
 
             // Individuelle Verbrauchsanteile und Zähler-Einzelwerte je Partei

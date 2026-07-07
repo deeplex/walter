@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterToastContent } from '$walter/lib';
-import { walter_post } from '$walter/services/requests';
+import { walter_post, parseBody } from '$walter/services/requests';
 import { walter_goto } from '$walter/services/utils';
 import { addToast, changeTracker } from '$walter/store';
 
@@ -34,11 +34,13 @@ export async function handle_save(apiURL: string, entry: unknown) {
     );
 
     const response = await walter_post(apiURL, entry);
-    const parsed = await response.json();
+    const parsed = await parseBody(response);
     addToast(SaveToast, response.status === 200, parsed);
 
-    if (parsed.id) {
+    if (parsed && typeof parsed === 'object' && 'id' in parsed) {
         changeTracker.set(0);
-        walter_goto(`${apiURL}/${parsed.id}`.replace('api/', ''));
+        walter_goto(
+            `${apiURL}/${(parsed as { id: unknown }).id}`.replace('api/', '')
+        );
     }
 }

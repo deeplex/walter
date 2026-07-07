@@ -90,14 +90,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
         /// <summary>
         /// Jahre, die ein Zählerstand vom Datum <paramref name="datum"/> beeinflusst:
-        /// das eigene Jahr; ein Dezember-Stand ist zusätzlich Anfangsstand des Folgejahres,
-        /// ein Januar-Stand Endstand-Ersatz des Vorjahres.
+        /// das eigene Jahr; ein Stand in den letzten 14 Dezembertagen (ab dem 18.12.)
+        /// ist zusätzlich Anfangsstand des Folgejahres (14-Tage-Fenster vor dem 01.01.,
+        /// siehe Verbrauch.GetZaehlerAnfangsStand).
+        ///
+        /// Ein Januar-Stand ist bewusst NICHT dabei: der Endstand eines Jahres wird
+        /// strikt mit Datum &lt;= 31.12. gewählt (Verbrauch.GetZaehlerEndStand), ein
+        /// Stand vom 01.01. kann also das Vorjahr nicht verfälschen.
         /// </summary>
         public static IEnumerable<int> StandBetroffeneJahre(DateOnly datum)
         {
             yield return datum.Year;
-            if (datum.Month == 12) yield return datum.Year + 1;
-            if (datum.Month == 1) yield return datum.Year - 1;
+            if (datum.Month == 12 && datum.Day >= 18) yield return datum.Year + 1;
         }
 
         public static List<int> Schnittmenge(HashSet<int> abgerechneteJahre, IEnumerable<int> betroffene)
@@ -115,6 +119,41 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// <summary>Frühestes berührtes Jahr, wenn ein Enddatum von alt auf neu wechselt.</summary>
         public static int FruehestesBetroffenesJahr(DateOnly? alt, DateOnly? neu)
             => Math.Min(alt?.Year ?? int.MaxValue, neu?.Year ?? int.MaxValue);
+
+        /// <summary>
+        /// Betroffene abgerechnete Jahre einer reinen Zeitgrenzen-Verschiebung (Beginn oder
+        /// Ende) von <paramref name="alt"/> auf <paramref name="neu"/>. Nur der Bereich
+        /// ZWISCHEN altem und neuem Jahr ändert die Anwesenheit — Jahre davor und danach
+        /// bleiben identisch belegt. Ist eine Seite offen (null = unbefristet), reicht der
+        /// Bereich bis in die Zukunft. Beispiel: Beginn 15.09.2023 → 01.10.2023 betrifft nur
+        /// 2023, ein bereits abgerechnetes 2024 bleibt unberührt.
+        /// </summary>
+        public static List<int> BetroffeneJahreGrenzverschiebung(
+            HashSet<int> abgerechneteJahre, DateOnly? alt, DateOnly? neu)
+        {
+            var von = Math.Min(alt?.Year ?? int.MaxValue, neu?.Year ?? int.MaxValue);
+            var bis = alt is null || neu is null
+                ? int.MaxValue
+                : Math.Max(alt.Value.Year, neu.Value.Year);
+            return abgerechneteJahre.Where(j => j >= von && j <= bis).OrderBy(j => j).ToList();
+        }
+
+        /// <summary>
+        /// Betroffene abgerechnete Jahre einer Versions-Änderung: eine Beginn-Verschiebung
+        /// wirkt nur im Bereich zwischen altem und neuem Jahr; eine Wertänderung
+        /// (Miete-relevant: Personen/Fläche/Schlüssel) wirkt ab dem Versionsbeginn fort in
+        /// die Zukunft (bis zur nächsten Version — konservativ als „bis Ende" behandelt).
+        /// </summary>
+        public static List<int> BetroffeneJahreVersionsaenderung(
+            HashSet<int> abgerechneteJahre, DateOnly altBeginn, DateOnly neuBeginn, bool wertGeaendert)
+        {
+            var betroffen = new HashSet<int>(
+                BetroffeneJahreGrenzverschiebung(abgerechneteJahre, altBeginn, neuBeginn));
+            if (wertGeaendert)
+                betroffen.UnionWith(BetroffeneAbgerechneteJahre(
+                    abgerechneteJahre, Math.Min(altBeginn.Year, neuBeginn.Year)));
+            return betroffen.OrderBy(j => j).ToList();
+        }
 
         public static string Sperrmeldung(IReadOnlyList<int> betroffeneJahre)
             => $"Für {string.Join(", ", betroffeneJahre)} ist bereits eine Abrechnung gebucht — "
@@ -152,6 +191,49 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         {
             var betroffen = BetroffeneAbgerechneteJahre(
                 await AbgerechneteJahreZaehler(ctx, zaehlerId), abJahr);
+            return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
+        }
+
+        /// <summary>Verschiebung des Zähler-Endes von <paramref name="alt"/> auf <paramref name="neu"/>.</summary>
+        public static async Task<string?> SperreZaehlerEnde(SaverwalterContext ctx, int zaehlerId, DateOnly? alt, DateOnly? neu)
+        {
+            var betroffen = BetroffeneJahreGrenzverschiebung(
+                await AbgerechneteJahreZaehler(ctx, zaehlerId), alt, neu);
+            return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
+        }
+
+        /// <summary>Verschiebung des Vertrags-Endes von <paramref name="alt"/> auf <paramref name="neu"/>.</summary>
+        public static async Task<string?> SperreVertragEnde(SaverwalterContext ctx, int vertragId, DateOnly? alt, DateOnly? neu)
+        {
+            var betroffen = BetroffeneJahreGrenzverschiebung(
+                await AbgerechneteJahreVertrag(ctx, vertragId), alt, neu);
+            return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
+        }
+
+        /// <summary>Änderung einer Vertrags-Version (Beginn verschoben und/oder Wert geändert).</summary>
+        public static async Task<string?> SperreVertragVersion(
+            SaverwalterContext ctx, int vertragId, DateOnly altBeginn, DateOnly neuBeginn, bool wertGeaendert)
+        {
+            var betroffen = BetroffeneJahreVersionsaenderung(
+                await AbgerechneteJahreVertrag(ctx, vertragId), altBeginn, neuBeginn, wertGeaendert);
+            return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
+        }
+
+        /// <summary>Änderung einer Wohnungs-Version (Beginn verschoben und/oder Wert geändert).</summary>
+        public static async Task<string?> SperreWohnungVersion(
+            SaverwalterContext ctx, int wohnungId, DateOnly altBeginn, DateOnly neuBeginn, bool wertGeaendert)
+        {
+            var betroffen = BetroffeneJahreVersionsaenderung(
+                await AbgerechneteJahreWohnungen(ctx, [wohnungId]), altBeginn, neuBeginn, wertGeaendert);
+            return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
+        }
+
+        /// <summary>Änderung einer Umlage-Version (Beginn verschoben und/oder Wert geändert).</summary>
+        public static async Task<string?> SperreUmlageVersion(
+            SaverwalterContext ctx, int umlageId, DateOnly altBeginn, DateOnly neuBeginn, bool wertGeaendert)
+        {
+            var betroffen = BetroffeneJahreVersionsaenderung(
+                await AbgerechneteJahreUmlage(ctx, umlageId), altBeginn, neuBeginn, wertGeaendert);
             return betroffen.Count > 0 ? Sperrmeldung(betroffen) : null;
         }
 

@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         DataTable,
         DataTableSkeleton,
         Dropdown,
+        InlineLoading,
         Modal,
         Tag,
         TextArea,
@@ -33,11 +34,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         getJahresUebersicht,
         getJahresabschluss,
+        getJahresabschlussKontrolle,
         setzeAbrechnungsverzicht,
         hebeAbrechnungsverzichtAuf,
         type WalterJahresUebersicht,
         type WalterJahresabschluss,
-        type WalterKontoJahres
+        type WalterKontoJahres,
+        type WalterJahresabschlussKontrolle,
+        type WalterPruefStatus
     } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import { convertEuro } from '$walter/services/utils';
@@ -62,11 +66,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: if (selectedJahr !== undefined && selectedJahr !== geladenesJahr) {
         geladenesJahr = selectedJahr;
         abschluss = undefined;
+        kontrolle = undefined; // Kontroll-Ergebnis gehört zum alten Jahr → verwerfen.
         getJahresabschluss(selectedJahr, fetchImpl).then((a) => {
             // Antwort verwerfen, wenn inzwischen ein anderes Jahr gewählt wurde.
             if (a.jahr === selectedJahr) abschluss = a;
         });
     }
+
+    // Konsistenz-Kontrolle: rechnet jede Gruppe des Jahres einmal nach und vergleicht
+    // mit dem Gebuchten. On-demand, weil das teuer sein kann.
+    let kontrolle: WalterJahresabschlussKontrolle | undefined;
+    let kontrolleLaeuft = false;
+
+    async function pruefeKonsistenz() {
+        if (selectedJahr === undefined) return;
+        const jahr = selectedJahr;
+        kontrolleLaeuft = true;
+        kontrolle = undefined;
+        try {
+            const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
+            if (jahr === selectedJahr) kontrolle = result;
+        } finally {
+            kontrolleLaeuft = false;
+        }
+    }
+
+    const statusInfo: Record<
+        WalterPruefStatus,
+        { label: string; type: 'green' | 'red' | 'gray' | 'teal' }
+    > = {
+        Bestanden: { label: 'Bestanden', type: 'green' },
+        NichtBestanden: { label: 'Abweichend', type: 'red' },
+        Fehlt: { label: 'Fehlt', type: 'gray' },
+        VerzichtBestanden: { label: 'Verzicht ok', type: 'teal' },
+        VerzichtNichtBestanden: { label: 'Verzicht mit Buchung', type: 'red' }
+    };
+
+    // Nur die auffälligen Positionen listen (bestanden/verzicht-ok braucht keiner).
+    $: probleme = (kontrolle?.positionen ?? []).filter(
+        (p) => p.status !== 'Bestanden' && p.status !== 'VerzichtBestanden'
+    );
 
     // Nach einer Verzicht-Änderung Jahr + Übersicht neu laden.
     async function reload() {
@@ -251,6 +290,114 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 ? 'Abrechnung'
                                 : 'Abrechnungen'} ausstehend
                         </Tag>
+                    {/if}
+                {/if}
+            </Tile>
+
+            <Tile style="margin-bottom: 1rem;">
+                <div
+                    style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;"
+                >
+                    <Button
+                        size="small"
+                        kind="tertiary"
+                        disabled={kontrolleLaeuft}
+                        on:click={pruefeKonsistenz}
+                    >
+                        Konsistenz prüfen
+                    </Button>
+                    {#if kontrolleLaeuft}
+                        <InlineLoading
+                            description="Rechne alle Abrechnungsgruppen nach …"
+                        />
+                    {:else}
+                        <span
+                            style="font-size: 0.875rem; color: var(--cds-text-secondary);"
+                        >
+                            Ergäbe eine erneute Abrechnung {abschluss.jahr} exakt
+                            dasselbe wie das Gebuchte?
+                        </span>
+                    {/if}
+                </div>
+
+                {#if kontrolle && !kontrolleLaeuft}
+                    {@const k = kontrolle}
+                    <p
+                        style="font-size: 0.75rem; color: var(--cds-text-secondary); margin: 1rem 0 0.5rem;"
+                    >
+                        {k.gesamt} Positionen geprüft
+                    </p>
+                    <div
+                        style="display: flex; gap: 0.75rem; flex-wrap: wrap;"
+                    >
+                        {#each [{ label: 'Bestanden', wert: k.bestanden, type: 'green' }, { label: 'Fehlt', wert: k.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: k.verzichtBestanden, type: 'teal' }, { label: 'Abweichend', wert: k.nichtBestanden, type: 'red' }, { label: 'Verzicht mit Buchung', wert: k.verzichtNichtBestanden, type: 'red' }] as kachel}
+                            <div
+                                style="min-width: 7rem; padding: 0.5rem 0.75rem; border-left: 4px solid {kachel.type ===
+                                'green'
+                                    ? 'var(--cds-support-success)'
+                                    : kachel.type === 'red'
+                                      ? 'var(--cds-support-error)'
+                                      : kachel.type === 'teal'
+                                        ? '#009d9a'
+                                        : 'var(--cds-border-subtle)'}; background: var(--cds-layer);"
+                            >
+                                <div
+                                    style="font-size: 1.5rem; font-weight: 600; line-height: 1;"
+                                >
+                                    {kachel.wert}
+                                </div>
+                                <div
+                                    style="font-size: 0.75rem; color: var(--cds-text-secondary);"
+                                >
+                                    {kachel.label}
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+
+                    {#if probleme.length === 0}
+                        <p
+                            style="margin-top: 1rem; color: var(--cds-support-success);"
+                        >
+                            Alles konsistent — eine erneute Abrechnung würde nichts
+                            ändern.
+                        </p>
+                    {:else}
+                        <div style="margin-top: 1rem;">
+                            {#each probleme as p}
+                                <div
+                                    role="button"
+                                    tabindex="0"
+                                    on:click={() =>
+                                        p.vertragId != null &&
+                                        navigation.vertrag(p.vertragId)}
+                                    on:keydown={(e) =>
+                                        e.key === 'Enter' &&
+                                        p.vertragId != null &&
+                                        navigation.vertrag(p.vertragId)}
+                                    style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--cds-border-subtle); {p.vertragId !=
+                                    null
+                                        ? 'cursor: pointer;'
+                                        : ''}"
+                                >
+                                    <Tag size="sm" type={statusInfo[p.status].type}
+                                        >{statusInfo[p.status].label}</Tag
+                                    >
+                                    <div style="flex: 1 1 0; min-width: 0;">
+                                        <div style="font-size: 0.875rem;">
+                                            {p.bezeichnung}
+                                        </div>
+                                        <div
+                                            style="font-size: 0.75rem; color: var(--cds-text-secondary);"
+                                        >
+                                            {p.gruppe}{p.detail
+                                                ? ` · ${p.detail}`
+                                                : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
                     {/if}
                 {/if}
             </Tile>

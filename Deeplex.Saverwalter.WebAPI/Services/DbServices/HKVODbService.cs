@@ -15,9 +15,12 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
@@ -26,6 +29,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
     {
         public HKVODbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
+        }
+
+        /// <summary>Lädt die ausgewählten Allgemein-Wärmezähler (für Q in §9(2)).</summary>
+        private async Task<List<Zaehler>> LadeZaehler(IEnumerable<SelectionEntry> auswahl)
+        {
+            var ids = auswahl.Select(a => a.Id).ToList();
+            if (ids.Count == 0) return [];
+            return await Ctx.ZaehlerSet.Where(z => ids.Contains(z.ZaehlerId)).ToListAsync();
         }
 
         public override async Task<ActionResult<HKVO>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
@@ -57,9 +68,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 if (betriebsstrom != null)
                     entity.Betriebsstrom = betriebsstrom;
 
-                entity.AllgemeinWaerme = entry.AllgemeinWaerme != null
-                    ? await Ctx.ZaehlerSet.FindAsync(entry.AllgemeinWaerme.Id)
-                    : null;
+                entity.AllgemeinWaermeZaehler.Clear();
+                entity.AllgemeinWaermeZaehler.AddRange(await LadeZaehler(entry.AllgemeinWaerme));
 
                 Ctx.HKVO.Update(entity);
                 await Ctx.SaveChangesAsync();
@@ -102,10 +112,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 {
                     Heizkosten = umlage,
                     Betriebsstrom = betriebsstrom,
-                    AllgemeinWaerme = entry.AllgemeinWaerme != null
-                        ? await Ctx.ZaehlerSet.FindAsync(entry.AllgemeinWaerme.Id)
-                        : null
                 };
+                newHkvo.AllgemeinWaermeZaehler.AddRange(await LadeZaehler(entry.AllgemeinWaerme));
 
                 Ctx.HKVO.Add(newHkvo);
                 await Ctx.SaveChangesAsync();

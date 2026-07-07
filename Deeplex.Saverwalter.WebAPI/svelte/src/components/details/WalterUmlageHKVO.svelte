@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Checkbox, Link, Row, Tile } from 'carbon-components-svelte';
     import WalterSlider from '../elements/WalterSlider.svelte';
     import WalterComboBox from '../elements/WalterComboBox.svelte';
+    import WalterMultiSelect from '../elements/WalterMultiSelect.svelte';
     import WalterDatePicker from '../elements/WalterDatePicker.svelte';
     import {
         WalterUmlageEntry,
@@ -70,8 +71,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             entry.hkvo.strompauschale !== initialHKVO.strompauschale ||
             (entry.hkvo.stromrechnung?.id ?? '') !==
                 (initialHKVO.stromrechnung?.id ?? '') ||
-            (entry.hkvo.allgemeinWaerme?.id ?? '') !==
-                (initialHKVO.allgemeinWaerme?.id ?? ''));
+            waermeIds(entry.hkvo.allgemeinWaerme) !==
+                waermeIds(initialHKVO.allgemeinWaerme));
+
+    const waermeIds = (z: WalterSelectionEntry[] | undefined) =>
+        (z ?? [])
+            .map((e) => e.id)
+            .sort()
+            .join(',');
 
     $: blockSave = hasHkvoChanges && !seitWannHkvo;
 
@@ -155,7 +162,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 hkvO_P9: initialHKVO.hkvO_P9 || p9a2[1],
                 strompauschale: initialHKVO.strompauschale || 5,
                 stromrechnung: initialHKVO.stromrechnung || undefined,
-                allgemeinWaerme: initialHKVO.allgemeinWaerme || undefined
+                allgemeinWaerme: initialHKVO.allgemeinWaerme || []
             };
         } else {
             entry.hkvo = undefined;
@@ -192,11 +199,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     bind:entries={selectableUmlagen}
                     titleText="Stromrechnung (Betriebsstrom)"
                 />
-                <WalterComboBox
+                <WalterMultiSelect
                     bind:value={entry.hkvo.allgemeinWaerme}
-                    {readonly}
+                    disabled={readonly}
                     bind:entries={selectableWaermezaehler}
-                    titleText="AllgemeinWärme-Zähler (§9 Abs. 2)"
+                    titleText="AllgemeinWärme-Zähler für Q (§9 Abs. 2)"
                 />
             </Row>
             <Row>

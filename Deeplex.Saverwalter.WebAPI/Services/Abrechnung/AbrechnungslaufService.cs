@@ -543,7 +543,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.Mieter)
-                // Vertraege – NK-Buchungskonto mit jahresgefilterter Haben-Vorauszahlung
+                // Vertraege – NK-Buchungskonto mit jahresgefilterter Haben-Vorauszahlung.
+                // Inkl. Geschwisterzeilen des Satzes (mit Konto), um echte Vorauszahlungen
+                // von NK-Anteil-Gutschriften (Satz berührt ein NkVerrechnungskonto) zu
+                // unterscheiden.
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.NkBuchungskonto)
@@ -551,6 +554,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                                 .Where(z => z.Buchungssatz.Buchungsjahr == jahr
                                             && z.SollHaben == SollHaben.Haben))
                             .ThenInclude(z => z.Buchungssatz)
+                                .ThenInclude(s => s.Buchungszeilen)
+                                    .ThenInclude(zz => zz.Buchungskonto)
                 // Vertraege – Miet-Buchungskonto für MietSaldo
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
@@ -574,8 +579,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Versionen)
                 // HKVO-Verlauf für warme Betriebskosten
                 .Include(u => u.HeizkostenHKVOs)
-                    .ThenInclude(h => h.AllgemeinWaerme)
-                        .ThenInclude(z => z!.Staende)
+                    .ThenInclude(h => h.AllgemeinWaermeZaehler)
+                        .ThenInclude(z => z.Staende)
                 // Betriebsstrom-Umlage (+ Verrechnungskonto) für die Strompauschale-Umbuchung
                 .Include(u => u.HeizkostenHKVOs)
                     .ThenInclude(h => h.Betriebsstrom)

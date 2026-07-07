@@ -33,7 +33,7 @@ export class WalterHKVOEntry extends WalterApiHandler {
         public createdAt: Date,
         public lastModified: Date,
         public permissions: WalterPermissions,
-        public allgemeinWaerme?: WalterSelectionEntry
+        public allgemeinWaerme: WalterSelectionEntry[] = []
     ) {
         super();
     }
@@ -44,9 +44,9 @@ export class WalterHKVOEntry extends WalterApiHandler {
         const stromrechnung =
             json.stromrechnung &&
             WalterSelectionEntry.fromJson(json.stromrechnung);
-        const allgemeinWaerme =
-            json.allgemeinWaerme &&
-            WalterSelectionEntry.fromJson(json.allgemeinWaerme);
+        const allgemeinWaerme = (json.allgemeinWaerme ?? []).map(
+            WalterSelectionEntry.fromJson
+        );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -63,7 +63,7 @@ export class WalterHKVOEntry extends WalterApiHandler {
             json.createdAt,
             json.lastModified,
             permissions,
-            allgemeinWaerme || undefined
+            allgemeinWaerme
         );
     }
 }

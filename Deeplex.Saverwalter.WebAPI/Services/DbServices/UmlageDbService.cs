@@ -232,10 +232,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                         (decimal)hkvo.Strompauschale / 100)
                     {
                         Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id),
-                        AllgemeinWaerme = hkvo.AllgemeinWaerme is { } aw
-                            ? Ctx.ZaehlerSet.Single(z => z.ZaehlerId == aw.Id)
-                            : null
                     };
+                    newHKVO.AllgemeinWaermeZaehler.AddRange(LadeWaermezaehler(hkvo.AllgemeinWaerme));
                     entity.HeizkostenHKVOs.Add(newHKVO);
                     Ctx.HKVO.Add(newHKVO);
                 }
@@ -246,9 +244,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     currentHkvo.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
                     currentHkvo.Strompauschale = (decimal)hkvo.Strompauschale / 100;
                     currentHkvo.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
-                    currentHkvo.AllgemeinWaerme = hkvo.AllgemeinWaerme is { } aw
-                        ? Ctx.ZaehlerSet.Single(z => z.ZaehlerId == aw.Id)
-                        : null;
+                    currentHkvo.AllgemeinWaermeZaehler.Clear();
+                    currentHkvo.AllgemeinWaermeZaehler.AddRange(LadeWaermezaehler(hkvo.AllgemeinWaerme));
                     Ctx.HKVO.Update(currentHkvo);
                 }
             }
@@ -259,6 +256,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
             entity.Ende = entry.Ende;
             entity.Notiz = entry.Notiz;
+        }
+
+        /// <summary>Lädt die ausgewählten Allgemein-Wärmezähler (für Q in §9(2)).</summary>
+        private List<Zaehler> LadeWaermezaehler(IEnumerable<SelectionEntry> auswahl)
+        {
+            var ids = auswahl.Select(a => a.Id).ToList();
+            return ids.Count == 0 ? [] : Ctx.ZaehlerSet.Where(z => ids.Contains(z.ZaehlerId)).ToList();
         }
     }
 }

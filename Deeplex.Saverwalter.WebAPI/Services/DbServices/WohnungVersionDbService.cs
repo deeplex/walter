@@ -111,15 +111,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 // Fläche/Einheiten/Beginn fließen in die Verteilung ein → bei Änderung sperren.
-                if (entity.Beginn != entry.Beginn
-                    || entity.Wohnflaeche != entry.Wohnflaeche
+                var flaecheGeaendert = entity.Wohnflaeche != entry.Wohnflaeche
                     || entity.Nutzflaeche != entry.Nutzflaeche
                     || entity.Miteigentumsanteile != entry.Miteigentumsanteile
-                    || entity.Nutzeinheit != entry.Einheiten)
+                    || entity.Nutzeinheit != entry.Einheiten;
+                if (entity.Beginn != entry.Beginn || flaecheGeaendert)
                 {
-                    var sperre = await AbrechnungsschutzService.SperreWohnung(
-                        Ctx, entity.Wohnung.WohnungId,
-                        AbrechnungsschutzService.FruehestesBetroffenesJahr(entity.Beginn, entry.Beginn));
+                    var sperre = await AbrechnungsschutzService.SperreWohnungVersion(
+                        Ctx, entity.Wohnung.WohnungId, entity.Beginn, entry.Beginn,
+                        wertGeaendert: flaecheGeaendert);
                     if (sperre != null) return new ConflictObjectResult(sperre);
                 }
 

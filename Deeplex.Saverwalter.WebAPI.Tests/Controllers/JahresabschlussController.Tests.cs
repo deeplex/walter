@@ -185,7 +185,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task Ausgleich_im_folgejahr_laesst_das_alte_jahr_offen()
+        public async Task Ausgleich_im_folgejahr_schliesst_das_alte_jahr()
         {
             var ctx = TestUtils.GetContext();
             var (manager, managed, _) = Seed(ctx);
@@ -196,9 +196,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var abschluss2024 = await GetJahr(controller, 2024);
             var abschluss2025 = await GetJahr(controller, 2025);
 
+            // Ausgleichsbasiert: die 2025 gebuchte Zahlung deckt die 2024er Forderung,
+            // also ist auch 2024 ausgeglichen — der Endsaldo bleibt aber der echte
+            // Jahresendstand (die Zahlung fiel erst 2025 an).
             var konto2024 = abschluss2024.Konten.Single(k => k.Funktion == "Mietforderungen");
-            konto2024.OffenePostenAnzahl.Should().Be(1);
-            konto2024.Ausgeglichen.Should().BeFalse();
+            konto2024.OffenePostenAnzahl.Should().Be(0);
+            konto2024.Ausgeglichen.Should().BeTrue();
+            konto2024.Endsaldo.Should().Be(500m);
 
             var konto2025 = abschluss2025.Konten.Single(k => k.Funktion == "Mietforderungen");
             konto2025.OffenePostenAnzahl.Should().Be(0);
@@ -237,7 +241,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var konto = abschluss.Konten.Single(k => k.Funktion == "Mietforderungen");
             konto.Endsaldo.Should().Be(0m);
-            konto.OffenePostenAnzahl.Should().Be(1);
+            // Trotz Saldo 0: ohne OPOS-Zuordnung bleiben beide Seiten offen — die
+            // unbeglichene Forderung UND die nicht zugeordnete Zahlung.
+            konto.OffenePostenAnzahl.Should().Be(2);
             konto.Ausgeglichen.Should().BeFalse();
         }
 
@@ -272,6 +278,35 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Datum = new DateOnly(jahr + 1, 1, 15)
             });
             ctx.SaveChanges();
+        }
+
+        /// <summary>
+        /// Legt eine Umlage auf die Wohnung(en) an und bucht eine Betriebskostenrechnung
+        /// (Haben NK-Verrechnungskonto) für das Jahr. Gibt das NK-Verrechnungskonto zurück.
+        /// </summary>
+        private static Buchungskonto ErstelleBetriebskostenrechnung(
+            SaverwalterContext ctx, int jahr, decimal betrag, string suffix, params Wohnung[] wohnungen)
+        {
+            var umlage = new Umlage
+            {
+                Typ = new Umlagetyp("Müllabfuhr " + suffix),
+                Wohnungen = wohnungen.ToList(),
+                NkVerrechnungsKonto = new Buchungskonto("710" + suffix, "NK-VK " + suffix, BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("121" + suffix, "Zahlung " + suffix, BuchungskontoTyp.Aktiv),
+            };
+            umlage.Versionen.Add(new UmlageVersion(
+                new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
+
+            var satz = new Buchungssatz(new DateOnly(jahr, 6, 1), $"Betriebskosten {jahr}") { Buchungsjahr = jahr };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+            {
+                Buchungssatz = satz,
+                Buchungskonto = umlage.NkVerrechnungsKonto
+            });
+            ctx.Umlagen.Add(umlage);
+            ctx.Buchungssaetze.Add(satz);
+            ctx.SaveChanges();
+            return umlage.NkVerrechnungsKonto;
         }
 
         [Fact]
@@ -346,6 +381,49 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             mietKonto.Verzichtet.Should().BeFalse();
             mietKonto.Ausgeglichen.Should().BeFalse();
             abschluss.KontenOffen.Should().Be(1);
+        }
+
+        private static readonly UserAccount Admin =
+            new() { Username = "a", Name = "a", Role = UserRole.Admin };
+
+        [Fact]
+        public async Task NkVerrechnung_zaehlt_nicht_als_offener_Punkt()
+        {
+            // Die NK-Verrechnung (Dienstleister-Seite) gleicht sich erst mit den – hier
+            // nicht gebuchten – Dienstleisterzahlungen aus. Sie darf den Abschluss nicht
+            // blockieren: gelistet, aber neutral (Summenkonto), nicht als offener Punkt.
+            var ctx = TestUtils.GetContext();
+            var (_, managed, _) = Seed(ctx);
+            var nkKonto = ErstelleBetriebskostenrechnung(ctx, 2024, 1000m, "A", managed.Wohnung);
+            var controller = WithUser(ctx, Principal(Admin));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var konto = abschluss.Konten.Single(k => k.KontoId == nkKonto.BuchungskontoId);
+            konto.Ausgleichbar.Should().BeFalse();
+            konto.Ausgeglichen.Should().BeTrue();
+            abschluss.KontenOffen.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Verzicht_nimmt_auch_das_BkAbrechnungskonto_aus()
+        {
+            var ctx = TestUtils.GetContext();
+            var (_, managed, _) = Seed(ctx);
+            // Offene BK-Abrechnungs-Nachzahlung auf dem BkAbrechnungskonto.
+            var satz = new Buchungssatz(new DateOnly(2024, 12, 31), "BK-Abrechnung 2024") { Buchungsjahr = 2024 };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 200m) { Buchungssatz = satz, Buchungskonto = managed.BkAbrechnungsKonto });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 200m) { Buchungssatz = satz, Buchungskonto = managed.NkBuchungskonto });
+            ctx.Buchungssaetze.Add(satz);
+            ctx.SaveChanges();
+            ErstelleVerzicht(ctx, managed, 2024, "vor Programmeinführung");
+            var controller = WithUser(ctx, Principal(Admin));
+
+            var abschluss = await GetJahr(controller, 2024);
+
+            var bkKonto = abschluss.Konten.Single(k => k.KontoId == managed.BkAbrechnungsKonto.BuchungskontoId);
+            bkKonto.Verzichtet.Should().BeTrue();     // Verzicht nimmt auch die BK-Abrechnung aus
+            bkKonto.Ausgeglichen.Should().BeTrue();
         }
 
         [Fact]

@@ -87,6 +87,47 @@ export async function getJahresabschluss(
     )) as WalterJahresabschluss;
 }
 
+export type WalterPruefStatus =
+    | 'Bestanden'
+    | 'NichtBestanden'
+    | 'Fehlt'
+    | 'VerzichtBestanden'
+    | 'VerzichtNichtBestanden';
+
+/** Eine geprüfte Position (Vertrag oder Eigenanteil) der Jahresabschluss-Kontrolle. */
+export type WalterPruefPosition = {
+    vertragId: number | undefined;
+    bezeichnung: string;
+    gruppe: string;
+    status: WalterPruefStatus;
+    gebuchterSaldo: number | undefined;
+    neuerSaldo: number | undefined;
+    detail: string | undefined;
+};
+
+/** Ergebnis der Jahresabschluss-Kontrolle: würde eine Neuabrechnung dasselbe ergeben? */
+export type WalterJahresabschlussKontrolle = {
+    jahr: number;
+    positionen: WalterPruefPosition[];
+    bestanden: number;
+    nichtBestanden: number;
+    fehlt: number;
+    verzichtBestanden: number;
+    verzichtNichtBestanden: number;
+    gesamt: number;
+};
+
+/** Läuft alle Abrechnungsgruppen des Jahres durch (rein prüfend, keine Buchung). */
+export async function getJahresabschlussKontrolle(
+    jahr: number,
+    fetchImpl: typeof fetch
+): Promise<WalterJahresabschlussKontrolle> {
+    return (await walter_get(
+        `/api/abrechnungslauf/kontrolle/${jahr}`,
+        fetchImpl
+    )) as WalterJahresabschlussKontrolle;
+}
+
 const VerzichtURL = '/api/abrechnungsverzicht';
 
 /** Setzt einen dokumentierten Abrechnungsverzicht (Grund Pflicht). */

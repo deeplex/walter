@@ -46,7 +46,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             int betreffendesJahr,
             string? notiz)
         {
-            var buchungssatz = new Buchungssatz(datum, $"Betriebskosten {umlage.Typ.Bezeichnung} {betreffendesJahr}");
+            var buchungssatz = new Buchungssatz(datum, $"Betriebskosten {umlage.Typ.Bezeichnung} {betreffendesJahr}")
+            {
+                Buchungsjahr = betreffendesJahr
+            };
             var sollHaben = betrag >= 0 ? SollHaben.Haben : SollHaben.Soll;
             AddZeile(buchungssatz, sollHaben, Math.Abs(betrag), umlage.NkVerrechnungsKonto);
             buchungssatz.Notiz = notiz;
@@ -64,6 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             string? neueNotiz)
         {
             satz.Buchungsdatum = neuesDatum;
+            satz.Buchungsjahr = neuesJahr; // Wirtschaftsjahr folgt dem betreffenden Jahr, nicht dem Datum.
             satz.Beschreibung = $"Betriebskosten {neueUmlage.Typ.Bezeichnung} {neuesJahr}";
             satz.Notiz = neueNotiz;
 

@@ -138,6 +138,130 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task NegativeRechnung_WirdAlsGutschriftAufNkVorauszahlungGebucht()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var kalt = new Umlage
+            {
+                Typ = new Umlagetyp("Grundsteuer"),
+                Wohnungen = [vertrag.Wohnung],
+                NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Grundsteuer", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1201", "Zahlung Grundsteuer", BuchungskontoTyp.Aktiv),
+            };
+            ctx.Umlagen.Add(MitVersion(kalt, Umlageschluessel.NachWohnflaeche));
+            // Echte Rechnung (positiv) + negative Korrektur (Soll NkVerrechnung = Gutschrift).
+            AddRechnung(ctx, kalt, 1000m);
+            var korrektur = new Buchungssatz(new DateOnly(Jahr, 7, 1), $"Betriebskosten Grundsteuer {Jahr} Korrektur") { Buchungsjahr = Jahr };
+            korrektur.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m) { Buchungssatz = korrektur, Buchungskonto = kalt.NkVerrechnungsKonto });
+            ctx.Buchungssaetze.Add(korrektur);
+            ctx.SaveChanges();
+            var korrekturId = korrektur.BuchungssatzId;
+
+            var service = Service(ctx);
+            var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
+
+            // Preview zeigt die negative Zeile korrekt und warnt (nicht-blockierend).
+            var preview = await service.PreviewAsync(wohnungIds, Jahr);
+            var negativeZeile = preview.Abrechnungseinheiten
+                .SelectMany(e => e.NkZeilen)
+                .Single(z => z.Betrag < 0);
+            negativeZeile.Betrag.Should().Be(-100m);
+            preview.Warnungen.Should().Contain(w => w.Contains("negativ"));
+
+            // Buchen möglich; die Gutschrift landet als Haben auf dem NkBuchungskonto
+            // (NK-Vorauszahlungs-Seite) des Mieters.
+            await service.BookAsync(wohnungIds, Jahr);
+
+            var korrekturZeilen = ctx.Buchungssaetze
+                .Where(s => s.BuchungssatzId == korrekturId)
+                .SelectMany(s => s.Buchungszeilen)
+                .Select(z => new { z.Buchungskonto.BuchungskontoId, z.SollHaben, z.Betrag })
+                .ToList();
+
+            korrekturZeilen.Should().ContainSingle(z =>
+                z.BuchungskontoId == kalt.NkVerrechnungsKonto.BuchungskontoId
+                && z.SollHaben == SollHaben.Soll && z.Betrag == 100m);
+            korrekturZeilen.Should().ContainSingle(z =>
+                z.BuchungskontoId == vertrag.NkBuchungskonto.BuchungskontoId
+                && z.SollHaben == SollHaben.Haben && z.Betrag == 100m);
+
+            // Preview nach dem Buchen unverändert und als gebucht markiert.
+            var nachher = await service.PreviewAsync(wohnungIds, Jahr);
+            nachher.Abrechnungseinheiten.SelectMany(e => e.NkZeilen)
+                .Single(z => z.Betrag < 0).IstVollstaendigGebucht.Should().BeTrue();
+        }
+
+        /// <summary>
+        /// Negative Rechnung (Gutschrift) einer geteilten Umlage: der Anteil wird als
+        /// Haben auf dem NkBuchungskonto gebucht. Das darf NICHT als Vorauszahlung
+        /// gewertet werden — sonst weicht der Preview-Saldo nach dem Buchen vom
+        /// gebuchten Saldo ab.
+        /// </summary>
+        [Fact]
+        public async Task NegativeRechnung_GutschriftIstKeineVorauszahlung()
+        {
+            var ctx = TestUtils.GetContext();
+            var v1 = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var v2 = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            // "Rest": Wohnung OHNE Vertrag → Leerstand → Eigenanteil.
+            var rest = new Wohnung("Rest")
+            {
+                Adresse = new Adresse("Teststraße", "1", "12345", "Stadt"),
+                MietErtragskonto = new Buchungskonto("4100", "Mieterträge Rest", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand Rest", BuchungskontoTyp.Aufwand),
+            };
+            rest.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = rest });
+            ctx.Wohnungen.Add(rest);
+            ctx.SaveChanges();
+            var alleWohnungen = new List<Wohnung> { v1.Wohnung, v2.Wohnung, rest };
+
+            // Positive Umlage, damit die Einheit/Gruppe existiert.
+            var muell = new Umlage
+            {
+                Typ = new Umlagetyp("Müllbeseitigung"),
+                Wohnungen = alleWohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Müll", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1201", "Zahlung Müll", BuchungskontoTyp.Aktiv),
+            };
+            ctx.Umlagen.Add(MitVersion(muell, Umlageschluessel.NachWohnflaeche));
+            AddRechnung(ctx, muell, 900m);
+
+            // Wasser: NUR negative Rechnung (Haben mit negativem Betrag), 3 Wohnungen.
+            var wasser = new Umlage
+            {
+                Typ = new Umlagetyp("Wasserversorgung"),
+                Wohnungen = alleWohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7002", "NK-VK Wasser", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1202", "Zahlung Wasser", BuchungskontoTyp.Aktiv),
+            };
+            ctx.Umlagen.Add(MitVersion(wasser, Umlageschluessel.NachWohnflaeche));
+            var korrektur = new Buchungssatz(new DateOnly(Jahr, 7, 1), $"Betriebskosten Wasser {Jahr}") { Buchungsjahr = Jahr };
+            korrektur.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, -429.41m) { Buchungssatz = korrektur, Buchungskonto = wasser.NkVerrechnungsKonto });
+            ctx.Buchungssaetze.Add(korrektur);
+            ctx.SaveChanges();
+            var korrekturId = korrektur.BuchungssatzId;
+
+            var service = Service(ctx);
+            var wohnungIds = alleWohnungen.Select(w => w.WohnungId).ToList();
+
+            var vor = await service.PreviewAsync(wohnungIds, Jahr);
+            var saldoVor = vor.Resultate.Single(r => r.VertragId == v1.VertragId).Saldo;
+            // Müll 300 + Wasser-Gutschrift (anteilig) → positiver Saldo, keine Vorauszahlung.
+            vor.Resultate.Single(r => r.VertragId == v1.VertragId).Vorauszahlung.Should().Be(0m);
+
+            await service.BookAsync(wohnungIds, Jahr);
+            var nach = await service.PreviewAsync(wohnungIds, Jahr);
+            var resultatNach = nach.Resultate.Single(r => r.VertragId == v1.VertragId);
+
+            // Kern der Regression: Saldo unverändert, Gutschrift NICHT als Vorauszahlung
+            // gewertet, und der Preview-Saldo stimmt mit dem gebuchten Saldo überein.
+            resultatNach.Vorauszahlung.Should().Be(0m);
+            resultatNach.Saldo.Should().Be(saldoVor);
+            resultatNach.GebuchterSaldo.Should().Be(saldoVor);
+        }
+
+        [Fact]
         public async Task PersonenZeitanteile_KommenAusDerGroesstenEinheit()
         {
             // Vertrag 1 hat zusätzlich eine Einzel-Wohnungs-Umlage (eigene Einheit).

@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import WalterSlider from '$walter/components/elements/WalterSlider.svelte';
     import WalterComboBox from '$walter/components/elements/WalterComboBox.svelte';
+    import WalterMultiSelect from '$walter/components/elements/WalterMultiSelect.svelte';
     import WalterDatePicker from '$walter/components/elements/WalterDatePicker.svelte';
     import { Row } from 'carbon-components-svelte';
     import { walter_selection } from '$walter/services/requests';
@@ -35,9 +36,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: entry = data.entry;
 
     const selectableUmlagen = walter_selection.umlagen(data.fetchImpl);
-    $: selectableWaermezaehler = entry.umlageId !== undefined
-        ? walter_selection.waermezaehler(entry.umlageId, data.fetchImpl)
-        : Promise.resolve([]);
+    // Einmalig laden - die Zaehler-Auswahl haengt nicht von der aktuellen Auswahl ab.
+    // (Reaktiv auf entry wuerde bei jeder Auswahlaenderung neu fetchen - Endlosschleife.)
+    const selectableWaermezaehler =
+        data.entry.umlageId !== undefined
+            ? walter_selection.waermezaehler(data.entry.umlageId, data.fetchImpl)
+            : Promise.resolve([]);
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(data.fetchImpl);
 
     $: title = `HKVO ab ${entry.beginn}`;
@@ -75,9 +79,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     entries={selectableUmlagen}
                     titleText="Stromrechnung (Betriebsstrom)"
                 />
-                <WalterComboBox
+                <WalterMultiSelect
                     bind:value={entry.allgemeinWaerme}
-                    readonly={entry.permissions?.update === false}
+                    disabled={entry.permissions?.update === false}
                     entries={selectableWaermezaehler}
                     titleText="AllgemeinWärme-Zähler (§9 Abs. 2)"
                 />

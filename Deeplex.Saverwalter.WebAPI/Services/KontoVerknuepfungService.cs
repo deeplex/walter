@@ -34,7 +34,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         public static readonly KontoFunktion Mietminderungen = new("Mietminderungen", false);
         public static readonly KontoFunktion Mietertraege = new("Mieterträge", false);
         public static readonly KontoFunktion Aufwendungen = new("Aufwendungen", false);
-        public static readonly KontoFunktion NkVerrechnung = new("NK-Verrechnung", true);
+        // Bewusst NICHT ausgleichbar: die NK-Verrechnung gleicht sich erst mit den
+        // Dienstleisterzahlungen aus, die hier momentan nicht gebucht werden. Sie soll
+        // den Jahresabschluss deshalb nicht als offener Punkt blockieren (nur gelistet).
+        public static readonly KontoFunktion NkVerrechnung = new("NK-Verrechnung", false);
         public static readonly KontoFunktion Verbindlichkeiten = new("Verbindlichkeiten", true);
     }
 
