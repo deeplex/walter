@@ -205,11 +205,24 @@ export async function walter_fetch(
 
 // =================================== GET ====================================
 
-export const walter_get = (
+export async function walter_get(
     url: string,
     fetchImpl: typeof fetch
-): Promise<unknown> =>
-    walter_fetch(fetchImpl, url, { method: 'GET' }).then((e) => e.json());
+): Promise<unknown> {
+    const response = await walter_fetch(fetchImpl, url, {
+        method: 'GET',
+        cache: 'no-store'
+    });
+    const body = await parseBody(response);
+    if (!response.ok) {
+        throw new Error(
+            typeof body === 'string' && body.length > 0
+                ? body
+                : 'Anfrage fehlgeschlagen.'
+        );
+    }
+    return body;
+}
 
 // =================================== PUT ===================================
 

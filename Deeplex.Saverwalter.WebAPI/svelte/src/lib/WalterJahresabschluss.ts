@@ -91,8 +91,7 @@ export type WalterPruefStatus =
     | 'Bestanden'
     | 'NichtBestanden'
     | 'Fehlt'
-    | 'VerzichtBestanden'
-    | 'VerzichtNichtBestanden';
+    | 'Verzichtet';
 
 /** Eine geprüfte Position (Vertrag oder Eigenanteil) der Jahresabschluss-Kontrolle. */
 export type WalterPruefPosition = {
@@ -112,8 +111,7 @@ export type WalterJahresabschlussKontrolle = {
     bestanden: number;
     nichtBestanden: number;
     fehlt: number;
-    verzichtBestanden: number;
-    verzichtNichtBestanden: number;
+    verzichtet: number;
     gesamt: number;
 };
 

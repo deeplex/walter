@@ -41,10 +41,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterJahresabschluss,
         type WalterKontoJahres,
         type WalterJahresabschlussKontrolle,
-        type WalterPruefStatus
+        type WalterPruefStatus,
+        WalterToastContent
     } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import { convertEuro } from '$walter/services/utils';
+    import { addToast } from '$walter/store';
 
     export let fetchImpl: typeof fetch;
 
@@ -78,6 +80,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let kontrolle: WalterJahresabschlussKontrolle | undefined;
     let kontrolleLaeuft = false;
 
+    const KontrolleToast = new WalterToastContent(
+        undefined,
+        'Konsistenz-Check fehlgeschlagen',
+        () => '',
+        (error: unknown) =>
+            typeof error === 'string' && error.length > 0
+                ? error
+                : 'Bitte erneut versuchen.'
+    );
+
     async function pruefeKonsistenz() {
         if (selectedJahr === undefined) return;
         const jahr = selectedJahr;
@@ -86,6 +98,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         try {
             const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
             if (jahr === selectedJahr) kontrolle = result;
+        } catch (e) {
+            addToast(KontrolleToast, false, String(e instanceof Error ? e.message : e));
         } finally {
             kontrolleLaeuft = false;
         }
@@ -98,13 +112,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Bestanden: { label: 'Bestanden', type: 'green' },
         NichtBestanden: { label: 'Abweichend', type: 'red' },
         Fehlt: { label: 'Fehlt', type: 'gray' },
-        VerzichtBestanden: { label: 'Verzicht ok', type: 'teal' },
-        VerzichtNichtBestanden: { label: 'Verzicht mit Buchung', type: 'red' }
+        Verzichtet: { label: 'Verzicht ok', type: 'teal' }
     };
 
     // Nur die auffälligen Positionen listen (bestanden/verzicht-ok braucht keiner).
     $: probleme = (kontrolle?.positionen ?? []).filter(
-        (p) => p.status !== 'Bestanden' && p.status !== 'VerzichtBestanden'
+        (p) => p.status !== 'Bestanden' && p.status !== 'Verzichtet'
     );
 
     // Nach einer Verzicht-Änderung Jahr + Übersicht neu laden.
@@ -310,14 +323,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <InlineLoading
                             description="Rechne alle Abrechnungsgruppen nach …"
                         />
-                    {:else}
-                        <span
-                            style="font-size: 0.875rem; color: var(--cds-text-secondary);"
-                        >
-                            Ergäbe eine erneute Abrechnung {abschluss.jahr} exakt
-                            dasselbe wie das Gebuchte?
-                        </span>
-                    {/if}
+                   {/if}
                 </div>
 
                 {#if kontrolle && !kontrolleLaeuft}
@@ -330,7 +336,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <div
                         style="display: flex; gap: 0.75rem; flex-wrap: wrap;"
                     >
-                        {#each [{ label: 'Bestanden', wert: k.bestanden, type: 'green' }, { label: 'Fehlt', wert: k.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: k.verzichtBestanden, type: 'teal' }, { label: 'Abweichend', wert: k.nichtBestanden, type: 'red' }, { label: 'Verzicht mit Buchung', wert: k.verzichtNichtBestanden, type: 'red' }] as kachel}
+                        {#each [{ label: 'Bestanden', wert: k.bestanden, type: 'green' }, { label: 'Fehlt', wert: k.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: k.verzichtet, type: 'teal' }, { label: 'Abweichend', wert: k.nichtBestanden, type: 'red' }] as kachel}
                             <div
                                 style="min-width: 7rem; padding: 0.5rem 0.75rem; border-left: 4px solid {kachel.type ===
                                 'green'

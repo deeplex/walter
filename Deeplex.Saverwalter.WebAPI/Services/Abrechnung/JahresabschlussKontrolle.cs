@@ -26,10 +26,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         NichtBestanden,
         /// <summary>Weder Abrechnung gebucht noch Verzicht — noch nicht gemacht.</summary>
         Fehlt,
-        /// <summary>Verzicht dokumentiert und (korrekt) nichts gebucht.</summary>
-        VerzichtBestanden,
-        /// <summary>Verzicht dokumentiert, aber es ist trotzdem noch etwas gebucht.</summary>
-        VerzichtNichtBestanden
+        /// <summary>Verzicht dokumentiert und nichts gebucht — akzeptiert, aber kein echtes "Bestanden".</summary>
+        Verzichtet
     }
 
     public class PruefPosition
@@ -52,8 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public int Bestanden { get; set; }
         public int NichtBestanden { get; set; }
         public int Fehlt { get; set; }
-        public int VerzichtBestanden { get; set; }
-        public int VerzichtNichtBestanden { get; set; }
+        public int Verzichtet { get; set; }
         public int Gesamt => Positionen.Count;
     }
 
@@ -91,35 +88,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 PruefStatus status;
                 string? detail = null;
 
-                if (verzicht)
+                if (!hatBuchungen)
                 {
-                    status = hatBuchungen ? PruefStatus.VerzichtNichtBestanden : PruefStatus.VerzichtBestanden;
-                    if (hatBuchungen)
-                        detail = "Verzicht hinterlegt, aber es ist noch eine Abrechnung/Anteile gebucht — bitte zurücknehmen.";
-                }
-                else if (!hatBuchungen)
-                {
-                    status = PruefStatus.Fehlt;
+                    status = verzicht ? PruefStatus.Verzichtet : PruefStatus.Fehlt;
                 }
                 else
                 {
-                    var saldoStimmt = hatResultat && Math.Abs(r.Saldo - r.GebuchterSaldo!.Value) <= Eps;
-                    var anteileStimmen = anteile.All(a =>
-                        a.GebuchterBetrag.HasValue && a.GeplanterBetrag.HasValue
-                        && Math.Abs(a.GebuchterBetrag.Value - a.GeplanterBetrag.Value) <= Eps);
+                    // Nur prüfen, was tatsächlich gebucht ist — ob Resultat/Anteile überhaupt
+                    // gebucht wurden, ist eine Frage offener Posten, nicht der Konsistenz.
+                    var saldoOk = !hatResultat
+                        || Math.Abs(r.Saldo - r.GebuchterSaldo!.Value) <= Eps;
+                    var anteileOk = anteile.All(a =>
+                        !a.GebuchterBetrag.HasValue
+                        || (a.GeplanterBetrag.HasValue
+                            && Math.Abs(a.GebuchterBetrag.Value - a.GeplanterBetrag.Value) <= Eps));
 
-                    if (hatResultat && saldoStimmt && anteileStimmen)
+                    if (saldoOk && anteileOk)
                     {
                         status = PruefStatus.Bestanden;
                     }
                     else
                     {
                         status = PruefStatus.NichtBestanden;
-                        detail = !hatResultat
-                            ? "Anteile gebucht, aber kein Abrechnungsresultat — unvollständig."
-                            : !saldoStimmt
-                                ? $"Saldo weicht ab: gebucht {r.GebuchterSaldo:0.00} €, neu {r.Saldo:0.00} €."
-                                : "NK-Anteile weichen von der Neuberechnung ab.";
+                        detail = !saldoOk
+                            ? $"Saldo weicht ab: gebucht {r.GebuchterSaldo:0.00} €, neu {r.Saldo:0.00} €."
+                            : "NK-Anteile weichen von der Neuberechnung ab.";
                     }
                 }
 
@@ -160,8 +153,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             result.Bestanden = result.Positionen.Count(p => p.Status == PruefStatus.Bestanden);
             result.NichtBestanden = result.Positionen.Count(p => p.Status == PruefStatus.NichtBestanden);
             result.Fehlt = result.Positionen.Count(p => p.Status == PruefStatus.Fehlt);
-            result.VerzichtBestanden = result.Positionen.Count(p => p.Status == PruefStatus.VerzichtBestanden);
-            result.VerzichtNichtBestanden = result.Positionen.Count(p => p.Status == PruefStatus.VerzichtNichtBestanden);
+            result.Verzichtet = result.Positionen.Count(p => p.Status == PruefStatus.Verzichtet);
         }
     }
 }

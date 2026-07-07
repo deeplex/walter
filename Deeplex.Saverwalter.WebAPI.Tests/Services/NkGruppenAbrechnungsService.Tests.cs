@@ -405,6 +405,58 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             plaene.Sum(p => p.Anteile.Sum(a => a.Betrag)).Should().Be(800m);
         }
 
+        /// <summary>
+        /// Ein Vertrag kann an mehreren Einheiten teilnehmen, wenn seine Umlagen
+        /// unterschiedliche Wohnungskombinationen haben (z.B. eine Umlage nur für
+        /// diese eine Wohnung, andere geteilt mit Nachbarwohnungen). Die
+        /// Anteil-Gutschrift-Erkennung darf sich dabei NICHT auf die Umlagen der
+        /// jeweils aktuellen Einheit beschränken, sonst wird eine Gutschrift auf
+        /// einer Umlage, die nur in einer ANDEREN Einheit dieses Vertrags auftaucht,
+        /// fälschlich als echte Vorauszahlung gezählt.
+        /// </summary>
+        [Fact]
+        public void Vorauszahlung_SchliesstGutschriftAusAuchWennUmlageInAndererEinheitLiegt()
+        {
+            var w1 = MakeWohnung("W1");
+            var w2 = MakeWohnung("W2");
+            var vertrag = MakeVertrag(w1);
+            vertrag.NkBuchungskonto.BuchungskontoId = 300;
+            MakeVertrag(w2);
+
+            // Umlage A: geteilt zwischen W1 und W2 → eigene Einheit "W1,W2".
+            var umlageA = MakeUmlage(Umlageschluessel.NachWohnflaeche, typName: "Müll",
+                nkKonto: new Buchungskonto("7000", "NK-VK Müll", BuchungskontoTyp.Passiv));
+            umlageA.NkVerrechnungsKonto!.BuchungskontoId = 100;
+            umlageA.Wohnungen.AddRange([w1, w2]);
+
+            // Umlage B: nur W1 → eigene Einheit "W1", andere Wohnungskombination als A.
+            var umlageB = MakeUmlage(Umlageschluessel.NachWohnflaeche, typName: "Allgemeinstrom",
+                nkKonto: new Buchungskonto("7001", "NK-VK Strom", BuchungskontoTyp.Passiv));
+            umlageB.NkVerrechnungsKonto!.BuchungskontoId = 200;
+            umlageB.Wohnungen.Add(w1);
+
+            // Anteil-Gutschrift auf Umlage B: Haben-Zeile auf dem Verrechnungskonto
+            // (negative Rechnung) UND Haben-Zeile auf dem NkBuchungskonto des
+            // Vertrags, im selben Buchungssatz — genau wie eine echte Gutschrift.
+            var jahr = 2024;
+            var satz = new Buchungssatz(new DateOnly(jahr, 6, 1), "Gutschrift Allgemeinstrom") { Buchungsjahr = jahr };
+            var verrechnungsZeile = new Buchungszeile(SollHaben.Haben, -26.96m)
+                { Buchungssatz = satz, Buchungskonto = umlageB.NkVerrechnungsKonto };
+            var vorauszahlungsZeile = new Buchungszeile(SollHaben.Haben, 26.96m)
+                { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto };
+            satz.Buchungszeilen.Add(verrechnungsZeile);
+            satz.Buchungszeilen.Add(vorauszahlungsZeile);
+            umlageB.NkVerrechnungsKonto.Buchungszeilen.Add(verrechnungsZeile);
+            vertrag.NkBuchungskonto.Buchungszeilen.Add(vorauszahlungsZeile);
+
+            var einheiten = ComputeEinheiten([umlageA, umlageB], jahr);
+
+            var einheitA = einheiten.Single(e => e.Umlagen.Contains(umlageA));
+            var partei = einheitA.Parteien.Single(p => p.Vertrag == vertrag);
+
+            partei.VertragInfo!.Vorauszahlung.Should().Be(0m);
+        }
+
         // ── Preview nach Buchung / Zahlungen ──────────────────────────────────
 
         [Fact]

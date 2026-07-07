@@ -246,11 +246,23 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var abrechnungsbeginn = new DateOnly(jahr, 1, 1);
             var abrechnungsende = new DateOnly(jahr, 12, 31);
             var abrechnungstage = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
+            var alleUmlagen = umlagen as IReadOnlyCollection<Umlage> ?? umlagen.ToList();
 
-            return [.. umlagen
+            // Verrechnungskonten ALLER Umlagen der Gruppe (nicht nur der einer einzelnen
+            // Einheit) — eine Umlage kann eine andere Wohnungskombination als die des
+            // Vertrags haben und würde sonst beim Vorauszahlungs-Gutschrift-Abgleich
+            // (s.u.) übersehen.
+            var gruppenVerrechnungsKontoIds = alleUmlagen
+                .Select(u => u.NkVerrechnungsKonto?.BuchungskontoId)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .ToHashSet();
+
+            return [.. alleUmlagen
                 .GroupBy(u => string.Join(",", u.Wohnungen.Select(w => w.WohnungId).OrderBy(id => id)))
                 .Select(group =>
-                    BuildEinheit(group.ToList(), jahr, abrechnungsbeginn, abrechnungsende, abrechnungstage))];
+                    BuildEinheit(group.ToList(), jahr, abrechnungsbeginn, abrechnungsende, abrechnungstage,
+                        gruppenVerrechnungsKontoIds))];
         }
 
         // ── Interne Berechnung ────────────────────────────────────────────────
@@ -260,7 +272,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             int jahr,
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
-            int abrechnungstage)
+            int abrechnungstage,
+            HashSet<int> gruppenVerrechnungsKontoIds)
         {
             var wohnungen = umlagenInGruppe.First().Wohnungen
                 .OrderBy(w => w.WohnungId)
@@ -274,7 +287,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var parteien = BuildParteien(
                 wohnungen, umlagenInGruppe,
                 gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
-                abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
+                abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr,
+                gruppenVerrechnungsKontoIds);
 
             var rechnungsplaene = BuildRechnungsplaene(umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr, abrechnungsende);
 
@@ -306,7 +320,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
             int abrechnungstage,
-            int jahr)
+            int jahr,
+            HashSet<int> gruppenVerrechnungsKontoIds)
         {
             var parteien = new List<NkPartei>();
 
@@ -318,7 +333,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var partei = BuildVertragsPartei(
                         vertrag, wohnung, wohnungen, umlagenInGruppe,
                         gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
-                        abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
+                        abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr,
+                        gruppenVerrechnungsKontoIds);
                     if (partei is not null)
                         parteien.Add(partei);
                 }
@@ -460,7 +476,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
             int abrechnungstage,
-            int jahr)
+            int jahr,
+            HashSet<int> gruppenVerrechnungsKontoIds)
         {
             var nutzungsbeginn = DateOnly.FromDayNumber(
                 Math.Max(vertrag.Beginn().DayNumber, abrechnungsbeginn.DayNumber));
@@ -498,19 +515,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
             var abrechnungsSatzId = existing?.Buchungssatz.BuchungssatzId;
 
-            // NK-Verrechnungskonten der Einheit: Sätze, die eines davon berühren, sind
-            // Betriebskostenrechnungen/NK-Anteile. Eine dort gebuchte Haben-Zeile auf dem
-            // NkBuchungskonto ist eine Anteil-GUTSCHRIFT (negative Rechnung), KEINE echte
-            // Vorauszahlung — sie steckt bereits im Rechnungsbetrag und darf nicht noch
-            // einmal als Vorauszahlung abgezogen werden.
-            var verrechnungsKontoIds = umlagen
-                .Select(u => u.NkVerrechnungsKonto?.BuchungskontoId)
-                .Where(id => id.HasValue)
-                .Select(id => id!.Value)
-                .ToHashSet();
+            // NK-Verrechnungskonten der GESAMTEN Gruppe (nicht nur der Einheit dieser
+            // Umlagen-Wohnungskombination — eine Umlage kann eine andere Wohnungskombination
+            // haben als der Vertrag und würde sonst hier übersehen): Sätze, die eines davon
+            // berühren, sind Betriebskostenrechnungen/NK-Anteile. Eine dort gebuchte
+            // Haben-Zeile auf dem NkBuchungskonto ist eine Anteil-GUTSCHRIFT (negative
+            // Rechnung), KEINE echte Vorauszahlung — sie steckt bereits im Rechnungsbetrag
+            // und darf nicht noch einmal als Vorauszahlung abgezogen werden.
             bool IstAnteilGutschrift(Buchungszeile z) =>
                 z.Buchungssatz.Buchungszeilen.Any(
-                    gz => verrechnungsKontoIds.Contains(gz.Buchungskonto.BuchungskontoId));
+                    gz => gruppenVerrechnungsKontoIds.Contains(gz.Buchungskonto.BuchungskontoId));
 
             var vertragInfo = new NkVertragInfo
             {

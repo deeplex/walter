@@ -78,11 +78,28 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void NichtBestanden_wenn_anteile_gebucht_aber_kein_resultat()
+        public void Bestanden_wenn_anteile_gebucht_und_passend_aber_kein_resultat()
         {
-            // Anteile gebucht, aber Glattstellung (Resultat) fehlt → unvollständig.
+            // Ob die Glattstellung (Resultat) gebucht wurde, ist eine Frage offener Posten,
+            // keine Frage der Konsistenz — die gebuchten Anteile stimmen, das reicht.
             var preview = Preview(1, saldo: 100m, gebuchterSaldo: null, geplanterAnteil: 50m, gebuchterAnteil: 50m);
+            Status(preview).Should().Be(PruefStatus.Bestanden);
+        }
+
+        [Fact]
+        public void NichtBestanden_wenn_anteile_gebucht_aber_abweichend_und_kein_resultat()
+        {
+            var preview = Preview(1, saldo: 100m, gebuchterSaldo: null, geplanterAnteil: 60m, gebuchterAnteil: 50m);
             Status(preview).Should().Be(PruefStatus.NichtBestanden);
+        }
+
+        [Fact]
+        public void Bestanden_wenn_resultat_passt_aber_anteile_nicht_gebucht()
+        {
+            // Resultat/Saldo stimmt, Anteile sind noch gar nicht gebucht — auch das ist
+            // konsistent, nicht "abweichend".
+            var preview = Preview(1, saldo: 100m, gebuchterSaldo: 100m, geplanterAnteil: 50m, gebuchterAnteil: null);
+            Status(preview).Should().Be(PruefStatus.Bestanden);
         }
 
         [Fact]
@@ -93,17 +110,24 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void VerzichtBestanden_wenn_verzicht_und_nichts_gebucht()
+        public void Verzichtet_wenn_verzicht_und_nichts_gebucht()
         {
             var preview = Preview(1, saldo: 100m, gebuchterSaldo: null, geplanterAnteil: 50m, gebuchterAnteil: null);
-            Status(preview, verzichtet: 1).Should().Be(PruefStatus.VerzichtBestanden);
+            Status(preview, verzichtet: 1).Should().Be(PruefStatus.Verzichtet);
         }
 
         [Fact]
-        public void VerzichtNichtBestanden_wenn_verzicht_aber_gebucht()
+        public void Bestanden_wenn_verzicht_und_saldo_und_anteil_trotzdem_uebereinstimmen()
         {
             var preview = Preview(1, saldo: 100m, gebuchterSaldo: 100m, geplanterAnteil: 50m, gebuchterAnteil: 50m);
-            Status(preview, verzichtet: 1).Should().Be(PruefStatus.VerzichtNichtBestanden);
+            Status(preview, verzichtet: 1).Should().Be(PruefStatus.Bestanden);
+        }
+
+        [Fact]
+        public void NichtBestanden_wenn_verzicht_aber_gebuchter_saldo_abweicht()
+        {
+            var preview = Preview(1, saldo: 120m, gebuchterSaldo: 100m, geplanterAnteil: 50m, gebuchterAnteil: 50m);
+            Status(preview, verzichtet: 1).Should().Be(PruefStatus.NichtBestanden);
         }
 
         [Fact]
@@ -132,8 +156,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                     new PruefPosition { Status = PruefStatus.Bestanden },
                     new PruefPosition { Status = PruefStatus.NichtBestanden },
                     new PruefPosition { Status = PruefStatus.Fehlt },
-                    new PruefPosition { Status = PruefStatus.VerzichtBestanden },
-                    new PruefPosition { Status = PruefStatus.VerzichtNichtBestanden }
+                    new PruefPosition { Status = PruefStatus.Verzichtet }
                 ]
             };
 
@@ -142,9 +165,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             result.Bestanden.Should().Be(2);
             result.NichtBestanden.Should().Be(1);
             result.Fehlt.Should().Be(1);
-            result.VerzichtBestanden.Should().Be(1);
-            result.VerzichtNichtBestanden.Should().Be(1);
-            result.Gesamt.Should().Be(6);
+            result.Verzichtet.Should().Be(1);
+            result.Gesamt.Should().Be(5);
         }
     }
 }

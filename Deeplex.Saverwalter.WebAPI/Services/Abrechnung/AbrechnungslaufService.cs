@@ -801,7 +801,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                             : "Eigenanteil";
 
                         var effectiveBetrag = plannedSum ?? bookedSum ?? 0;
-                        var anteilFaktor = plan.Betrag > 0
+                        var anteilFaktor = plan.Betrag != 0
                             ? effectiveBetrag / plan.Betrag
                             : 0;
 
