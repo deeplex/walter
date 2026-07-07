@@ -42,6 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterKontoJahres,
         type WalterJahresabschlussKontrolle,
         type WalterPruefStatus,
+        type WalterPruefPosition,
         WalterToastContent
     } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
@@ -95,6 +96,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const jahr = selectedJahr;
         kontrolleLaeuft = true;
         kontrolle = undefined;
+        alleJahreErgebnisse = [];
         try {
             const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
             if (jahr === selectedJahr) kontrolle = result;
@@ -104,6 +106,139 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             kontrolleLaeuft = false;
         }
     }
+
+    // Alle Jahre auf einmal prüfen: sequenziell (nicht parallel), damit das
+    // Backend nicht mit vielen gleichzeitigen Neuberechnungen überlastet wird.
+    // Läuft über den bestehenden Pro-Jahr-Endpunkt, ein Fehler in einem Jahr
+    // bricht die übrigen Jahre nicht ab.
+    type JahresKontrollErgebnis = {
+        jahr: number;
+        kontrolle?: WalterJahresabschlussKontrolle;
+        fehler?: string;
+    };
+
+    let alleJahreLaeuft = false;
+    let alleJahreFortschritt = { jahr: 0, erledigt: 0, gesamt: 0 };
+    let alleJahreErgebnisse: JahresKontrollErgebnis[] = [];
+
+    async function pruefeAlleJahre() {
+        const jahre = [...uebersicht].map((u) => u.jahr).sort((a, b) => b - a);
+        if (jahre.length === 0) return;
+
+        alleJahreLaeuft = true;
+        alleJahreErgebnisse = [];
+        kontrolle = undefined;
+        alleJahreFortschritt = { jahr: jahre[0], erledigt: 0, gesamt: jahre.length };
+
+        for (const jahr of jahre) {
+            alleJahreFortschritt = { ...alleJahreFortschritt, jahr };
+            try {
+                const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
+                alleJahreErgebnisse = [
+                    ...alleJahreErgebnisse,
+                    { jahr, kontrolle: result }
+                ];
+            } catch (e) {
+                alleJahreErgebnisse = [
+                    ...alleJahreErgebnisse,
+                    {
+                        jahr,
+                        fehler: String(e instanceof Error ? e.message : e)
+                    }
+                ];
+            } finally {
+                alleJahreFortschritt = {
+                    ...alleJahreFortschritt,
+                    erledigt: alleJahreFortschritt.erledigt + 1
+                };
+            }
+        }
+
+        alleJahreLaeuft = false;
+    }
+
+    // Auffällige Positionen aller geprüften Jahre zusammen, je mit Jahr markiert.
+    $: alleJahreProbleme = alleJahreErgebnisse.flatMap((e) =>
+        (e.kontrolle?.positionen ?? [])
+            .filter((p) => p.status !== 'Bestanden' && p.status !== 'Verzichtet')
+            .map((p) => ({ ...p, jahr: e.jahr }))
+    );
+
+    // Die Gruppen-Bezeichnung trägt für Auswahl-Zwecke die Wohnungszahl mit
+    // ("… (3 Wohnungen)"), die hier nur ablenkt.
+    const ohneWohnungszahl = (gruppe: string) =>
+        gruppe.replace(/\s*\(\d+\s+Wohnungen\)\s*$/, '');
+
+    type ProblemZeile = WalterPruefPosition & { jahr?: number };
+
+    type Ansicht = {
+        gesamt: number;
+        bestanden: number;
+        nichtBestanden: number;
+        fehlt: number;
+        verzichtet: number;
+        probleme: ProblemZeile[];
+        fehlerProJahr: { jahr: number; fehler: string }[];
+    };
+
+    // Einheitliche Ansicht für Einzeljahr- und Alle-Jahre-Ergebnis — sieht
+    // gleich aus, unabhängig davon, welcher Check zuletzt lief. Abhängigkeiten
+    // werden als Parameter übergeben, damit Svelte sie in der reaktiven
+    // Zuweisung unten erkennt (reine Nutzung im Funktionskörper reicht nicht).
+    function berechneAnsicht(
+        kontrolle: WalterJahresabschlussKontrolle | undefined,
+        probleme: ProblemZeile[],
+        alleJahreErgebnisse: JahresKontrollErgebnis[],
+        alleJahreProbleme: ProblemZeile[]
+    ): Ansicht | undefined {
+        if (kontrolle) {
+            return {
+                gesamt: kontrolle.gesamt,
+                bestanden: kontrolle.bestanden,
+                nichtBestanden: kontrolle.nichtBestanden,
+                fehlt: kontrolle.fehlt,
+                verzichtet: kontrolle.verzichtet,
+                probleme,
+                fehlerProJahr: []
+            };
+        }
+        if (alleJahreErgebnisse.length > 0) {
+            return {
+                gesamt: alleJahreErgebnisse.reduce(
+                    (s, e) => s + (e.kontrolle?.gesamt ?? 0),
+                    0
+                ),
+                bestanden: alleJahreErgebnisse.reduce(
+                    (s, e) => s + (e.kontrolle?.bestanden ?? 0),
+                    0
+                ),
+                nichtBestanden: alleJahreErgebnisse.reduce(
+                    (s, e) => s + (e.kontrolle?.nichtBestanden ?? 0),
+                    0
+                ),
+                fehlt: alleJahreErgebnisse.reduce(
+                    (s, e) => s + (e.kontrolle?.fehlt ?? 0),
+                    0
+                ),
+                verzichtet: alleJahreErgebnisse.reduce(
+                    (s, e) => s + (e.kontrolle?.verzichtet ?? 0),
+                    0
+                ),
+                probleme: alleJahreProbleme,
+                fehlerProJahr: alleJahreErgebnisse
+                    .filter((e) => e.fehler)
+                    .map((e) => ({ jahr: e.jahr, fehler: e.fehler! }))
+            };
+        }
+        return undefined;
+    }
+
+    $: ansicht = berechneAnsicht(
+        kontrolle,
+        probleme,
+        alleJahreErgebnisse,
+        alleJahreProbleme
+    );
 
     const statusInfo: Record<
         WalterPruefStatus,
@@ -314,29 +449,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <Button
                         size="small"
                         kind="tertiary"
-                        disabled={kontrolleLaeuft}
+                        disabled={kontrolleLaeuft || alleJahreLaeuft}
                         on:click={pruefeKonsistenz}
                     >
                         Konsistenz prüfen
+                    </Button>
+                    <Button
+                        size="small"
+                        kind="ghost"
+                        disabled={kontrolleLaeuft || alleJahreLaeuft}
+                        on:click={pruefeAlleJahre}
+                    >
+                        Alle Jahre prüfen
                     </Button>
                     {#if kontrolleLaeuft}
                         <InlineLoading
                             description="Rechne alle Abrechnungsgruppen nach …"
                         />
                    {/if}
+                    {#if alleJahreLaeuft}
+                        <InlineLoading
+                            description={`Prüfe Jahr ${alleJahreFortschritt.jahr} (${alleJahreFortschritt.erledigt + 1}/${alleJahreFortschritt.gesamt}) …`}
+                        />
+                    {/if}
                 </div>
 
-                {#if kontrolle && !kontrolleLaeuft}
-                    {@const k = kontrolle}
+                {#if ansicht}
                     <p
                         style="font-size: 0.75rem; color: var(--cds-text-secondary); margin: 1rem 0 0.5rem;"
                     >
-                        {k.gesamt} Positionen geprüft
+                        {ansicht.gesamt} Positionen geprüft
                     </p>
                     <div
                         style="display: flex; gap: 0.75rem; flex-wrap: wrap;"
                     >
-                        {#each [{ label: 'Bestanden', wert: k.bestanden, type: 'green' }, { label: 'Fehlt', wert: k.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: k.verzichtet, type: 'teal' }, { label: 'Abweichend', wert: k.nichtBestanden, type: 'red' }] as kachel}
+                        {#each [{ label: 'Bestanden', wert: ansicht.bestanden, type: 'green' }, { label: 'Fehlt', wert: ansicht.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: ansicht.verzichtet, type: 'teal' }, { label: 'Abweichend', wert: ansicht.nichtBestanden, type: 'red' }] as kachel}
                             <div
                                 style="min-width: 7rem; padding: 0.5rem 0.75rem; border-left: 4px solid {kachel.type ===
                                 'green'
@@ -361,7 +508,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         {/each}
                     </div>
 
-                    {#if probleme.length === 0}
+                    {#if ansicht.fehlerProJahr.length > 0}
+                        <p
+                            style="margin-top: 0.75rem; color: var(--cds-support-error); font-size: 0.875rem;"
+                        >
+                            {#each ansicht.fehlerProJahr as f (f.jahr)}
+                                <span style="display: block;"
+                                    >{f.jahr}: {f.fehler}</span
+                                >
+                            {/each}
+                        </p>
+                    {/if}
+
+                    {#if ansicht.probleme.length === 0}
                         <p
                             style="margin-top: 1rem; color: var(--cds-support-success);"
                         >
@@ -369,41 +528,53 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             ändern.
                         </p>
                     {:else}
-                        <div style="margin-top: 1rem;">
-                            {#each probleme as p}
-                                <div
-                                    role="button"
-                                    tabindex="0"
-                                    on:click={() =>
-                                        p.vertragId != null &&
-                                        navigation.vertrag(p.vertragId)}
-                                    on:keydown={(e) =>
-                                        e.key === 'Enter' &&
-                                        p.vertragId != null &&
-                                        navigation.vertrag(p.vertragId)}
-                                    style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--cds-border-subtle); {p.vertragId !=
-                                    null
-                                        ? 'cursor: pointer;'
-                                        : ''}"
-                                >
-                                    <Tag size="sm" type={statusInfo[p.status].type}
-                                        >{statusInfo[p.status].label}</Tag
+                        <Accordion style="margin-top: 1rem;">
+                            <AccordionItem open>
+                                <svelte:fragment slot="title">
+                                    Offene Punkte ({ansicht.probleme.length})
+                                </svelte:fragment>
+                                {#each ansicht.probleme as p (`${p.jahr ?? ''}-${p.vertragId ?? p.bezeichnung}-${p.gruppe}`)}
+                                    <div
+                                        role="button"
+                                        tabindex="0"
+                                        on:click={() =>
+                                            p.vertragId != null &&
+                                            navigation.vertrag(p.vertragId)}
+                                        on:keydown={(e) =>
+                                            e.key === 'Enter' &&
+                                            p.vertragId != null &&
+                                            navigation.vertrag(p.vertragId)}
+                                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--cds-border-subtle); {p.vertragId !=
+                                        null
+                                            ? 'cursor: pointer;'
+                                            : ''}"
                                     >
-                                    <div style="flex: 1 1 0; min-width: 0;">
-                                        <div style="font-size: 0.875rem;">
-                                            {p.bezeichnung}
-                                        </div>
-                                        <div
-                                            style="font-size: 0.75rem; color: var(--cds-text-secondary);"
+                                        {#if p.jahr !== undefined}
+                                            <Tag size="sm" type="cool-gray"
+                                                >{p.jahr}</Tag
+                                            >
+                                        {/if}
+                                        <Tag
+                                            size="sm"
+                                            type={statusInfo[p.status].type}
+                                            >{statusInfo[p.status].label}</Tag
                                         >
-                                            {p.gruppe}{p.detail
-                                                ? ` · ${p.detail}`
-                                                : ''}
+                                        <div style="flex: 1 1 0; min-width: 0;">
+                                            <div style="font-size: 0.875rem;">
+                                                {p.bezeichnung}
+                                            </div>
+                                            <div
+                                                style="font-size: 0.75rem; color: var(--cds-text-secondary);"
+                                            >
+                                                {ohneWohnungszahl(p.gruppe)}{p.detail
+                                                    ? ` · ${p.detail}`
+                                                    : ''}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            {/each}
-                        </div>
+                                {/each}
+                            </AccordionItem>
+                        </Accordion>
                     {/if}
                 {/if}
             </Tile>
