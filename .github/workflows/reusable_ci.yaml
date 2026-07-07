@@ -294,19 +294,28 @@ jobs:
 
       - name: Initialize MinIO bucket for file tests
         run: |
+          # "localhost" can resolve to ::1 first on the runner while the MinIO
+          # service container's published port is only reachable over IPv4 —
+          # use 127.0.0.1 explicitly to avoid a spurious connection refused.
+          ready=false
           for _ in $(seq 1 60); do
-            if curl --silent --fail http://localhost:9000/minio/health/ready >/dev/null; then
+            if curl --silent --fail http://127.0.0.1:9000/minio/health/ready >/dev/null; then
+              ready=true
               break
             fi
             sleep 1
           done
+          if [ "$ready" != "true" ]; then
+            echo "MinIO did not become healthy at 127.0.0.1:9000 within 60s."
+            exit 1
+          fi
 
           curl --fail --silent --show-error --location \
             https://dl.min.io/client/mc/release/linux-amd64/mc \
             --output /tmp/mc
           chmod +x /tmp/mc
 
-          /tmp/mc alias set local http://localhost:9000 minioadmin minioadmin
+          /tmp/mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
           /tmp/mc mb --ignore-existing local/saverwalter
           /tmp/mc anonymous set public local/saverwalter
 
@@ -336,7 +345,7 @@ jobs:
           S3_HOST: localhost
           S3_PORT: 9000
           S3_BUCKET: saverwalter
-          S3_PROVIDER: http://localhost:9000/saverwalter
+          S3_PROVIDER: http://127.0.0.1:9000/saverwalter
           WALTER_E2E_PASSWORD: postgres
           WALTER_LOG_DIR: ${{ runner.temp }}/walter-e2e
           WALTER_PRESERVE_LOGS_ON_FAILURE: 1
