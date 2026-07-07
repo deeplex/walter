@@ -18,15 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
           cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install frontend dependencies
         working-directory: ${{ env.FRONTEND_DIR }}
@@ -68,15 +68,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
           cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install frontend dependencies
         run: yarn install --immutable
@@ -92,15 +92,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
           cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install frontend dependencies
         run: yarn install --immutable
@@ -124,15 +124,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
           cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install frontend dependencies
         run: yarn install --immutable
@@ -274,15 +274,15 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
           cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install frontend dependencies
         working-directory: ${{ env.FRONTEND_DIR }}
