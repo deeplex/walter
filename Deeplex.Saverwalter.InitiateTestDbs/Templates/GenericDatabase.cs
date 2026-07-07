@@ -1429,7 +1429,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             foreach (var umlage in umlagen)
             {
                 var zahlerBankkonto = umlage.Wohnungen
-                    .Select(w => {
+                    .Select(w =>
+                    {
                         var b = w.Eigentuemer.FirstOrDefault()?.Kontakt;
                         return b != null ? eigentuemerBankkontos.GetValueOrDefault(b) : null;
                     })

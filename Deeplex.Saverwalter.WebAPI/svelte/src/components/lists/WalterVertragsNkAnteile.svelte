@@ -29,8 +29,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import { Add, TrashCan } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
-    import { WalterComboBox, WalterNumberInput, WalterDatePicker } from '$walter/components';
-    import { walter_selection, walter_get, walter_post, walter_delete } from '$walter/services/requests';
+    import {
+        WalterComboBox,
+        WalterNumberInput,
+        WalterDatePicker
+    } from '$walter/components';
+    import {
+        walter_selection,
+        walter_get,
+        walter_post,
+        walter_delete
+    } from '$walter/services/requests';
     import { convertEuro } from '$walter/services/utils';
     import type { WalterSelectionEntry } from '$walter/lib';
 
@@ -145,7 +154,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const headers = [
         ...(umlageId == null ? [{ key: 'umlageText', value: 'Umlage' }] : []),
-        ...(vertragId == null ? [{ key: 'vertragText', value: 'Vertrag' }] : []),
+        ...(vertragId == null
+            ? [{ key: 'vertragText', value: 'Vertrag' }]
+            : []),
         { key: 'betreffendesJahr', value: 'Jahr' },
         { key: 'betrag', value: 'Betrag (€)' },
         { key: 'datum', value: 'Datum' },
@@ -207,7 +218,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 titleText="Umlage"
                                 entries={umlagen}
                                 bind:value={newUmlage}
-                                on:select={(e) => { newUmlage = e.detail?.selectedItem; }}
+                                on:select={(e) => {
+                                    newUmlage = e.detail?.selectedItem;
+                                }}
                             />
                         </Column>
                     {/if}
@@ -217,7 +230,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 titleText="Vertrag"
                                 entries={vertraege}
                                 bind:value={newVertrag}
-                                on:select={(e) => { newVertrag = e.detail?.selectedItem; }}
+                                on:select={(e) => {
+                                    newVertrag = e.detail?.selectedItem;
+                                }}
                             />
                         </Column>
                     {/if}

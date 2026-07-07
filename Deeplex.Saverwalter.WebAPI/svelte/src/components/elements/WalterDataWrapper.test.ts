@@ -3,13 +3,24 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const walterPostMock = vi.fn();
 const addToastMock = vi.fn();
 
-vi.mock('$walter/services/requests', () => ({
-    walter_post: walterPostMock
-}));
+vi.mock('$walter/services/requests', async () => {
+    const actual = await vi.importActual<
+        typeof import('$walter/services/requests')
+    >('$walter/services/requests');
+    return {
+        ...actual,
+        walter_post: walterPostMock
+    };
+});
 
-vi.mock('$walter/store', () => ({
-    addToast: addToastMock
-}));
+vi.mock('$walter/store', async () => {
+    const actual =
+        await vi.importActual<typeof import('$walter/store')>('$walter/store');
+    return {
+        ...actual,
+        addToast: addToastMock
+    };
+});
 
 describe('WalterDataWrapper helper', () => {
     beforeEach(() => {

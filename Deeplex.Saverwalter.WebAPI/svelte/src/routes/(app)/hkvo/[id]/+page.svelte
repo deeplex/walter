@@ -40,7 +40,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // (Reaktiv auf entry wuerde bei jeder Auswahlaenderung neu fetchen - Endlosschleife.)
     const selectableWaermezaehler =
         data.entry.umlageId !== undefined
-            ? walter_selection.waermezaehler(data.entry.umlageId, data.fetchImpl)
+            ? walter_selection.waermezaehler(
+                  data.entry.umlageId,
+                  data.fetchImpl
+              )
             : Promise.resolve([]);
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(data.fetchImpl);
 

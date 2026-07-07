@@ -183,10 +183,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ladeZaehlerFaellig(selectedYear)
         ]);
         try {
-            const paged = await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
-                fetchImpl,
-                { take: 10000 }
-            );
+            const paged =
+                await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
+                    fetchImpl,
+                    { take: 10000 }
+                );
             umlagen = paged.items;
         } catch (e) {
             console.error('Konnte Umlagen nicht laden:', e);
@@ -550,7 +551,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={forderungTableRows}
             headers={forderungHeaders}
             on_click_row={(e) => {
-                const row = forderungTableRows.find((r) => r.id === e.detail.id);
+                const row = forderungTableRows.find(
+                    (r) => r.id === e.detail.id
+                );
                 if (row?.button) row.button();
             }}
         />

@@ -15,8 +15,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterComboBoxKontakt, WalterDataTable, WalterDatePicker, WalterNumberInput } from '$walter/components';
-    import { WalterWohnungEigentuemerEntry, type WalterEigentuemerEntry } from '$walter/lib';
+    import {
+        WalterComboBoxKontakt,
+        WalterDataTable,
+        WalterDatePicker,
+        WalterNumberInput
+    } from '$walter/components';
+    import {
+        WalterWohnungEigentuemerEntry,
+        type WalterEigentuemerEntry
+    } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
     const headers = [
@@ -52,18 +60,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             bind:value={entry.kontakt}
             title="Eigentümer"
         />
-        <WalterDatePicker
-            required
-            bind:value={entry.von}
-            labelText="Von"
-        />
-        <WalterDatePicker
-            bind:value={entry.bis}
-            labelText="Bis"
-        />
-        <WalterNumberInput
-            bind:value={entry.anteil}
-            label="Anteil"
-        />
+        <WalterDatePicker required bind:value={entry.von} labelText="Von" />
+        <WalterDatePicker bind:value={entry.bis} labelText="Bis" />
+        <WalterNumberInput bind:value={entry.anteil} label="Anteil" />
     </Row>
 </WalterDataTable>

@@ -44,7 +44,8 @@ export const fileURL = {
     adresse: (id: string) => `${WalterAdresseEntry.ApiURL}/${id}/files`,
     betriebskostenrechnung: (id: string) =>
         `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,
-    buchungssatz: (id: string) => `${WalterBuchungssatzEntry.ApiURL}/${id}/files`,
+    buchungssatz: (id: string) =>
+        `${WalterBuchungssatzEntry.ApiURL}/${id}/files`,
     erhaltungsaufwendung: (id: string) =>
         `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}/files`,
     garage: (id: string) => `${WalterGarageEntry.ApiURL}/${id}/files`,

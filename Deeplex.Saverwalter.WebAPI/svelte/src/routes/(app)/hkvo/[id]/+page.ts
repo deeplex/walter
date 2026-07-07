@@ -19,8 +19,14 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ params, fetch }) => {
     const apiURL = `${WalterHKVOEntry.ApiURL}/${params.id}`;
 
-    const entry = await WalterHKVOEntry.GetOne<WalterHKVOEntry>(params.id, fetch);
-    const umlage = WalterUmlageEntry.GetOne<WalterUmlageEntry>(`${entry.umlageId}`, fetch);
+    const entry = await WalterHKVOEntry.GetOne<WalterHKVOEntry>(
+        params.id,
+        fetch
+    );
+    const umlage = WalterUmlageEntry.GetOne<WalterUmlageEntry>(
+        `${entry.umlageId}`,
+        fetch
+    );
 
     return {
         fetchImpl: fetch,

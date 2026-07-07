@@ -441,9 +441,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var jahr = 2024;
             var satz = new Buchungssatz(new DateOnly(jahr, 6, 1), "Gutschrift Allgemeinstrom") { Buchungsjahr = jahr };
             var verrechnungsZeile = new Buchungszeile(SollHaben.Haben, -26.96m)
-                { Buchungssatz = satz, Buchungskonto = umlageB.NkVerrechnungsKonto };
+            { Buchungssatz = satz, Buchungskonto = umlageB.NkVerrechnungsKonto };
             var vorauszahlungsZeile = new Buchungszeile(SollHaben.Haben, 26.96m)
-                { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto };
+            { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto };
             satz.Buchungszeilen.Add(verrechnungsZeile);
             satz.Buchungszeilen.Add(vorauszahlungsZeile);
             umlageB.NkVerrechnungsKonto.Buchungszeilen.Add(verrechnungsZeile);

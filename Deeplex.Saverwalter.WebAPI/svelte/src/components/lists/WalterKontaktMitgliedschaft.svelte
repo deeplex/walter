@@ -15,8 +15,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterComboBoxKontakt, WalterDataTable, WalterDatePicker, WalterNumberInput } from '$walter/components';
-    import { WalterKontaktMitgliedschaftEntry, type WalterMitgliedschaftEntry } from '$walter/lib';
+    import {
+        WalterComboBoxKontakt,
+        WalterDataTable,
+        WalterDatePicker,
+        WalterNumberInput
+    } from '$walter/components';
+    import {
+        WalterKontaktMitgliedschaftEntry,
+        type WalterMitgliedschaftEntry
+    } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
     export let rows: WalterMitgliedschaftEntry[] = [];
@@ -40,10 +48,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'anteil', value: 'Anteil' }
     ];
 
-    $: headers = mode === 'alsMitglied' ? headersAlsMitglied : headersAlsJuristischePerson;
+    $: headers =
+        mode === 'alsMitglied'
+            ? headersAlsMitglied
+            : headersAlsJuristischePerson;
     $: submitDisabled =
         !entry.von ||
-        (mode === 'alsMitglied' ? !entry.juristischePerson?.id : !entry.mitglied?.id);
+        (mode === 'alsMitglied'
+            ? !entry.juristischePerson?.id
+            : !entry.mitglied?.id);
 </script>
 
 <WalterDataTable
@@ -71,18 +84,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 title="Mitglied"
             />
         {/if}
-        <WalterDatePicker
-            required
-            bind:value={entry.von}
-            labelText="Von"
-        />
-        <WalterDatePicker
-            bind:value={entry.bis}
-            labelText="Bis"
-        />
-        <WalterNumberInput
-            bind:value={entry.anteil}
-            label="Anteil"
-        />
+        <WalterDatePicker required bind:value={entry.von} labelText="Von" />
+        <WalterDatePicker bind:value={entry.bis} labelText="Bis" />
+        <WalterNumberInput bind:value={entry.anteil} label="Anteil" />
     </Row>
 </WalterDataTable>

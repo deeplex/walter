@@ -251,12 +251,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
 
         private static TransaktionBuchungsService.TransaktionsInput AusgleichsInput(
             Abrechnungsresultat resultat, decimal betrag, int? zahlerId = null) => new()
-        {
-            Betrag = betrag,
-            Zahlungsdatum = new DateOnly(2025, 3, 10),
-            Verwendungszweck = "NK-Abrechnung",
-            ZahlerId = zahlerId,
-            AbrechnungsAusgleiche =
+            {
+                Betrag = betrag,
+                Zahlungsdatum = new DateOnly(2025, 3, 10),
+                Verwendungszweck = "NK-Abrechnung",
+                ZahlerId = zahlerId,
+                AbrechnungsAusgleiche =
             {
                 new TransaktionBuchungsService.AbrechnungsAusgleichInput
                 {
@@ -264,7 +264,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
                     Betrag = betrag
                 }
             }
-        };
+            };
 
         [Fact]
         public async Task AbrechnungsAusgleichNachzahlungGleichtForderungAus()

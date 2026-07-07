@@ -47,8 +47,9 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
 
     static fromJson(json: WalterErhaltungsaufwendungEntry) {
         const wohnung = WalterSelectionEntry.fromJson(json.wohnung);
-        const aussteller =
-            json.aussteller ? WalterSelectionEntry.fromJson(json.aussteller) : undefined;
+        const aussteller = json.aussteller
+            ? WalterSelectionEntry.fromJson(json.aussteller)
+            : undefined;
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 

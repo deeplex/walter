@@ -139,13 +139,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
         return [...byJahr.entries()]
             .sort(([a], [b]) => a - b)
-            .map(([y, { soll, haben }]): MietOposMonat => ({
-                jahr: y,
-                monat: 0, // 0 = Jahres-Summe (kein einzelner Monat)
-                soll,
-                ausgeglichen: haben,
-                offen: soll - haben
-            }));
+            .map(
+                ([y, { soll, haben }]): MietOposMonat => ({
+                    jahr: y,
+                    monat: 0, // 0 = Jahres-Summe (kein einzelner Monat)
+                    soll,
+                    ausgeglichen: haben,
+                    offen: soll - haben
+                })
+            );
     })();
 </script>
 

@@ -129,7 +129,9 @@ export class WalterBuchungssatzEntry extends WalterApiHandler {
             json.kannStornieren ?? false,
             json.kannLoeschen ?? false,
             json.sperrgrund,
-            WalterPermissions.fromJson(json.permissions ?? { read: true, update: false, remove: false })
+            WalterPermissions.fromJson(
+                json.permissions ?? { read: true, update: false, remove: false }
+            )
         );
     }
 

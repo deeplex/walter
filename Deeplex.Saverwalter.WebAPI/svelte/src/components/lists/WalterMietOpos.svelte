@@ -58,7 +58,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: tableRows = rows.map((r, i) => ({
         id: String(i),
         // monat === 0 → Jahres-Summe, sonst einzelner Monat.
-        periode: r.monat === 0 ? `${r.jahr}` : `${MONAT[r.monat - 1]} ${r.jahr}`,
+        periode:
+            r.monat === 0 ? `${r.jahr}` : `${MONAT[r.monat - 1]} ${r.jahr}`,
         soll: convertEuro(r.soll),
         ausgeglichen: convertEuro(r.ausgeglichen),
         offen: r.offen,

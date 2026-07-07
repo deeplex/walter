@@ -15,7 +15,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterBankkontoEntry, WalterSelectionEntry, validateBankkonto } from '$walter/lib';
+    import {
+        WalterBankkontoEntry,
+        WalterSelectionEntry,
+        validateBankkonto
+    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { WalterComboBox } from '..';
     import WalterBankkonto from '../details/WalterBankkonto.svelte';

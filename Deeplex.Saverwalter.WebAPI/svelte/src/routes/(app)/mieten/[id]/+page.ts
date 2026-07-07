@@ -17,10 +17,11 @@ import { WalterMietzahlungDetailEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const entry = await WalterMietzahlungDetailEntry.GetOne<WalterMietzahlungDetailEntry>(
-        params.id,
-        fetch
-    );
+    const entry =
+        await WalterMietzahlungDetailEntry.GetOne<WalterMietzahlungDetailEntry>(
+            params.id,
+            fetch
+        );
 
     return {
         fetchImpl: fetch,

@@ -101,7 +101,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
             if (jahr === selectedJahr) kontrolle = result;
         } catch (e) {
-            addToast(KontrolleToast, false, String(e instanceof Error ? e.message : e));
+            addToast(
+                KontrolleToast,
+                false,
+                String(e instanceof Error ? e.message : e)
+            );
         } finally {
             kontrolleLaeuft = false;
         }
@@ -128,12 +132,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         alleJahreLaeuft = true;
         alleJahreErgebnisse = [];
         kontrolle = undefined;
-        alleJahreFortschritt = { jahr: jahre[0], erledigt: 0, gesamt: jahre.length };
+        alleJahreFortschritt = {
+            jahr: jahre[0],
+            erledigt: 0,
+            gesamt: jahre.length
+        };
 
         for (const jahr of jahre) {
             alleJahreFortschritt = { ...alleJahreFortschritt, jahr };
             try {
-                const result = await getJahresabschlussKontrolle(jahr, fetchImpl);
+                const result = await getJahresabschlussKontrolle(
+                    jahr,
+                    fetchImpl
+                );
                 alleJahreErgebnisse = [
                     ...alleJahreErgebnisse,
                     { jahr, kontrolle: result }
@@ -160,7 +171,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Auffällige Positionen aller geprüften Jahre zusammen, je mit Jahr markiert.
     $: alleJahreProbleme = alleJahreErgebnisse.flatMap((e) =>
         (e.kontrolle?.positionen ?? [])
-            .filter((p) => p.status !== 'Bestanden' && p.status !== 'Verzichtet')
+            .filter(
+                (p) => p.status !== 'Bestanden' && p.status !== 'Verzichtet'
+            )
             .map((p) => ({ ...p, jahr: e.jahr }))
     );
 
@@ -466,7 +479,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <InlineLoading
                             description="Rechne alle Abrechnungsgruppen nach …"
                         />
-                   {/if}
+                    {/if}
                     {#if alleJahreLaeuft}
                         <InlineLoading
                             description={`Prüfe Jahr ${alleJahreFortschritt.jahr} (${alleJahreFortschritt.erledigt + 1}/${alleJahreFortschritt.gesamt}) …`}
@@ -480,9 +493,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     >
                         {ansicht.gesamt} Positionen geprüft
                     </p>
-                    <div
-                        style="display: flex; gap: 0.75rem; flex-wrap: wrap;"
-                    >
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         {#each [{ label: 'Bestanden', wert: ansicht.bestanden, type: 'green' }, { label: 'Fehlt', wert: ansicht.fehlt, type: 'gray' }, { label: 'Verzicht ok', wert: ansicht.verzichtet, type: 'teal' }, { label: 'Abweichend', wert: ansicht.nichtBestanden, type: 'red' }] as kachel}
                             <div
                                 style="min-width: 7rem; padding: 0.5rem 0.75rem; border-left: 4px solid {kachel.type ===
@@ -524,8 +535,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <p
                             style="margin-top: 1rem; color: var(--cds-support-success);"
                         >
-                            Alles konsistent — eine erneute Abrechnung würde nichts
-                            ändern.
+                            Alles konsistent — eine erneute Abrechnung würde
+                            nichts ändern.
                         </p>
                     {:else}
                         <Accordion style="margin-top: 1rem;">
@@ -566,7 +577,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                             <div
                                                 style="font-size: 0.75rem; color: var(--cds-text-secondary);"
                                             >
-                                                {ohneWohnungszahl(p.gruppe)}{p.detail
+                                                {ohneWohnungszahl(
+                                                    p.gruppe
+                                                )}{p.detail
                                                     ? ` · ${p.detail}`
                                                     : ''}
                                             </div>
@@ -749,8 +762,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 >
     <p style="margin-bottom: 1rem;">
         Für <strong>{verzichtBezeichnung}</strong> wird für das Jahr
-        {selectedJahr} bewusst keine Betriebskostenabrechnung erstellt. Es wird
-        nichts gebucht — der Verzicht wird nur dokumentiert.
+        {selectedJahr} bewusst keine Betriebskostenabrechnung erstellt. Es wird nichts
+        gebucht — der Verzicht wird nur dokumentiert.
     </p>
     <TextArea
         labelText="Grund (Pflicht)"

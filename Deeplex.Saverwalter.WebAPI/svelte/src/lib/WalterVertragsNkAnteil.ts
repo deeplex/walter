@@ -33,7 +33,9 @@ export class WalterVertragsNkAnteilEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: WalterVertragsNkAnteilEntry): WalterVertragsNkAnteilEntry {
+    static fromJson(
+        json: WalterVertragsNkAnteilEntry
+    ): WalterVertragsNkAnteilEntry {
         return new WalterVertragsNkAnteilEntry(
             json.id,
             json.betrag,
@@ -49,5 +51,10 @@ export class WalterVertragsNkAnteilEntry extends WalterApiHandler {
 
 export function validateVertragsNkAnteil(e: unknown): boolean {
     const entry = e as Partial<WalterVertragsNkAnteilEntry>;
-    return !!(entry.vertrag?.id && entry.umlage?.id && entry.betrag && entry.betrag > 0);
+    return !!(
+        entry.vertrag?.id &&
+        entry.umlage?.id &&
+        entry.betrag &&
+        entry.betrag > 0
+    );
 }

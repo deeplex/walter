@@ -114,21 +114,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         private static BuchungskontoEntry ToEntry(
             Buchungskonto k, bool canUpdate, KontoVerknuepfungEntry? verknuepfung) => new()
-        {
-            Id = k.BuchungskontoId,
-            Kontonummer = k.Kontonummer,
-            Bezeichnung = k.Bezeichnung,
-            Kontotyp = k.Kontotyp.ToString(),
-            Notiz = k.Notiz,
-            AnzahlBuchungszeilen = k.Buchungszeilen.Count,
-            Saldo = k.Buchungszeilen
+            {
+                Id = k.BuchungskontoId,
+                Kontonummer = k.Kontonummer,
+                Bezeichnung = k.Bezeichnung,
+                Kontotyp = k.Kontotyp.ToString(),
+                Notiz = k.Notiz,
+                AnzahlBuchungszeilen = k.Buchungszeilen.Count,
+                Saldo = k.Buchungszeilen
                 .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag),
-            Funktion = verknuepfung?.Funktion,
-            Ausgleichbar = verknuepfung?.Ausgleichbar ?? false,
-            CreatedAt = k.CreatedAt,
-            LastModified = k.LastModified,
-            Permissions = new Permissions(true) { Update = canUpdate }
-        };
+                Funktion = verknuepfung?.Funktion,
+                Ausgleichbar = verknuepfung?.Ausgleichbar ?? false,
+                CreatedAt = k.CreatedAt,
+                LastModified = k.LastModified,
+                Permissions = new Permissions(true) { Update = canUpdate }
+            };
 
         /// <summary>
         /// Konto-IDs mit Vollmacht-Zugriff des Nutzers — null bedeutet Admin (alle).

@@ -300,7 +300,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ZahlungsKonto = new Buchungskonto("121" + suffix, "Zahlung " + suffix, BuchungskontoTyp.Aktiv),
             };
             umlage.Versionen.Add(new UmlageVersion(
-                new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
+                new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche)
+            { Umlage = umlage });
 
             var satz = new Buchungssatz(new DateOnly(jahr, 6, 1), $"Betriebskosten {jahr}") { Buchungsjahr = jahr };
             satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)

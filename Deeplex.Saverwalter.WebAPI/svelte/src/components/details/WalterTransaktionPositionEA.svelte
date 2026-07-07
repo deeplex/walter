@@ -51,9 +51,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: ea.wohnungId = wohnung?.id as number | undefined;
     $: ea.existingBuchungssatzId = existingEa?.id as string | undefined;
-    $: invalid = modeExisting
-        ? !ea.existingBuchungssatzId
-        : !ea.wohnungId;
+    $: invalid = modeExisting ? !ea.existingBuchungssatzId : !ea.wohnungId;
     $: if (isSinglePosition && availableBetrag > 0) {
         ea.betrag = availableBetrag;
     }
@@ -136,12 +134,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <InlineNotification
                         kind="warning"
                         title="Bereits vollständig bezahlt"
-                        subtitle="Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} €, bereits gezahlt: {eaInfo.schonGezahlt.toFixed(2)} €"
+                        subtitle="Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(
+                            2
+                        )} €, bereits gezahlt: {eaInfo.schonGezahlt.toFixed(
+                            2
+                        )} €"
                         hideCloseButton
                     />
                 {:else}
                     <Tag type="blue">
-                        Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} € — noch offen: {eaInfo.verbleibenderBetrag.toFixed(2)} €
+                        Rechnungsbetrag: {eaInfo.rechnungsbetrag.toFixed(2)} € — noch
+                        offen: {eaInfo.verbleibenderBetrag.toFixed(2)} €
                     </Tag>
                     {#if eaInfo.schonGezahlt > 0}
                         <Tag type="green">
@@ -152,21 +155,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <InlineNotification
                             kind="error"
                             title="Betrag zu hoch:"
-                            subtitle="Maximal {eaInfo.verbleibenderBetrag.toFixed(2)} € offen"
+                            subtitle="Maximal {eaInfo.verbleibenderBetrag.toFixed(
+                                2
+                            )} € offen"
                             hideCloseButton
                         />
                     {:else if ea.betrag > availableBetrag + 0.005}
                         <InlineNotification
                             kind="error"
                             title="Betrag übersteigt Transaktionsbetrag:"
-                            subtitle="Maximal {availableBetrag.toFixed(2)} € verfügbar"
+                            subtitle="Maximal {availableBetrag.toFixed(
+                                2
+                            )} € verfügbar"
                             hideCloseButton
                         />
                     {:else if ea.betrag < eaInfo.verbleibenderBetrag - 0.005}
                         <InlineNotification
                             kind="warning"
                             title="Teilzahlung:"
-                            subtitle="Noch {(eaInfo.verbleibenderBetrag - ea.betrag).toFixed(2)} € offen nach dieser Zahlung"
+                            subtitle="Noch {(
+                                eaInfo.verbleibenderBetrag - ea.betrag
+                            ).toFixed(2)} € offen nach dieser Zahlung"
                             hideCloseButton
                         />
                     {/if}

@@ -33,13 +33,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Nur nachladen, wenn sich die Umlage ändert — NICHT bei jeder Auswahländerung.
     // (Sonst invalidiert die MultiSelect via bind:value das entry, das reaktive
     //  Statement fetcht neu, die MultiSelect feuert erneut → Endlosschleife.)
-    let selectableWaermezaehler: Promise<WalterSelectionEntry[]> = Promise.resolve([]);
+    let selectableWaermezaehler: Promise<WalterSelectionEntry[]> =
+        Promise.resolve([]);
     let letzteUmlageId: number | undefined;
     $: if (entry.umlageId !== letzteUmlageId) {
         letzteUmlageId = entry.umlageId;
-        selectableWaermezaehler = entry.umlageId !== undefined
-            ? walter_selection.waermezaehler(entry.umlageId, fetchImpl!)
-            : Promise.resolve([]);
+        selectableWaermezaehler =
+            entry.umlageId !== undefined
+                ? walter_selection.waermezaehler(entry.umlageId, fetchImpl!)
+                : Promise.resolve([]);
     }
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(fetchImpl!);
 </script>

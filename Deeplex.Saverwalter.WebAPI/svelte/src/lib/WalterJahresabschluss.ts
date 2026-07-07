@@ -13,7 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { walter_get, walter_post, walter_delete } from '$walter/services/requests';
+import {
+    walter_get,
+    walter_post,
+    walter_delete
+} from '$walter/services/requests';
 
 /** Ein Konto in der Jahressicht der Jahresabschlusskontrolle. */
 export type WalterKontoJahres = {

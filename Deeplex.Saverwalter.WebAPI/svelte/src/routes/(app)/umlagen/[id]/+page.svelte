@@ -119,7 +119,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <WalterHKVOVersionen
                 title="HKVO-Versionen"
                 rows={data.entry.hkvos}
-                entry={{ umlageId: data.entry.id, hkvO_P7: 70, hkvO_P8: 70, strompauschale: 0, permissions: data.entry.permissions }}
+                entry={{
+                    umlageId: data.entry.id,
+                    hkvO_P7: 70,
+                    hkvO_P8: 70,
+                    strompauschale: 0,
+                    permissions: data.entry.permissions
+                }}
                 fetchImpl={data.fetchImpl}
             />
         {/if}

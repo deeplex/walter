@@ -16,7 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { WalterGrid, WalterHeader } from '$walter/components';
-    import { WalterLinkTile, WalterLinks, WalterNumberInput } from '$walter/components';
+    import {
+        WalterLinkTile,
+        WalterLinks,
+        WalterNumberInput
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 
@@ -42,8 +46,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterNumberInput readonly label="Betrag" value={entry.betrag} />
     </Row>
     <Row>
-        <p style="margin: 1rem 1rem 0"><strong>Betreffender Monat:</strong> {monat}</p>
-        <p style="margin: 1rem 1rem 0"><strong>Zahlungsdatum:</strong> {datum}</p>
+        <p style="margin: 1rem 1rem 0">
+            <strong>Betreffender Monat:</strong>
+            {monat}
+        </p>
+        <p style="margin: 1rem 1rem 0">
+            <strong>Zahlungsdatum:</strong>
+            {datum}
+        </p>
     </Row>
     {#if entry.vertrag}
         <WalterLinks>

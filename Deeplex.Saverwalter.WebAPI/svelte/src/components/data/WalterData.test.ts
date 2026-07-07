@@ -156,8 +156,14 @@ describe('WalterData helpers', () => {
                     wohnung: { id: 201, text: 'W1' },
                     versionen: [{ grundmiete: 700 }],
                     mietzahlungen: [
-                        { betreffenderMonat: '2026-01-15', kaltmieteZahlung: 700 },
-                        { betreffenderMonat: '2026-02-15', kaltmieteZahlung: 710 }
+                        {
+                            betreffenderMonat: '2026-01-15',
+                            kaltmieteZahlung: 700
+                        },
+                        {
+                            betreffenderMonat: '2026-02-15',
+                            kaltmieteZahlung: 710
+                        }
                     ]
                 },
                 {
@@ -166,7 +172,12 @@ describe('WalterData helpers', () => {
                     ende: '2025-12-01',
                     wohnung: { id: 202, text: 'W2' },
                     versionen: [{ grundmiete: 700 }],
-                    mietzahlungen: [{ betreffenderMonat: '2026-01-15', kaltmieteZahlung: 999 }]
+                    mietzahlungen: [
+                        {
+                            betreffenderMonat: '2026-01-15',
+                            kaltmieteZahlung: 999
+                        }
+                    ]
                 },
                 {
                     id: 3,
@@ -174,7 +185,12 @@ describe('WalterData helpers', () => {
                     ende: undefined,
                     wohnung: { id: 203, text: 'W3' },
                     versionen: [{ grundmiete: 0 }],
-                    mietzahlungen: [{ betreffenderMonat: '2026-01-15', kaltmieteZahlung: 999 }]
+                    mietzahlungen: [
+                        {
+                            betreffenderMonat: '2026-01-15',
+                            kaltmieteZahlung: 999
+                        }
+                    ]
                 }
             ] as never,
             2026

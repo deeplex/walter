@@ -64,7 +64,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <div slot="subtitle">
                 <ul style="margin: 0.25rem 0 0 1.1rem;">
                     {#each fehler as f}
-                        <li style="margin: 0.15rem 0;">{f.replace(/^.*?Fehler:\s*/, '')}</li>
+                        <li style="margin: 0.15rem 0;">
+                            {f.replace(/^.*?Fehler:\s*/, '')}
+                        </li>
                     {/each}
                 </ul>
             </div>
