@@ -251,15 +251,22 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-      s3:
-        image: minio/minio:RELEASE.2023-02-17T17-52-43Z
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        ports:
-          - 9000:9000
     steps:
       - uses: actions/checkout@v4
+
+      - name: Start MinIO
+        # GitHub Actions' `services:` block has no way to pass a command/args
+        # to the container, but the MinIO image needs "server /data" to
+        # actually start its server (without it, health checks never
+        # succeed) — so it's run as a plain docker step instead, matching
+        # the command already used in .devcontainer/compose.yaml.
+        run: >-
+          docker run -d --name minio
+          -p 9000:9000 -p 9001:9001
+          -e MINIO_ROOT_USER=minioadmin
+          -e MINIO_ROOT_PASSWORD=minioadmin
+          minio/minio:RELEASE.2023-02-17T17-52-43Z
+          server /data --console-address ":9001"
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
