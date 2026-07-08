@@ -245,6 +245,34 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         private static async Task<HashSet<int>> MaterializeAsHashSetAsync(IQueryable<int> query) =>
             [.. await query.ToListAsync()];
 
+        // The kontoIds cache above still leaves HandleRequirementAsync issuing a
+        // fresh AnyAsync round-trip per Transaktion — for a ?take=100000 listing
+        // that's tens of thousands of queries per request. Cache the accessible
+        // TransaktionIds themselves per (Nutzer, Rolle) instead, so each row's
+        // check is an in-memory HashSet lookup.
+        private readonly Dictionary<(Guid, VerwalterRolle), Task<HashSet<Guid>>> _accessibleTransaktionIdsCache = [];
+
+        private Task<HashSet<Guid>> AccessibleTransaktionIdsCached(Guid guid, VerwalterRolle rolle)
+        {
+            var key = (guid, rolle);
+            if (!_accessibleTransaktionIdsCache.TryGetValue(key, out var task))
+            {
+                task = MaterializeAccessibleTransaktionIdsAsync(guid, rolle);
+                _accessibleTransaktionIdsCache[key] = task;
+            }
+            return task;
+        }
+
+        private async Task<HashSet<Guid>> MaterializeAccessibleTransaktionIdsAsync(Guid guid, VerwalterRolle rolle)
+        {
+            var kontoIds = await ManagedBuchungskontoIdsCached(guid, rolle);
+            return [.. await ctx.Transaktionen
+                .Where(t => t.Buchungssaetze.Any(s =>
+                    s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))))
+                .Select(t => t.TransaktionId)
+                .ToListAsync()];
+        }
+
         /// <summary>
         /// Buchungskonto-IDs, die zu einer Wohnung gehören, die der Nutzer in der
         /// gegebenen Rolle verwaltet — inklusive der Konten der zugehörigen Verträge,
@@ -309,13 +337,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 ? VerwalterRolle.Keine
                 : VerwalterRolle.Vollmacht;
 
-            var kontoIds = await ManagedBuchungskontoIdsCached(context.User.GetUserId(), rolle);
-            var darfZugreifen = await ctx.Transaktionen
-                .Where(t => t.TransaktionId == entity.TransaktionId)
-                .AnyAsync(t => t.Buchungssaetze.Any(s =>
-                    s.Buchungszeilen.Any(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))));
-
-            if (darfZugreifen)
+            var accessibleIds = await AccessibleTransaktionIdsCached(context.User.GetUserId(), rolle);
+            if (accessibleIds.Contains(entity.TransaktionId))
             {
                 context.Succeed(requirement);
             }
@@ -324,6 +347,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class KontaktPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Kontakt>
     {
+        private bool? _hasManagementAuthority;
+
+        private bool HasManagementAuthorityCached(ClaimsPrincipal user) =>
+            _hasManagementAuthority ??= Utils.HasAnyManagementAuthority(ctx, user);
+
         public static IQueryable<Kontakt> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
             return ctx.Kontakte;
@@ -349,7 +377,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             // Kontakte sind ein gemeinsames Adressbuch: für alle lesbar, aber nur
             // von Nutzern mit Verwaltungsrechten änderbar (nicht von Gast/Nur-Lese).
             if (!Utils.IsWriteOperation(requirement)
-                || Utils.HasAnyManagementAuthority(ctx, context.User))
+                || HasManagementAuthorityCached(context.User))
             {
                 context.Succeed(requirement);
             }
@@ -386,10 +414,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     {
         public static IQueryable<Umlage> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
+            var query = ctx.Umlagen.Include(e => e.Wohnungen).ThenInclude(w => w.Verwalter);
             if (user.IsInRole("Admin"))
-                return ctx.Umlagen;
+                return query;
             var guid = user.GetUserId();
-            return ctx.Umlagen
+            return query
                 .Where(e => e.Wohnungen.Any(w =>
                     w.Verwalter.Count != 0 &&
                     w.Verwalter.AsQueryable()
@@ -467,6 +496,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class GaragePermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Garage>
     {
+        private bool? _hasManagementAuthority;
+
+        private bool HasManagementAuthorityCached(ClaimsPrincipal user) =>
+            _hasManagementAuthority ??= Utils.HasAnyManagementAuthority(ctx, user);
+
         public static IQueryable<Garage> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
             // Garagen sind allen verwaltenden Nutzern sichtbar
@@ -491,7 +525,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             Garage entity)
         {
             if (!Utils.IsWriteOperation(requirement)
-                || Utils.HasAnyManagementAuthority(ctx, context.User))
+                || HasManagementAuthorityCached(context.User))
             {
                 context.Succeed(requirement);
             }
@@ -501,6 +535,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class GarageVertragPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<GarageVertrag>
     {
+        private bool? _hasManagementAuthority;
+
+        private bool HasManagementAuthorityCached(ClaimsPrincipal user) =>
+            _hasManagementAuthority ??= Utils.HasAnyManagementAuthority(ctx, user);
+
         public static IQueryable<GarageVertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
             if (user.IsInRole("Admin"))
@@ -524,7 +563,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             GarageVertrag entity)
         {
             if (!Utils.IsWriteOperation(requirement)
-                || Utils.HasAnyManagementAuthority(ctx, context.User))
+                || HasManagementAuthorityCached(context.User))
             {
                 context.Succeed(requirement);
             }
@@ -536,10 +575,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     {
         public static IQueryable<Vertrag> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
+            var query = ctx.Vertraege
+                .Include(e => e.Wohnung).ThenInclude(w => w.Verwalter)
+                .Include(e => e.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(e => e.Wohnung).ThenInclude(w => w.Eigentuemer).ThenInclude(eig => eig.Kontakt)
+                .Include(e => e.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(e => e.Versionen)
+                .Include(e => e.Mieter);
             if (user.IsInRole("Admin"))
-                return ctx.Vertraege;
+                return query;
             var guid = user.GetUserId();
-            return ctx.Vertraege
+            return query
                 .Where(e =>
                     e.Wohnung.Verwalter.Count > 0 &&
                     e.Wohnung.Verwalter.AsQueryable()
@@ -595,10 +641,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     {
         public static IQueryable<Wohnung> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
+            var query = ctx.Wohnungen.Include(e => e.Verwalter);
             if (user.IsInRole("Admin"))
-                return ctx.Wohnungen;
+                return query;
             var guid = user.GetUserId();
-            return ctx.Wohnungen
+            return query
                 .Where(e =>
                     e.Verwalter.Count > 0 &&
                     e.Verwalter.AsQueryable()
@@ -648,12 +695,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ZaehlerPermissionHandler(SaverwalterContext ctx) : WohnungPermissionHandlerBase<Zaehler>
     {
+        private bool? _hasManagementAuthority;
+
+        private bool HasManagementAuthorityCached(ClaimsPrincipal user) =>
+            _hasManagementAuthority ??= Utils.HasAnyManagementAuthority(ctx, user);
+
         public static IQueryable<Zaehler> GetQueryable(SaverwalterContext ctx, ClaimsPrincipal user)
         {
+            var query = ctx.ZaehlerSet.Include(e => e.Wohnung).ThenInclude(w => w!.Verwalter);
             if (user.IsInRole("Admin"))
-                return ctx.ZaehlerSet;
+                return query;
             var guid = user.GetUserId();
-            return ctx.ZaehlerSet
+            return query
                 .Where(e =>
                     e.Wohnung == null ||
                     e.Wohnung.Verwalter.Count > 0 &&
@@ -690,7 +743,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 // Zähler ohne Wohnung: für alle lesbar, nur mit Verwaltungsrechten änderbar.
                 if (!Utils.IsWriteOperation(requirement)
-                    || Utils.HasAnyManagementAuthority(ctx, context.User))
+                    || HasManagementAuthorityCached(context.User))
                 {
                     context.Succeed(requirement);
                 }

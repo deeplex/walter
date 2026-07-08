@@ -2,6 +2,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 import { devUsers } from './credentials';
 import { authHeader, signInApi } from './auth';
 import { getList, type EntityPermissions } from './api';
+import { getCountAs } from './entities';
 
 type WohnungListEntry = {
     id: number;
@@ -18,7 +19,7 @@ async function getWohnungsCount(
     api: APIRequestContext,
     username: string
 ): Promise<number> {
-    return (await getWohnungen(api, username)).length;
+    return getCountAs(api, username, '/api/wohnungen');
 }
 
 async function getWohnungen(

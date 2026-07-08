@@ -65,6 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return Ok(Array.Empty<OffeneForderungEntry>());
 
             var vertraege = await ctx.Vertraege
+                .AsSplitQuery()
                 .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung).ThenInclude(w => w.MietErtragskonto)
@@ -225,6 +226,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var endOfYear = new DateOnly(jahr, 12, 31);
 
             var vertraege = await ctx.Vertraege
+                .AsSplitQuery()
                 .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .Include(v => v.MietBuchungskonto)
@@ -356,6 +358,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return Ok(Array.Empty<OffeneGarageForderungEntry>());
 
             var garageVertraege = await ctx.GarageVertraege
+                .AsSplitQuery()
                 .Include(gv => gv.Versionen)
                 .Include(gv => gv.Garage).ThenInclude(g => g.Ertragskonto)
                 .Include(gv => gv.Mieter)
