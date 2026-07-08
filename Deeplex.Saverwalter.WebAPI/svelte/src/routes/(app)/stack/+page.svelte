@@ -92,9 +92,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <style>
     :global(
-            .FileUploaderDropContainerWrapper .bx--file-browse-btn,
-            .FileUploaderDropContainerWrapper .bx--file__drop-container
-        ) {
+        .FileUploaderDropContainerWrapper .bx--file-browse-btn,
+        .FileUploaderDropContainerWrapper .bx--file__drop-container
+    ) {
         font-size: xx-large;
         flex: 0 0 97%;
         height: 85vh !important;

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterDataWrapper, WalterMietminderung } from '$walter/components';
+    import WalterMietminderung from '../details/WalterMietminderung.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
     import { WalterMietminderungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
@@ -25,26 +26,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'minderung', value: 'Minderung' }
     ];
 
-    export let rows: WalterMietminderungEntry[];
+    export let rows: WalterMietminderungEntry[] | undefined = undefined;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-
-    const on_click_row = (e: CustomEvent) =>
-        navigation.mietminderung(e.detail.id);
-
-    export let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
+    export let entry: Partial<WalterMietminderungEntry> | undefined = {};
 </script>
 
-<WalterDataWrapper
-    addUrl={WalterMietminderungEntry.ApiURL}
-    {on_click_row}
-    addEntry={entry}
-    {title}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterMietminderungEntry}
     {headers}
+    navFn={navigation.mietminderung}
+    routeBase="mietminderungen"
+    formComponent={WalterMietminderung}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterMietminderung {entry} />
-    {/if}
-</WalterDataWrapper>
+/>

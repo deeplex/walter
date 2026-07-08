@@ -1,10 +1,17 @@
+name: feature
+
 on:
   push:
     branches:
       - feature/*
 
+permissions:
+  contents: read
+
+concurrency:
+  group: feature-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    uses: ./.github/workflows/reusable_test.yaml
-  build:
-    uses: ./.github/workflows/reusable_build.yaml
+  ci:
+    uses: ./.github/workflows/reusable_ci.yaml

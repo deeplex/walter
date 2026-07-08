@@ -17,10 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import '@carbon/styles/css/styles.css';
     import '@carbon/charts-svelte/styles.css';
-    import { LineChart } from '@carbon/charts-svelte';
+    import { LineChart, type LineChartOptions } from '@carbon/charts-svelte';
     import type { WalterDataConfigType } from './WalterData';
 
     export let config: WalterDataConfigType;
+    $: options = config.options as LineChartOptions;
 </script>
 
-<LineChart data={config.data} options={config.options} />
+<LineChart data={config.data} {options} />

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2025  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterComboBox,
+        WalterDatePicker,
         WalterMultiSelectWohnung,
         WalterTextArea,
         WalterMultiSelectZaehler,
@@ -27,13 +28,81 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     import { Row } from 'carbon-components-svelte';
     import type { WalterUmlageEntry } from '$walter/lib';
-    import { walter_selection } from '$walter/services/requests';
+    import { WalterToastContent, WalterUmlageVersionEntry } from '$walter/lib';
+    import type { WalterSelectionEntry } from '$walter/lib';
+    import { walter_selection, walter_post } from '$walter/services/requests';
+    import { addToast } from '$walter/store';
 
     export let entry: Partial<WalterUmlageEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
-    $: {
-        readonly = entry?.permissions?.update === false;
+    export let blockSave = false;
+
+    $: readonly = entry?.permissions?.update === false;
+    $: isNew = !entry.id;
+
+    $: newVersion = (entry.versionen?.[0] ??
+        {}) as Partial<WalterUmlageVersionEntry>;
+
+    $: sortedVersionen = [...(entry.versionen ?? [])].sort((a, b) =>
+        a.beginn.localeCompare(b.beginn)
+    );
+    $: latestVersion = sortedVersionen.at(-1);
+
+    // In new mode: bind directly to newVersion.schluessel
+    // In edit mode: use a copy for change detection
+    let editSchluessel: WalterSelectionEntry | undefined;
+    let initialized = false;
+    let seitWann: string | undefined;
+
+    $: if (!initialized && !isNew && latestVersion?.schluessel) {
+        editSchluessel = { ...latestVersion.schluessel };
+        initialized = true;
+    }
+
+    $: hasVersionChanges =
+        !isNew &&
+        initialized &&
+        editSchluessel?.id !== latestVersion?.schluessel?.id;
+
+    $: blockSave = (hasVersionChanges && !seitWann) || hkvoBlockSave;
+
+    let hkvoBlockSave = false;
+
+    // Current displayed schluessel for HKVO check (works for both new and edit)
+    $: currentSchluessel = isNew ? newVersion.schluessel : editSchluessel;
+
+    export let commitVersionIfPending: () => Promise<void> = async () => {};
+    $: commitVersionIfPending = async () => {
+        if (hasVersionChanges && seitWann) await createNewVersion();
+    };
+
+    async function createNewVersion() {
+        if (!entry.id || !seitWann) return;
+
+        const toast = new WalterToastContent(
+            'Version gespeichert',
+            'Fehler beim Speichern',
+            () => 'Neue Umlageschlüssel-Version erfolgreich erstellt.',
+            (e: unknown) => `Konnte Version nicht speichern: ${e}`
+        );
+
+        const response = await walter_post(WalterUmlageVersionEntry.ApiURL, {
+            umlage: { id: entry.id, text: '' },
+            beginn: seitWann,
+            schluessel: editSchluessel
+        });
+        const parsed = await response.json();
+        addToast(toast, response.status === 200, parsed);
+
+        if (response.status === 200) {
+            entry.versionen = [
+                ...(entry.versionen ?? []),
+                parsed as WalterUmlageVersionEntry
+            ];
+            initialized = false;
+            seitWann = undefined;
+        }
     }
 
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
@@ -47,13 +116,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:value={entry.typ}
         title="Betriebskostentyp der Umlage"
     />
-    <WalterComboBox
-        required
-        {readonly}
-        entries={umlageschluessel}
-        bind:value={entry.schluessel}
-        titleText="Umlageschlüssel"
-    />
+    {#if isNew}
+        <WalterComboBox
+            required
+            {readonly}
+            entries={umlageschluessel}
+            bind:value={newVersion.schluessel}
+            titleText="Umlageschlüssel"
+        />
+        <WalterDatePicker
+            required
+            disabled={readonly}
+            bind:value={newVersion.beginn}
+            labelText="Beginn"
+        />
+    {:else}
+        <WalterComboBox
+            required
+            {readonly}
+            entries={umlageschluessel}
+            bind:value={editSchluessel}
+            titleText="Umlageschlüssel"
+        />
+    {/if}
 </Row>
 <Row>
     <WalterMultiSelectWohnung
@@ -63,8 +148,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         titleText="Wohnungen"
     />
 </Row>
-<!-- If entry.schluessel is nach Verbrauch -->
-{#if entry.schluessel?.id === 3}
+<!-- If schluessel is nach Verbrauch (id=3) -->
+{#if currentSchluessel?.id === 3}
     <Row>
         <WalterMultiSelectZaehler
             {fetchImpl}
@@ -76,6 +161,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/if}
 
 <Row>
+    <WalterDatePicker
+        disabled={readonly}
+        bind:value={entry.ende}
+        labelText="Ende"
+    />
+</Row>
+<Row>
     <WalterTextArea
         {readonly}
         labelText="Beschreibung"
@@ -83,10 +175,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 
+{#if hasVersionChanges}
+    <Row>
+        <WalterDatePicker
+            required
+            bind:value={seitWann}
+            labelText="Zeitpunkt der Änderung"
+        />
+    </Row>
+{/if}
+
 <WalterUmlageHKVO
     bind:entry
     {fetchImpl}
     bind:selectedWohnungen={entry.selectedWohnungen}
+    schluessel={currentSchluessel}
+    bind:blockSave={hkvoBlockSave}
 />
 
 <Row>

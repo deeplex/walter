@@ -16,22 +16,27 @@
 import { walter_goto } from './utils';
 
 export const navigation = {
-    abrechnungsresultat: (id: string) => walter_goto(`/abrechnungsresultate/${id}`),
+    bankkonto: (id: number) => walter_goto(`/bankkontos/${id}`),
+    buchungskonto: (id: number) => walter_goto(`/buchungskonten/${id}`),
+    buchungssatz: (id: string) => walter_goto(`/buchungssaetze/${id}`),
+    garage: (id: number) => walter_goto(`/garagen/${id}`),
+    garageVertrag: (id: number) => walter_goto(`/garage-vertraege/${id}`),
+    abrechnungsresultat: (id: string) =>
+        walter_goto(`/abrechnungsresultate/${id}`),
     account: (id: number) => walter_goto(`/accounts/${id}`),
     adresse: (id: number) => walter_goto(`/adressen/${id}`),
-    betriebskostenrechnung: (id: number) =>
-        walter_goto(`/betriebskostenrechnungen/${id}`),
-    erhaltungsaufwendung: (id: number) =>
-        walter_goto(`/erhaltungsaufwendungen/${id}`),
     kontakt: (id: number) => walter_goto(`/kontakte/${id}`),
     miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
     transaktion: (id: number) => walter_goto(`/transaktionen/${id}`),
+    hkvo: (id: number) => walter_goto(`/hkvo/${id}`),
     umlage: (id: number) => walter_goto(`/umlagen/${id}`),
+    umlageversion: (id: number) => walter_goto(`/umlageversionen/${id}`),
     umlagetyp: (id: number) => walter_goto(`/umlagetypen/${id}`),
     vertrag: (id: number) => walter_goto(`/vertraege/${id}`),
     vertragversion: (id: number) => walter_goto(`/vertragversionen/${id}`),
     wohnung: (id: number) => walter_goto(`/wohnungen/${id}`),
+    wohnungversion: (id: number) => walter_goto(`/wohnungversionen/${id}`),
     zaehler: (id: number) => walter_goto(`/zaehler/${id}`),
     zaehlerstand: (id: number) => walter_goto(`/zaehlerstaende/${id}`)
 };

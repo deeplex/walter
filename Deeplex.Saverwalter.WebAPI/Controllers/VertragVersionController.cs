@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -33,7 +33,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public int Personenzahl { get; set; }
             public DateOnly Beginn { get; set; }
-            public double Grundmiete { get; set; }
+            public decimal Grundmiete { get; set; }
+            public decimal Nebenkostenvorauszahlung { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -45,6 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Personenzahl = entity.Personenzahl;
                 Beginn = entity.Beginn;
                 Grundmiete = entity.Grundmiete;
+                Nebenkostenvorauszahlung = entity.Nebenkostenvorauszahlung;
 
                 Permissions = permissions;
             }

@@ -14,13 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -33,6 +34,27 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/wohnungen")]
     public class WohnungController : FileControllerBase<WohnungEntry, int, Wohnung>
     {
+        public class EigentuemerEntryBase
+        {
+            public int Id { get; set; }
+            public SelectionEntry Kontakt { get; set; } = null!;
+            public DateOnly Von { get; set; }
+            public DateOnly? Bis { get; set; }
+            public decimal? Anteil { get; set; }
+            public Permissions Permissions { get; set; } = new();
+
+            public EigentuemerEntryBase() { }
+            public EigentuemerEntryBase(WohnungEigentuemer entity, Permissions permissions)
+            {
+                Id = entity.WohnungEigentuemerId;
+                Kontakt = new(entity.Kontakt.KontaktId, entity.Kontakt.Bezeichnung);
+                Von = entity.Von;
+                Bis = entity.Bis;
+                Anteil = entity.Anteil;
+                Permissions = permissions;
+            }
+        }
+
         public class WohnungEntryBase
         {
             protected Wohnung? Entity { get; }
@@ -40,11 +62,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
             public AdresseEntryBase? Adresse { get; set; }
-            public SelectionEntry? Besitzer { get; set; }
+            public IEnumerable<EigentuemerEntryBase> Eigentuemer { get; set; } = [];
             public string? Bewohner { get; set; }
-            public double Wohnflaeche { get; set; }
-            public double Nutzflaeche { get; set; }
-            public double Miteigentumsanteile { get; set; }
+            public decimal Wohnflaeche { get; set; }
+            public decimal Nutzflaeche { get; set; }
+            public decimal Miteigentumsanteile { get; set; }
             public int Einheiten { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -57,15 +79,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = entity.WohnungId;
                 Bezeichnung = entity.Bezeichnung;
                 Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
-                if (entity.Besitzer is Kontakt k)
-                {
-                    Besitzer = new(k.KontaktId, k.Bezeichnung);
-                }
+                Eigentuemer = entity.Eigentuemer.Select(e => new EigentuemerEntryBase(e, permissions));
 
-                Wohnflaeche = entity.Wohnflaeche;
-                Nutzflaeche = entity.Nutzflaeche;
-                Miteigentumsanteile = entity.Miteigentumsanteile;
-                Einheiten = entity.Nutzeinheit;
+                var current = entity.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault();
+                Wohnflaeche = current?.Wohnflaeche ?? 0;
+                Nutzflaeche = current?.Nutzflaeche ?? 0;
+                Miteigentumsanteile = current?.Miteigentumsanteile ?? 0;
+                Einheiten = current?.Nutzeinheit ?? 0;
 
                 var v = entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
@@ -73,6 +93,46 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     null;
 
                 Permissions = permissions;
+            }
+        }
+
+        public class WohnungVersionEntryBase
+        {
+            public int Id { get; set; }
+            public DateOnly Beginn { get; set; }
+            public decimal Wohnflaeche { get; set; }
+            public decimal Nutzflaeche { get; set; }
+            public decimal Miteigentumsanteile { get; set; }
+            public int Einheiten { get; set; }
+            public Permissions Permissions { get; set; } = new Permissions();
+
+            public WohnungVersionEntryBase() { }
+            public WohnungVersionEntryBase(WohnungVersion entity, Permissions permissions)
+            {
+                Id = entity.WohnungVersionId;
+                Beginn = entity.Beginn;
+                Wohnflaeche = entity.Wohnflaeche;
+                Nutzflaeche = entity.Nutzflaeche;
+                Miteigentumsanteile = entity.Miteigentumsanteile;
+                Einheiten = entity.Nutzeinheit;
+                Permissions = permissions;
+            }
+        }
+
+        public class WohnungVersionEntry : WohnungVersionEntryBase
+        {
+            public string? Notiz { get; set; }
+            public SelectionEntry? Wohnung { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public WohnungVersionEntry() : base() { }
+            public WohnungVersionEntry(WohnungVersion entity, Permissions permissions) : base(entity, permissions)
+            {
+                Notiz = entity.Notiz;
+                Wohnung = new(entity.Wohnung.WohnungId, entity.Wohnung.Bezeichnung);
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
@@ -85,10 +145,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<WohnungEntryBase> Haus { get; set; } = [];
             public IEnumerable<ZaehlerEntryBase> Zaehler { get; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
-            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; } = [];
+            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; set; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
-            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; } = [];
-
+            public IEnumerable<WohnungVersionEntryBase> Versionen { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
@@ -99,9 +159,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Zaehler = entity.Zaehler.Select(e => new ZaehlerEntryBase(e, permissions));
                 Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
-                Erhaltungsaufwendungen = entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, permissions));
+                Erhaltungsaufwendungen = [];
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
-                Betriebskostenrechnungen = entity.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f, permissions)));
+                Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new WohnungVersionEntryBase(e, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.MietErtragskonto, KontoFunktion.Mietertraege),
+                    (entity.AufwandsKonto, KontoFunktion.Aufwendungen));
             }
         }
 
@@ -115,7 +178,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<WohnungEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<WohnungEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpPost]
         [Authorize(Policy = "RequireOwner")]

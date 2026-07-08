@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
                     Wohnung = vertrag.Wohnung
                 };
                 ctx.VerwalterSet.Add(verwalter);
-            };
+            }
 
             ctx.SaveChanges();
 

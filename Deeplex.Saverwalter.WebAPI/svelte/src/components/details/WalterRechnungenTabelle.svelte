@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -16,10 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
-        WalterBetriebskostenrechnungEntry,
-        type WalterUmlageEntry
+        emptyTransaktionsInput,
+        type WalterUmlageEntry,
+        type TransaktionsInput
     } from '$walter/lib';
-    import { convertDateCanadian } from '$walter/services/utils';
     import {
         walter_data_rechnungentabelle,
         type WalterDataConfigType,
@@ -27,87 +27,61 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterBetriebskostenrechnung from './WalterBetriebskostenrechnung.svelte';
+    import { invalidateAll } from '$app/navigation';
+    import { WalterTransaktion } from '$walter/components';
 
     export let config: WalterDataConfigType;
     export let umlagen: WalterUmlageEntry[];
     export let fetchImpl: typeof fetch;
     export let year: number;
-    let addEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
-    function updateEntry(
-        umlageId: number,
-        umlageTyp: string,
-        rechnungTyp: number
-    ) {
-        addEntry = {
-            datum: convertDateCanadian(new Date()),
-            betreffendesJahr: year,
-            typ: {
-                id: rechnungTyp,
-                text: umlageTyp
-            },
-            umlage: {
-                id: umlageId,
-                text: umlageTyp
-            }
-        };
-    }
+    let addModalOpen = false;
+    let modalTitle = 'Betriebskostenrechnung';
+    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
 
     function click(e: CustomEvent, config: WalterDataConfigType) {
         const targetWithData = e.target as { __data__?: WalterDataPoint };
         const data = targetWithData?.__data__;
 
         // NOTE: Blame the tab implementation for all the tables being triggered at once.
-        // Because of that all the configs with different years are filtered here.
         if (!data) return;
 
         const group = config.data.filter((entry) => entry.group === data.group);
-
         const thisEntry = group.find((entry) => entry.key === data.key);
 
-        if (thisEntry?.id && thisEntry.id2 && thisEntry.key) {
-            const umlageTyp = thisEntry.key;
-            const rechnungTyp = +thisEntry.id2;
-            const umlageId = +thisEntry.id;
-
-            updateEntry(umlageId, umlageTyp, rechnungTyp);
+        if (thisEntry?.id && thisEntry.key) {
+            modalTitle = thisEntry.key;
+            buchungsInput = {
+                ...emptyTransaktionsInput(),
+                betriebskostenEingaenge: [
+                    {
+                        betrag: 0,
+                        umlageId: +thisEntry.id,
+                        betreffendesJahr: year
+                    }
+                ]
+            };
             addModalOpen = true;
         }
     }
 
-    let addModalOpen = false;
-    let title = 'Umlage';
-    let rechnungen = umlagen.flatMap((e) => e.betriebskostenrechnungen);
-
-    function onSubmit(new_value: unknown) {
-        const value = new_value as WalterBetriebskostenrechnungEntry;
-        const umlage = umlagen.find((e) => e.id === +value.umlage?.id);
-        if (!umlage) {
-            console.warn('Umlage not found: ', value.umlage.id);
-            return;
-        }
-        umlage!.betriebskostenrechnungen.push(value);
-        rechnungen.push(value);
+    async function onSubmit() {
         config = walter_data_rechnungentabelle(umlagen, year);
+        await invalidateAll();
     }
 </script>
 
 <WalterDataWrapperQuickAdd
-    {onSubmit}
-    bind:addEntry
-    addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
+    title={modalTitle}
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={buchungsInput}
     bind:addModalOpen
-    {title}
+    {onSubmit}
 >
-    <WalterBetriebskostenrechnung
-        {fetchImpl}
-        bind:entry={addEntry}
-        {rechnungen}
-    />
+    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
-<div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
+<div style="left: 0; min-height: 30em; display: block; width: 100%;">
     <h3>Umlagentabelle</h3>
     {#if config.data.length === 0}
         <p>Keine Daten vorhanden</p>

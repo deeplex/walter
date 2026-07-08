@@ -19,6 +19,12 @@ import { getAccessToken } from './auth';
 import { walter_goto } from './utils';
 
 export const walter_selection = {
+    abrechnungsgruppen(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/abrechnungsgruppen',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
     adressen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/adressen', fetchImpl) as Promise<
             WalterSelectionEntry[]
@@ -35,6 +41,12 @@ export const walter_selection = {
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
     },
+    betriebskostenrechnungenOffen(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/bk-forderungen/offen',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
     erhaltungsaufwendungen(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/erhaltungsaufwendungen',
@@ -46,16 +58,17 @@ export const walter_selection = {
             WalterSelectionEntry[]
         >;
     },
+    waermezaehler(umlageId: number, fetchImpl: typeof fetch) {
+        return walter_get(
+            `/api/selection/umlage/${umlageId}/waermezaehler`,
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
     juristischePersonen(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/juristischepersonen',
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
-    },
-    mieten(fetchImpl: typeof fetch) {
-        return walter_get('/api/selection/mieten', fetchImpl) as Promise<
-            WalterSelectionEntry[]
-        >;
     },
     mietminderungen(fetchImpl: typeof fetch) {
         return walter_get(
@@ -97,6 +110,17 @@ export const walter_selection = {
     zaehlerstaende(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/zaehlerstaende',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
+    garagen(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/garagen', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
+    },
+    garageVertraege(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/garage-vertraege',
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
     },
@@ -143,6 +167,17 @@ export const walter_selection = {
         return walter_get('/api/selection/userrole', fetchImpl) as Promise<
             WalterSelectionEntry[]
         >;
+    },
+    buchungskonten(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/buchungskonten',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
+    bankkontos(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/bankkontos', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
     }
 };
 
@@ -170,11 +205,24 @@ export async function walter_fetch(
 
 // =================================== GET ====================================
 
-export const walter_get = (
+export async function walter_get(
     url: string,
     fetchImpl: typeof fetch
-): Promise<unknown> =>
-    walter_fetch(fetchImpl, url, { method: 'GET' }).then((e) => e.json());
+): Promise<unknown> {
+    const response = await walter_fetch(fetchImpl, url, {
+        method: 'GET',
+        cache: 'no-store'
+    });
+    const body = await parseBody(response);
+    if (!response.ok) {
+        throw new Error(
+            typeof body === 'string' && body.length > 0
+                ? body
+                : 'Anfrage fehlgeschlagen.'
+        );
+    }
+    return body;
+}
 
 // =================================== PUT ===================================
 
@@ -188,8 +236,24 @@ export const walter_put = (
         body: JSON.stringify(body)
     }).then((e) => finishPut(e, toast));
 
+/**
+ * Liest den Response-Body robust: ASP.NET liefert String-Ergebnisse (z.B. eine
+ * Konflikt-/Sperrmeldung in einem 409) als text/plain, nicht als JSON. Ein blindes
+ * `.json()` würde dann werfen und der Toast käme nie an. Daher: als Text lesen, JSON
+ * versuchen, sonst den rohen Text zurückgeben.
+ */
+export async function parseBody(response: Response): Promise<unknown> {
+    const text = await response.text();
+    if (!text) return undefined;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
 async function finishPut(e: Response, toast?: WalterToastContent) {
-    const j = await e.json();
+    const j = await parseBody(e);
 
     toast && addToast(toast, e.status === 200, j);
 

@@ -18,7 +18,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterGrid,
-        WalterKontakte,
+        WalterBankkontos,
+        WalterBuchungskonten,
+        WalterKontaktMitgliedschaft,
         WalterWohnungen,
         WalterVertraege,
         WalterHeaderDetail,
@@ -26,9 +28,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterKontakt
     } from '$walter/components';
-    import { WalterFileWrapper, WalterTransaktionEntry } from '$walter/lib';
+    import {
+        WalterFileWrapper,
+        WalterKontaktMitgliedschaftEntry,
+        WalterTransaktionEntry,
+        validateKontakt
+    } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
-    import WalterTransaktion from '$walter/components/details/WalterTransaktion.svelte';
+    import WalterTransaktion from '$walter/components/details/WalterTransaktionRaw.svelte';
     import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
 
@@ -45,6 +52,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         permissions: data.entry.permissions
     };
 
+    const mitgliedEntry: Partial<WalterKontaktMitgliedschaftEntry> = {
+        mitglied: { id: data.entry.id, text: data.entry.bezeichnung }
+    };
+    const juristischePersonEntry: Partial<WalterKontaktMitgliedschaftEntry> = {
+        juristischePerson: { id: data.entry.id, text: data.entry.bezeichnung }
+    };
+
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
@@ -55,22 +69,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={!validateKontakt(data.entry)}
 />
 
 <WalterGrid>
     <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
 
     <WalterLinks>
-        <WalterKontakte
+        <WalterKontaktMitgliedschaft
             fetchImpl={data.fetchImpl}
-            title="Juristische Personen"
-            rows={data.entry.juristischePersonen}
+            title="Mitgliedschaften"
+            rows={data.entry.mitgliedschaftenAlsMitglied}
+            entry={mitgliedEntry}
+            mode="alsMitglied"
         />
         {#if data.entry.rechtsform.id !== 0}
-            <WalterKontakte
+            <WalterKontaktMitgliedschaft
                 fetchImpl={data.fetchImpl}
                 title="Mitglieder"
-                rows={data.entry.mitglieder}
+                rows={data.entry.mitgliedschaftenAlsJuristischePerson}
+                entry={juristischePersonEntry}
+                mode="alsJuristischePerson"
             />
         {/if}
         <WalterWohnungen
@@ -83,6 +102,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Verträge"
             rows={data.entry.vertraege}
         />
+
+        <WalterBankkontos
+            fetchImpl={data.fetchImpl}
+            title="Bankkonten"
+            rows={data.entry.bankkontos}
+        />
+
+        {#if data.entry.konten.length > 0}
+            <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
+        {/if}
 
         <WalterTransaktionen
             fetchImpl={data.fetchImpl}

@@ -21,20 +21,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterKontakt
     } from '$walter/components';
     import type { PageData } from './$types';
-    import { WalterKontaktEntry } from '$walter/lib';
+    import { WalterKontaktEntry, validateKontakt } from '$walter/lib';
 
     export let data: PageData;
 
     const title = 'Neue Person';
 
-    const entry: Partial<WalterKontaktEntry> = {
+    let entry: Partial<WalterKontaktEntry> = {
         rechtsform: { id: 0, text: '' },
         anrede: { id: 0, text: '' }
     };
 </script>
 
-<WalterHeaderNew apiURL={WalterKontaktEntry.ApiURL} {title} {entry} />
+<WalterHeaderNew
+    apiURL={WalterKontaktEntry.ApiURL}
+    {title}
+    {entry}
+    disabled={!validateKontakt(entry)}
+/>
 
 <WalterGrid>
-    <WalterKontakt {entry} fetchImpl={data.fetchImpl} />
+    <WalterKontakt bind:entry fetchImpl={data.fetchImpl} />
 </WalterGrid>

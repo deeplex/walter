@@ -60,6 +60,20 @@
                 "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte"
             },
             "problemMatcher": "$tsc"
+        },
+        {
+            "label": "dev_watch_stack",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/dev-watch-stack.sh",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "dev_watch_stack_with_bootstrap",
+            "type": "shell",
+            "command": "WALTER_BOOTSTRAP=1 ${workspaceFolder}/scripts/dev-watch-stack.sh",
+            "isBackground": true,
+            "problemMatcher": []
         }
     ]
 }

@@ -16,7 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact(Skip = "Files is todo. Also provide valid XML to test here")]
-        public async void GetFiles()
+        public async Task GetFiles()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void GetFile()
+        public async Task GetFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void PostFile()
+        public async Task PostFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void DeleteFile()
+        public async Task DeleteFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void GetFilesNoServer()
+        public async Task GetFilesNoServer()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -173,11 +173,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.GetFiles(1);
 
             result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
-            result.Result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
+            var okResult = (OkObjectResult)result.Result!;
+            okResult.Value.Should().BeAssignableTo<List<Utils.WalterFile>>();
+            ((List<Utils.WalterFile>)okResult.Value!).Should().BeEmpty();
         }
 
         [Fact]
-        public async void GetFilesNoS3Provider()
+        public async Task GetFilesNoS3Provider()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -199,7 +202,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.GetFiles(1);
 
             result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
-            result.Result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
+            var okResult = (OkObjectResult)result.Result!;
+            okResult.Value.Should().BeAssignableTo<List<Utils.WalterFile>>();
+            ((List<Utils.WalterFile>)okResult.Value!).Should().BeEmpty();
         }
     }
 }

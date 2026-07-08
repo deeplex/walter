@@ -15,20 +15,23 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BankkontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktMitgliedschaftController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class KontaktDbService : WalterDbServiceBase<KontaktEntry, int, Kontakt>
     {
@@ -36,11 +39,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<KontaktEntryBase>>> GetList()
-        {
-            var list = await Ctx.Kontakte.ToListAsync();
-            return list.Select(e => new KontaktEntryBase(e, new(true))).ToList();
-        }
+        public Task<PagedResult<KontaktEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            KontaktPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Name.ToLower().Contains(t) ||
+                    (e.Vorname != null && e.Vorname.ToLower().Contains(t)) ||
+                    (e.Email != null && e.Email.ToLower().Contains(t)) ||
+                    (e.Telefon != null && e.Telefon.ToLower().Contains(t)) ||
+                    (e.Mobil != null && e.Mobil.ToLower().Contains(t)) ||
+                    (e.Adresse != null && (
+                        e.Adresse.Strasse.ToLower().Contains(t) ||
+                        e.Adresse.Stadt.ToLower().Contains(t))),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "email" => q.SortBy(e => e.Email, dir),
+                    _ => q.SortBy(e => e.Name, dir).ThenSortBy(e => e.Vorname, dir)
+                },
+                toEntry: async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Kontakt>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
@@ -52,32 +67,53 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
-                // TODO: Who can manage contacts?
-                var permissions = new Permissions()
-                {
-                    Read = true,
-                    Update = true,
-                    Remove = true
-                };
+                // Kontakte sind für alle lesbar, aber nur mit Verwaltungsrechten
+                // änderbar — dieselbe Regel wie im KontaktPermissionHandler.
+                var permissions = await GetPermissions(user, entity, Auth);
                 var entry = new KontaktEntry(entity, permissions);
 
-                entry.JuristischePersonen = await Task.WhenAll(entity.JuristischePersonen
+                entry.JuristischePersonen = await Task.WhenAll(entity.AlsMitglied
+                    .Where(m => m.Bis == null)
+                    .Select(m => m.JuristischePerson)
                     .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
-                entry.Mitglieder = await Task.WhenAll(entity.Mitglieder
+                entry.Mitglieder = await Task.WhenAll(entity.AlsJuristischePerson
+                    .Where(m => m.Bis == null)
+                    .Select(m => m.Mitglied)
                     .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.MitgliedschaftenAlsMitglied = entity.AlsMitglied
+                    .Select(m => new KontaktMitgliedschaftEntry(m))
+                    .ToList();
+                entry.MitgliedschaftenAlsJuristischePerson = entity.AlsJuristischePerson
+                    .Select(m => new KontaktMitgliedschaftEntry(m))
+                    .ToList();
+                var eigentuemerWohnungen = entity.EigentuemerIn.Select(e => e.Wohnung);
                 entry.Vertraege = await Task.WhenAll(entity.Mietvertraege
-                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Concat(eigentuemerWohnungen.SelectMany(w => w.Vertraege))
                     .Distinct()
                     .Select(async e => new VertragEntryBase(e, await GetPermissions(user, e, Auth))));
                 entry.Wohnungen = await Task.WhenAll(entity.Mietvertraege
-                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Concat(eigentuemerWohnungen.SelectMany(w => w.Vertraege))
                     .Select(e => e.Wohnung)
                     .Distinct()
                     .Select(async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth))));
-                entry.Transaktionen = Ctx.Transaktionen
+                var myBankkontoIds = Ctx.Bankkontos
+                    .Where(b => b.Besitzer.Any(k => k.KontaktId == entity.KontaktId))
+                    .Select(b => b.BankkontoId)
+                    .ToList();
+
+                entry.Bankkontos = Ctx.Bankkontos
+                    .Where(b => myBankkontoIds.Contains(b.BankkontoId))
+                    .AsEnumerable()
+                    .Select(b => new BankkontoEntryBase(b, new Permissions { Read = true, Update = true, Remove = true }))
+                    .ToList();
+
+                entry.Transaktionen = myBankkontoIds.Count == 0 ? [] : Ctx.Transaktionen
                     .Where(t =>
-                        t.Zahler.KontaktId == entity.KontaktId ||
-                        t.Zahlungsempfaenger.KontaktId == entity.KontaktId)
+                        (t.Zahler != null && myBankkontoIds.Contains(t.Zahler.BankkontoId)) ||
+                        (t.Zahlungsempfaenger != null && myBankkontoIds.Contains(t.Zahlungsempfaenger.BankkontoId)))
+                    .Include(t => t.Zahler).ThenInclude(b => b!.Besitzer)
+                    .Include(t => t.Zahlungsempfaenger).ThenInclude(b => b!.Besitzer)
+                    .AsEnumerable()
                     .Select(e => new TransaktionEntryBase(e, new(true)))
                     .ToList();
 
@@ -165,25 +201,38 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 entity.Adresse = GetAdresse(a, Ctx);
             }
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
             if (entry.SelectedJuristischePersonen is IEnumerable<SelectionEntry> l)
             {
-                // Add new
-                entity.JuristischePersonen
-                    .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.KontaktId))
-                    .SelectMany(w => Ctx.Kontakte.Where(u => u.KontaktId == w.Id)));
-                // Remove old
-                entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.KontaktId));
+                var lIds = l.Select(x => x.Id).ToHashSet();
+                // Close memberships no longer selected
+                foreach (var m in entity.AlsMitglied.Where(m => m.Bis == null && !lIds.Contains(m.JuristischePerson.KontaktId)))
+                    m.Bis = today;
+                // Add new active memberships
+                var existingActiveIds = entity.AlsMitglied.Where(m => m.Bis == null).Select(m => m.JuristischePerson.KontaktId).ToHashSet();
+                foreach (var selected in l.Where(x => !existingActiveIds.Contains(x.Id)))
+                {
+                    var jp = Ctx.Kontakte.Find(selected.Id);
+                    if (jp != null)
+                        Ctx.KontaktMitgliedschaften.Add(new KontaktMitgliedschaft(today) { JuristischePerson = jp, Mitglied = entity });
+                }
             }
 
-            if (entry.SelectedMitglieder is IEnumerable<SelectionEntry> m)
+            if (entry.SelectedMitglieder is IEnumerable<SelectionEntry> sel)
             {
-                // Add new
-                entity.Mitglieder
-                    .AddRange(m.Where(w => !entity.Mitglieder.Exists(e => w.Id == e.KontaktId))
-                    .SelectMany(w => Ctx.Kontakte.Where(u => u.KontaktId == w.Id)));
-
-                // Remove old
-                entity.Mitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.KontaktId));
+                var selIds = sel.Select(x => x.Id).ToHashSet();
+                // Close memberships no longer selected
+                foreach (var m in entity.AlsJuristischePerson.Where(m => m.Bis == null && !selIds.Contains(m.Mitglied.KontaktId)))
+                    m.Bis = today;
+                // Add new active memberships
+                var existingActiveIds = entity.AlsJuristischePerson.Where(m => m.Bis == null).Select(m => m.Mitglied.KontaktId).ToHashSet();
+                foreach (var selected in sel.Where(x => !existingActiveIds.Contains(x.Id)))
+                {
+                    var mitglied = Ctx.Kontakte.Find(selected.Id);
+                    if (mitglied != null)
+                        Ctx.KontaktMitgliedschaften.Add(new KontaktMitgliedschaft(today) { JuristischePerson = entity, Mitglied = mitglied });
+                }
             }
 
             if ((Rechtsform)entry.Rechtsform.Id == Rechtsform.natuerlich)

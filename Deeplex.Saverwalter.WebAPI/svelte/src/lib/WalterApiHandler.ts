@@ -18,7 +18,6 @@ import { walter_get } from '$walter/services/requests';
 export abstract class WalterApiHandler {
     protected static ApiURL: string;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static fromJson(_json: unknown) {
         throw new Error('WalterApiHandler.fromJson not implemented.');
     }
@@ -33,6 +32,46 @@ export abstract class WalterApiHandler {
         }
 
         return response.map<T>((json) => this.fromJson(json) as unknown as T);
+    }
+
+    public static async GetPaged<T extends WalterApiHandler>(
+        fetchImpl: typeof fetch,
+        params: {
+            search?: string;
+            sortBy?: string;
+            sortDir?: 'asc' | 'desc';
+            skip?: number;
+            take?: number;
+        } = {}
+    ): Promise<{ items: T[]; totalCount: number }> {
+        const qs = new URLSearchParams();
+        if (params.search) qs.set('search', params.search);
+        if (params.sortBy) qs.set('sortBy', params.sortBy);
+        if (params.sortDir) qs.set('sortDir', params.sortDir);
+        if (params.skip !== undefined) qs.set('skip', `${params.skip}`);
+        if (params.take !== undefined) qs.set('take', `${params.take}`);
+
+        const url = qs.size ? `${this.ApiURL}?${qs.toString()}` : this.ApiURL;
+        const response = await walter_get(url, fetchImpl);
+
+        if (
+            typeof response !== 'object' ||
+            response === null ||
+            !('items' in response) ||
+            !('totalCount' in response)
+        ) {
+            throw new Error(
+                'Expected paged response with items and totalCount.'
+            );
+        }
+
+        const paged = response as { items: unknown[]; totalCount: number };
+        return {
+            items: paged.items.map(
+                (json) => this.fromJson(json) as unknown as T
+            ),
+            totalCount: paged.totalCount
+        };
     }
 
     public static async GetOne<T extends WalterApiHandler>(

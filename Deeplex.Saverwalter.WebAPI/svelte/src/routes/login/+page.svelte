@@ -62,7 +62,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             if (document.referrer.includes($page.url.host)) {
                 history.back(); // TODO should be walter_history_back
             } else {
-                walter_goto('/');
+                await walter_goto('/');
             }
         }
     }

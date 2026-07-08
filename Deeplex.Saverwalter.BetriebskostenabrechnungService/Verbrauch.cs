@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,18 +22,27 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Zaehler Zaehler;
         public DateOnly Anfangsdatum;
         public DateOnly Enddatum;
-        public double Delta;
+        public decimal Delta;
 
         public Verbrauch(Zaehler zaehler, DateOnly beginn, DateOnly ende, List<Note> notes)
         {
             Zaehler = zaehler;
+
+            // Zähler, der schon außer Betrieb war oder dessen erster Stand noch nach
+            // dem Zeitraum liegt, war im Zeitraum gar nicht aktiv — dafür fehlende
+            // Stände zu bemängeln wäre falscher Alarm.
+            var zaehlerAusserhalbZeitraum =
+                (zaehler.Ende.HasValue && zaehler.Ende.Value < beginn)
+                || (zaehler.Staende.Count > 0 && zaehler.Staende.Min(s => s.Datum) > ende);
+
             var endstand = GetZaehlerEndStand(zaehler, ende);
             var anfangsstand = GetZaehlerAnfangsStand(zaehler, beginn);
             if (anfangsstand == null)
             {
-                notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
-                    $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
-                    Severity.Error);
+                if (!zaehlerAusserhalbZeitraum)
+                    notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
+                        $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
+                        Severity.Error);
             }
             else
             {
@@ -42,9 +51,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (endstand == null)
             {
-                notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
-                    $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
-                    Severity.Error);
+                if (!zaehlerAusserhalbZeitraum)
+                    notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
+                        $"innerhalb des Zeitraums ({beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}) gefunden.",
+                        Severity.Error);
             }
             else
             {
@@ -54,12 +64,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (anfangsstand != null && endstand != null)
             {
                 Delta = endstand.Stand - anfangsstand.Stand;
-            }
 
-
-            else if (anfangsstand == null && endstand?.Stand == 0)
-            {
-                Delta = 0;
+                // Ein stark abweichendes Messfenster verfälscht Verbrauchsanteile
+                // (z.B. §9(2)-V/Q) still — deshalb warnen statt schweigen.
+                if (anfangsstand.Datum.DayNumber - beginn.DayNumber > 14
+                    || ende.DayNumber - endstand.Datum.DayNumber > 14)
+                {
+                    notes.Add($"Messfenster von Zähler {zaehler.Kennnummer} ({zaehler.Typ}) weicht vom " +
+                        $"Zeitraum ab: gemessen {anfangsstand.Datum:dd.MM.yyyy} - {endstand.Datum:dd.MM.yyyy}, " +
+                        $"Zeitraum {beginn:dd.MM.yyyy} - {ende:dd.MM.yyyy}.",
+                        Severity.Warning);
+                }
             }
             else
             {
@@ -74,14 +89,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     .LastOrDefault(zaehlerstand => zaehlerstand.Datum <= ende);
         }
 
+        /// <summary>
+        /// Stand, der dem Periodenbeginn am nächsten liegt (frühestens 14 Tage davor).
+        /// Nicht den ersten Stand ab beginn−14 nehmen: Gibt es z.B. Stände am 20.12.
+        /// und 31.12., ist der 31.12. der richtige Anfangsstand für den 01.01. —
+        /// sonst zählen Tage des Vorjahres in den Verbrauch hinein.
+        /// </summary>
         private static Zaehlerstand? GetZaehlerAnfangsStand(Zaehler zaehler, DateOnly beginn)
         {
             var earliest = beginn.AddDays(-14).DayNumber;
             return zaehler.Staende
-                .OrderBy(zaehlerstand => zaehlerstand.Datum)
-                .FirstOrDefault(zaehlerstand => earliest <= zaehlerstand.Datum.DayNumber);
+                .Where(zaehlerstand => earliest <= zaehlerstand.Datum.DayNumber)
+                .OrderBy(zaehlerstand => Math.Abs(zaehlerstand.Datum.DayNumber - beginn.DayNumber))
+                .ThenBy(zaehlerstand => zaehlerstand.Datum)
+                .FirstOrDefault();
         }
-
-
     }
 }

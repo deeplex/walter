@@ -28,7 +28,9 @@ export async function handle_save(
         'Speichern fehlgeschlagen',
         () => `${toastTitle} erfolgreich gespeichert.`,
         (a: unknown) =>
-            `Folgende Einträge sind erforderlich:
+            typeof a === 'string'
+                ? a
+                : `Folgende Einträge sind erforderlich:
             ${Object.keys((a as { errors: string }).errors)
                 .map((e) => e.split('.').pop())
                 .join(', \n')}`

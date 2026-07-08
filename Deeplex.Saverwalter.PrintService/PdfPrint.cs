@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 
@@ -117,7 +116,7 @@ namespace Deeplex.Saverwalter.PrintService
                     para.AddLineBreak();
                 }
             }
-            para.Format.SpaceAfter = Unit.FromPoint(spacing);
+            para.Format.SpaceAfter = spacing;
 
             section.Add(para);
         }
@@ -128,7 +127,7 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text);
         }
@@ -137,20 +136,6 @@ namespace Deeplex.Saverwalter.PrintService
             var section = body.AddSection();
             section.AddPageBreak();
         }
-        public void EqHeizkostenV9_2(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit)
-        {
-            Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
-
-            var wohnung = abrechnung.Vertrag.Wohnung;
-            var zeitraum = abrechnung.Zeitraum;
-
-            foreach (var hk in abrechnungseinheit.Heizkostenberechnungen)
-            {
-                // TODO implement...
-                Text(Utils.Prozent(hk.Para9_2));
-            }
-        }
-
         private string frac(string num, string den)
         {
             return $"{num} / {den}";
@@ -170,7 +155,7 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text, TextFormat.Bold | TextFormat.Italic);
         }
@@ -181,9 +166,34 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text, TextFormat.Bold);
+        }
+
+        public void EntwurfHinweis(string grund)
+        {
+            var section = body.LastSection;
+            var para = section.AddParagraph();
+            para.Format.Font.Size = 14;
+            para.Format.Font.Name = font;
+            para.Format.SpaceAfter = spacing * 2;
+            para.Format.Borders.Bottom = new MigraDoc.DocumentObjectModel.Border
+            {
+                Style = BorderStyle.Single,
+                Width = 0.5
+            };
+            var fmt = para.AddFormattedText($"⚠ ENTWURF – {grund}", TextFormat.Bold);
+            fmt.Font.Color = MigraDoc.DocumentObjectModel.Colors.Red;
+        }
+
+        public void EqHeizkostenV9_2(HkvoP9_2Berechnung b)
+        {
+            Text($"Berechnung Warmwasseranteil §9 Abs. 2 HKVO:");
+            Text($"2,5 × ({Utils.Unit(b.V, "m³")} / {Utils.Unit(b.Q, "kWh")}) × ({Utils.Celsius((int)b.Tw)} − 10°C) = {Utils.Prozent(b.Para9_2)}");
+            Text($"V = {Utils.Unit(b.V, "m³")} = Warmwassermenge");
+            Text($"Q = {Utils.Unit(b.Q, "kWh")} = Wärmemenge Allgemeinzähler");
+            Text($"tw = {Utils.Celsius((int)b.Tw)} = geschätzte Temperatur Warmwasser");
         }
 
         private static string font = "Times New Roman";

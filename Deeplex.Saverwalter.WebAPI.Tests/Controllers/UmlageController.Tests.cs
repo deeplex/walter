@@ -17,7 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +31,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 {
     public class UmlageControllerTests
     {
+        private static Umlage MakeUmlage(Umlageschluessel schluessel, Umlagetyp? typ = null)
+        {
+            var u = new Umlage { Typ = typ ?? new Umlagetyp("Dachrinnenreinigung") };
+            u.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = u });
+            return u;
+        }
+
         [Fact]
         public async Task Get()
         {
@@ -46,9 +53,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
             A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = await controller.Get();
+            var result = await controller.Get(new PagedQuery());
 
-            result.Value.Should().NotBeNull();
+            result.Should().NotBeNull();
         }
 
         [Fact]
@@ -66,10 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagetypen.Add(typ);
             ctx.SaveChanges();
 
-            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = typ
-            };
+            var entity = MakeUmlage(Umlageschluessel.NachWohnflaeche, typ);
             var entry = new UmlageEntry(entity, new());
 
             var result = await controller.Post(entry);

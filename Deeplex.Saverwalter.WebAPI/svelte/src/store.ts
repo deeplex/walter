@@ -64,7 +64,8 @@ export const walterModalControl: Writable<WalterModalControl> = writable({
     content: 'Bitte einfach schließen.',
     danger: false,
     primaryButtonText: 'Schließen',
-    submit: async () => true
+    submit: async () => true,
+    cancel: () => true
 });
 
 export function openModal(configs: Partial<WalterModalControl>) {

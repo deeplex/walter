@@ -21,9 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         BarChartSimple,
         type BarChartOptions
     } from '@carbon/charts-svelte';
-    import type { WalterDataType } from './WalterData';
+    import type { WalterDataConfigType } from './WalterData';
 
-    export let config: { data: WalterDataType; options: BarChartOptions };
+    export let config: WalterDataConfigType;
+    $: options = config.options as BarChartOptions;
 </script>
 
-<BarChartSimple data={config.data} options={config.options} />
+<BarChartSimple data={config.data} {options} />

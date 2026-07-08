@@ -14,10 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Helper;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Utils;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -30,10 +35,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class TransaktionEntryBase
         {
             public Guid Id { get; set; }
-            public SelectionEntry Zahler { get; set; } = null!;
-            public SelectionEntry Zahlungsempfaenger { get; set; } = null!;
+            public SelectionEntry? Zahler { get; set; }
+            public SelectionEntry? Zahlungsempfaenger { get; set; }
             public DateOnly Zahlungsdatum { get; set; }
-            public double Betrag { get; set; }
+            public decimal Betrag { get; set; }
             public string Verwendungszweck { get; set; } = string.Empty;
             public string? Notiz { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
@@ -42,8 +47,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public TransaktionEntryBase(Transaktion entity, Permissions permissions)
             {
                 Id = entity.TransaktionId;
-                Zahler = new SelectionEntry(entity.Zahler.KontaktId, entity.Zahler.Bezeichnung);
-                Zahlungsempfaenger = new SelectionEntry(entity.Zahlungsempfaenger.KontaktId, entity.Zahlungsempfaenger.Bezeichnung);
+                if (entity.Zahler is { } zahler)
+                    Zahler = new SelectionEntry(zahler.BankkontoId, BankkontoLabel(zahler));
+                if (entity.Zahlungsempfaenger is { } empfaenger)
+                    Zahlungsempfaenger = new SelectionEntry(empfaenger.BankkontoId, BankkontoLabel(empfaenger));
                 Zahlungsdatum = entity.Zahlungsdatum;
                 Betrag = entity.Betrag;
                 Verwendungszweck = entity.Verwendungszweck;
@@ -57,28 +64,48 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
+            public IEnumerable<BuchungssatzEntryBase> Buchungssaetze { get; set; } = [];
 
             public TransaktionEntry() : base() { }
             public TransaktionEntry(Transaktion entity, Permissions permissions) : base(entity, permissions)
             {
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+                Buchungssaetze = entity.Buchungssaetze
+                    .OrderByDescending(s => s.Buchungsdatum)
+                    .ThenByDescending(s => s.Buchungsnummer)
+                    .Select(s => new BuchungssatzEntryBase(s))
+                    .ToList();
             }
         }
 
         private readonly ILogger<TransaktionController> _logger;
+        private readonly TransaktionBuchungsService _buchungsService;
+        private readonly NkAnteilBuchungsService _nkAnteilService;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
         protected override TransaktionDbService DbService { get; }
 
         public TransaktionController(
             ILogger<TransaktionController> logger,
-            TransaktionDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+            TransaktionDbService dbService,
+            TransaktionBuchungsService buchungsService,
+            NkAnteilBuchungsService nkAnteilService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth,
+            HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
+            _buchungsService = buchungsService;
+            _nkAnteilService = nkAnteilService;
+            _ctx = ctx;
+            _auth = auth;
             _logger = logger;
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<TransaktionEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<TransaktionEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
 
         [HttpPost]
         public Task<ActionResult<TransaktionEntry>> Post([FromBody] TransaktionEntry entry) => DbService.Post(User!, entry);
@@ -89,6 +116,79 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<TransaktionEntry>> Put(Guid id, [FromBody] TransaktionEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(Guid id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Erstellt eine Transaktion mit Buchungssätzen aus typisierten Positionen.
+        /// Die Konten werden anhand des Positionstyps und der referenzierten Entitäten
+        /// (z.B. Vertrag) automatisch aufgelöst.
+        /// </summary>
+        [HttpPost("buchen")]
+        public async Task<ActionResult<TransaktionEntry>> Buchen(
+            [FromBody] TransaktionBuchungsService.TransaktionsInput input)
+        {
+            foreach (var miete in input.Mieten)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(miete.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {miete.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var bk in input.BetriebskostenEingaenge)
+            {
+                var umlage = await _ctx.Umlagen.FindAsync(bk.UmlageId);
+                if (umlage is null) return NotFound($"Umlage {bk.UmlageId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, umlage, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var nk in input.NkAnteilEingaenge)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(nk.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {nk.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var ausgleich in input.AbrechnungsAusgleiche)
+            {
+                var resultat = await _ctx.Abrechnungsresultate
+                    .Include(r => r.Vertrag)
+                    .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == ausgleich.AbrechnungsresultatId);
+                if (resultat is null)
+                    return NotFound($"Abrechnungsresultat {ausgleich.AbrechnungsresultatId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, resultat.Vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            var nkAnteile = input.NkAnteilEingaenge.ToList();
+            input.NkAnteilEingaenge.Clear();
+
+            try
+            {
+                TransaktionEntry? result = null;
+                if (input.Betrag > 0)
+                {
+                    var transaktion = await _buchungsService.BucheAsync(input);
+                    var permissions = await GetPermissions(User!, transaktion, _auth);
+                    result = new TransaktionEntry(transaktion, permissions);
+                }
+
+                foreach (var nk in nkAnteile)
+                    await _nkAnteilService.BucheVertragsNkAnteilAsync(
+                        nk.VertragId, nk.UmlageId, nk.Betrag, nk.BetreffendesJahr,
+                        input.Zahlungsdatum, nk.Notiz);
+
+                if (result is not null)
+                    return Ok(result);
+
+                return nkAnteile.Count > 0
+                    ? Ok(new { message = $"{nkAnteile.Count} NK-Anteil(e) gebucht." })
+                    : BadRequest("Keine Positionen vorhanden.");
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
     }
 }
 

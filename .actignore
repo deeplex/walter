@@ -1,0 +1,3 @@
+# Postgres data directory created by the dev container – owned by uid 70
+# and not readable by the vscode user, so act can't copy it.
+.devcontainer/test_data

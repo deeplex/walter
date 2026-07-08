@@ -20,38 +20,128 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { removeToast, toasts } from '$walter/store';
     import type { WalterToast } from '$walter/types';
 
-    function close(e: CustomEvent, index: number) {
+    const TIMEOUT = 3000;
+
+    let toaster: Partial<WalterToast>[] = [];
+    const timers = new Map<
+        Partial<WalterToast>,
+        ReturnType<typeof setTimeout>
+    >();
+    const nodes = new Map<Partial<WalterToast>, HTMLElement>();
+    const remaining = new Map<Partial<WalterToast>, number>();
+    const startTimes = new Map<Partial<WalterToast>, number>();
+
+    function animateOut(node: HTMLElement, index: () => number) {
+        node.style.transition = 'transform 1s ease, opacity 0.2s ease';
+        node.style.transform = 'translateX(200px)';
+        node.style.opacity = '0';
+        setTimeout(() => removeToast(index()), 200);
+    }
+
+    function close(e: CustomEvent, toast: Partial<WalterToast>) {
         e.preventDefault();
-        const notification = document.querySelectorAll(`.toast-notification`)[
-            index
-        ] as HTMLElement;
+        clearTimeout(timers.get(toast));
+        timers.delete(toast);
+        const node = nodes.get(toast);
+        if (node) animateOut(node, () => toaster.indexOf(toast));
+    }
 
-        if (notification) {
-            notification.style.transition =
-                'transform 1s ease, opacity 0.2s ease';
-            notification.style.transform = 'translateX(200px)';
-            notification.style.opacity = '0';
+    function toastAction(node: HTMLElement, toast: Partial<WalterToast>) {
+        nodes.set(toast, node);
+        const pb = node.querySelector('.progress-bar') as HTMLElement | null;
 
-            setTimeout(() => removeToast(index), 200);
-        } else {
-            removeToast(index);
+        function startAutoClose(delay = TIMEOUT) {
+            clearTimeout(timers.get(toast));
+            if (pb) {
+                pb.style.animationName = 'none';
+                void pb.offsetWidth; // force reflow to restart animation
+                pb.style.removeProperty('animation-name');
+                pb.style.removeProperty('animation-play-state');
+            }
+            startTimes.set(toast, Date.now());
+            remaining.set(toast, delay);
+            timers.set(
+                toast,
+                setTimeout(
+                    () => animateOut(node, () => toaster.indexOf(toast)),
+                    delay
+                )
+            );
+        }
+
+        startAutoClose();
+
+        return {
+            destroy() {
+                clearTimeout(timers.get(toast));
+                timers.delete(toast);
+                nodes.delete(toast);
+                remaining.delete(toast);
+                startTimes.delete(toast);
+            }
+        };
+    }
+
+    function pauseAll() {
+        for (const [toast] of timers) {
+            clearTimeout(timers.get(toast));
+            timers.delete(toast);
+            const elapsed = Date.now() - (startTimes.get(toast) ?? Date.now());
+            remaining.set(
+                toast,
+                Math.max(0, (remaining.get(toast) ?? TIMEOUT) - elapsed)
+            );
+        }
+        for (const [, node] of nodes) {
+            const pb = node.querySelector(
+                '.progress-bar'
+            ) as HTMLElement | null;
+            if (pb) pb.style.animationPlayState = 'paused';
         }
     }
 
-    let toaster: Partial<WalterToast>[] = [];
+    function resumeAll() {
+        for (const [toast, node] of nodes) {
+            const rem = remaining.get(toast) ?? TIMEOUT;
+            const pb = node.querySelector(
+                '.progress-bar'
+            ) as HTMLElement | null;
+            if (pb) pb.style.animationPlayState = 'running';
+            startTimes.set(toast, Date.now());
+            timers.set(
+                toast,
+                setTimeout(
+                    () => animateOut(node, () => toaster.indexOf(toast)),
+                    rem
+                )
+            );
+        }
+    }
 
     toasts.subscribe((value) => {
+        for (const [toast] of timers) {
+            if (!value.includes(toast)) {
+                clearTimeout(timers.get(toast));
+                timers.delete(toast);
+            }
+        }
         toaster = value;
     });
 </script>
 
-<div class="toast-container">
-    {#each toaster as toast, i (toast)}
-        <div class="toast-notification">
+<div
+    class="toast-container"
+    role="region"
+    aria-label="Benachrichtigungen"
+    on:mouseenter={pauseAll}
+    on:mouseleave={resumeAll}
+>
+    {#each toaster as toast (toast)}
+        <div class="toast-notification" use:toastAction={toast}>
             <ToastNotification
                 style="margin: 0px; margin-bottom: -0.25em"
-                timeout={10000}
-                on:close={(e) => close(e, i)}
+                timeout={0}
+                on:close={(e) => close(e, toast)}
                 title={toast.title}
                 kind={toast.kind}
                 subtitle={toast.subtitle}
@@ -85,7 +175,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         z-index: 9001;
         height: 0.25em;
         width: 0; /* Set initial width to 0 */
-        animation: progressBarAnimation 10s linear forwards; /* One-liner animation */
+        animation: progressBarAnimation 3s linear forwards;
     }
 
     .progress-bar-error {

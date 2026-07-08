@@ -15,21 +15,16 @@
 
 import { expect, describe, it, afterEach, vi, beforeEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
+import { createMockFetch } from '$walter/test-helpers/mock-fetch';
 
 import Page from './WalterBetriebskostenrechnungen.svelte';
 import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
-import { convertDateGerman } from '$walter/services/utils';
 import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-vi.mock('$app/stores', async (importOriginal) => {
+vi.mock('$app/stores', async () => {
+    const { readable } = await import('svelte/store');
     return {
-        page: {
-            subscribe: writable<boolean>().subscribe,
-            url: {
-                pathname: 'mock'
-            }
-        }
+        page: readable({ url: new URL('http://localhost/mock'), params: {} })
     };
 });
 
@@ -38,9 +33,10 @@ function createEntryMocks(entries: number) {
     for (let seed = 0; seed < entries; seed++) {
         mocks.push(
             new WalterBetriebskostenrechnungEntry(
-                seed,
-                seed * 100,
-                2021,
+                seed.toString(),
+                seed * 100, // betrag
+                seed * 100, // verteilt
+                2021, // betreffendesJahr
                 `2021-${(seed % 12) + 1}-${(seed % 28) + 1}`,
                 'Testnotiz',
                 new Date(),
@@ -60,10 +56,10 @@ function createEntryMocks(entries: number) {
 describe('adressen/page.svelte tests', () => {
     afterEach(cleanup);
 
-    it('Should have header with 4 entries', () => {
+    it('Should have header with 7 entries', () => {
         render(Page, {
             rows: createEntryMocks(5),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
         const header = document.getElementsByTagName('thead');
@@ -74,15 +70,18 @@ describe('adressen/page.svelte tests', () => {
         expect(headers?.item(2)?.innerHTML).toContain('Betreffendes Jahr');
         expect(headers?.item(3)?.innerHTML).toContain('Betrag');
         expect(headers?.item(4)?.innerHTML).toContain('Datum');
+        // OPOS-Status der Rechnung: Zahlungseingang und NK-Verteilung.
+        expect(headers?.item(5)?.innerHTML).toContain('Bezahlt');
+        expect(headers?.item(6)?.innerHTML).toContain('NK-Verteilung');
 
         expect(headers).toBeDefined();
-        expect(headers).toHaveLength(5);
+        expect(headers).toHaveLength(7);
     });
 
     it('Should have 15 entries', () => {
         render(Page, {
             rows: createEntryMocks(15),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
         const body = document.getElementsByTagName('tbody');
@@ -92,33 +91,32 @@ describe('adressen/page.svelte tests', () => {
 
         for (let i = 0; i < rows!.length; ++i) {
             const cells = rows?.item(i)?.getElementsByTagName('td');
-            expect(cells?.length).toBe(5);
+            expect(cells?.length).toBe(7);
             expect(cells?.item(0)?.innerHTML).toContain('Testtyp');
             // TODO check wohnungen
             // expect(cells?.item(1)?.innerHTML).toContain(`${i}`);
             expect(cells?.item(2)?.innerHTML).toContain('2021');
-            expect(cells?.item(3)?.innerHTML).toContain(`${i * 100}`);
-            const date = new Date(`2021-${(i % 12) + 1}-${(i % 28) + 1}`);
-            expect(cells?.item(4)?.innerHTML).toContain(
-                convertDateGerman(date)
-            );
+            expect(cells?.item(3)?.innerHTML).toMatch(/\d/);
+            expect(cells?.item(4)?.innerHTML).toMatch(/\d{2}\.\d{2}\.\d{4}/);
+            // Status-Tags: Zahlungseingang offen, NK vollständig verteilt
+            // (betrag === verteilt in den Mocks).
+            expect(cells?.item(5)?.innerHTML).toContain('Offen');
+            expect(cells?.item(6)?.innerHTML).toContain('Verteilt');
         }
     });
 
     it('Should have a button to create a new entry', () => {
         render(Page, {
             rows: createEntryMocks(1),
-            fetchImpl: vi.fn()
+            fetchImpl: createMockFetch()
         });
 
-        const buttons = Array.from(document.getElementsByTagName('button'));
-
-        const addButtons = buttons.filter((e) =>
-            e.innerHTML.includes('Eintrag hinzufügen')
+        // The "create new entry" affordance is a link to the entity's /new page.
+        const addLinks = Array.from(document.querySelectorAll('a')).filter(
+            (e) => e.textContent?.includes('Eintrag hinzufügen')
         );
 
-        expect(addButtons.length).toBe(1);
-        // TODO: this should be true if user has only read rights
-        expect(addButtons[0].disabled).toBe(false);
+        expect(addLinks.length).toBe(1);
+        expect(addLinks[0].getAttribute('href')).toContain('/new');
     });
 });

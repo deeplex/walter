@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2025  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -17,41 +17,57 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterTransaktion } from '$walter/components';
+    import { WalterDataTable, WalterTransaktion } from '$walter/components';
     import { WalterTransaktionEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+
     export let fetchImpl: typeof fetch;
+    export let fullHeight = false;
+    export let title: string | undefined = undefined;
+    export let entry: Partial<WalterTransaktionEntry> | undefined = {};
+    export let rows: WalterTransaktionEntry[] | undefined = undefined;
+
+    let transaktionIsValid = false;
 
     const headers = [
         { key: 'zahler.text', value: 'Zahler' },
         { key: 'betrag', value: 'Betrag' },
-        {
-            key: 'zahlungsempfaenger.text',
-            value: 'Zahlungsempfänger'
-        },
+        { key: 'zahlungsempfaenger.text', value: 'Zahlungsempfänger' },
         { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
         { key: 'verwendungszweck', value: 'Memo' }
     ];
 
-    export let rows: WalterTransaktionEntry[];
-    export let fullHeight = false;
-    export let title: string | undefined = undefined;
-    export let entry: Partial<WalterTransaktionEntry> | undefined = undefined;
-
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.transaktion(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
+
+    const fetchData =
+        rows === undefined
+            ? (p: Parameters<typeof WalterTransaktionEntry.GetPaged>[1]) =>
+                  WalterTransaktionEntry.GetPaged<WalterTransaktionEntry>(
+                      fetchImpl,
+                      p
+                  )
+            : undefined;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterTransaktionEntry.ApiURL}
     {on_click_row}
+    {rowHref}
     addEntry={entry}
-    {title}
+    submitDisabled={!transaktionIsValid}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {rows}
+    {fetchData}
+    initialSortBy="zahlungsdatum"
+    initialSortDir="desc"
     {headers}
     {fullHeight}
 >
     {#if entry}
-        <WalterTransaktion {fetchImpl} {entry} />
+        <WalterTransaktion {fetchImpl} bind:isValid={transaktionIsValid} />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

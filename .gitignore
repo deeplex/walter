@@ -65,6 +65,12 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Local devcontainer volumes (can be root-owned and unreadable for act checkout)
+.devcontainer/data/
+.devcontainer/test_data/
+.claude
+ANALYSE_*
+
 # StyleCop
 StyleCopReport.xml
 

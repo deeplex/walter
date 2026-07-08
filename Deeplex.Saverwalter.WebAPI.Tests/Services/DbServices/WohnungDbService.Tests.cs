@@ -16,13 +16,13 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Utils;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
@@ -30,6 +30,20 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class WohnungDbServiceTests : IDisposable
     {
         public SaverwalterContext ctx;
+
+        private static Wohnung MakeWohnung(string name, Kontakt? besitzer = null)
+        {
+            var w = new Wohnung(name)
+            {
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
+            };
+            if (besitzer != null)
+                w.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = w, Kontakt = besitzer });
+            w.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = w });
+            return w;
+        }
+
         public WohnungDbServiceTests()
         {
             ctx = TestUtils.GetContext();
@@ -92,11 +106,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
-
+            var entity = MakeWohnung("Test", besitzer);
             var entry = new WohnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
@@ -116,11 +126,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
-
+            var entity = MakeWohnung("Test", besitzer);
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
@@ -144,14 +150,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = MakeWohnung("Test", besitzer);
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
             var entry = new WohnungEntry(entity, new());
-            entry.Wohnflaeche = 200;
+            entry.Bezeichnung = "Test geändert";
 
             var result = await service.Put(user, entity.WohnungId, entry);
 
@@ -161,7 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new Exception("Wohnung not found");
             }
-            updatedEntity.Wohnflaeche.Should().Be(200);
+            updatedEntity.Bezeichnung.Should().Be("Test geändert");
         }
 
         [Fact]
@@ -172,18 +175,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new WohnungDbService(ctx, auth);
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = new Umlagetyp("Dachrinnenreinigung")
-            };
+            var umlage = new Umlage { Typ = new Umlagetyp("Dachrinnenreinigung") };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
-            {
-                Besitzer = besitzer
-            };
+            var entity = MakeWohnung("Test", besitzer);
             var entry = new WohnungEntry(entity, new());
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();

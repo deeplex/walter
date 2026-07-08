@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class AbrechnungsresultatDbService : WalterDbServiceBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat>
     {
@@ -27,7 +28,32 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<Abrechnungsresultat>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {
-            var entity = await Ctx.Abrechnungsresultate.FindAsync(id);
+            var entity = await Ctx.Abrechnungsresultate
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsSollZeile)
+                            .ThenInclude(a => a.HabenZeile)
+                                .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsHabenZeile)
+                            .ThenInclude(a => a.SollZeile)
+                                .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.ZahlungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.BkAbrechnungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.NkBuchungskonto)
+                        .ThenInclude(k => k.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.Wohnung)
+                        .ThenInclude(w => w.Adresse)
+                .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == id);
             return await GetEntity(user, entity, op);
         }
 
@@ -48,8 +74,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new ForbidResult();
             }
 
-            var entity = vertrag.Abrechnungsresultate
-                .SingleOrDefault(e => e.Jahr == jahr);
+            var entity = await Ctx.Abrechnungsresultate
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsSollZeile)
+                            .ThenInclude(a => a.HabenZeile)
+                                .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.AlsHabenZeile)
+                            .ThenInclude(a => a.SollZeile)
+                                .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.ZahlungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.BkAbrechnungsKonto)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.NkBuchungskonto)
+                        .ThenInclude(k => k.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungssatz)
+                .Include(r => r.Vertrag)
+                    .ThenInclude(v => v.Wohnung)
+                        .ThenInclude(w => w.Adresse)
+                .Where(r => r.Vertrag.VertragId == VertragId &&
+                            r.Buchungssatz != null &&
+                            r.Buchungssatz.Buchungsjahr == jahr)
+                .SingleOrDefaultAsync();
 
             if (entity == null)
             {
@@ -57,19 +110,58 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             var permissions = await GetPermissions(user, entity, Auth);
-            var entry = new AbrechnungsresultatEntry(entity, permissions);
+            // Einzel-Löschen ist gesperrt (nur Rückabwicklung über den Abrechnungslauf)
+            permissions.Remove = false;
+            var entry = new AbrechnungsresultatEntry(entity, permissions)
+            {
+                VermieterBankkontoId = await ResolveVermieterBankkonto(entity)
+            };
 
             return entry;
         }
 
+        /// <summary>
+        /// Bankkonto des Vermieters für den Zahlungsverkehr dieses Vertrags —
+        /// Vorbelegung für den Abrechnungs-Ausgleich. Das Vertrags-Zahlungskonto
+        /// ist meist ein rein virtuelles Buchungskonto ohne Bankkonto dahinter;
+        /// dann greift das Bankkonto der aktuellen Wohnungs-Eigentümer
+        /// (gleiche Auflösung wie beim Betriebskosten-Eingang).
+        /// </summary>
+        private async Task<int?> ResolveVermieterBankkonto(Abrechnungsresultat entity)
+        {
+            var direkt = await Ctx.Bankkontos
+                .Where(b => b.BuchungsKonto.BuchungskontoId
+                    == entity.Vertrag.ZahlungsKonto.BuchungskontoId)
+                .Select(b => (int?)b.BankkontoId)
+                .FirstOrDefaultAsync();
+            if (direkt != null) return direkt;
 
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var besitzerIds = await Ctx.Wohnungen
+                .Where(w => w.WohnungId == entity.Vertrag.Wohnung.WohnungId)
+                .SelectMany(w => w.Eigentuemer)
+                .Where(e => e.Bis == null || e.Bis >= today)
+                .Select(e => e.Kontakt.KontaktId)
+                .ToListAsync();
+            if (besitzerIds.Count == 0) return null;
+
+            return await Ctx.Bankkontos
+                .Where(b => b.Besitzer.Any(k => besitzerIds.Contains(k.KontaktId)))
+                .Select(b => (int?)b.BankkontoId)
+                .FirstOrDefaultAsync();
+        }
 
         public override async Task<ActionResult<AbrechnungsresultatEntry>> Get(ClaimsPrincipal user, Guid id)
         {
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await GetPermissions(user, entity, Auth);
-                var entry = new AbrechnungsresultatEntry(entity, permissions);
+                // Einzel-Löschen ist gesperrt (nur Rückabwicklung über den Abrechnungslauf)
+                permissions.Remove = false;
+                var entry = new AbrechnungsresultatEntry(entity, permissions)
+                {
+                    VermieterBankkontoId = await ResolveVermieterBankkonto(entity)
+                };
 
                 return entry;
             });
@@ -77,13 +169,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, Guid id)
         {
-            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
-            {
-                Ctx.Abrechnungsresultate.Remove(entity);
-                await Ctx.SaveChangesAsync();
-
-                return new OkResult();
-            });
+            // Einzelne Resultate zu löschen würde die Abrechnung der Gruppe
+            // inkonsistent machen (Buchungssatz, NK-Verteilungen und Umbuchungen
+            // blieben zurück) — Rückabwicklung nur als Ganzes über den Abrechnungslauf.
+            return await HandleEntity(user, id, Operations.Delete, (entity) =>
+                Task.FromResult<ActionResult>(new ConflictObjectResult(
+                    "Abrechnungsresultate können nur über die Rückabwicklung des " +
+                    "Abrechnungslaufs (gesamte Gruppe + Jahr) gelöscht werden.")));
         }
 
         public override async Task<ActionResult<AbrechnungsresultatEntry>> Post(
@@ -101,6 +193,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
+            if (resultat.Abgesendet)
+                return new ConflictObjectResult("Abgesendete Abrechnungen können nicht mehr geändert werden. Bitte zuerst stornieren.");
+
             var authRx = await Auth.AuthorizeAsync(user, resultat.Vertrag, Operations.Read);
             if (!authRx.Succeeded)
             {
@@ -114,13 +209,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 Remove = true
             };
 
-            resultat.Jahr = entry.Jahr;
-            resultat.Kaltmiete = entry.Kaltmiete;
-            resultat.Vorauszahlung = entry.Vorauszahlung;
-            resultat.Rechnungsbetrag = entry.Rechnungsbetrag;
-            resultat.Minderung = entry.Minderung;
             resultat.Abgesendet = entry.Abgesendet;
-            resultat.Saldo = entry.Saldo;
             resultat.Notiz = entry.Notiz;
             Ctx.Abrechnungsresultate.Update(resultat);
             await Ctx.SaveChangesAsync();

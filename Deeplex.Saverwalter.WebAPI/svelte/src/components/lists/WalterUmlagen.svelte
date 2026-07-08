@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,10 +15,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterDataWrapper, WalterUmlage } from '$walter/components';
-    import { WalterUmlageEntry } from '$walter/lib';
+    import WalterUmlage from '../details/WalterUmlage.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterUmlageEntry, validateUmlage } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [
@@ -26,26 +25,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'wohnungenBezeichnung', value: 'Wohnungen' }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.umlage(e.detail.id);
-
     export let fullHeight = false;
-    export let rows: WalterUmlageEntry[];
+    export let rows: WalterUmlageEntry[] | undefined = undefined;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterUmlageEntry> | undefined = undefined;
+    export let entry: Partial<WalterUmlageEntry> | undefined = {};
     export let fetchImpl: typeof fetch;
 </script>
 
-<WalterDataWrapper
-    addUrl={WalterUmlageEntry.ApiURL}
-    addEntry={entry}
-    {title}
-    {on_click_row}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterUmlageEntry}
+    validate={validateUmlage}
     {headers}
+    navFn={navigation.umlage}
+    routeBase="umlagen"
+    formComponent={WalterUmlage}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterUmlage {fetchImpl} {entry} />
-    {/if}
-</WalterDataWrapper>
+    initialSortDir="asc"
+/>

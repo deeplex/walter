@@ -13,15 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterUmlageEntry, WalterVertragEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
     const apiURL = `/api/vertraege`;
     return {
         fetchImpl: fetch,
-        apiURL: apiURL,
-        vertraege: WalterVertragEntry.GetAll<WalterVertragEntry>(fetch),
-        umlagen: WalterUmlageEntry.GetAll<WalterUmlageEntry>(fetch)
+        apiURL: apiURL
     };
 };

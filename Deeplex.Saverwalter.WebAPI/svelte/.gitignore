@@ -41,3 +41,7 @@ _actual*.*
 _output
 /types
 .eslintcache
+
+# Playwright outputs
+/test-results
+/playwright-report

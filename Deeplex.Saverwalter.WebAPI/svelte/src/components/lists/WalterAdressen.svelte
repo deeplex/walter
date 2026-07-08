@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,10 +15,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-    import { WalterAdresse, WalterDataWrapper } from '$walter/components';
-    import { WalterAdresseEntry } from '$walter/lib';
+    import WalterAdresse from '../details/WalterAdresse.svelte';
+    import WalterSimpleList from './WalterSimpleList.svelte';
+    import { WalterAdresseEntry, validateAdresse } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [
@@ -28,25 +27,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'stadt', value: 'Stadt' }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.adresse(e.detail.id);
-
     export let fullHeight = false;
-    export let rows: WalterAdresseEntry[];
+    export let rows: WalterAdresseEntry[] | undefined = undefined;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterAdresseEntry> | undefined = undefined;
+    export let entry: Partial<WalterAdresseEntry> | undefined = {};
+    export let fetchImpl: typeof fetch | undefined = undefined;
 </script>
 
-<WalterDataWrapper
-    addUrl={WalterAdresseEntry.ApiURL}
-    addEntry={entry}
-    {title}
-    {on_click_row}
-    {rows}
+<WalterSimpleList
+    entityClass={WalterAdresseEntry}
+    validate={validateAdresse}
     {headers}
+    navFn={navigation.adresse}
+    routeBase="adressen"
+    formComponent={WalterAdresse}
+    {fetchImpl}
+    {entry}
+    {rows}
+    {title}
     {fullHeight}
->
-    {#if entry}
-        <WalterAdresse {entry} />
-    {/if}
-</WalterDataWrapper>
+/>

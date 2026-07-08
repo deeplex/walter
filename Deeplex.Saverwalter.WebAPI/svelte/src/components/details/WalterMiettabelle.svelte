@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { type WalterVertragEntry, WalterMieteEntry } from '$walter/lib';
+    import type { WalterVertragEntry, TransaktionsInput } from '$walter/lib';
+    import type { WalterMietzahlungListEntry } from '$walter/lib/WalterMietzahlung';
+    import { emptyTransaktionsInput } from '$walter/lib';
     import {
         months,
         walter_data_miettabelle,
@@ -23,35 +25,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterDataPoint
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
-    import { convertDateCanadian } from '$walter/services/utils';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import { WalterMiete } from '..';
+    import { invalidateAll } from '$app/navigation';
+    import { WalterTransaktion } from '..';
 
     export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
     export let year: number;
-    export let mieten: WalterMieteEntry[];
+    export let mieten: WalterMietzahlungListEntry[];
+    export let fetchImpl: typeof fetch;
 
-    function updateEntry(
-        vertragId: string,
-        monthIndex: number,
-        wohnung: string,
-        betrag: number
-    ) {
-        addEntry = {
-            zahlungsdatum: convertDateCanadian(new Date()),
-            betreffenderMonat: convertDateCanadian(
-                new Date(year, monthIndex, 1)
-            ),
-            vertrag: {
-                id: vertragId,
-                text: wohnung
-            },
-            betrag: betrag
-        };
-
-        title = `${wohnung}`;
-    }
+    let addModalOpen = false;
+    let modalTitle = 'Mietzahlung';
+    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
 
     function click(e: CustomEvent, config: WalterDataConfigType) {
         const targetWithData = e.target as { __data__?: WalterDataPoint };
@@ -62,62 +48,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (!data) return;
 
         let monthIndex = months.findIndex((month) => month === data.key);
-
         if (monthIndex === -1) return;
 
-        let lastMonthIndex =
-            monthIndex === 0 ? months.length - 1 : monthIndex - 1;
-
-        const group = config.data.filter((entry) => entry.group === data.group);
-
-        const lastEntry = group.find(
-            (entry) =>
-                entry.key === months[lastMonthIndex] &&
-                entry.year === (monthIndex === 0 ? year - 1 : year)
-        );
-
-        const thisEntry = group.find(
+        const thisEntry = config.data.find(
             (entry) => entry.key === data.key && entry.year === year
         );
 
         const vertragId = thisEntry?.id;
         if (vertragId) {
-            const wohnung = data.group!;
-            const lastValue = (lastEntry?.value as number) || 0;
-
-            updateEntry(vertragId, monthIndex, wohnung, lastValue);
+            modalTitle = data.group!;
+            buchungsInput = {
+                ...emptyTransaktionsInput(),
+                mieten: [
+                    {
+                        kaltmiete: 0,
+                        garagen: [],
+                        nkVorauszahlung: 0,
+                        vertragId: +vertragId
+                    }
+                ]
+            };
             addModalOpen = true;
         }
     }
 
-    let addEntry: Partial<WalterMieteEntry> = {};
-    let addModalOpen = false;
-    let title = 'Unbekannter Vertrag';
-
-    function onSubmit(new_value: unknown) {
-        const value = new_value as WalterMieteEntry;
-        const vertrag = vertraege.find((e) => e.id === +value.vertrag?.id);
-        if (!vertrag) {
-            console.warn('Vertrag not found: ', value.vertrag?.id);
-            return;
-        }
-        mieten.push(value);
-        vertrag!.mieten.push(value);
+    async function onSubmit() {
         config = walter_data_miettabelle(vertraege, year);
+        await invalidateAll();
     }
 </script>
 
 <WalterDataWrapperQuickAdd
-    {onSubmit}
-    bind:addEntry
-    addUrl={WalterMieteEntry.ApiURL}
+    title={modalTitle}
+    addUrl="/api/transaktionen/buchen"
+    bind:addEntry={buchungsInput}
     bind:addModalOpen
-    {title}
+    {onSubmit}
 >
-    <WalterMiete entry={addEntry} {mieten} />
+    <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
 </WalterDataWrapperQuickAdd>
 
-<div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
+<div style="left: 0; min-height: 30em; display: block; width: 100%;">
     <h3>Miettabelle</h3>
     {#if mieten.length === 0}
         <p>Keine Mieten vorhanden</p>

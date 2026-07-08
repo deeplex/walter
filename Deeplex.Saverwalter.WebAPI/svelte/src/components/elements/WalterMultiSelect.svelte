@@ -49,14 +49,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     // svelte things item should be MultiSelectItem but importing is squiggly.
     function filterItem(item: { text: string } & unknown, value: string) {
-        if (!value) return true;
+        if (!value) return item.text;
 
         const text = item.text.toLowerCase();
         const values = `${value}`
             .toLowerCase()
             .split(';')
             .map((e) => e.trim());
-        return values.every((val) => text.includes(val)); // svelte thinks this should be string...
+        return values.every((val) => text.includes(val)) ? item.text : '';
     }
 </script>
 

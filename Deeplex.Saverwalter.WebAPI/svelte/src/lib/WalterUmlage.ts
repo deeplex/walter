@@ -15,9 +15,11 @@
 
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterHKVOEntry } from './WalterHKVO';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
+import { WalterUmlageVersionEntry } from './WalterUmlageVersion';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
@@ -39,7 +41,12 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public selectedWohnungen: WalterSelectionEntry[],
         public wohnungen: WalterWohnungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
-        public permissions: WalterPermissions
+        public versionen: WalterUmlageVersionEntry[],
+        public hkvos: WalterHKVOEntry[],
+        public permissions: WalterPermissions,
+        public ende: string | undefined = undefined,
+        public betriebskostenrechnungsJahre: number[] = [],
+        public konten: Partial<WalterBuchungskontoEntry>[] = []
     ) {
         super();
     }
@@ -52,15 +59,19 @@ export class WalterUmlageEntry extends WalterApiHandler {
             WalterSelectionEntry.fromJson
         );
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
-        const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
-            WalterBetriebskostenrechnungEntry.fromJson
-        );
+        const betriebskostenrechnungen =
+            json.betriebskostenrechnungen?.map(
+                WalterBetriebskostenrechnungEntry.fromJson
+            ) ?? [];
         const selectedZaehler = json.selectedZaehler?.map(
             WalterSelectionEntry.fromJson
         );
         const hkvo =
             json.hkvo && WalterHKVOEntry.fromJson(json.hkvo as WalterHKVOEntry);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
+        const versionen =
+            json.versionen?.map(WalterUmlageVersionEntry.fromJson) ?? [];
+        const hkvos = json.hkvos?.map(WalterHKVOEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -79,7 +90,12 @@ export class WalterUmlageEntry extends WalterApiHandler {
             selectedWohnungen,
             wohnungen,
             betriebskostenrechnungen,
-            permissions
+            versionen,
+            hkvos,
+            permissions,
+            json.ende ?? undefined,
+            json.betriebskostenrechnungsJahre ?? [],
+            json.konten ?? []
         );
     }
 }

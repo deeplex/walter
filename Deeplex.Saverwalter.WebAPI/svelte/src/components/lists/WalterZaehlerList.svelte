@@ -17,16 +17,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterZaehler } from '$walter/components';
+    import { WalterDataTable, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
-    import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
+    import {
+        WalterZaehlerEntry,
+        WalterZaehlerstandEntry,
+        validateZaehler
+    } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
-        { key: 'adresse.anschrift', value: 'Adresse'},
+        { key: 'adresse.anschrift', value: 'Adresse' },
         { key: 'wohnung.text', value: 'Wohnung' },
         { key: 'typ.text', value: 'Typ' },
         { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },
@@ -36,10 +40,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'button', value: 'Stand hinzufügen' }
     ];
 
-    export let rows: WalterZaehlerEntry[];
+    export let rows: WalterZaehlerEntry[] | undefined = undefined;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let entry: Partial<WalterZaehlerEntry> | undefined = undefined;
+    export let entry: Partial<WalterZaehlerEntry> | undefined = {};
     export let fetchImpl: typeof fetch;
 
     export let ablesedatum: Date = new Date();
@@ -56,18 +60,34 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         open = true;
     }
-    const rowsAdd = rows.map((row) => ({
-        ...row,
-        button:
-            row.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum)
-                ? 'disabled'
-                : (e: CustomEvent) => add(e, row)
-    }));
+
+    $: transformRow = (row: DataTableRow) => {
+        const zaehler = row as unknown as WalterZaehlerEntry;
+        return {
+            ...zaehler,
+            button:
+                zaehler.lastZaehlerstand?.datum ===
+                convertDateCanadian(ablesedatum)
+                    ? 'disabled'
+                    : (e: CustomEvent) => add(e, zaehler)
+        };
+    };
+
+    $: rowsAdd = rows?.map(transformRow);
 
     let open = false;
 
+    const fetchData =
+        rows === undefined
+            ? (p: Parameters<typeof WalterZaehlerEntry.GetPaged>[1]) =>
+                  WalterZaehlerEntry.GetPaged<WalterZaehlerEntry>(fetchImpl, p)
+            : undefined;
+
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.zaehler(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/zaehler/${row.id}`;
+
+    $: submitDisabled = !validateZaehler(entry);
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -79,16 +99,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterZaehlerstand {fetchImpl} entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterZaehlerEntry.ApiURL}
     addEntry={entry}
-    {title}
+    {submitDisabled}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     {on_click_row}
+    {rowHref}
     rows={rowsAdd}
+    {fetchData}
+    {transformRow}
     {headers}
     {fullHeight}
 >
     {#if entry}
-        <WalterZaehler {fetchImpl} {entry} />
+        <WalterZaehler {fetchImpl} bind:entry />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

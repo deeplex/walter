@@ -35,6 +35,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let disabled: boolean | undefined = false;
     export let required = false;
     export let maxDate: string | undefined = undefined;
+    export let valueRaw: string | undefined = undefined;
+    $: valueRaw = value;
 
     let lastSavedValue: string | undefined;
     function updateLastSavedValue() {

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterToastContent } from '$walter/lib';
-import { walter_post } from '$walter/services/requests';
+import { walter_post, parseBody } from '$walter/services/requests';
 import { addToast } from '$walter/store';
 
 export async function handle_save(
@@ -30,7 +30,7 @@ export async function handle_save(
     );
 
     const response = await walter_post(url, body);
-    const parsed = await response.json();
+    const parsed = await parseBody(response);
     addToast(PostToast, response.status === 200, parsed);
 
     return parsed;

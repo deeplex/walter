@@ -16,7 +16,8 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -86,7 +87,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await service.Post(user, entry);
 
             result.Value.Should().NotBeNull();
-            var postedAdresse = Helper.Utils.GetAdresse(entry, ctx);
+            var postedAdresse = Utils.Utils.GetAdresse(entry, ctx);
             postedAdresse.Should().NotBeNull();
         }
 

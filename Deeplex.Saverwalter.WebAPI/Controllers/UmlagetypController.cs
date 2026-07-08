@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
@@ -31,6 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Umlagetyp? Entity { get; }
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
+            public int? BetrKVNummer { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -41,6 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Id = entity.UmlagetypId;
                 Bezeichnung = entity.Bezeichnung;
+                BetrKVNummer = (int?)entity.BetrKVNummer;
 
                 Permissions = permissions;
             }

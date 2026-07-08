@@ -36,9 +36,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Location,
         Logout,
         Meter,
-        Money,
         NetworkAdminControl,
-        Tools,
+        TaskComplete,
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
@@ -71,8 +70,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterSideNavLink icon={Home} text="Startseite" href="/" />
         <WalterSideNavLink
             icon={Document}
-            text="Abrechnung"
-            href="/abrechnung"
+            text="Abrechnungslauf"
+            href="/abrechnungslauf"
         />
         <SideNavDivider />
         <WalterSideNavLink
@@ -82,6 +81,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <WalterSideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
         <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
+        <WalterSideNavLink icon={Building} text="Garagen" href="/garagen" />
         <SideNavDivider />
         <div>
             <SideNavMenu icon={ListBoxes} text="Erweitert">
@@ -91,9 +91,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     href="/transaktionen"
                 />
                 <WalterSideNavLink
-                    icon={Money}
-                    text="Betriebskostenrechnungen"
-                    href="/betriebskostenrechnungen"
+                    icon={TaskComplete}
+                    text="Jahresabschluss"
+                    href="/jahresabschlusskontrolle"
                 />
                 <WalterSideNavLink
                     icon={ChartRelationship}
@@ -104,11 +104,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     icon={IbmDataReplication}
                     text="Umlagetypen"
                     href="/umlagetypen"
-                />
-                <WalterSideNavLink
-                    icon={Tools}
-                    text="Erhaltungsaufwendungen"
-                    href="/erhaltungsaufwendungen"
                 />
                 <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
                 <WalterSideNavLink

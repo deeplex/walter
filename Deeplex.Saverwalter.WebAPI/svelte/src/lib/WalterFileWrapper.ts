@@ -19,7 +19,7 @@ import { WalterFileHandle } from './WalterFileHandle';
 export class WalterFileWrapper {
     handles: WalterFileHandle[] = [];
 
-    constructor(public fetchImpl: typeof fetch) { }
+    constructor(public fetchImpl: typeof fetch) {}
 
     clear() {
         this.handles = [];

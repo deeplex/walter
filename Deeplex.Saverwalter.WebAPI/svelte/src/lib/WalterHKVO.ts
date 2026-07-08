@@ -18,10 +18,12 @@ import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterHKVOEntry extends WalterApiHandler {
-    // public static ApiURL = `/api/hkvo`;
+    public static ApiURL = `/api/hkvo`;
 
     constructor(
         public id: number,
+        public umlageId: number,
+        public beginn: string,
         public notiz: string,
         public hkvO_P7: number,
         public hkvO_P8: number,
@@ -30,7 +32,8 @@ export class WalterHKVOEntry extends WalterApiHandler {
         public stromrechnung: WalterSelectionEntry,
         public createdAt: Date,
         public lastModified: Date,
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        public allgemeinWaerme: WalterSelectionEntry[] = []
     ) {
         super();
     }
@@ -41,11 +44,16 @@ export class WalterHKVOEntry extends WalterApiHandler {
         const stromrechnung =
             json.stromrechnung &&
             WalterSelectionEntry.fromJson(json.stromrechnung);
+        const allgemeinWaerme = (json.allgemeinWaerme ?? []).map(
+            WalterSelectionEntry.fromJson
+        );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterHKVOEntry(
             json.id,
+            json.umlageId,
+            json.beginn,
             json.notiz,
             json.hkvO_P7,
             json.hkvO_P8,
@@ -54,7 +62,8 @@ export class WalterHKVOEntry extends WalterApiHandler {
             stromrechnung,
             json.createdAt,
             json.lastModified,
-            permissions
+            permissions,
+            allgemeinWaerme
         );
     }
 }

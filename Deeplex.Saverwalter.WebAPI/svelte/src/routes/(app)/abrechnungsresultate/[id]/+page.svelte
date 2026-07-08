@@ -34,5 +34,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     title="Resultat"
 />
 <WalterGrid>
-    <WalterAbrechnungsResultat bind:entry={data.entry} />
+    <WalterAbrechnungsResultat
+        bind:entry={data.entry}
+        fetchImpl={data.fetchImpl}
+    />
 </WalterGrid>

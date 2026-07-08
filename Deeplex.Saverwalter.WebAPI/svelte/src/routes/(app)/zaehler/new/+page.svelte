@@ -21,15 +21,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderNew
     } from '$walter/components';
     import type { WalterZaehlerEntry } from '$walter/lib';
+    import { validateZaehler } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
 
-    const entry: Partial<WalterZaehlerEntry> = {};
+    let entry: Partial<WalterZaehlerEntry> = {};
 </script>
 
-<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
+<WalterHeaderNew
+    apiURL={data.apiURL}
+    {entry}
+    title={data.title}
+    disabled={!validateZaehler(entry)}
+/>
 
 <WalterGrid>
-    <WalterZaehler fetchImpl={data.fetchImpl} {entry} />
+    <WalterZaehler fetchImpl={data.fetchImpl} bind:entry />
 </WalterGrid>

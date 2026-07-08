@@ -21,18 +21,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderNew,
         WalterTextArea
     } from '$walter/components';
-    import { WalterAdresseEntry } from '$walter/lib';
+    import { WalterAdresseEntry, validateAdresse } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
     const title = 'Neue Adresse';
 
-    const entry: Partial<WalterAdresseEntry> = {};
+    let entry: Partial<WalterAdresseEntry> = {};
 </script>
 
-<WalterHeaderNew apiURL={WalterAdresseEntry.ApiURL} {entry} {title} />
+<WalterHeaderNew
+    apiURL={WalterAdresseEntry.ApiURL}
+    {entry}
+    {title}
+    disabled={!validateAdresse(entry)}
+/>
 
 <WalterGrid>
-    <WalterAdresse {entry} />
+    <WalterAdresse bind:entry />
     <Row>
         <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
     </Row>

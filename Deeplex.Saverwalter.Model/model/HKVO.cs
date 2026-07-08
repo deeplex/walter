@@ -23,13 +23,15 @@ namespace Deeplex.Saverwalter.Model
         public int HKVOId { get; set; }
 
         [Required]
-        public double HKVO_P7 { get; set; }
+        public DateOnly Beginn { get; set; }
         [Required]
-        public double HKVO_P8 { get; set; }
+        public decimal HKVO_P7 { get; set; }
+        [Required]
+        public decimal HKVO_P8 { get; set; }
         [Required]
         public HKVO_P9A2 HKVO_P9 { get; set; }
         [Required]
-        public double Strompauschale { get; set; }
+        public decimal Strompauschale { get; set; }
 
         public int HeizkostenId { get; set; }
         [Required]
@@ -37,18 +39,24 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public virtual Umlage Betriebsstrom { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
 
+        /// <summary>
+        /// Haus-Wärmezähler (Gas, Wärme, …) für Q in §9(2). Q ist die Summe der Verbräuche
+        /// dieser Zähler — manchmal braucht es mehrere, um das gesamte Q zu erfassen.
+        /// Leer → §9(2) = 0.
+        /// </summary>
+        public virtual List<Zaehler> AllgemeinWaermeZaehler { get; private set; } = [];
+
         public string? Notiz { get; set; }
 
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public HKVO(double hKVO_P7, double hKVO_P8, HKVO_P9A2 hKVO_P9, double strompauschale)
+        public HKVO(DateOnly beginn, decimal hKVO_P7, decimal hKVO_P8, HKVO_P9A2 hKVO_P9, decimal strompauschale)
         {
+            Beginn = beginn;
             HKVO_P7 = hKVO_P7;
             HKVO_P8 = hKVO_P8;
             HKVO_P9 = hKVO_P9;
-
-            // TODO this could be calculated by a zaehler, too... Then it would be different for each year...
             Strompauschale = strompauschale;
         }
     }

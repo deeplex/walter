@@ -15,15 +15,19 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class UmlageDbService : WalterDbServiceBase<UmlageEntry, int, Umlage>
     {
@@ -31,13 +35,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await UmlagePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<UmlageEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            UmlagePermissionHandler.GetQueryable(Ctx, user)
+                .AsSplitQuery()
+                .Include(u => u.Typ)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Adresse)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Verwalter)
+                .PagedAsync(query,
+                    searchPredicate: t => e =>
+                        e.Typ.Bezeichnung.ToLower().Contains(t) ||
+                        e.Wohnungen.Any(w =>
+                            w.Bezeichnung.ToLower().Contains(t) ||
+                            (w.Adresse != null && (
+                                w.Adresse.Strasse.ToLower().Contains(t) ||
+                                w.Adresse.Stadt.ToLower().Contains(t)))),
+                    applySort: (q, sortBy, dir) => sortBy switch
+                    {
+                        "wohnungenBezeichnung" => q.SortBy(e => e.Wohnungen.Count, dir),
+                        _ => q.SortBy(e => e.Typ.Bezeichnung, dir)
+                    },
+                    toEntry: async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Umlage>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
@@ -56,6 +78,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
                 entry.Zaehler = await Task.WhenAll(entity.Zaehler
                     .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
+                var nkKontoId = entity.NkVerrechnungsKonto.BuchungskontoId;
+                var bkSaetze = await Ctx.Buchungssaetze
+                    .AsSplitQuery()
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                    .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
+                    .Where(s => s.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Haben &&
+                        z.Buchungskonto.BuchungskontoId == nkKontoId))
+                    .ToListAsync();
+                entry.Betriebskostenrechnungen = bkSaetze
+                    .OrderBy(s => s.Buchungsjahr)
+                    .ThenBy(s => s.Buchungsdatum)
+                    .Select(s => new BetriebskostenrechnungEntryBase(s, entity, permissions))
+                    .ToList();
 
                 return entry;
             });
@@ -110,10 +147,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
             var schluessel = (Umlageschluessel)entry.Schluessel.Id;
             var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
-            var entity = new Umlage(schluessel)
+            var entity = new Umlage { Typ = typ };
+            var firstVersion = entry.Versionen.FirstOrDefault();
+            var beginn = firstVersion?.Beginn ?? DateOnly.FromDateTime(DateTime.Today);
+            var version = new UmlageVersion(beginn, schluessel)
             {
-                Typ = typ
+                Umlage = entity
             };
+            entity.Versionen.Add(version);
 
             SetOptionalValues(entity, entry);
             Ctx.Umlagen.Add(entity);
@@ -130,14 +171,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     throw new ArgumentException("entry has no Typ.");
                 }
-                if (entry.Schluessel == null)
-                {
-                    throw new ArgumentException("entry has no Schluessel.");
-                }
 
                 entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
-                entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
-
                 SetOptionalValues(entity, entry);
                 Ctx.Umlagen.Update(entity);
                 Ctx.SaveChanges();
@@ -179,36 +214,55 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 (Umlageschluessel)entry.Schluessel.Id == Umlageschluessel.NachVerbrauch &&
                 entry.HKVO is HKVOEntryBase hkvo)
             {
-                var oldHKVO = entity.HKVO;
-                if (oldHKVO == null)
+                var currentHkvo = entity.HeizkostenHKVOs.OrderByDescending(h => h.Beginn).FirstOrDefault();
+                if (hkvo.HKVO_P7 < 50 || hkvo.HKVO_P7 > 70)
+                    throw new ArgumentException($"HKVO §7: Verbrauchsanteil {hkvo.HKVO_P7}% liegt außerhalb des gesetzlichen Bereichs (50–70%).");
+                if (hkvo.HKVO_P8 < 50 || hkvo.HKVO_P8 > 70)
+                    throw new ArgumentException($"HKVO §8: Verbrauchsanteil {hkvo.HKVO_P8}% liegt außerhalb des gesetzlichen Bereichs (50–70%).");
+
+                var isNewVersion = currentHkvo == null || currentHkvo.Beginn != hkvo.Beginn;
+
+                if (isNewVersion)
                 {
                     var newHKVO = new HKVO(
-                        ((double)hkvo.HKVO_P7) / 100,
-                        ((double)hkvo.HKVO_P8) / 100,
+                        hkvo.Beginn,
+                        (decimal)hkvo.HKVO_P7 / 100,
+                        (decimal)hkvo.HKVO_P8 / 100,
                         (HKVO_P9A2)hkvo.HKVO_P9.Id,
-                        ((double)hkvo.Strompauschale) / 100)
+                        (decimal)hkvo.Strompauschale / 100)
                     {
-                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id)
+                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id),
                     };
-                    entity.HKVO = newHKVO;
+                    newHKVO.AllgemeinWaermeZaehler.AddRange(LadeWaermezaehler(hkvo.AllgemeinWaerme));
+                    entity.HeizkostenHKVOs.Add(newHKVO);
                     Ctx.HKVO.Add(newHKVO);
                 }
                 else
                 {
-                    oldHKVO.HKVO_P7 = ((double)hkvo.HKVO_P7) / 100;
-                    oldHKVO.HKVO_P8 = ((double)hkvo.HKVO_P8) / 100;
-                    oldHKVO.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
-                    oldHKVO.Strompauschale = ((double)hkvo.Strompauschale) / 100;
-                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
-                    Ctx.HKVO.Update(oldHKVO);
+                    currentHkvo!.HKVO_P7 = (decimal)hkvo.HKVO_P7 / 100;
+                    currentHkvo.HKVO_P8 = (decimal)hkvo.HKVO_P8 / 100;
+                    currentHkvo.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
+                    currentHkvo.Strompauschale = (decimal)hkvo.Strompauschale / 100;
+                    currentHkvo.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
+                    currentHkvo.AllgemeinWaermeZaehler.Clear();
+                    currentHkvo.AllgemeinWaermeZaehler.AddRange(LadeWaermezaehler(hkvo.AllgemeinWaerme));
+                    Ctx.HKVO.Update(currentHkvo);
                 }
             }
             else
             {
-                entity.HKVO = null;
+                entity.HeizkostenHKVOs.Clear();
             }
 
+            entity.Ende = entry.Ende;
             entity.Notiz = entry.Notiz;
+        }
+
+        /// <summary>Lädt die ausgewählten Allgemein-Wärmezähler (für Q in §9(2)).</summary>
+        private List<Zaehler> LadeWaermezaehler(IEnumerable<SelectionEntry> auswahl)
+        {
+            var ids = auswahl.Select(a => a.Id).ToList();
+            return ids.Count == 0 ? [] : Ctx.ZaehlerSet.Where(z => ids.Contains(z.ZaehlerId)).ToList();
         }
     }
 }

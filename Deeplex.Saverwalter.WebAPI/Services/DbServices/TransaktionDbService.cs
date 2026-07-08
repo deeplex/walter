@@ -15,12 +15,15 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class TransaktionDbService : WalterDbServiceBase<TransaktionEntry, Guid, Transaktion>
     {
@@ -28,13 +31,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<TransaktionEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await TransaktionPermissionHandler.GetList(Ctx, user);
-
-            return await Task.WhenAll(list
-                .Select(async e => new TransaktionEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Verwendungszweck.ToLower().Contains(t) ||
+                    (e.Zahler != null && (
+                        (e.Zahler.Iban != null && e.Zahler.Iban.ToLower().Contains(t)) ||
+                        (e.Zahler.Bank != null && e.Zahler.Bank.ToLower().Contains(t)))) ||
+                    (e.Zahlungsempfaenger != null && (
+                        (e.Zahlungsempfaenger.Iban != null && e.Zahlungsempfaenger.Iban.ToLower().Contains(t)) ||
+                        (e.Zahlungsempfaenger.Bank != null && e.Zahlungsempfaenger.Bank.ToLower().Contains(t)))) ||
+                    (e.Notiz != null && e.Notiz.ToLower().Contains(t)),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "betrag" => q.SortBy(e => e.Betrag, dir),
+                    "zahlungsdatum" => q.SortBy(e => e.Zahlungsdatum, dir),
+                    "verwendungszweck" => q.SortBy(e => e.Verwendungszweck, dir),
+                    _ => q.SortBy(e => e.Zahlungsdatum, "desc")
+                },
+                toEntry: async e => new TransaktionEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Transaktion>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {
@@ -71,15 +86,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var zahler = (await Ctx.Kontakte.FindAsync(entry.Zahler.Id))!;
-            if (zahler == null)
+            if (entry.Zahler == null || await Ctx.Bankkontos.FindAsync(entry.Zahler.Id) == null)
             {
                 return new BadRequestObjectResult($"Ungültiger Zahler");
-            }
-            var authRx = await Auth.AuthorizeAsync(user, zahler, [Operations.SubCreate]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
             }
 
             try
@@ -94,13 +103,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private async Task<TransaktionEntry> Add(TransaktionEntry entry)
         {
-            var zahler = (await Ctx.Kontakte.FindAsync(entry.Zahler.Id))!;
+            var zahler = entry.Zahler != null ? await Ctx.Bankkontos.FindAsync(entry.Zahler.Id) : null;
             if (zahler == null)
             {
                 throw new ArgumentException($"Ungültiger Zahler");
             }
 
-            var empfaenger = (await Ctx.Kontakte.FindAsync(entry.Zahlungsempfaenger.Id))!;
+            var empfaenger = entry.Zahlungsempfaenger != null ? await Ctx.Bankkontos.FindAsync(entry.Zahlungsempfaenger.Id) : null;
             if (empfaenger == null)
             {
                 throw new ArgumentException($"Ungültiger Zahlungsempfänger");
@@ -129,16 +138,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 entity.Betrag = entry.Betrag;
-                var zahler = (await Ctx.Kontakte.FindAsync(entry.Zahler.Id))!;
-                if (zahler == null)
+
+                // Zahler/Zahlungsempfänger sind optional (z.B. Abrechnungs-Ausgleich
+                // ohne erfasstes Bankkonto) und können einzeln nachgetragen werden.
+                Bankkonto? zahler = null;
+                if (entry.Zahler != null)
                 {
-                    throw new ArgumentException($"Ungültiger Zahler");
+                    zahler = await Ctx.Bankkontos.FindAsync(entry.Zahler.Id)
+                        ?? throw new ArgumentException("Ungültiger Zahler");
                 }
 
-                var empfaenger = (await Ctx.Kontakte.FindAsync(entry.Zahlungsempfaenger.Id))!;
-                if (empfaenger == null)
+                Bankkonto? empfaenger = null;
+                if (entry.Zahlungsempfaenger != null)
                 {
-                    throw new ArgumentException($"Ungültiger Zahlungsempfänger");
+                    empfaenger = await Ctx.Bankkontos.FindAsync(entry.Zahlungsempfaenger.Id)
+                        ?? throw new ArgumentException("Ungültiger Zahlungsempfänger");
                 }
 
                 entity.Zahler = zahler;

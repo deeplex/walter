@@ -20,6 +20,7 @@ export function dates(key: string) {
         case 'datum':
         case 'betreffenderMonat':
         case 'zahlungsdatum':
+        case 'buchungsdatum':
         case 'lastZaehlerstand.datum':
             return true;
         default:
@@ -44,6 +45,9 @@ export function euro(key: string) {
         case 'kosten':
         case 'gesamtBetrag':
         case 'betragLetztesJahr':
+        case 'saldo':
+        case 'kontoSoll':
+        case 'kontoHaben':
             return true;
         default:
             return false;

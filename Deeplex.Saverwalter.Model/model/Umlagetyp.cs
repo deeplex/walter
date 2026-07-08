@@ -17,11 +17,35 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
+    /// <summary>
+    /// Kanonische Betriebskostenkategorien nach §2 BetrKV.
+    /// Wert entspricht der offiziellen Nummer (Nr. 1–14).
+    /// </summary>
+    public enum BetrKVNummer
+    {
+        Nr1_OeffentlicheLasten = 1,
+        Nr2_Wasserversorgung = 2,
+        Nr3_Entwaesserung = 3,
+        Nr4_Fahrstuhl = 4,
+        Nr5_StrassenreinigungUndMuellbeseitigung = 5,
+        Nr6_GebaeudereinigungUndUngezieferbekaempfung = 6,
+        Nr7_Gartenpflege = 7,
+        Nr8_Beleuchtung = 8,
+        Nr9_Schornsteinreinigung = 9,
+        Nr10_SachUndHaftpflichtversicherung = 10,
+        Nr11_Hauswart = 11,
+        Nr12_AntenneOderBreitband = 12,
+        Nr13_MaschinelleWascheinrichtung = 13,
+        Nr14_SonstigeBetriebskosten = 14,
+    }
+
     public class Umlagetyp
     {
         public int UmlagetypId { get; set; }
         [Required]
         public string Bezeichnung { get; set; }
+
+        public BetrKVNummer? BetrKVNummer { get; set; }
 
         public string? Notiz { get; set; }
 

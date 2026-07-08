@@ -18,7 +18,9 @@ using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,9 +49,26 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
-            await CreateRootIfNoUserExists(container);
+            // Run DB initialisation after the host starts so that a slow or
+            // temporarily unavailable database never prevents the app from
+            // binding to its port and writing startup log messages.
+            app.Lifetime.ApplicationStarted.Register(() =>
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await CreateRootIfNoUserExists(container);
+                    }
+                    catch (Exception ex)
+                    {
+                        // CreateRootIfNoUserExists handles watch-mode failures
+                        // internally; this catches unexpected non-watch errors.
+                        Console.Error.WriteLine(
+                            $"Root account initialisation failed: {ex.GetBaseException().Message}");
+                    }
+                }));
 
-            app.Run();
+            await app.RunAsync();
         }
 
         private static WebApplication Configure(WebApplicationBuilder builder, Container container)
@@ -137,22 +156,25 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
             builder.Services.AddSingleton<IAuthorizationHandler, AbrechnungsresultatPermissionHandler>();
+            // Handlers that read the DbContext must be scoped (ctx is scoped).
+            builder.Services.AddScoped<IAuthorizationHandler, GaragePermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, GarageVertragPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, BetriebskostenrechnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ErhaltungsaufwendungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, KontaktPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, MietePermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, KontaktPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, TransaktionPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, TransaktionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagenPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UmlagetypPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, VertragPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, VertragVersionPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungenPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, WohnungVersionPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlageVersionPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, HKVOPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, ZaehlerPermissionHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
         }
 
         private static Container GetServiceContainer()
@@ -164,21 +186,37 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Register<AbrechnungsresultatDbService>(Lifestyle.Scoped);
             container.Register<AdresseDbService>(Lifestyle.Scoped);
+            container.Register<BetriebskostenrechnungBuchungsService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
+            container.Register<ErhaltungsaufwendungBuchungsService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);
-            container.Register<MieteDbService>(Lifestyle.Scoped);
             container.Register<MietminderungDbService>(Lifestyle.Scoped);
+            container.Register<BankkontoDbService>(Lifestyle.Scoped);
+            container.Register<BuchungssatzDbService>(Lifestyle.Scoped);
             container.Register<KontaktDbService>(Lifestyle.Scoped);
             container.Register<TransaktionDbService>(Lifestyle.Scoped);
             container.Register<UmlageDbService>(Lifestyle.Scoped);
+            container.Register<UmlageVersionDbService>(Lifestyle.Scoped);
+            container.Register<HKVODbService>(Lifestyle.Scoped);
             container.Register<UmlagetypDbService>(Lifestyle.Scoped);
+            container.Register<GarageDbService>(Lifestyle.Scoped);
+            container.Register<GarageVertragDbService>(Lifestyle.Scoped);
             container.Register<VertragDbService>(Lifestyle.Scoped);
             container.Register<VertragVersionDbService>(Lifestyle.Scoped);
             container.Register<WohnungDbService>(Lifestyle.Scoped);
+            container.Register<WohnungVersionDbService>(Lifestyle.Scoped);
             container.Register<ZaehlerDbService>(Lifestyle.Scoped);
             container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
-            container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
+            container.Register<VertragsNkAnteilDbService>(Lifestyle.Scoped);
+            container.Register<TransaktionBuchungsService>(Lifestyle.Scoped);
+            container.Register<StornoBuchungsService>(Lifestyle.Scoped);
+            container.Register<BuchungssatzSchutzService>(Lifestyle.Scoped);
+            container.Register<AbrechnungsresultatBuchungsService>(Lifestyle.Scoped);
+            container.Register<NkAnteilBuchungsService>(Lifestyle.Scoped);
+            container.Register<AbrechnungsgruppenService>(Lifestyle.Scoped);
+            container.Register<AbrechnungslaufService>(Lifestyle.Scoped);
+            container.Register<AbrechnungslaufPrintService>(Lifestyle.Scoped);
 
             container.Register<TokenService>(Lifestyle.Singleton);
             container.Register<AccountDbService>(Lifestyle.Scoped);

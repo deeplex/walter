@@ -18,21 +18,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterBetriebskostenrechnungen,
+        WalterBuchungskonten,
         WalterHeaderDetail,
         WalterGrid,
         WalterWohnungen,
         WalterUmlage,
+        WalterUmlageVersionen,
+        WalterHKVOVersionen,
         WalterZaehlerList,
         WalterLinks,
         WalterLinkTile,
-        WalterZaehler
+        WalterZaehler,
+        WalterVertragsNkAnteile
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
         type WalterBetriebskostenrechnungEntry,
-        type WalterSelectionEntry
+        type WalterSelectionEntry,
+        type WalterUmlageVersionEntry,
+        validateUmlage
     } from '$walter/lib';
+    import { changeTracker } from '$walter/store';
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
@@ -70,6 +77,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    const umlageversionEntry: Partial<WalterUmlageVersionEntry> = {
+        umlage: {
+            id: '' + data.entry.id,
+            text: data.entry.typ?.text + ' - ' + data.entry.wohnungenBezeichnung
+        },
+        permissions: data.entry.permissions
+    };
+
+    let blockSave = false;
+    let commitVersionIfPending: () => Promise<void>;
+    $: submitDisabled =
+        $changeTracker === 0 || !validateUmlage(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail
@@ -77,12 +97,38 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={submitDisabled}
+    beforeSave={commitVersionIfPending}
 />
 
 <WalterGrid>
-    <WalterUmlage fetchImpl={data.fetchImpl} bind:entry={data.entry} />
+    <WalterUmlage
+        fetchImpl={data.fetchImpl}
+        bind:entry={data.entry}
+        bind:blockSave
+        bind:commitVersionIfPending
+    />
 
     <WalterLinks>
+        <WalterUmlageVersionen
+            entry={umlageversionEntry}
+            title="Nachträge"
+            rows={data.entry.versionen}
+        />
+        {#if data.entry.hkvos.length > 0 || data.entry.hkvo}
+            <WalterHKVOVersionen
+                title="HKVO-Versionen"
+                rows={data.entry.hkvos}
+                entry={{
+                    umlageId: data.entry.id,
+                    hkvO_P7: 70,
+                    hkvO_P8: 70,
+                    strompauschale: 0,
+                    permissions: data.entry.permissions
+                }}
+                fetchImpl={data.fetchImpl}
+            />
+        {/if}
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
             title="Wohnungen"
@@ -94,6 +140,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Rechnungen"
             rows={data.entry.betriebskostenrechnungen}
         />
+        <WalterVertragsNkAnteile
+            fetchImpl={data.fetchImpl}
+            umlageId={data.entry.id}
+            title="Vertragsanteile"
+        />
+        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if `${data.entry?.schluessel?.id}` === '3'}
             <WalterZaehlerList

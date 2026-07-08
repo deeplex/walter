@@ -15,7 +15,7 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using FluentAssertions;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
@@ -140,7 +140,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Utils.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Utils.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -205,7 +205,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Utils.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().Be(null);
             }

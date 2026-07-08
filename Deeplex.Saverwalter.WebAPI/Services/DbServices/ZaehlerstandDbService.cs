@@ -15,12 +15,13 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, int, Zaehlerstand>
     {
@@ -47,6 +48,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Delete, async (w) =>
             {
+                var sperre = await AbrechnungsschutzService.SperreZaehlerstand(
+                    Ctx, w.Zaehler.ZaehlerId, w.Datum);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.Zaehlerstaende.Remove(w);
                 await Ctx.SaveChangesAsync();
 
@@ -69,6 +74,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     return new ForbidResult();
                 }
+
+                var sperre = await AbrechnungsschutzService.SperreZaehlerstand(
+                    Ctx, entry.Zaehler.Id, entry.Datum);
+                if (sperre != null) return new ConflictObjectResult(sperre);
 
                 return await Add(entry);
             }
@@ -96,6 +105,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Ein geänderter Stand/Datum verändert den gemessenen Verbrauch der
+                // betroffenen Jahre (alt UND neu) → sperren, wenn eines abgerechnet ist.
+                if (entity.Datum != entry.Datum || entity.Stand != entry.Stand)
+                {
+                    var sperre =
+                        await AbrechnungsschutzService.SperreZaehlerstand(Ctx, entity.Zaehler.ZaehlerId, entity.Datum)
+                        ?? await AbrechnungsschutzService.SperreZaehlerstand(Ctx, entity.Zaehler.ZaehlerId, entry.Datum);
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Datum = entry.Datum;
                 entity.Stand = entry.Stand;
 

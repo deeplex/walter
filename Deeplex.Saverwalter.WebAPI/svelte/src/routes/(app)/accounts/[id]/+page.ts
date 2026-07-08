@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterAccountEntry } from '$walter/lib';
+import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -27,6 +28,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
     return {
         apiURL,
+        fileURL: fileURL.stack,
         fetchImpl: fetch,
         entry: {
             ...(await WalterAccountEntry.GetOne<WalterAccountEntry>(

@@ -15,19 +15,16 @@
 
 import { expect, describe, it, afterEach, vi, beforeEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
+import { createMockFetch } from '../../../test-helpers/mock-fetch';
 
 import Page from './+page.svelte';
 import { WalterAdresseEntry } from '$walter/lib';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-vi.mock('$app/stores', async (importOriginal) => {
+vi.mock('$app/stores', async () => {
+    const { readable } = await import('svelte/store');
     return {
-        page: {
-            subscribe: writable<boolean>().subscribe,
-            url: {
-                pathname: 'mock'
-            }
-        }
+        page: readable({ url: new URL('http://localhost/mock'), params: {} })
     };
 });
 
@@ -47,7 +44,8 @@ function createWalterAdresseEntryMocks(entries: number) {
                 new Date(),
                 [],
                 [],
-                []
+                [],
+                new WalterPermissions(true, true, true)
             )
         );
     }
@@ -60,7 +58,10 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have title Adressen', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(5) }
+            data: {
+                rows: createWalterAdresseEntryMocks(5),
+                fetch: createMockFetch()
+            }
         });
 
         const title = document.getElementsByTagName('a').item(0)?.innerHTML;
@@ -70,7 +71,10 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have header with 4 entries', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(5) }
+            data: {
+                rows: createWalterAdresseEntryMocks(5),
+                fetch: createMockFetch()
+            }
         });
 
         const header = document.getElementsByTagName('thead');
@@ -87,7 +91,10 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have 15 entries', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(15) }
+            data: {
+                rows: createWalterAdresseEntryMocks(15),
+                fetch: createMockFetch()
+            }
         });
 
         const body = document.getElementsByTagName('tbody');
@@ -107,17 +114,18 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have a button to create a new entry', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(1) }
+            data: {
+                rows: createWalterAdresseEntryMocks(1),
+                fetch: createMockFetch()
+            }
         });
 
-        const buttons = Array.from(document.getElementsByTagName('button'));
-
-        const addButtons = buttons.filter((e) =>
-            e.innerHTML.includes('Eintrag hinzufügen')
+        // The "create new entry" affordance is a link to the entity's /new page.
+        const addLinks = Array.from(document.querySelectorAll('a')).filter(
+            (e) => e.textContent?.includes('Eintrag hinzufügen')
         );
 
-        expect(addButtons.length).toBe(1);
-        // TODO: this should be true if user has only read rights
-        expect(addButtons[0].disabled).toBe(false);
+        expect(addLinks.length).toBe(1);
+        expect(addLinks[0].getAttribute('href')).toContain('/new');
     });
 });

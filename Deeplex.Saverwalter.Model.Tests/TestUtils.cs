@@ -36,13 +36,13 @@ namespace Deeplex.Saverwalter.ModelTests
         public static SaverwalterContext GetContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseInMemoryDatabase("TestDb");
+            optionsBuilder.UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}");
             optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             var ctx = new SaverwalterContext(optionsBuilder.Options);
 
             return ctx;
         }
-        public static Vertrag FillVertragWithSomeData(SaverwalterContext ctx, double grundmiete)
+        public static Vertrag FillVertragWithSomeData(SaverwalterContext ctx, decimal grundmiete)
         {
             var vermieter = new Kontakt("TestKopf", Rechtsform.natuerlich)
             {
@@ -54,16 +54,24 @@ namespace Deeplex.Saverwalter.ModelTests
             ctx.Kontakte.Add(vermieter);
             ctx.SaveChanges();
 
-            var wohnung = new Wohnung("TestWohnung", 100, 100, 100, 1)
+            var wohnung = new Wohnung("TestWohnung")
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
-                Besitzer = vermieter
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
             };
+            wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = vermieter });
+            wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = wohnung });
 
             var vertrag = new Vertrag()
             {
                 Ansprechpartner = vermieter,
-                Wohnung = wohnung
+                Wohnung = wohnung,
+                MietBuchungskonto = new Buchungskonto("1000", "Miete", BuchungskontoTyp.Ertrag),
+                NkBuchungskonto = new Buchungskonto("1001", "Nebenkosten-Vorauszahlung", BuchungskontoTyp.Ertrag),
+                BkAbrechnungsKonto = new Buchungskonto("1003", "NK-Abrechnung", BuchungskontoTyp.Ertrag),
+                ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
             };
             var mieter = new Kontakt("TestMieter", Rechtsform.natuerlich)
             {
@@ -89,38 +97,19 @@ namespace Deeplex.Saverwalter.ModelTests
             return vertrag;
         }
 
-        public static List<Miete> Add12Mieten(Vertrag vertrag, double grundmiete)
+        private static void AddBkForderung(Umlage umlage, decimal betrag, DateOnly datum, int jahr)
         {
-            var mieten = new List<Miete>();
-            for (int month = 1; month <= 12; month++)
+            var satz = new Buchungssatz(datum, $"BK-Forderung {umlage.Typ?.Bezeichnung} {jahr}")
             {
-                mieten.Add(new Miete(
-                    new DateOnly(2021, month, 1),
-                    new DateOnly(2021, month, 1),
-                    grundmiete)
-                {
-                    Vertrag = vertrag,
-                });
-            }
-
-            return mieten;
-        }
-
-        public static List<Miete> Add6Mieten(Vertrag vertrag, double grundmiete)
-        {
-            var mieten = new List<Miete>();
-            for (int month = 1; month <= 6; month++)
+                Buchungsjahr = jahr
+            };
+            var zeile = new Buchungszeile(SollHaben.Haben, betrag)
             {
-                mieten.Add(new Miete(
-                    new DateOnly(2021, month, 1),
-                    new DateOnly(2021, month, 1),
-                    grundmiete)
-                {
-                    Vertrag = vertrag,
-                });
-            }
-
-            return mieten;
+                Buchungssatz = satz,
+                Buchungskonto = umlage.NkVerrechnungsKonto
+            };
+            satz.Buchungszeilen.Add(zeile);
+            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(zeile);
         }
 
         public static List<Umlage> Add6Umlagen(List<Wohnung> wohnungen)
@@ -128,60 +117,73 @@ namespace Deeplex.Saverwalter.ModelTests
             var umlagen = new List<Umlage>();
             var date = new DateOnly(2021, 1, 1);
 
-            var grundsteuer = new Umlage(Umlageschluessel.NachWohnflaeche)
+            var grundsteuer = new Umlage
             {
                 Typ = new Umlagetyp("Grundsteuer"),
-                Wohnungen = wohnungen
+                Wohnungen = wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Grundsteuer", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1201", "Zahlung Grundsteuer", BuchungskontoTyp.Aktiv),
             };
-            var grundsteuer_rechnung = new Betriebskostenrechnung(1000, date, 2021) { Umlage = grundsteuer };
-            grundsteuer.Betriebskostenrechnungen.Add(grundsteuer_rechnung);
+            grundsteuer.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = grundsteuer });
+            AddBkForderung(grundsteuer, 1000, date, 2021);
             umlagen.Add(grundsteuer);
 
-            var dachrinnenreinigung = new Umlage(Umlageschluessel.NachNutzeinheit)
+            var dachrinnenreinigung = new Umlage
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung"),
-                Wohnungen = wohnungen
+                Wohnungen = wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7002", "NK-VK Dachrinne", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1202", "Zahlung Dachrinne", BuchungskontoTyp.Aktiv),
             };
-            var dachrinnenreinigung_rechnung = new Betriebskostenrechnung(500, date, 2021) { Umlage = dachrinnenreinigung };
-            dachrinnenreinigung.Betriebskostenrechnungen.Add(dachrinnenreinigung_rechnung);
+            dachrinnenreinigung.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachNutzeinheit) { Umlage = dachrinnenreinigung });
+            AddBkForderung(dachrinnenreinigung, 500, date, 2021);
             umlagen.Add(dachrinnenreinigung);
 
-            var gartenpflege = new Umlage(Umlageschluessel.NachNutzeinheit)
+            var gartenpflege = new Umlage
             {
-                Typ = new Umlagetyp("Gartenpflege")
+                Typ = new Umlagetyp("Gartenpflege"),
+                NkVerrechnungsKonto = new Buchungskonto("7003", "NK-VK Garten", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1203", "Zahlung Garten", BuchungskontoTyp.Aktiv),
             };
+            gartenpflege.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachNutzeinheit) { Umlage = gartenpflege });
             gartenpflege.Wohnungen.Add(wohnungen.First());
-            var gartenpflege_rechnung = new Betriebskostenrechnung(650, date, 2021) { Umlage = gartenpflege };
-            gartenpflege.Betriebskostenrechnungen.Add(gartenpflege_rechnung);
+            AddBkForderung(gartenpflege, 650, date, 2021);
             umlagen.Add(gartenpflege);
 
-            var allgemeinstrom = new Umlage(Umlageschluessel.NachWohnflaeche)
+            var allgemeinstrom = new Umlage
             {
                 Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
-                Wohnungen = wohnungen
+                Wohnungen = wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7004", "NK-VK Strom", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1204", "Zahlung Strom", BuchungskontoTyp.Aktiv),
             };
-            var allgemeinstrom_rechnung = new Betriebskostenrechnung(200, date, 2021) { Umlage = allgemeinstrom };
-            allgemeinstrom.Betriebskostenrechnungen.Add(allgemeinstrom_rechnung);
+            allgemeinstrom.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = allgemeinstrom });
+            AddBkForderung(allgemeinstrom, 200, date, 2021);
             umlagen.Add(allgemeinstrom);
 
-            var muellbeseitigung = new Umlage(Umlageschluessel.NachPersonenzahl)
+            var muellbeseitigung = new Umlage
             {
                 Typ = new Umlagetyp("Müllbeseitigung"),
-                Wohnungen = wohnungen
+                Wohnungen = wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto("7005", "NK-VK Müll", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1205", "Zahlung Müll", BuchungskontoTyp.Aktiv),
             };
-            var muellbeseitigung_rechnung = new Betriebskostenrechnung(1000, date, 2021) { Umlage = muellbeseitigung };
-            muellbeseitigung.Betriebskostenrechnungen.Add(muellbeseitigung_rechnung);
+            muellbeseitigung.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachPersonenzahl) { Umlage = muellbeseitigung });
+            AddBkForderung(muellbeseitigung, 1000, date, 2021);
             umlagen.Add(muellbeseitigung);
 
-            var hkvo = new HKVO(0.5, 0.5, HKVO_P9A2.Satz_2, 0.05) { Betriebsstrom = allgemeinstrom };
-            var heizkosten = new Umlage(Umlageschluessel.NachVerbrauch)
+            var hkvo = new HKVO(new DateOnly(2000, 1, 1), 0.5m, 0.5m, HKVO_P9A2.Satz_2, 0.05m) { Betriebsstrom = allgemeinstrom };
+            var heizkosten = new Umlage
             {
                 Typ = new Umlagetyp("Heizkosten"),
                 Wohnungen = wohnungen,
-                HKVO = hkvo
+                NkVerrechnungsKonto = new Buchungskonto("7006", "NK-VK Heizung", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1206", "Zahlung Heizung", BuchungskontoTyp.Aktiv),
             };
-            var heizkosten_rechnung = new Betriebskostenrechnung(2000, date, 2021) { Umlage = heizkosten };
-            heizkosten.Betriebskostenrechnungen.Add(heizkosten_rechnung);
+            heizkosten.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachVerbrauch) { Umlage = heizkosten });
+            hkvo.Heizkosten = heizkosten;
+            heizkosten.HeizkostenHKVOs.Add(hkvo);
+            AddBkForderung(heizkosten, 2000, date, 2021);
 
             var allgemeinZaehler = new Zaehler("Allgemein_Heizung", Zaehlertyp.Gas);
             var allgemeinZaehlerstand_beginn = new Zaehlerstand(new DateOnly(2021, 1, 1), 0)

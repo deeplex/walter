@@ -15,8 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterDataWrapper } from '$walter/components';
-    import { WalterAbrechnungsresultatEntry } from '$walter/lib';
+    import type { WalterAbrechnungsresultatEntry } from '$walter/lib';
+    import { WalterDataTable } from '$walter/components';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -33,26 +33,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             return {
                 id: row.id,
                 jahr: row.jahr,
-                saldo: row.vorauszahlung - row.kaltmiete - row.rechnungsbetrag,
+                saldo: row.saldo,
                 istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
-                istBeglichen: row.istBeglichen ? 'Ja' : 'Nein'
+                istBeglichen: row.ausgeglichen
+                    ? 'Ja'
+                    : `Nein (offen: ${row.offenerBetrag.toFixed(2)} €)`
             };
         })
         .sort((a, b) => b.jahr - a.jahr);
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.abrechnungsresultat(`${e.detail.id}`);
+    const rowHref = (row: DataTableRow) => `/abrechnungsresultate/${row.id}`;
 
     export let title: string | undefined = undefined;
     const readonly = true;
     const fullHeight = false;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     {on_click_row}
+    {rowHref}
     {readonly}
     {fullHeight}
-    {title}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
     rows={actualRows}
     {headers}
-></WalterDataWrapper>
+></WalterDataTable>

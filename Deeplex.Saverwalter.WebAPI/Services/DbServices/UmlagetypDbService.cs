@@ -15,14 +15,14 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class UmlagetypDbService : WalterDbServiceBase<UmlagetypEntry, int, Umlagetyp>
     {
@@ -114,6 +114,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private static void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
         {
             entity.Notiz = entry.Notiz;
+            entity.BetrKVNummer = entry.BetrKVNummer.HasValue
+                ? (BetrKVNummer)entry.BetrKVNummer.Value
+                : null;
         }
     }
 }

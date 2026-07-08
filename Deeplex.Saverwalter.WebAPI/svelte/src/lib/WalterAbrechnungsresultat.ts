@@ -13,12 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterApiHandler } from "./WalterApiHandler";
-import { WalterPermissions } from "./WalterPermissions";
-import { WalterSelectionEntry } from "./WalterSelection";
+import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
+import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
-
     public static ApiURL = `/api/abrechnungsresultate`;
     public static ApiURLId(id: string) {
         return `${WalterAbrechnungsresultatEntry.ApiURL}/${id}`;
@@ -27,38 +26,54 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
         public id: string,
         public vertrag: WalterSelectionEntry,
         public jahr: number,
-        public kaltmiete: number,
-        public vorauszahlung: number,
-        public rechnungsbetrag: number,
-        public minderung: number,
         public abgesendet: boolean,
         public saldo: number,
+        public rechnungsbetrag: number,
+        public vorauszahlung: number,
+        public offenerBetrag: number,
+        public ausgeglichen: boolean,
+        public ausgleichsZahlungen: AusgleichsZahlungInfo[],
         public notiz: string,
+        public buchungssatzId: string,
         public createdAt: Date,
         public lastModified: Date,
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        // Vermieter-Bankkonto für den Ausgleich: Zahler bei Erstattungen,
+        // Zahlungsempfänger bei Nachzahlungen.
+        public vermieterBankkontoId?: number
     ) {
         super();
     }
 
     static fromJson(json: WalterAbrechnungsresultatEntry) {
-        const vertrag = json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
-        const permissions = json.permissions && WalterPermissions.fromJson(json.permissions);
+        const vertrag =
+            json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterAbrechnungsresultatEntry(
             json.id,
             vertrag,
             json.jahr,
-            json.kaltmiete,
-            json.vorauszahlung,
-            json.rechnungsbetrag,
-            json.minderung,
             json.abgesendet,
             json.saldo,
+            json.rechnungsbetrag ?? 0,
+            json.vorauszahlung ?? 0,
+            json.offenerBetrag ?? 0,
+            json.ausgeglichen ?? false,
+            json.ausgleichsZahlungen ?? [],
             json.notiz,
+            json.buchungssatzId,
             json.createdAt,
             json.lastModified,
-            permissions
+            permissions,
+            json.vermieterBankkontoId ?? undefined
         );
     }
 }
+
+export type AusgleichsZahlungInfo = {
+    datum: string;
+    betrag: number;
+    buchungssatzId: string;
+};

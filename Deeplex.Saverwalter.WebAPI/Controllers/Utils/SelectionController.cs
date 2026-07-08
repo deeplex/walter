@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -16,10 +16,12 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     public class SelectionListController : ControllerBase
     {
@@ -41,11 +43,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         private readonly ILogger<SelectionListController> _logger;
         private SaverwalterContext Ctx { get; }
+        private readonly AbrechnungsgruppenService _gruppenService;
 
-        public SelectionListController(ILogger<SelectionListController> logger, SaverwalterContext ctx)
+        public SelectionListController(ILogger<SelectionListController> logger, SaverwalterContext ctx, AbrechnungsgruppenService gruppenService)
         {
             Ctx = ctx;
             _logger = logger;
+            _gruppenService = gruppenService;
+        }
+
+        [HttpGet]
+        [Route("api/selection/abrechnungsgruppen")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetAbrechnungsgruppen()
+        {
+            var gruppen = await _gruppenService.GetGruppenAsync();
+            return Ok(gruppen.Select(g => new SelectionEntry(g.WohnungIds[0], g.Bezeichnung)));
         }
 
         [HttpGet]
@@ -84,36 +96,91 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/betriebskostenrechnungen")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetBetriebskostenrechnungen()
+        [Route("api/selection/bk-forderungen/offen")]
+        public async Task<ActionResult<IEnumerable<object>>> GetOffeneBkForderungen()
         {
-            var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var umlagen = await Ctx.Umlagen
+                .AsSplitQuery()
+                .Include(u => u.Typ)
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(u => u.NkVerrechnungsKonto)
+                    .ThenInclude(k => k.Buchungszeilen.Where(z => z.SollHaben == SollHaben.Haben))
+                    .ThenInclude(z => z.AlsHabenZeile)
+                    .ThenInclude(a => a.SollZeile)
+                .ToListAsync();
 
-            return Ok(list.Select(e => new SelectionEntry(
-                e.BetriebskostenrechnungId,
-                $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}")));
+            return Ok(umlagen
+                .SelectMany(u => u.NkVerrechnungsKonto?.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben)
+                    .Where(z =>
+                    {
+                        var schonGezahlt = z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag);
+                        return z.Betrag - schonGezahlt > 0.005m;
+                    })
+                    .Select(z => new
+                    {
+                        Id = z.Buchungssatz.BuchungssatzId,
+                        Text = $"{z.Buchungssatz.Buchungsjahr} - {u.Typ.Bezeichnung} - {u.GetWohnungenBezeichnung()}"
+                    }) ?? [])
+                .OrderBy(e => e.Text));
+        }
+
+        [HttpGet]
+        [Route("api/selection/umlage/{umlageId}/waermezaehler")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetWaermezaehler(int umlageId)
+        {
+            // AllgemeinWärme-Kandidaten (§9(2) Q): Wärmequelle-Zähler der Umlage ohne Wohnung.
+            var zaehler = await Ctx.Umlagen
+                .Where(u => u.UmlageId == umlageId)
+                .SelectMany(u => u.Zaehler)
+                .Where(z => z.Wohnung == null
+                         && (z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Wärme))
+                .OrderBy(z => z.Kennnummer)
+                .Select(z => new { z.ZaehlerId, z.Kennnummer })
+                .ToListAsync();
+
+            return Ok(zaehler.Select(z => new SelectionEntry(z.ZaehlerId, z.Kennnummer)));
         }
 
         [HttpGet]
         [Route("api/selection/erhaltungsaufwendungen")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetErhaltungsaufwendungen()
+        public async Task<ActionResult<IEnumerable<object>>> GetErhaltungsaufwendungen()
         {
-            var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var wohnungen = await WohnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var aufwandsKontoIds = wohnungen.Select(w => w.AufwandsKonto.BuchungskontoId).ToHashSet();
 
-            return Ok(list.Select(e => new SelectionEntry(
-                e.ErhaltungsaufwendungId,
-                $"{e.Bezeichnung} - {e.Aussteller.Bezeichnung}")));
-        }
+            var kontakte = await Ctx.Kontakte
+                .Where(k => k.VerbindlichkeitsKonto != null)
+                .Include(k => k.VerbindlichkeitsKonto)
+                .ToListAsync();
+            var verbindlichkeitsMap = kontakte
+                .ToDictionary(k => k.VerbindlichkeitsKonto!.BuchungskontoId, k => k.Bezeichnung);
 
-        [HttpGet]
-        [Route("api/selection/mieten")]
-        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetMieten()
-        {
-            var list = await MietePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            var saetze = await Ctx.Buchungssaetze
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Where(s => s.Buchungszeilen.Any(z =>
+                    z.SollHaben == SollHaben.Soll &&
+                    aufwandsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
+                .ToListAsync();
 
-            return Ok(list.Select(e => new SelectionEntry(
-                e.MieteId,
-                $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.BetreffenderMonat.ToString("MM.yyyy")}")));
+            return Ok(saetze.Select(s =>
+            {
+                var habenKontoId = s.Buchungszeilen
+                    .FirstOrDefault(z => z.SollHaben == SollHaben.Haben)
+                    ?.Buchungskonto.BuchungskontoId;
+                var ausstellerName = habenKontoId.HasValue && verbindlichkeitsMap.TryGetValue(habenKontoId.Value, out var n)
+                    ? n : null;
+                var bezeichnung = s.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
+                    ? s.Beschreibung["Erhaltungsaufwendung: ".Length..]
+                    : s.Beschreibung;
+                var text = ausstellerName != null
+                    ? $"{bezeichnung} - {ausstellerName}"
+                    : bezeichnung;
+                return new { Id = s.BuchungssatzId, Text = text };
+            }).OrderBy(e => e.Text));
         }
 
         [HttpGet]
@@ -158,7 +225,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             var list = await UmlagePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
             return Ok(list
-                .Where(e => e.Schluessel == Umlageschluessel.NachVerbrauch)
+                .Where(e => e.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault()?.Schluessel == Umlageschluessel.NachVerbrauch)
                 .Select(e => new SelectionEntry(
                     e.UmlageId,
                     e.Typ.Bezeichnung + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung())));
@@ -188,6 +255,34 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
+        [Route("api/selection/garagen")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetGaragen()
+        {
+            var list = await GaragePermissionHandler.GetQueryable(Ctx, User).ToListAsync();
+            return Ok(list.Select(e => new SelectionEntry(
+                e.GarageId,
+                e.Kennung,
+                e.Besitzer?.Bezeichnung)));
+        }
+
+        [HttpGet]
+        [Route("api/selection/garage-vertraege")]
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetGarageVertraege()
+        {
+            var list = await GarageVertragPermissionHandler.GetQueryable(Ctx, User)
+                .Include(gv => gv.Garage)
+                .Include(gv => gv.Mieter)
+                .ToListAsync();
+            return Ok(list.Select(e =>
+            {
+                var mieter = e.Mieter.Any()
+                    ? string.Join(", ", e.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+                return new SelectionEntry(e.GarageVertragId, $"{e.Garage.Kennung} | {mieter}", null);
+            }));
+        }
+
+        [HttpGet]
         [Route("api/selection/wohnungen")]
         public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetWohnungen()
         {
@@ -196,7 +291,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             return Ok(list.Select(e => new SelectionEntry(
                 e.WohnungId,
                 $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
-                e.Besitzer?.Bezeichnung)));
+                e.Eigentuemer.FirstOrDefault(ei => ei.Bis == null)?.Kontakt.Bezeichnung)));
         }
 
         [HttpGet]
@@ -208,15 +303,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             return Ok(list.Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag))));
         }
 
-        private static string GetVertragName(Vertrag vertrag)
-        {
-            var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
-            var mieterList = vertrag.Mieter.Select(person => person.Bezeichnung);
-            var mieterText = string.Join(", ", mieterList);
-            var vertragname = $"{wohnung} - {mieterText}";
-
-            return vertragname;
-        }
+        private static string GetVertragName(Vertrag vertrag) =>
+            KontoVerknuepfungService.GetVertragName(vertrag);
 
         [HttpGet]
         [Route("api/selection/zaehler")]
@@ -325,6 +413,79 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .ToList();
 
             return list;
+        }
+
+        [HttpGet]
+        [Route("api/selection/buchungskonten")]
+        public ActionResult<IEnumerable<SelectionEntry>> GetBuchungskonten()
+        {
+            var konten = Ctx.Buchungskonten
+                .OrderBy(k => k.Kontonummer)
+                .Select(k => new { k.BuchungskontoId, k.Kontonummer, k.Bezeichnung })
+                .ToList();
+            return Ok(konten.Select(k => new SelectionEntry(k.BuchungskontoId, $"{k.Kontonummer} – {k.Bezeichnung}")));
+        }
+
+        [HttpGet]
+        [Route("api/selection/bankkontos")]
+        public ActionResult<IEnumerable<SelectionEntry>> GetBankkontos()
+        {
+            var list = Ctx.Bankkontos
+                .Include(b => b.Besitzer)
+                .ToList();
+            return Ok(list.Select(b => new SelectionEntry(
+                b.BankkontoId,
+                BankkontoLabel(b))));
+        }
+
+        [HttpGet]
+        [Route("api/selection/zahler-bankkonto/buchungssatz/{buchungssatzId}")]
+        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForBuchungssatz(Guid buchungssatzId)
+        {
+            var umlageId = await Ctx.Umlagen
+                .Where(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                    z.Buchungssatz.BuchungssatzId == buchungssatzId && z.SollHaben == SollHaben.Haben))
+                .Select(u => (int?)u.UmlageId)
+                .FirstOrDefaultAsync();
+
+            if (umlageId is null) return NotFound();
+
+            return await GetZahlerBankkontoForUmlage(umlageId.Value);
+        }
+
+        [HttpGet]
+        [Route("api/selection/zahler-bankkonto/umlage/{umlageId}")]
+        public async Task<ActionResult<SelectionEntry>> GetZahlerBankkontoForUmlage(int umlageId)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var besitzerIds = await Ctx.Umlagen
+                .Where(u => u.UmlageId == umlageId)
+                .SelectMany(u => u.Wohnungen)
+                .SelectMany(w => w.Eigentuemer)
+                .Where(e => e.Bis == null || e.Bis >= today)
+                .Select(e => e.Kontakt.KontaktId)
+                .Distinct()
+                .ToListAsync();
+
+            if (besitzerIds.Count == 0) return NotFound();
+
+            var bankkonto = await Ctx.Bankkontos
+                .Include(b => b.Besitzer)
+                .FirstOrDefaultAsync(b => b.Besitzer.Any(k => besitzerIds.Contains(k.KontaktId)));
+
+            if (bankkonto is null) return NotFound();
+
+            return Ok(new SelectionEntry(bankkonto.BankkontoId, BankkontoLabel(bankkonto)));
+        }
+
+        internal static string BankkontoLabel(Bankkonto b)
+        {
+            var parts = new List<string>();
+            var besitzer = b.Besitzer.FirstOrDefault()?.Bezeichnung;
+            if (!string.IsNullOrWhiteSpace(besitzer)) parts.Add(besitzer);
+            if (!string.IsNullOrWhiteSpace(b.Bank)) parts.Add(b.Bank);
+            if (!string.IsNullOrWhiteSpace(b.Iban)) parts.Add(b.Iban);
+            return parts.Count > 0 ? string.Join(" – ", parts) : $"Bankkonto {b.BankkontoId}";
         }
     }
 }

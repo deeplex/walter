@@ -76,12 +76,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
                     Wohnung = vertrag.Wohnung
                 };
                 ctx.VerwalterSet.Add(verwalter);
-            };
+            }
 
             ctx.SaveChanges();
 
             var authContext = new AuthorizationHandlerContext([requirement], claimsPrincipal, entity);
-            var permissionHandler = new ZaehlerstandPermissionHandler();
+            var permissionHandler = new ZaehlerstandPermissionHandler(ctx);
 
             // Act
             await permissionHandler.HandleAsync(authContext);

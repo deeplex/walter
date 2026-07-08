@@ -17,28 +17,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
+        WalterBuchungskonten,
         WalterGrid,
         WalterWohnungen,
         WalterVertraege,
         WalterZaehlerList,
-        WalterErhaltungsaufwendungen,
-        WalterBetriebskostenrechnungen,
         WalterUmlagen,
         WalterHeaderDetail,
         WalterWohnung,
+        WalterWohnungEigentuemer,
+        WalterWohnungVersionen,
         WalterLinks,
         WalterLinkTile
     } from '$walter/components';
-    import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
-        type WalterErhaltungsaufwendungEntry,
+        WalterWohnungEigentuemerEntry,
+        WalterVertragVersionEntry,
         type WalterUmlageEntry,
-        type WalterZaehlerEntry
+        type WalterVertragEntry,
+        type WalterWohnungVersionEntry,
+        type WalterZaehlerEntry,
+        validateWohnung
     } from '$walter/lib';
-    import { Row } from 'carbon-components-svelte';
-    import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
-    import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { changeTracker } from '$walter/store';
     import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
@@ -63,19 +65,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ],
         permissions: data.entry.permissions
     };
-    const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> =
-        {
-            wohnung: {
-                id: '' + data.entry.id,
-                text:
-                    data.entry.adresse?.anschrift +
-                    ' - ' +
-                    data.entry.bezeichnung
-            },
-            datum: convertDateCanadian(new Date()),
-            permissions: data.entry.permissions
-        };
-
     let title = data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
     $: {
         title = data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
@@ -84,6 +73,38 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    const wohnungversionEntry: Partial<WalterWohnungVersionEntry> = {
+        wohnung: {
+            id: '' + data.entry.id,
+            text: data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung
+        },
+        permissions: data.entry.permissions
+    };
+
+    const vertragEntry: Partial<WalterVertragEntry> = {
+        wohnung: {
+            id: '' + data.entry.id,
+            text: data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung
+        },
+        versionen: [{} as WalterVertragVersionEntry],
+        permissions: data.entry.permissions
+    };
+
+    const eigentuemerEntry: Partial<WalterWohnungEigentuemerEntry> = {
+        wohnung: {
+            id: '' + data.entry.id,
+            text: data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung
+        },
+        permissions: data.entry.permissions
+    };
+    const eigentuemerRows = data.entry
+        .eigentuemer as unknown as WalterWohnungEigentuemerEntry[];
+
+    let blockSave = false;
+    let commitVersionIfPending: () => Promise<void>;
+    $: submitDisabled =
+        $changeTracker === 0 || !validateWohnung(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail
@@ -91,12 +112,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={submitDisabled}
+    beforeSave={commitVersionIfPending}
 />
 
 <WalterGrid>
-    <WalterWohnung fetchImpl={data.fetchImpl} entry={data.entry} />
+    <WalterWohnung
+        fetchImpl={data.fetchImpl}
+        bind:entry={data.entry}
+        bind:blockSave
+        bind:commitVersionIfPending
+    />
 
     <WalterLinks>
+        <WalterWohnungVersionen
+            entry={wohnungversionEntry}
+            title="Versionen"
+            rows={data.entry.versionen}
+        />
+        <WalterWohnungEigentuemer
+            fetchImpl={data.fetchImpl}
+            entry={eigentuemerEntry}
+            title="Eigentümer"
+            rows={eigentuemerRows}
+        />
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
             title="Wohnungen an der selben Adresse"
@@ -111,6 +150,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterVertraege
             fetchImpl={data.fetchImpl}
             title="Verträge"
+            entry={vertragEntry}
             rows={data.entry.vertraege}
         />
         <WalterUmlagen
@@ -119,17 +159,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Umlagen"
             rows={data.entry.umlagen}
         />
-        <WalterBetriebskostenrechnungen
-            fetchImpl={data.fetchImpl}
-            title="Betriebskostenrechnungen"
-            rows={data.entry.betriebskostenrechnungen}
-        />
-        <WalterErhaltungsaufwendungen
-            fetchImpl={data.fetchImpl}
-            entry={erhaltungsaufwendungEntry}
-            title="Erhaltungsaufwendungen"
-            rows={data.entry.erhaltungsaufwendungen}
-        />
+        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         <WalterLinkTile
             bind:fileWrapper
@@ -140,15 +170,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         <!-- TODO besitzer id is guid -->
     </WalterLinks>
-
-    {#if data.entry.erhaltungsaufwendungen.length > 1}
-        <Row>
-            <WalterDataScatterChart
-                config={walter_data_aufwendungen(
-                    'Erhaltungsaufwendungen',
-                    data.entry.erhaltungsaufwendungen
-                )}
-            />
-        </Row>
-    {/if}
 </WalterGrid>

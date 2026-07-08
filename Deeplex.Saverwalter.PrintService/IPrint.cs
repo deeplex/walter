@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-
 namespace Deeplex.Saverwalter.PrintService
 {
     public interface IPrint<T>
@@ -25,9 +23,12 @@ namespace Deeplex.Saverwalter.PrintService
         public void Text(string s);
         public void PageBreak();
         public void Break();
-        public void EqHeizkostenV9_2(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit);
         public void Heading(string str);
         public void SubHeading(string str);
         public void Paragraph(params PrintRun[] runs);
+        /// <summary>Fügt einen Entwurf-Hinweis am Anfang des Dokuments ein.</summary>
+        public void EntwurfHinweis(string grund);
+        /// <summary>Gibt die §9 Abs. 2 HKVO Formel mit den konkreten Werten aus.</summary>
+        public void EqHeizkostenV9_2(HkvoP9_2Berechnung berechnung);
     }
 }

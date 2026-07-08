@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import 'carbon-components-svelte/css/all.css';
 
     beforeNavigate((e) => {
-        if (e.to && e.type !== 'goto') {
+        // Do not intercept browser back/forward; cancelling popstate breaks history traversal.
+        if (e.to && e.type === 'link') {
             e.cancel();
             walter_goto(e.to.url.href);
         }
@@ -89,10 +90,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         color: #2e7d32;
     }
     :global(
-            a.bx--side-nav__icon--small,
-            a.bx--side-nav__link[aria-current='page']::before,
-            a.bx--side-nav__link--current::before
-        ) {
+        a.bx--side-nav__icon--small,
+        a.bx--side-nav__link[aria-current='page']::before,
+        a.bx--side-nav__link--current::before
+    ) {
         background-color: #2e7d32 !important;
     }
 
@@ -120,9 +121,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         padding: 0 !important;
     }
 
-    :global(#homepagetabs) {
-        position: fixed;
-        z-index: 3000;
+    :global(.cds--cc--heatmap g.axis.left .tick text) {
+        text-anchor: end;
     }
 
     :global(.bx--list-box__menu-item) {
@@ -149,11 +149,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     /* Align datepicker to rest of elements */
     :global(
-            .bx--date-picker-container,
-            .flatpickr-input,
-            .flatpickr-wrapper,
-            .bx--date-picker.bx--date-picker--single
-        ) {
+        .bx--date-picker-container,
+        .flatpickr-input,
+        .flatpickr-wrapper,
+        .bx--date-picker.bx--date-picker--single
+    ) {
         width: 100% !important;
     }
 
@@ -177,5 +177,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     :global(.bx--number input[type='number']) {
         min-width: 6.375rem !important;
         padding-right: 4em !important;
+    }
+
+    /* Visual disabled state for Carbon's HeaderGlobalAction (no built-in :disabled style) */
+    :global(.bx--header__action:disabled) {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    /* Toolbar sticky for full-page tables — must live here (after Carbon CSS in cascade) */
+    :global(.sticky-chrome .bx--table-toolbar) {
+        position: sticky !important;
+        top: 3rem !important;
+        z-index: 10 !important;
+    }
+
+    :global(.sticky-chrome thead) {
+        position: sticky !important;
+        top: 6rem !important;
+        z-index: 9 !important;
+        background: var(--cds-layer, #f4f4f4) !important;
     }
 </style>

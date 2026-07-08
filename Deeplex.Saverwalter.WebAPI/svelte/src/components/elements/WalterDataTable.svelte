@@ -15,12 +15,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import type { ComponentType } from 'svelte';
     import {
         Button,
         Content,
         DataTable,
         DataTableSkeleton,
-        SkeletonPlaceholder,
+        Pagination,
+        Tag,
         Toolbar,
         ToolbarContent,
         ToolbarSearch
@@ -36,6 +38,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Add } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
+    import WalterDataTableContainer from './WalterDataTableContainer.svelte';
+
+    type WalterDataTableRow = DataTableRow & {
+        id: string | number;
+        permissions?: {
+            read?: boolean;
+            update?: boolean;
+        };
+    };
+
+    type FetchParams = {
+        search?: string;
+        sortBy?: string;
+        sortDir: 'asc' | 'desc';
+        skip: number;
+        take: number;
+    };
 
     export let fullHeight = false;
     export let size: 'compact' | 'short' | 'medium' | 'tall' | undefined =
@@ -43,39 +63,319 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let headers: {
         key: string;
         value: string;
+        sort?: false;
     }[];
     export let readonly = false;
-    export let rows: unknown[];
-    export let add: (() => void) | undefined = undefined;
+    export let rows: WalterDataTableRow[] | undefined = undefined;
+    export let rowHref:
+        | ((row: WalterDataTableRow) => string | undefined)
+        | undefined = undefined;
+    export let layout: 'inline' | 'accordion' = 'inline';
+    export let accordionTitle: string | undefined = undefined;
+    export let initialOpen = false;
+    export let quickAddTitle: string | undefined = undefined;
+    export let addUrl: string | undefined = undefined;
+    export let addEntry: unknown = undefined;
+    export let onAdd: (() => void) | undefined = undefined;
+    export let beforeSubmit:
+        | undefined
+        | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
+    export let submitDisabled = false;
+    export let on_click_row: (
+        e: CustomEvent<DataTableRow>
+    ) => Promise<void> | void = () => {};
+
+    // When provided, WalterDataTable manages server-side pagination internally.
+    export let fetchData:
+        | ((
+              params: FetchParams
+          ) => Promise<{ items: WalterDataTableRow[]; totalCount: number }>)
+        | undefined = undefined;
+    export let initialSortBy = '';
+    export let initialSortDir: 'asc' | 'desc' = 'desc';
+    export let initialPageSize = 50;
+    // Optional row transform applied to server-fetched rows before rendering.
+    export let transformRow:
+        | ((row: WalterDataTableRow) => WalterDataTableRow)
+        | undefined = undefined;
+
+    let addModalOpen = false;
+
+    $: newPageUrl = addUrl
+        ? addUrl
+              .replace(/^\/api/, '')
+              .split('/')
+              .slice(0, 2)
+              .join('/') + '/new'
+        : undefined;
 
     const searchParams: URLSearchParams | null = $page
         ? new URL($page.url).searchParams
         : null;
     let searchQuery = searchParams?.get('search') || '';
 
-    function toolbarSearchInput() {
-        if (searchParams) {
-            if (searchQuery) {
-                searchParams.set('search', searchQuery);
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
-            } else {
-                searchParams.delete('search');
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
-            }
+    $: resolvedAccordionTitle = accordionTitle || '';
+    $: resolvedQuickAddTitle = quickAddTitle ?? accordionTitle;
+
+    // ── Internal server-pagination state ──────────────────────────────────────
+    let _pagedRows: WalterDataTableRow[] = [];
+    let _totalCount = 0;
+    let _page = 1;
+    let _pageSize = initialPageSize;
+    let _sortBy = initialSortBy;
+    let _sortDir: 'asc' | 'desc' = initialSortDir;
+    // Initialise from URL so that a page reload preserves the search term.
+    let _appliedSearch = searchParams?.get('search') || '';
+    let _loading = false;
+
+    async function _fetchData() {
+        if (!fetchData) return;
+        _loading = true;
+        try {
+            const result = await fetchData({
+                search: _appliedSearch || undefined,
+                sortBy: _sortBy || undefined,
+                sortDir: _sortDir,
+                skip: (_page - 1) * _pageSize,
+                take: _pageSize
+            });
+            _pagedRows = result.items;
+            _totalCount = result.totalCount;
+        } finally {
+            _loading = false;
         }
     }
 
-    export let on_click_row: (
-        e: CustomEvent<DataTableRow>
-    ) => Promise<void> | void = () => {};
+    $: if (fetchData)
+        void (_page,
+        _pageSize,
+        _sortBy,
+        _sortDir,
+        _appliedSearch,
+        _fetchData());
+
+    $: showSkeleton =
+        fetchData !== undefined && _loading && _pagedRows.length === 0;
+
+    $: displayRows = fetchData
+        ? transformRow
+            ? _pagedRows.map(transformRow)
+            : _pagedRows
+        : (rows ?? []);
+
+    function quick_add() {
+        addModalOpen = true;
+    }
+
+    function handleAddClick() {
+        quick_add();
+    }
+
+    function onSubmit(new_value: unknown) {
+        if (fetchData) {
+            void _fetchData();
+        } else {
+            rows = [...(rows ?? []), new_value as WalterDataTableRow];
+        }
+    }
+
+    $: useServerSearch = !!fetchData;
+
+    function handleHeaderClick(e: CustomEvent) {
+        if (!fetchData) return;
+        const { header, sortDirection } = e.detail as {
+            header: { key: string };
+            sortDirection?: 'ascending' | 'descending' | 'none';
+        };
+        if (!sortDirection || sortDirection === 'none') return;
+        _sortBy = header.key;
+        _sortDir = sortDirection === 'ascending' ? 'asc' : 'desc';
+        _page = 1;
+    }
+
+    let searchMounted = false;
+    onMount(() => {
+        searchMounted = true;
+    });
+
+    let _searchTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function updateSearchUrl(query: string) {
+        if (!searchParams) return;
+        if (query) {
+            searchParams.set('search', query);
+        } else {
+            searchParams.delete('search');
+        }
+        window.history.replaceState({}, '', `?${searchParams.toString()}`);
+    }
+
+    function dispatchServerSearch(query: string) {
+        if (!fetchData) return;
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => {
+            _appliedSearch = query;
+            _page = 1;
+            updateSearchUrl(query);
+        }, 300);
+    }
+
+    $: if (searchMounted) dispatchServerSearch(searchQuery);
+
+    function toolbarSearchInput() {
+        if (fetchData) return;
+        updateSearchUrl(searchQuery);
+    }
+
+    $: hasButtonColumn = headers.some((header) => header.key === 'button');
+    $: hasCompactButtonColumn = headers.some(
+        (header) =>
+            header.key === 'button' && `${header.value || ''}`.trim() === ''
+    );
+
+    function resolveActionButton(cellValue: unknown): {
+        disabled: boolean;
+        onClick: (e: MouseEvent) => void;
+        kind:
+            | 'danger'
+            | 'primary'
+            | 'secondary'
+            | 'tertiary'
+            | 'ghost'
+            | 'danger-tertiary'
+            | 'danger-ghost';
+        icon: ComponentType;
+        iconDescription: string;
+    } {
+        if (cellValue === 'disabled') {
+            return {
+                disabled: true,
+                onClick: () => {},
+                kind: 'tertiary',
+                icon: Add,
+                iconDescription: 'Hinzufügen'
+            };
+        }
+
+        if (typeof cellValue === 'function') {
+            return {
+                disabled: false,
+                onClick: cellValue as (e: MouseEvent) => void,
+                kind: 'tertiary',
+                icon: Add,
+                iconDescription: 'Hinzufügen'
+            };
+        }
+
+        if (typeof cellValue === 'object' && cellValue !== null) {
+            const buttonValue = cellValue as {
+                disabled?: boolean;
+                onClick?: (e: MouseEvent) => void;
+                kind?:
+                    | 'danger'
+                    | 'primary'
+                    | 'secondary'
+                    | 'tertiary'
+                    | 'ghost'
+                    | 'danger-tertiary'
+                    | 'danger-ghost';
+                icon?: ComponentType;
+                iconDescription?: string;
+            };
+
+            return {
+                disabled: !!buttonValue.disabled,
+                onClick: buttonValue.onClick || (() => {}),
+                kind: buttonValue.kind || 'tertiary',
+                icon: buttonValue.icon || Add,
+                iconDescription: buttonValue.iconDescription || 'Hinzufügen'
+            };
+        }
+
+        return {
+            disabled: true,
+            onClick: () => {},
+            kind: 'tertiary',
+            icon: Add,
+            iconDescription: 'Hinzufügen'
+        };
+    }
+
+    function resolveRowHref(row: DataTableRow): string | undefined {
+        const typedRow = row as WalterDataTableRow;
+
+        if (typedRow.permissions && !typedRow.permissions.read) {
+            return undefined;
+        }
+
+        return rowHref?.(typedRow);
+    }
+
+    function onRowLinkClick(event: MouseEvent) {
+        // Prevent DataTable row click handlers from firing when the user
+        // explicitly clicked the anchor, while preserving native link behavior.
+        event.stopPropagation();
+    }
+
+    // Zellen können statt Text auch einen farbigen Status-Tag anzeigen,
+    // indem der Wert als { text, tag } geliefert wird.
+    type WalterTagCellValue = {
+        text: string;
+        tag:
+            | 'red'
+            | 'magenta'
+            | 'purple'
+            | 'blue'
+            | 'cyan'
+            | 'teal'
+            | 'green'
+            | 'gray'
+            | 'cool-gray'
+            | 'warm-gray'
+            | 'high-contrast'
+            | 'outline';
+    };
+
+    function tagCell(value: unknown): WalterTagCellValue | undefined {
+        if (
+            typeof value === 'object' &&
+            value !== null &&
+            'tag' in value &&
+            'text' in value
+        ) {
+            return value as WalterTagCellValue;
+        }
+        return undefined;
+    }
+
+    function getCellDisplayValue(cell: {
+        key: string;
+        value: unknown;
+    }): string {
+        if (
+            cell.value === null ||
+            cell.value === undefined ||
+            cell.value === ''
+        ) {
+            return '---';
+        }
+        if (dates(cell.key)) {
+            return formatToTableDate(`${cell.value}`);
+        }
+        if (time(cell.key)) {
+            return (
+                convertTime(cell.value as Date | string | undefined) || '---'
+            );
+        }
+        if (euro(cell.key)) {
+            return convertEuro(cell.value as number | undefined) || '---';
+        }
+        if (cell.key === 'anteil') {
+            return convertPercent(cell.value as number | undefined) || '---';
+        }
+
+        return `${cell.value}`;
+    }
 
     function shouldFilterRows(row: { [key: string]: unknown }, value: unknown) {
         const filteredValues = headers.map((headerObj) => {
@@ -104,10 +404,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         );
     }
 
-    const disabledRows = rows
+    const disabledRows = (rows ?? [])
         .filter((row) => row.permissions && !row.permissions?.read)
         .map((row) => row.id);
-    const enabledRows = rows
+    const enabledRows = (rows ?? [])
         .filter((row) => row.permissions?.read)
         .map((row) => row.id);
 
@@ -117,94 +417,233 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const enabledSelector = enabledRows
         .map((id) => `[data-row="${id}"]`)
         .join(',');
-    const styles = `
-    <style>
-    ${disabledSelector} {
+    const styleRules = [
+        disabledSelector
+            ? `${disabledSelector} {
         opacity: 0.5;
         cursor: not-allowed !important;
         pointer-events: none !important;
-    }
-      ${enabledSelector} {
+    }`
+            : '',
+        enabledSelector
+            ? `${enabledSelector} {
         color: #ff0;
         cursor: pointer !important;
-      }
-    <\/style>`;
+      }`
+            : ''
+    ].filter(Boolean);
+
+    onMount(() => {
+        const styleElements = styleRules.map((rule) => {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = rule;
+            document.head.appendChild(styleElement);
+            return styleElement;
+        });
+
+        return () => {
+            styleElements.forEach((styleElement) => styleElement.remove());
+        };
+    });
 </script>
 
-<svelte:head>
-    {@html styles}
-</svelte:head>
-
 <Content>
-    <DataTable
-        {size}
-        on:click:row={on_click_row}
-        sortable
-        zebra
-        stickyHeader
-        {headers}
-        {rows}
-        class={fullHeight ? 'proper-list' : ''}
-        style="cursor-events: none !important; max-height: none !important;"
-    >
-        <Toolbar>
-            <ToolbarContent>
-                <ToolbarSearch
-                    placeholder="Suche mit ; separierter Liste..."
-                    persistent
-                    on:input={toolbarSearchInput}
-                    bind:value={searchQuery}
-                    {shouldFilterRows}
-                />
-                {#if !!add && !readonly}
-                    <Button
-                        style="right: -1em; position: sticky;"
-                        on:click={add}
-                        iconDescription="Eintrag hinzufügen"
-                        icon={Add}
-                    >
-                        Eintrag hinzufügen
-                    </Button>
-                {/if}
-            </ToolbarContent>
-        </Toolbar>
-        <span
-            style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
-            slot="cell"
-            let:cell
-            let:row
+    {#if addUrl}
+        <WalterDataWrapperQuickAdd
+            bind:addEntry
+            {addUrl}
+            bind:addModalOpen
+            {onSubmit}
+            {beforeSubmit}
+            {submitDisabled}
+            title={resolvedQuickAddTitle}
         >
-            {#if cell.value === null || cell.value === undefined || cell.value === ''}
-                ---
-            {:else if dates(cell.key)}
-                {formatToTableDate(cell.value)}
-            {:else if time(cell.key)}
-                {convertTime(cell.value)}
-            {:else if euro(cell.key)}
-                {convertEuro(cell.value)}
-            {:else if cell.key === 'anteil'}
-                {convertPercent(cell.value)}
-            {:else if cell.key === 'button'}
-                <Button
-                    disabled={cell.value === 'disabled'}
-                    on:click={cell.value}
-                    tooltipPosition="left"
-                    style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
-                    kind="tertiary"
-                    icon={Add}
-                    iconDescription={'Hinzufügen'}
-                />
-            {:else}
-                {cell.value}
+            <slot />
+        </WalterDataWrapperQuickAdd>
+    {/if}
+
+    <WalterDataTableContainer
+        {layout}
+        accordionTitle={resolvedAccordionTitle}
+        count={fetchData ? _totalCount : displayRows.length}
+        {initialOpen}
+    >
+        {#if showSkeleton}
+            <DataTableSkeleton showHeader={false} showToolbar={false} />
+        {:else}
+            <div
+                class:has-compact-button-column={hasCompactButtonColumn}
+                class:sticky-chrome={!!fetchData}
+            >
+                <DataTable
+                    {size}
+                    on:click:row={on_click_row}
+                    on:click:header={handleHeaderClick}
+                    sortable
+                    zebra
+                    stickyHeader={!fetchData}
+                    {headers}
+                    rows={displayRows}
+                    class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
+                    style="cursor-events: none !important; max-height: none !important;"
+                >
+                    <Toolbar>
+                        <ToolbarContent>
+                            <ToolbarSearch
+                                placeholder={useServerSearch
+                                    ? 'Suche...'
+                                    : 'Suche mit ; separierter Liste...'}
+                                persistent
+                                on:input={toolbarSearchInput}
+                                bind:value={searchQuery}
+                                shouldFilterRows={useServerSearch
+                                    ? () => true
+                                    : shouldFilterRows}
+                            />
+                            {#if (addUrl || onAdd) && !readonly}
+                                <Button
+                                    style="right: -1em; position: sticky;"
+                                    href={newPageUrl}
+                                    on:click={(e) => {
+                                        e.preventDefault();
+                                        (onAdd ?? handleAddClick)();
+                                    }}
+                                    iconDescription="Eintrag hinzufügen"
+                                    icon={Add}
+                                >
+                                    Eintrag hinzufügen
+                                </Button>
+                            {/if}
+                        </ToolbarContent>
+                    </Toolbar>
+                    <span
+                        class="walter-table-cell"
+                        slot="cell"
+                        let:cell
+                        let:row
+                    >
+                        {#if cell.key === 'button'}
+                            {@const buttonConfig = resolveActionButton(
+                                cell.value
+                            )}
+                            <span class="button-cell">
+                                <Button
+                                    disabled={buttonConfig.disabled}
+                                    on:click={buttonConfig.onClick}
+                                    tooltipPosition="left"
+                                    size="small"
+                                    style="margin: 0;"
+                                    kind={buttonConfig.kind}
+                                    icon={buttonConfig.icon}
+                                    iconDescription={buttonConfig.iconDescription}
+                                />
+                            </span>
+                        {:else}
+                            {@const tagValue = tagCell(cell.value)}
+                            {#if tagValue}
+                                <Tag size="sm" type={tagValue.tag}
+                                    >{tagValue.text}</Tag
+                                >
+                            {:else}
+                                {@const displayValue =
+                                    getCellDisplayValue(cell)}
+                                {@const tooltip =
+                                    displayValue === '---'
+                                        ? undefined
+                                        : displayValue}
+                                {@const href = resolveRowHref(row)}
+                                {#if href}
+                                    <a
+                                        class="walter-table-link"
+                                        {href}
+                                        title={tooltip}
+                                        on:click={onRowLinkClick}
+                                    >
+                                        <span class="walter-table-link__label"
+                                            >{displayValue}</span
+                                        >
+                                    </a>
+                                {:else}
+                                    <span
+                                        class="walter-table-text"
+                                        title={tooltip}>{displayValue}</span
+                                    >
+                                {/if}
+                            {/if}
+                        {/if}
+                    </span>
+                </DataTable>
+            </div>
+            {#if fetchData && _totalCount > _pageSize}
+                <div class="pagination-sticky">
+                    <Pagination
+                        totalItems={_totalCount}
+                        pageSize={_pageSize}
+                        page={_page}
+                        pageSizes={[25, 50, 100, 250]}
+                        on:update={(e) => {
+                            _page = e.detail.page;
+                            _pageSize = e.detail.pageSize;
+                        }}
+                    />
+                </div>
             {/if}
-        </span>
-    </DataTable>
+        {/if}
+    </WalterDataTableContainer>
 
     <style>
+        .pagination-sticky {
+            position: sticky;
+            bottom: 0;
+        }
+
         .proper-list
             > .bx--data-table_inner-container
             > .bx--data-table--sticky-header {
             max-height: none !important;
+        }
+
+        .walter-table-cell {
+            display: block;
+            width: 100%;
+        }
+
+        .walter-table-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            box-sizing: border-box;
+            width: calc(100% + 2rem);
+            margin: -0.5rem -1rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .walter-table-link__label,
+        .walter-table-text {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .button-cell {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            min-height: 1.5rem;
+        }
+
+        :global(.has-compact-button-column .bx--data-table th:last-child),
+        :global(.has-compact-button-column .bx--data-table td:last-child) {
+            max-width: 2.75rem !important;
+            min-width: 2.75rem !important;
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 2.75rem !important;
         }
     </style>
 </Content>

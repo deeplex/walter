@@ -14,32 +14,34 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
     public class Umlage
     {
         public int UmlageId { get; set; }
-        [Required]
         public virtual Umlagetyp Typ { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-        [Required]
-        public Umlageschluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
         public string? Notiz { get; set; }
-        public virtual HKVO? HKVO { get; set; }
 
+        /// <summary>HKVOs, for which this Umlage IS the Heizkosten component.</summary>
+        public virtual List<HKVO> HeizkostenHKVOs { get; set; } = [];
+        /// <summary>HKVOs, for which this Umlage IS the Betriebsstrom component.</summary>
+        public virtual List<HKVO> BetriebsstromHKVOs { get; set; } = [];
+
+        public virtual Buchungskonto NkVerrechnungsKonto { get; set; } = null!;
+        public virtual Buchungskonto ZahlungsKonto { get; set; } = null!;
+
+        public virtual List<UmlageVersion> Versionen { get; private set; } = [];
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
-        public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
-        // Stromrechnungen keep track of the HKVOs that point to them
-        public virtual List<HKVO> HKVOs { get; set; } = new List<HKVO>();
+
+        public DateOnly? Ende { get; set; }
+
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Umlage(Umlageschluessel schluessel)
-        {
-            Schluessel = schluessel;
-        }
+
+        public Umlage() { }
     }
 
     public enum Umlageschluessel

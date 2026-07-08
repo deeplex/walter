@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,23 +22,45 @@ namespace Deeplex.Saverwalter.PrintService.Tests
 {
     public class PdfIntegrationTests
     {
-        [Fact(Skip = "PDF is TODO")]
+        [Fact]
         public void EverythingZeroTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
-            var abrechnung = new Betriebskostenabrechnung(
-                vertrag,
-                2021,
-                new DateOnly(2021, 1, 1),
-                new DateOnly(2021, 12, 31)
-            );
+            var einheiten = NkGruppenAbrechnungsService.ComputeEinheiten(
+                vertrag.Wohnung.Umlagen, 2021);
+            var partei = einheiten
+                .SelectMany(e => e.Parteien)
+                .First(p => p.Vertrag?.VertragId == vertrag.VertragId);
+            var druckdaten = NkDruckdaten.Build(partei, einheiten, 2021);
 
             var stream = new MemoryStream();
 
             // Act
-            abrechnung.SaveAsPdf(stream);
+            druckdaten.SaveAsPdf(stream);
+
+            // Assert
+            stream.Length.Should().BeGreaterThan(1000);
+        }
+
+        [Fact]
+        public void EntwurfHinweisTest()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+
+            var einheiten = NkGruppenAbrechnungsService.ComputeEinheiten(
+                vertrag.Wohnung.Umlagen, 2021);
+            var partei = einheiten
+                .SelectMany(e => e.Parteien)
+                .First(p => p.Vertrag?.VertragId == vertrag.VertragId);
+            var druckdaten = NkDruckdaten.Build(partei, einheiten, 2021);
+
+            var stream = new MemoryStream();
+
+            // Act
+            druckdaten.SaveAsPdf(stream, istEntwurf: true, entwurfGrund: "Noch nicht gebucht");
 
             // Assert
             stream.Length.Should().BeGreaterThan(1000);

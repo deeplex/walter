@@ -15,13 +15,17 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class VertragDbService : WalterDbServiceBase<VertragEntry, int, Vertrag>
     {
@@ -29,13 +33,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<VertragEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await VertragPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new VertragEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<VertragEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            VertragPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+                searchPredicate: t => e =>
+                    e.Wohnung.Bezeichnung.ToLower().Contains(t) ||
+                    (e.Wohnung.Adresse != null && (
+                        e.Wohnung.Adresse.Strasse.ToLower().Contains(t) ||
+                        e.Wohnung.Adresse.Stadt.ToLower().Contains(t))) ||
+                    e.Mieter.Any(m =>
+                        m.Name.ToLower().Contains(t) ||
+                        (m.Vorname != null && m.Vorname.ToLower().Contains(t))),
+                applySort: (q, sortBy, dir) => sortBy switch
+                {
+                    "beginn" => q.SortBy(e => e.Versionen.Min(v => v.Beginn), dir),
+                    "ende" => q.SortBy(e => e.Ende, dir),
+                    _ => q.SortBy(e => e.Versionen.Min(v => v.Beginn), "desc")
+                },
+                toEntry: async e => new VertragEntryBase(e, await GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Vertrag>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
@@ -81,6 +95,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
+                var beginn = entry.Versionen?.FirstOrDefault()?.Beginn;
+                if (beginn.HasValue)
+                {
+                    var conflict = await FindOverlappingVertrag(entry.Wohnung.Id, beginn.Value, entry.Ende);
+                    if (conflict is not null) return new ConflictObjectResult(conflict);
+                }
+
                 return await Add(entry);
             }
             catch
@@ -96,7 +117,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Wohnung");
             }
             var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
-            var entity = new Vertrag() { Wohnung = wohnung! };
+            var idx = $"V{entry.Id:D5}";
+            var entity = new Vertrag()
+            {
+                Wohnung = wohnung!,
+                MietBuchungskonto = new Buchungskonto($"{idx}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                NkBuchungskonto = new Buchungskonto($"{idx}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                BkAbrechnungsKonto = new Buchungskonto($"{idx}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto($"{idx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto($"{idx}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
+            };
 
             await SetOptionalValues(entity, entry);
             Ctx.Vertraege.Add(entity);
@@ -113,6 +143,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     throw new ArgumentException("entry has no Wohnung.");
                 }
+
+                // Abrechnungsschutz: Eine geänderte Vertragsdauer (Ende) verfälscht die
+                // Zeitanteile in allen betroffenen Jahren. Ist eines davon bereits gebucht
+                // abgerechnet, wird blockiert (erst Abrechnung zurücknehmen).
+                if (entity.Ende != entry.Ende)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreVertragEnde(
+                        Ctx, id, entity.Ende, entry.Ende);
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
+                var beginn = await Ctx.VertragVersionen
+                    .Where(v => v.Vertrag.VertragId == id)
+                    .MinAsync(v => (DateOnly?)v.Beginn);
+                if (beginn.HasValue)
+                {
+                    var conflict = await FindOverlappingVertrag(entry.Wohnung.Id, beginn.Value, entry.Ende, excludeId: id);
+                    if (conflict is not null) return new ConflictObjectResult(conflict);
+                }
+
                 entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
 
                 await SetOptionalValues(entity, entry);
@@ -121,6 +171,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 return new VertragEntry(entity, entry.Permissions);
             });
+        }
+
+        private async Task<string?> FindOverlappingVertrag(int wohnungId, DateOnly beginn, DateOnly? ende, int excludeId = 0)
+        {
+            var existing = await Ctx.Vertraege
+                .Where(v => v.Wohnung.WohnungId == wohnungId && v.VertragId != excludeId)
+                .Select(v => new
+                {
+                    Ende = v.Ende,
+                    Beginn = v.Versionen.Min(vv => (DateOnly?)vv.Beginn),
+                    Mieter = v.Mieter.Select(m => m.Bezeichnung)
+                })
+                .ToListAsync();
+
+            var conflict = existing.FirstOrDefault(v =>
+                v.Beginn.HasValue &&
+                beginn <= (v.Ende ?? DateOnly.MaxValue) &&
+                (ende ?? DateOnly.MaxValue) >= v.Beginn.Value);
+
+            if (conflict is null) return null;
+
+            var mieter = string.Join(", ", conflict.Mieter);
+            var endeText = conflict.Ende.HasValue ? conflict.Ende.Value.ToString("dd.MM.yyyy") : "offen";
+            return $"Konflikt mit bestehendem Vertrag ({mieter}) vom {conflict.Beginn!.Value:dd.MM.yyyy} bis {endeText}.";
         }
 
         private async Task SetOptionalValues(Vertrag entity, VertragEntry entry)
@@ -139,14 +213,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     var entityVersion = new VertragVersion(entryVersion.Beginn, entryVersion.Grundmiete, entryVersion.Personenzahl)
                     {
                         Vertrag = entity,
+                        Nebenkostenvorauszahlung = entryVersion.Nebenkostenvorauszahlung
                     };
                     entity.Versionen.Add(entityVersion);
                 }
             }
 
             entity.Ende = entry.Ende;
-            entity.Ansprechpartner = await Ctx.Kontakte.FindAsync(entry.Ansprechpartner.Id)!;
+            entity.Ansprechpartner = entry.Ansprechpartner?.Id is int apId
+                ? await Ctx.Kontakte.FindAsync(apId)
+                : null;
             entity.Notiz = entry.Notiz;
+            entity.KautionBetrag = entry.KautionBetrag;
+            entity.KautionEingangsdatum = entry.KautionEingangsdatum;
+            entity.KautionRueckgabedatum = entry.KautionRueckgabedatum;
+            entity.KautionArt = entry.KautionArt;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
             {

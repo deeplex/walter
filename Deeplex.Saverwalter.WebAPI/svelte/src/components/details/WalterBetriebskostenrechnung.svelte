@@ -139,6 +139,53 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
 </Row>
 
+{#if entry.buchungszeilen && entry.buchungszeilen.length > 0}
+    <Row style="margin-top: 1rem;">
+        <div style="width: 100%; overflow-x: auto;">
+            <table
+                style="width: 100%; border-collapse: collapse; font-size: 0.875rem;"
+            >
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--cds-ui-03);">
+                        <th
+                            style="text-align: left; padding: 0.5rem; color: var(--cds-text-secondary);"
+                            >Konto</th
+                        >
+                        <th
+                            style="text-align: left; padding: 0.5rem; color: var(--cds-text-secondary);"
+                            >Soll/Haben</th
+                        >
+                        <th
+                            style="text-align: right; padding: 0.5rem; color: var(--cds-text-secondary);"
+                            >Betrag</th
+                        >
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each entry.buchungszeilen as z}
+                        <tr style="border-bottom: 1px solid var(--cds-ui-01);">
+                            <td style="padding: 0.5rem;">{z.konto}</td>
+                            <td
+                                style="padding: 0.5rem; color: {z.sollHaben ===
+                                'Soll'
+                                    ? 'var(--cds-support-error)'
+                                    : 'var(--cds-support-success)'};"
+                                >{z.sollHaben}</td
+                            >
+                            <td style="text-align: right; padding: 0.5rem;"
+                                >{z.betrag.toLocaleString('de-DE', {
+                                    style: 'currency',
+                                    currency: 'EUR'
+                                })}</td
+                            >
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
+    </Row>
+{/if}
+
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
     <WalterLinks>
         <WalterLinkTile

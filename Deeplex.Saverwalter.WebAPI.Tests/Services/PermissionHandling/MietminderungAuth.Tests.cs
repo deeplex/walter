@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
                 Name = requirementName
             };
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var entity = new Mietminderung(new DateOnly(), 0.1)
+            var entity = new Mietminderung(new DateOnly(), 0.1m)
             {
                 Vertrag = vertrag
             };
@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
                     Wohnung = vertrag.Wohnung
                 };
                 ctx.VerwalterSet.Add(verwalter);
-            };
+            }
 
             ctx.SaveChanges();
 

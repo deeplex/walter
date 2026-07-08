@@ -36,19 +36,19 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var wohnungen = FillWohnungen(ctx, adressen);
             var vertraege = FillVertraege(ctx, wohnungen);
             var vertragVersionen = FillVertragversionen(ctx, vertraege);
-            var mieten = FillMieten(ctx, vertraege);
-            var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen);
-
+            FillMieten(ctx, vertraege);
+            FillErhaltungsaufwendungen(ctx, wohnungen);
             // Still empty
             var mietminderungen = FillMietminderungen(ctx);
-            var kontos = FillKontos(ctx);
+            var bankkontos = FillBankkontos(ctx);
             var garagen = FillGaragen(ctx);
 
             // TODO
             var umlagen = FillUmlagen(ctx, adressen);
-            var zaehlerSet = FillZaehlerSet(ctx, umlagen);
-            var zaehlerstaende = FillZaehlerstaende(ctx, vertraege);
-            var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx, umlagen);
+            var (zaehlerSet, hauszaehlerHeizung) = FillZaehlerSet(ctx, umlagen);
+            var zaehlerstaende = FillZaehlerstaende(ctx, zaehlerSet, vertraege);
+            FillHKVO(ctx, umlagen, hauszaehlerHeizung);
+            FillBetriebskostenrechnungen(ctx, umlagen);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
             await ctx.SaveChangesAsync();
@@ -149,19 +149,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return person;
         }
 
-        private static bool isPrime(int number)
-        {
-            if (number == 1) return false;
-            if (number == 2) return true;
-
-            var limit = Math.Ceiling(Math.Sqrt(number));
-
-            for (int i = 2; i <= limit; ++i)
-                if (number % i == 0)
-                    return false;
-            return true;
-        }
-
         private static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen)
         {
             Console.Write("Füge Wohnungen hinzu: ");
@@ -180,14 +167,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     var bezeichnung = $"Wohnung Nr. {j}";
                     var flaeche = 35 + (j * 35);
-                    wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, i * 2, 1)
+                    var wIdx = wohnungen.Count;
+                    var wohnung = new Wohnung(bezeichnung)
                     {
                         Adresse = adresse,
-                        Besitzer = besitzer,
-                        Wohnflaeche = flaeche,
-                        Nutzflaeche = flaeche,
-                        Nutzeinheit = 1
-                    });
+                        MietErtragskonto = new Buchungskonto($"W{wIdx:D5}-M", $"Mieterlöse {bezeichnung}", BuchungskontoTyp.Ertrag),
+                        AufwandsKonto = new Buchungskonto($"W{wIdx:D5}-E", $"Erhaltungsaufwand {bezeichnung}", BuchungskontoTyp.Aufwand),
+                    };
+                    wohnung.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = wohnung, Kontakt = besitzer });
+                    wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), flaeche, flaeche, flaeche, 1) { Wohnung = wohnung });
+                    wohnungen.Add(wohnung);
                 }
             }
 
@@ -196,37 +185,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             Console.WriteLine($"{wohnungen.Count} Wohnungen hinzugefügt");
 
             return wohnungen;
-        }
-
-        static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen)
-        {
-            Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
-
-            var erhaltungsaufwendungen = new List<Erhaltungsaufwendung> { };
-            // TODO only one aussteller...
-            var aussteller = generateJuristischePerson(11);
-
-            for (var i = 0; i < 3000; i++)
-            {
-                var betrag = 100;
-                var bezeichnung = $"Rechnungsnr. {i}";
-                var jahr = 2020 + i % 5;
-                var monat = 1 + i % 12;
-                var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
-                var datum = new DateOnly(jahr, monat, tag);
-                var wohnung = wohnungen[i % wohnungen.Count];
-
-                erhaltungsaufwendungen.Add(new Erhaltungsaufwendung(betrag, bezeichnung, datum)
-                {
-                    Aussteller = aussteller,
-                    Wohnung = wohnung
-                });
-            }
-
-            ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
-            Console.WriteLine($"{erhaltungsaufwendungen.Count} Erhaltungsaufwendungen hinzugefügt");
-
-            return erhaltungsaufwendungen;
         }
 
         static List<Vertrag> FillVertraege(
@@ -249,11 +207,17 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     ende = new DateOnly(jahr, monat, tag);
                 }
 
+                var vIdx = vertraege.Count;
                 var vertrag = new Vertrag()
                 {
-                    Ansprechpartner = wohnung.Besitzer, // TODO add some variation. Maybe a chance to add a new person
+                    Ansprechpartner = wohnung.Eigentuemer.FirstOrDefault()?.Kontakt, // TODO add some variation. Maybe a chance to add a new person
                     Ende = ende,
-                    Wohnung = wohnung
+                    Wohnung = wohnung,
+                    MietBuchungskonto = new Buchungskonto($"V{vIdx:D5}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                    NkBuchungskonto = new Buchungskonto($"V{vIdx:D5}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                    BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                    ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+                    MietminderungsKonto = new Buchungskonto($"V{vIdx:D5}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
                 };
 
                 vertraege.Add(vertrag);
@@ -279,7 +243,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 for (var j = 0; j <= (j + 1) % 3; ++j)
                 {
-                    var grundmiete = wohnung.Wohnflaeche * (6 - i % 3 + j % 3);
+                    var grundmiete = wohnung.VersionAt(ende).Wohnflaeche * (6 - i % 3 + j % 3);
                     var personenzahl = (i + 1) % 3 * (j + 1) % 3;
                     var length = Math.Abs((vertraege.Count - i) * (i / 2) * (j + 1));
                     var beginn = ende.AddMonths(-3).AddDays(-length);
@@ -296,11 +260,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return vertragVersionen;
         }
 
-        static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
+        static void FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
-            Console.Write("Füge Mieten hinzu: ");
-
-            var mieten = new List<Miete> { };
+            Console.Write("Füge Miet-Buchungssätze hinzu: ");
+            var count = 0;
 
             foreach (var vertrag in vertraege)
             {
@@ -308,20 +271,91 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     var ende = version.Ende() ?? globalToday;
 
-                    for (DateOnly date = version.Beginn; date <= ende; date = date.AddMonths(1))
+                    for (var monat = new DateOnly(version.Beginn.Year, version.Beginn.Month, 1);
+                         monat <= new DateOnly(ende.Year, ende.Month, 1);
+                         monat = monat.AddMonths(1))
                     {
-                        mieten.Add(new Miete(date, date, version.Grundmiete + 200 + (date.Day % 3) * 50)
+                        var betrag = version.Grundmiete + 200 + (monat.Day % 3) * 50;
+
+                        // Sollstellung: Soll MietBuchungskonto / Haben Wohnung.MietErtragskonto
+                        var sollSatz = new Buchungssatz(monat, $"Mietsoll {monat:MM/yyyy}");
+                        var sollZeile = new Buchungszeile(SollHaben.Soll, betrag)
                         {
-                            Vertrag = vertrag
+                            Buchungssatz = sollSatz,
+                            Buchungskonto = vertrag.MietBuchungskonto
+                        };
+                        sollSatz.Buchungszeilen.Add(sollZeile);
+                        sollSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                        {
+                            Buchungssatz = sollSatz,
+                            Buchungskonto = vertrag.Wohnung.MietErtragskonto
                         });
+                        ctx.Buchungssaetze.Add(sollSatz);
+
+                        // Zahlung: Soll ZahlungsKonto / Haben MietBuchungskonto
+                        var zahlSatz = new Buchungssatz(monat, $"Mietzahlung {monat:MM/yyyy}");
+                        var zahlHaben = new Buchungszeile(SollHaben.Haben, betrag)
+                        {
+                            Buchungssatz = zahlSatz,
+                            Buchungskonto = vertrag.MietBuchungskonto
+                        };
+                        zahlSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                        {
+                            Buchungssatz = zahlSatz,
+                            Buchungskonto = vertrag.ZahlungsKonto
+                        });
+                        zahlSatz.Buchungszeilen.Add(zahlHaben);
+                        ctx.Buchungssaetze.Add(zahlSatz);
+
+                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                        {
+                            SollZeile = sollZeile,
+                            HabenZeile = zahlHaben
+                        });
+
+                        count++;
                     }
                 }
             }
 
-            ctx.Mieten.AddRange(mieten);
-            Console.WriteLine($"{mieten.Count} Mieten hinzugefügt");
+            Console.WriteLine($"{count} Miet-Buchungssätze hinzugefügt");
+        }
 
-            return mieten;
+        static void FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen)
+        {
+            Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
+
+            var aussteller = generateJuristischePerson(11);
+            aussteller.VerbindlichkeitsKonto = new Buchungskonto("DL000-V", $"Verbindlichkeiten {aussteller.Name}", BuchungskontoTyp.Passiv);
+            ctx.Kontakte.Add(aussteller);
+
+            var count = 0;
+            for (var i = 0; i < 3000; i++)
+            {
+                decimal betrag = 100;
+                var bezeichnung = $"Rechnungsnr. {i}";
+                var jahr = 2020 + i % 5;
+                var monat = 1 + i % 12;
+                var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
+                var datum = new DateOnly(jahr, monat, tag);
+                var wohnung = wohnungen[i % wohnungen.Count];
+
+                var satz = new Buchungssatz(datum, bezeichnung);
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+                {
+                    Buchungssatz = satz,
+                    Buchungskonto = wohnung.AufwandsKonto
+                });
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
+                {
+                    Buchungssatz = satz,
+                    Buchungskonto = aussteller.VerbindlichkeitsKonto
+                });
+                ctx.Buchungssaetze.Add(satz);
+                count++;
+            }
+
+            Console.WriteLine($"{count} Erhaltungsaufwendungen hinzugefügt");
         }
 
         static List<Garage> FillGaragen(SaverwalterContext ctx)
@@ -337,18 +371,18 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return garagen;
         }
 
-        static List<Konto> FillKontos(SaverwalterContext ctx)
+        static List<Bankkonto> FillBankkontos(SaverwalterContext ctx)
         {
-            Console.Write("Füge Kontos hinzu: ");
+            Console.Write("Füge Bankkontos hinzu: ");
 
-            var kontos = new List<Konto> { };
+            var bankkontos = new List<Bankkonto>();
 
             // TODO still empty...
 
-            ctx.Kontos.AddRange(kontos);
-            Console.WriteLine($"{kontos.Count} Kontos hinzugefügt");
+            ctx.Bankkontos.AddRange(bankkontos);
+            Console.WriteLine($"{bankkontos.Count} Bankkontos hinzugefügt");
 
-            return kontos;
+            return bankkontos;
         }
 
         static List<Mietminderung> FillMietminderungen(SaverwalterContext ctx)
@@ -384,57 +418,65 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return earliest;
         }
 
-        private static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(
+        private static void FillBetriebskostenrechnungen(
             SaverwalterContext ctx,
             List<Umlage> umlagen)
         {
-            Console.Write("Füge Betriebskostenrechnung hinzu: ");
+            Console.Write("Füge Betriebskostenrechnungen hinzu: ");
 
-            var betriebskostenrechnungen = new List<Betriebskostenrechnung> { };
+            var count = 0;
 
             foreach (var umlage in umlagen)
             {
                 var beginn = getEarliestDate(umlage.Wohnungen.ToList());
                 for (var date = beginn; date < globalToday; date = date.AddYears(1))
                 {
-                    double betrag = 100 + beginn.DayOfYear;
+                    var abrechnungsEnde = new DateOnly(date.Year, 12, 31);
+                    decimal betrag = 100 + beginn.DayOfYear;
                     if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
                     {
-                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 12 + beginn.DayOfYear;
+                        betrag = umlage.Wohnungen.Sum(e => e.VersionAt(abrechnungsEnde).Wohnflaeche) * 12 + beginn.DayOfYear;
                     }
                     else if (umlage.Typ == GetTyp(ctx, "Grundsteuer"))
                     {
-                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5;
+                        betrag = umlage.Wohnungen.Sum(e => e.VersionAt(abrechnungsEnde).Wohnflaeche) * 5;
                     }
                     else if (umlage.Typ == GetTyp(ctx, "Entwässerung/Schmutzwasser")
                         || umlage.Typ == GetTyp(ctx, "Wasserversorgung"))
                     {
-                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5 + beginn.DayOfYear;
+                        betrag = umlage.Wohnungen.Sum(e => e.VersionAt(abrechnungsEnde).Wohnflaeche) * 5 + beginn.DayOfYear;
                     }
-                    betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
+                    var satz = new Buchungssatz(
+                        date,
+                        $"BK-Eingang {umlage.Typ.Bezeichnung} {date.Year}");
+                    satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
                     {
-                        Umlage = umlage,
+                        Buchungssatz = satz,
+                        Buchungskonto = umlage.NkVerrechnungsKonto
                     });
+                    ctx.Buchungssaetze.Add(satz);
+                    count++;
                 }
             }
 
-            ctx.Betriebskostenrechnungen.AddRange(betriebskostenrechnungen);
-            Console.WriteLine($"{betriebskostenrechnungen.Count} Betriebskostenrechnungen hinzugefügt");
-
-            return betriebskostenrechnungen;
+            Console.WriteLine($"{count} Betriebskostenrechnungen hinzugefügt");
         }
 
         private static Umlage addUmlage(
             Adresse adresse,
             Umlagetyp typ,
-            Umlageschluessel schluessel)
+            Umlageschluessel schluessel,
+            int idx)
         {
-            var umlage = new Umlage(schluessel)
+            var umlage = new Umlage
             {
                 Typ = typ,
                 Beschreibung = $"{typ.Bezeichnung} wird über die Stadt {adresse.Stadt} abgerechnet.",
                 Wohnungen = adresse.Wohnungen,
+                NkVerrechnungsKonto = new Buchungskonto($"U{idx:D5}-NR", $"NK-Verrechnung {typ.Bezeichnung}", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto($"U{idx:D5}-ZK", $"NK-Zahlung {typ.Bezeichnung}", BuchungskontoTyp.Aktiv),
             };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), schluessel) { Umlage = umlage });
 
             return umlage;
         }
@@ -454,49 +496,51 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 var adresse = adressen[i];
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Allgemeinstrom/Hausbeleuchtung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Allgemeinstrom/Hausbeleuchtung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 10 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Breitbandkabelanschluss"), Umlageschluessel.NachNutzeinheit));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Breitbandkabelanschluss"), Umlageschluessel.NachNutzeinheit, umlagen.Count));
                 }
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Dachrinnenreinigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Dachrinnenreinigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                // Can also use Personen
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachVerbrauch));
+                // Niederschlagswasser wird nach Fläche abgerechnet (kein Zähler)
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 2 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachWohnflaeche));
+                    // Schmutzwasser nach Verbrauch (teilt sich Kaltwasserzähler mit Wasserversorgung)
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachVerbrauch, umlagen.Count));
                 }
 
                 // Can also be made direct
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Gartenpflege"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Gartenpflege"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Grundsteuer"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Grundsteuer"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
                 if (i % 3 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Haftpflichtversicherung"), Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Haftpflichtversicherung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
                 if (i % 3 == 0 || i % 7 == 0 || i % 11 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch));
-                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch, umlagen.Count));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Betriebsstrom (Heizung)"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
                 }
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachPersonenzahl));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachPersonenzahl, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Sachversicherung"), Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Schornsteinfegerarbeiten"), Umlageschluessel.NachNutzeinheit));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Sachversicherung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Schornsteinfegerarbeiten"), Umlageschluessel.NachNutzeinheit, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Strassenreinigung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Strassenreinigung"), Umlageschluessel.NachWohnflaeche, umlagen.Count));
 
-                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wasserversorgung"), Umlageschluessel.NachVerbrauch));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wasserversorgung"), Umlageschluessel.NachVerbrauch, umlagen.Count));
                 // umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungWarm, Umlageschluessel.NachVerbrauch))
             }
 
@@ -506,93 +550,182 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return umlagen;
         }
 
-        static List<Zaehler> FillZaehlerSet(SaverwalterContext ctx, List<Umlage> umlagen)
+        static (List<Zaehler>, Dictionary<Adresse, Zaehler>) FillZaehlerSet(SaverwalterContext ctx, List<Umlage> umlagen)
         {
             Console.Write("Füge Zähler hinzu: ");
 
-            var zaehler = new List<Zaehler> { };
+            var zaehlerListe = new List<Zaehler>();
+            var wohnungszaehler = new Dictionary<(Wohnung, Zaehlertyp), Zaehler>();
+            var hauszaehlerHeizung = new Dictionary<Adresse, Zaehler>();
+
+            Zaehler GetOrAddWohnungszaehler(Wohnung wohnung, Zaehlertyp typ, string kennung)
+            {
+                var key = (wohnung, typ);
+                if (!wohnungszaehler.TryGetValue(key, out var existing))
+                {
+                    existing = new Zaehler(kennung, typ) { Wohnung = wohnung };
+                    zaehlerListe.Add(existing);
+                    wohnungszaehler[key] = existing;
+                }
+                return existing;
+            }
 
             foreach (var umlage in umlagen)
             {
-                if (umlage.Typ == GetTyp(ctx, "Wasserversorgung"))
+                var bezeichnung = umlage.Typ.Bezeichnung;
+
+                if (bezeichnung == "Wasserversorgung" || bezeichnung == "Entwässerung/Schmutzwasser")
                 {
                     foreach (var wohnung in umlage.Wohnungen)
                     {
-                        var kaltKennung = "Kaltwasserzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(kaltKennung, Zaehlertyp.Kaltwasser)
-                        {
-                            Wohnung = wohnung
-                        });
-                        var warmKennung = "Warmwasserzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(warmKennung, Zaehlertyp.Warmwasser)
-                        {
-                            Wohnung = wohnung
-                        });
+                        var prefix = $"{wohnung.Adresse?.Strasse ?? "?"} – {wohnung.Bezeichnung}";
+                        var kw = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Kaltwasser, $"KW {prefix}");
+                        var ww = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Warmwasser, $"WW {prefix}");
+                        if (!umlage.Zaehler.Contains(kw)) umlage.Zaehler.Add(kw);
+                        if (!umlage.Zaehler.Contains(ww)) umlage.Zaehler.Add(ww);
                     }
                 }
-                // Vielleicht brauchen die Zähler?
-                if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
+
+                if (bezeichnung == "Heizkosten")
                 {
-                    var kennung = "Allgemein Heizung" + umlage.GetWohnungenBezeichnung();
-                    zaehler.Add(new Zaehler(kennung, Zaehlertyp.Gas)
+                    var adresse = umlage.Wohnungen.FirstOrDefault()?.Adresse;
+                    if (adresse != null && !hauszaehlerHeizung.ContainsKey(adresse))
                     {
-                    });
+                        var hauszaehler = new Zaehler($"Heizung Haus {adresse.Strasse}", Zaehlertyp.Gas) { Adresse = adresse };
+                        zaehlerListe.Add(hauszaehler);
+                        hauszaehlerHeizung[adresse] = hauszaehler;
+                    }
 
                     foreach (var wohnung in umlage.Wohnungen)
                     {
-                        var kennungEinzeln = "Heizzähler " + wohnung.Bezeichnung;
-                        zaehler.Add(new Zaehler(kennungEinzeln, Zaehlertyp.Gas)
-                        {
-                            Wohnung = wohnung
-                        });
+                        var prefix = $"{wohnung.Adresse?.Strasse ?? "?"} – {wohnung.Bezeichnung}";
+                        var hz = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Gas, $"HZ {prefix}");
+                        var ww = GetOrAddWohnungszaehler(wohnung, Zaehlertyp.Warmwasser, $"WW {prefix}");
+                        if (!umlage.Zaehler.Contains(hz)) umlage.Zaehler.Add(hz);
+                        if (!umlage.Zaehler.Contains(ww)) umlage.Zaehler.Add(ww);
                     }
                 }
             }
 
-            ctx.ZaehlerSet.AddRange(zaehler);
-            Console.WriteLine($"{zaehler.Count} Zähler hinzugefügt");
-
-            return zaehler;
+            ctx.ZaehlerSet.AddRange(zaehlerListe);
+            Console.WriteLine($"{zaehlerListe.Count} Zähler hinzugefügt");
+            return (zaehlerListe, hauszaehlerHeizung);
         }
 
-        static List<Zaehlerstand> FillZaehlerstaende(SaverwalterContext ctx, List<Vertrag> vertraege)
+        static void FillHKVO(
+            SaverwalterContext ctx,
+            List<Umlage> umlagen,
+            Dictionary<Adresse, Zaehler> hauszaehlerHeizung)
+        {
+            var hkvoList = new List<HKVO>();
+            var betriebsstromByAdresse = umlagen
+                .Where(u => u.Typ.Bezeichnung == "Betriebsstrom (Heizung)")
+                .ToDictionary(u => u.Wohnungen.First().Adresse!);
+
+            foreach (var heizUmlage in umlagen.Where(u => u.Typ.Bezeichnung == "Heizkosten"))
+            {
+                var adresse = heizUmlage.Wohnungen.FirstOrDefault()?.Adresse;
+                if (adresse == null
+                    || !hauszaehlerHeizung.TryGetValue(adresse, out var hauszaehler)
+                    || !betriebsstromByAdresse.TryGetValue(adresse, out var betriebsstrom))
+                    continue;
+
+                var hkvo = new HKVO(new DateOnly(2000, 1, 1), 0.7m, 0.7m, HKVO_P9A2.Satz_2, 0m)
+                {
+                    Heizkosten = heizUmlage,
+                    Betriebsstrom = betriebsstrom,
+                };
+                if (hauszaehler != null) hkvo.AllgemeinWaermeZaehler.Add(hauszaehler);
+                heizUmlage.HeizkostenHKVOs.Add(hkvo);
+                hkvoList.Add(hkvo);
+            }
+
+            ctx.HKVO.AddRange(hkvoList);
+            Console.WriteLine($"{hkvoList.Count} HKVO-Einträge hinzugefügt");
+        }
+
+        static List<Zaehlerstand> FillZaehlerstaende(
+            SaverwalterContext ctx,
+            List<Zaehler> zaehlerSet,
+            List<Vertrag> vertraege)
         {
             Console.Write("Füge Zählerstände hinzu: ");
 
-            var zaehlerstaende = new List<Zaehlerstand> { };
+            var zaehlerstaende = new List<Zaehlerstand>();
 
-            foreach (var vertrag in vertraege)
+            // Build lookup: Wohnung → earliest contract start, so we know when to begin readings
+            var fruehesterBeginnByWohnung = vertraege
+                .Where(v => v.Wohnung != null)
+                .GroupBy(v => v.Wohnung)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(v => v.Beginn())
+                          .Where(b => b != default)
+                          .DefaultIfEmpty(globalToday.AddYears(-3))
+                          .Min());
+
+            foreach (var zaehler in zaehlerSet)
             {
-                var beginn = vertrag.Beginn();
-                var ende = vertrag.Ende ?? globalToday;
-
-                // TODO wenn der Vertrag früher endet muss entsprechend noch ein Zählerstand dazwischen.
-                for (var date = beginn; date <= ende; date = date.AddYears(1))
+                DateOnly rangeStart;
+                if (zaehler.Wohnung != null)
                 {
-                    foreach (var zaehler in vertrag.Wohnung.Zaehler)
+                    if (!fruehesterBeginnByWohnung.TryGetValue(zaehler.Wohnung, out rangeStart)
+                        || rangeStart == default)
                     {
-                        var lastStand = zaehler.Staende.ToList().OrderBy(e => e.Datum).LastOrDefault();
-                        var max = zaehler.Typ switch
-                        {
-                            Zaehlertyp.Warmwasser => 50,
-                            Zaehlertyp.Kaltwasser => 100,
-                            Zaehlertyp.Strom => 1000,
-                            Zaehlertyp.Gas => 20000,
-                            _ => 10000
-                        };
-                        var lastStandStand = lastStand?.Stand ?? (double)0;
-                        var stand = lastStandStand += date.DayNumber % max;
-                        zaehlerstaende.Add(new Zaehlerstand(date, stand)
-                        {
-                            Zaehler = zaehler
-                        });
+                        continue; // Wohnung hat keine Verträge – kein Zählerstand nötig
                     }
+                }
+                else
+                {
+                    // Hauszähler (z.B. Gas-Gesamtzähler Heizung) – gesamten Zeitraum abdecken
+                    rangeStart = globalToday.AddYears(-6);
+                }
+
+                var wohnungsAnzahl = zaehler.Adresse?.Wohnungen.Count ?? 1;
+                var tagesVerbrauch = zaehler.Typ switch
+                {
+                    Zaehlertyp.Warmwasser => 0.05m,                      // ~18 m³/Jahr pro Wohnung
+                    Zaehlertyp.Kaltwasser => 0.18m,                      // ~65 m³/Jahr pro Wohnung
+                    Zaehlertyp.Gas when zaehler.Wohnung == null => 25m * wohnungsAnzahl, // Hauszähler: Summe aller Wohnungen
+                    Zaehlertyp.Gas => 25m,                               // ~9000 kWh/Jahr pro Wohnung
+                    Zaehlertyp.Strom => 1.2m,                            // ~440 kWh/Jahr
+                    _ => 0.5m
+                };
+
+                var stand = zaehler.Typ switch
+                {
+                    Zaehlertyp.Warmwasser => 100m + (rangeStart.DayOfYear % 200),
+                    Zaehlertyp.Kaltwasser => 200m + (rangeStart.DayOfYear % 500),
+                    Zaehlertyp.Gas => 5000m + (rangeStart.DayOfYear % 10000),
+                    Zaehlertyp.Strom => 1000m + (rangeStart.DayOfYear % 3000),
+                    _ => 100m
+                };
+
+                // One reading per Dec 31 plus one at contract start
+                var stichtage = new SortedSet<DateOnly> { rangeStart };
+                for (var jahr = rangeStart.Year; jahr <= globalToday.Year; jahr++)
+                {
+                    var jahresende = new DateOnly(jahr, 12, 31);
+                    if (jahresende >= rangeStart && jahresende <= globalToday)
+                    {
+                        stichtage.Add(jahresende);
+                    }
+                }
+
+                DateOnly? letzterTag = null;
+                foreach (var stichtag in stichtage)
+                {
+                    var tage = letzterTag.HasValue
+                        ? Math.Max(1, stichtag.DayNumber - letzterTag.Value.DayNumber)
+                        : 1;
+                    stand = Math.Round(stand + tagesVerbrauch * tage, 2);
+                    zaehlerstaende.Add(new Zaehlerstand(stichtag, stand) { Zaehler = zaehler });
+                    letzterTag = stichtag;
                 }
             }
 
             ctx.Zaehlerstaende.AddRange(zaehlerstaende);
             Console.WriteLine($"{zaehlerstaende.Count} Zählerstände hinzugefügt");
-
             return zaehlerstaende;
         }
     }

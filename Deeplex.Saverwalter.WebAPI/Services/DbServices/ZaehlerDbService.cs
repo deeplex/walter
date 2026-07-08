@@ -15,15 +15,18 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
-using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class ZaehlerDbService : WalterDbServiceBase<ZaehlerEntry, int, Zaehler>
     {
@@ -31,13 +34,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
         }
 
-        public async Task<ActionResult<IEnumerable<ZaehlerEntryBase>>> GetList(ClaimsPrincipal user)
-        {
-            var list = await ZaehlerPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-
-            return await Task.WhenAll(list
-                .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
-        }
+        public Task<PagedResult<ZaehlerEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
+            ZaehlerPermissionHandler.GetQueryable(Ctx, user)
+                .Include(e => e.Adresse)
+                .Include(e => e.Wohnung)
+                    .ThenInclude(w => w!.Verwalter)
+                .Include(e => e.Staende)
+                .PagedAsync(query,
+                    searchPredicate: t => e =>
+                        e.Kennnummer.ToLower().Contains(t) ||
+                        (e.Adresse != null && (
+                            e.Adresse.Strasse.ToLower().Contains(t) ||
+                            e.Adresse.Stadt.ToLower().Contains(t))) ||
+                        (e.Wohnung != null && e.Wohnung.Bezeichnung.ToLower().Contains(t)),
+                    applySort: (q, sortBy, dir) => sortBy switch
+                    {
+                        "adresse.anschrift" => q.SortBy(e => e.Adresse!.Stadt, dir)
+                            .ThenSortBy(e => e.Adresse!.Strasse, dir),
+                        "wohnung.text" => q.SortBy(e => e.Wohnung!.Bezeichnung, dir),
+                        "ende" => q.SortBy(e => e.Ende, dir),
+                        _ => q.SortBy(e => e.Kennnummer, dir)
+                    },
+                    toEntry: async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth)));
 
         public override async Task<ActionResult<Zaehler>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
@@ -58,6 +76,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                // Löschen entfernt die Zählerdaten aus allen Abrechnungen → sperren, wenn
+                // für den Zähler überhaupt ein Jahr abgerechnet ist.
+                var sperre = await AbrechnungsschutzService.SperreZaehlerAbJahr(Ctx, id, 0);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.ZaehlerSet.Remove(entity);
                 await Ctx.SaveChangesAsync();
 
@@ -125,6 +148,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Ein geändertes Zähler-Ende verschiebt, welche Jahre den Zähler nutzen.
+                if (entity.Ende != entry.Ende)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreZaehlerEnde(
+                        Ctx, id, entity.Ende, entry.Ende);
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Kennnummer = entry.Kennnummer;
                 entity.Typ = (Zaehlertyp)entry.Typ.Id;
 

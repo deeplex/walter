@@ -25,9 +25,5 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterHeader {title} />
 <Content>
-    <WalterMiettabelleWrapper
-        fetchImpl={data.fetchImpl}
-        umlagen={data.umlagen}
-        vertraege={data.vertraege}
-    />
+    <WalterMiettabelleWrapper fetchImpl={data.fetchImpl} />
 </Content>

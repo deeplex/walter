@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -15,49 +15,75 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import {
-        WalterDataWrapper,
-        WalterMiete,
-        WalterNumberInput
-    } from '$walter/components';
-    import { WalterMieteEntry } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
+    import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
+    import { WalterDataTable, WalterTransaktion } from '$walter/components';
+    import type {
+        WalterMietzahlungListEntry,
+        WalterVertragEntry,
+        TransaktionsInput
+    } from '$walter/lib';
+    import { emptyTransaktionsInput } from '$walter/lib';
 
     const headers = [
         { key: 'betreffenderMonat', value: 'Betreffender Monat' },
-        { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
-        { key: 'betrag', value: 'Betrag' }
+        { key: 'buchungsdatum', value: 'Buchungsdatum' },
+        { key: 'kaltmieteZahlung', value: 'Kaltmiete' }
     ];
 
-    export let rows: WalterMieteEntry[];
-    const sortedRows = rows.sort((a, b) =>
-        b.betreffenderMonat.localeCompare(a.betreffenderMonat)
-    );
+    export let rows: WalterMietzahlungListEntry[];
+    $: sortedRows = [...(rows || [])].sort((a, b) => {
+        const monthA = new Date(a.betreffenderMonat).getTime();
+        const monthB = new Date(b.betreffenderMonat).getTime();
+        if (!Number.isNaN(monthA) && !Number.isNaN(monthB))
+            return monthB - monthA;
+        return `${b.betreffenderMonat || ''}`.localeCompare(
+            `${a.betreffenderMonat || ''}`
+        );
+    });
+
     export let fullHeight = false;
     export let title: string | undefined = undefined;
+    export let vertrag: WalterVertragEntry | undefined = undefined;
+    export let fetchImpl: typeof fetch;
 
-    const on_click_row = (e: CustomEvent) => navigation.miete(e.detail.id);
-
-    export let entry: Partial<WalterMieteEntry> | undefined = undefined;
+    $: buchungsInput = {
+        ...emptyTransaktionsInput(),
+        mieten: [
+            {
+                kaltmiete: 0,
+                nkVorauszahlung: 0,
+                vertragId: vertrag?.id as number | undefined
+            }
+        ]
+    } as TransaktionsInput;
 </script>
 
-<WalterDataWrapper
-    addUrl={WalterMieteEntry.ApiURL}
-    {on_click_row}
-    addEntry={entry}
-    {title}
-    rows={sortedRows}
-    {headers}
-    {fullHeight}
->
-    {#if entry}
-        <WalterMiete {entry} />
-        <WalterNumberInput
-            label="Auch anwenden auf die nächsten Monate:"
-            min={0}
-            max={11}
-            hideSteppers={false}
-            bind:value={entry.repeat}
-        />
-    {/if}
-</WalterDataWrapper>
+{#if title !== undefined}
+    <Accordion>
+        <AccordionItem title={`${title} (${(rows || []).length})`}>
+            <Tile style="overflow: auto">
+                <WalterDataTable
+                    addUrl="/api/transaktionen/buchen"
+                    bind:addEntry={buchungsInput}
+                    rows={sortedRows}
+                    {headers}
+                >
+                    <WalterTransaktion
+                        {fetchImpl}
+                        bind:buchung={buchungsInput}
+                    />
+                </WalterDataTable>
+            </Tile>
+        </AccordionItem>
+    </Accordion>
+{:else}
+    <WalterDataTable
+        addUrl="/api/transaktionen/buchen"
+        bind:addEntry={buchungsInput}
+        {fullHeight}
+        rows={sortedRows}
+        {headers}
+    >
+        <WalterTransaktion {fetchImpl} bind:buchung={buchungsInput} />
+    </WalterDataTable>
+{/if}

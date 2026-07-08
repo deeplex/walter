@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -14,86 +14,99 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/erhaltungsaufwendungen")]
-    public class ErhaltungsaufwendungController : FileControllerBase<ErhaltungsaufwendungEntry, int, Erhaltungsaufwendung>
+    public class ErhaltungsaufwendungController(ErhaltungsaufwendungDbService dbService) : ControllerBase
     {
+        public class BuchungszeileInfo
+        {
+            public string Konto { get; set; } = "";
+            public string SollHaben { get; set; } = "";
+            public decimal Betrag { get; set; }
+        }
+
         public class ErhaltungsaufwendungEntryBase
         {
-            protected Erhaltungsaufwendung? Entity { get; }
-
-            public int Id { get; set; }
-            public double Betrag { get; set; }
+            public Guid Id { get; set; }
+            public decimal Betrag { get; set; }
             public DateOnly Datum { get; set; }
-            public string Bezeichnung { get; set; } = null!;
-            public SelectionEntry Aussteller { get; set; } = null!;
-
+            public string Bezeichnung { get; set; } = "";
+            public SelectionEntry Wohnung { get; set; } = null!;
+            public SelectionEntry? Aussteller { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, Permissions permissions)
+            public ErhaltungsaufwendungEntryBase(Buchungssatz satz, SelectionEntry wohnung, Kontakt? aussteller, Permissions permissions, int aufwandsKontoId = -1)
             {
-                Entity = entity;
-
-                Id = Entity.ErhaltungsaufwendungId;
-                Betrag = Entity.Betrag;
-                Datum = Entity.Datum;
-                Bezeichnung = Entity.Bezeichnung;
-                Aussteller = new(Entity.Aussteller.KontaktId, Entity.Aussteller.Bezeichnung);
-
-
+                Id = satz.BuchungssatzId;
+                Datum = satz.Buchungsdatum;
+                // Filter to this Wohnung's AufwandsKonto only — avoids summing all Parteien
+                // when a BK-Forderungs-Buchungssatz has multiple Soll-Zeilen after Abrechnung.
+                Betrag = satz.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Soll &&
+                                (aufwandsKontoId < 0 || z.Buchungskonto.BuchungskontoId == aufwandsKontoId))
+                    .Sum(z => z.Betrag);
+                Bezeichnung = satz.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
+                    ? satz.Beschreibung["Erhaltungsaufwendung: ".Length..]
+                    : satz.Beschreibung;
+                Wohnung = wohnung;
+                Aussteller = aussteller != null
+                    ? new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung)
+                    : null;
                 Permissions = permissions;
             }
         }
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
-            public SelectionEntry Wohnung { get; set; } = null!;
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public string? Notiz { get; set; }
+            public List<BuchungszeileInfo> Buchungszeilen { get; set; } = [];
 
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, Permissions permissions) : base(entity, permissions)
+            public ErhaltungsaufwendungEntry(Buchungssatz satz, Deeplex.Saverwalter.Model.Wohnung wohnung, Kontakt? aussteller, Permissions permissions)
+                : base(satz, BuildWohnungEntry(wohnung), aussteller, permissions, wohnung.AufwandsKonto.BuchungskontoId)
             {
-                Notiz = entity.Notiz;
-                var anschrift = entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
-                Wohnung = new(entity.Wohnung.WohnungId, $"{anschrift} - {entity.Wohnung.Bezeichnung}");
+                Notiz = satz.Notiz;
+                CreatedAt = satz.CreatedAt;
+                LastModified = satz.LastModified;
+                Buchungszeilen = satz.Buchungszeilen.Select(z => new BuchungszeileInfo
+                {
+                    Konto = z.Buchungskonto.Bezeichnung,
+                    SollHaben = z.SollHaben == SollHaben.Soll ? "Soll" : "Haben",
+                    Betrag = z.Betrag
+                }).ToList();
+            }
 
-                CreatedAt = entity.CreatedAt;
-                LastModified = entity.LastModified;
+            private static SelectionEntry BuildWohnungEntry(Deeplex.Saverwalter.Model.Wohnung wohnung)
+            {
+                var anschrift = wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
+                return new SelectionEntry(wohnung.WohnungId, $"{anschrift} - {wohnung.Bezeichnung}");
             }
         }
 
-        private readonly ILogger<ErhaltungsaufwendungController> _logger;
-        protected override ErhaltungsaufwendungDbService DbService { get; }
-
-        public ErhaltungsaufwendungController(ILogger<ErhaltungsaufwendungController> logger, ErhaltungsaufwendungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
-        {
-            DbService = dbService;
-            _logger = logger;
-        }
-
         [HttpGet]
-        public Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> Get() => DbService.GetList(User!);
-
-        [HttpPost]
-        public Task<ActionResult<ErhaltungsaufwendungEntry>> Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(User!, entry);
+        public Task<PagedResult<ErhaltungsaufwendungEntryBase>> Get([FromQuery] PagedQuery query)
+            => dbService.GetList(User!, query);
 
         [HttpGet("{id}")]
-        public Task<ActionResult<ErhaltungsaufwendungEntry>> Get(int id) => DbService.Get(User!, id);
-        [HttpPut("{id}")]
-        public Task<ActionResult<ErhaltungsaufwendungEntry>> Put(int id, [FromBody] ErhaltungsaufwendungEntry entry) => DbService.Put(User!, id, entry);
+        public Task<ActionResult<ErhaltungsaufwendungEntry>> Get(Guid id)
+            => dbService.Get(User!, id);
+
+        [HttpPost]
+        public Task<ActionResult<ErhaltungsaufwendungEntry>> Post([FromBody] ErhaltungsaufwendungEntry entry)
+            => dbService.Post(User!, entry);
+
         [HttpDelete("{id}")]
-        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
+        public Task<ActionResult> Delete(Guid id)
+            => dbService.Delete(User!, id);
     }
 }

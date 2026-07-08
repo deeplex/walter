@@ -16,10 +16,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { WalterVertraege, WalterHeader } from '$walter/components';
+    import type {
+        WalterVertragEntry,
+        WalterVertragVersionEntry
+    } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
+
+    // Leeres entry aktiviert das Inline-Anlegen ("+") in der Liste
+    // (Wohnung wird beim Anlegen ausgewählt) — wie auf der Wohnung-Detailseite.
+    let entry: Partial<WalterVertragEntry> = {
+        versionen: [{} as WalterVertragVersionEntry]
+    };
 </script>
 
 <WalterHeader title="Verträge" />
-<WalterVertraege fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />
+<WalterVertraege fetchImpl={data.fetchImpl} {entry} fullHeight />

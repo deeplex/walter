@@ -17,14 +17,20 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
+export interface EABuchungszeileInfo {
+    konto: string;
+    sollHaben: string;
+    betrag: number;
+}
+
 export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
     public static ApiURL = `/api/erhaltungsaufwendungen`;
-    public static ApiURLId(id: number) {
+    public static ApiURLId(id: string) {
         return `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}`;
     }
 
     constructor(
-        public id: number,
+        public id: string,
         public betrag: number,
         public datum: string,
         public notiz: string,
@@ -32,17 +38,18 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
         public createdAt: Date,
         public lastModified: Date,
         public wohnung: WalterSelectionEntry,
-        public aussteller: WalterSelectionEntry,
+        public aussteller: WalterSelectionEntry | undefined,
+        public buchungszeilen: EABuchungszeileInfo[],
         public permissions: WalterPermissions
     ) {
         super();
     }
 
     static fromJson(json: WalterErhaltungsaufwendungEntry) {
-        const wohnung =
-            json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
-        const aussteller =
-            json.aussteller && WalterSelectionEntry.fromJson(json.aussteller);
+        const wohnung = WalterSelectionEntry.fromJson(json.wohnung);
+        const aussteller = json.aussteller
+            ? WalterSelectionEntry.fromJson(json.aussteller)
+            : undefined;
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -56,6 +63,7 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
             json.lastModified,
             wohnung,
             aussteller,
+            json.buchungszeilen ?? [],
             permissions
         );
     }

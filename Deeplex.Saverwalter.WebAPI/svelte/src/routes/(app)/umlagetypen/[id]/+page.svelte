@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterUmlagetyp,
         WalterUmlagen
     } from '$walter/components';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, validateUmlagetyp } from '$walter/lib';
 
     export let data: PageData;
 
@@ -42,6 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     title={data.entry.bezeichnung}
     bind:fileWrapper
+    disabled={!validateUmlagetyp(data.entry)}
 />
 
 <WalterGrid>

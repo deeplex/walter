@@ -18,48 +18,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterAbrechnungsresultate,
+        WalterBuchungskonten,
+        WalterGarageVertraege,
         WalterKontakte,
-        WalterMieten,
         WalterMietminderungen,
         WalterHeaderDetail,
         WalterGrid,
         WalterVertrag,
         WalterVertragVersionen,
         WalterLinkTile,
-        WalterLinks
+        WalterLinks,
+        WalterVertragsNkAnteile
     } from '$walter/components';
-    import {
-        getMieteEntry,
-        getMietminderungEntry,
-        getVertragversionEntry
-    } from './utils';
+    import { getMietminderungEntry, getVertragversionEntry } from './utils';
     import {
         WalterFileWrapper,
-        type WalterMieteEntry,
         type WalterMietminderungEntry,
-        type WalterVertragVersionEntry,
-        WalterBetriebskostenrechnungEntry,
-        WalterKontaktEntry
+        WalterKontaktEntry,
+        validateVertrag
     } from '$walter/lib';
-    import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
-    import { ClickableTile, Row } from 'carbon-components-svelte';
-    import { walter_data_mieten } from '$walter/components/data/WalterData';
-    import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { changeTracker } from '$walter/store';
     import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
         getMietminderungEntry(data.entry);
 
-    const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-        getVertragversionEntry(data.entry);
-
-    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(data.entry);
+    $: vertragversionEntry = getVertragversionEntry(data.entry);
 
     const mieterEntry: Partial<WalterKontaktEntry> = {};
-
-    const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
-        {};
 
     let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
@@ -73,6 +60,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    let blockSave = false;
+    let commitVersionIfPending: () => Promise<void>;
+    $: submitDisabled =
+        $changeTracker === 0 || !validateVertrag(data.entry) || blockSave;
 </script>
 
 <WalterHeaderDetail
@@ -80,16 +72,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
+    disabled={submitDisabled}
+    beforeSave={commitVersionIfPending}
 />
 
 <WalterGrid>
-    <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
+    <WalterVertrag
+        fetchImpl={data.fetchImpl}
+        bind:entry={data.entry}
+        bind:blockSave
+        bind:commitVersionIfPending
+    />
 
     <WalterLinks>
-        <ClickableTile href="/abrechnung?vertrag={data.id}"
-            >Betriebskostenabrechnung erstellen</ClickableTile
-        >
-
         <WalterKontakte
             fetchImpl={data.fetchImpl}
             entry={mieterEntry}
@@ -101,21 +96,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        <WalterMieten
-            entry={mieteEntry}
-            title="Mieten"
-            rows={data.entry.mieten}
-        />
         <WalterMietminderungen
             entry={mietminderungEntry}
             title="Mietminderungen"
             rows={data.entry.mietminderungen}
         />
-        <WalterBetriebskostenrechnungen
-            entry={betriebskostenrechnungEntry}
+        <WalterGarageVertraege
             fetchImpl={data.fetchImpl}
-            title="Betriebskostenrechnungen"
-            rows={data.entry.betriebskostenrechnungen}
+            title="Garagenverträge"
+            rows={data.entry.garageVertraege}
+        />
+
+        <WalterVertragsNkAnteile
+            fetchImpl={data.fetchImpl}
+            vertragId={data.entry.id}
+            title="NK-Anteile"
         />
 
         <WalterAbrechnungsresultate
@@ -123,12 +118,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.abrechnungsresultate}
         />
 
-        <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
-            name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
-            href={`/kontakte/${data.entry.ansprechpartner.id}`}
-        />
+        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
+
+        {#if data.entry.ansprechpartner?.id}
+            <WalterLinkTile
+                bind:fileWrapper
+                fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
+                name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
+                href={`/kontakte/${data.entry.ansprechpartner.id}`}
+            />
+        {/if}
         <WalterLinkTile
             bind:fileWrapper
             fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}
@@ -136,12 +135,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
-
-    {#if data.entry.mieten.length > 1}
-        <Row>
-            <WalterDataScatterChart
-                config={walter_data_mieten('Mieten', data.entry.mieten)}
-            />
-        </Row>
-    {/if}
 </WalterGrid>

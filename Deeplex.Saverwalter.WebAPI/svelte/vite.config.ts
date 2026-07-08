@@ -1,20 +1,13 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
+
+const apiTarget = process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:5254';
 
 export default defineConfig({
     plugins: [sveltekit()],
     server: {
         proxy: {
-            '/api': 'http://localhost:5254'
-        }
-    },
-    test: {
-        environment: 'jsdom',
-        include: ['src/**/*.{test,spec}.ts'],
-        coverage: {
-            reporter: ['text-summary', 'html'],
-            reportsDirectory: './coverage',
-            provider: 'v8'
+            '/api': apiTarget
         }
     }
 });

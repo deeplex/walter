@@ -36,6 +36,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     walterModalControl.subscribe((value) => {
         modalControl = value;
     });
+
+    let modalAction: 'primary' | 'secondary' | undefined = undefined;
+
+    function onModalSecondary() {
+        modalAction = 'secondary';
+        modalControl.open = false;
+        modalControl.cancel?.();
+    }
+
+    function onModalPrimary() {
+        modalAction = 'primary';
+        modalControl.open = false;
+    }
+
+    function onModalClose() {
+        if (!modalAction) {
+            modalControl.cancel?.();
+        }
+
+        modalAction = undefined;
+    }
 </script>
 
 <WalterSideNav fetchImpl={data.fetch} />
@@ -43,10 +64,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {...modalControl}
     bind:open={modalControl.open}
     secondaryButtonText="Abbrechen"
-    on:click:button--secondary={() => (modalControl.open = false)}
-    on:click:button--primary={() => (modalControl.open = false)}
+    on:click:button--secondary={onModalSecondary}
+    on:click:button--primary={onModalPrimary}
     on:open
-    on:close
+    on:close={onModalClose}
     on:submit={modalControl.submit}
 >
     <p>{modalControl.content}</p>

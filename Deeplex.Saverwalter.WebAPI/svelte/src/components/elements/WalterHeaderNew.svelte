@@ -27,6 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let title = 'Neu...';
     export let apiURL: string;
     export let entry: unknown;
+    export let disabled = false;
 
     function click_post(): void {
         handle_save(apiURL, entry);
@@ -36,6 +37,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterHeader {title}>
     <slot />
     <HeaderUtilities>
-        <HeaderGlobalAction on:click={click_post} icon={Save} />
+        <HeaderGlobalAction {disabled} on:click={click_post} icon={Save} />
     </HeaderUtilities>
 </WalterHeader>

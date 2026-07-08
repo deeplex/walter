@@ -22,4 +22,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Wohnungen" />
-<WalterWohnungen fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />
+<WalterWohnungen fetchImpl={data.fetchImpl} fullHeight />

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     {
         public DateOnly Beginn { get; }
         public DateOnly Ende { get; }
-        public double Tage { get; }
+        public decimal Tage { get; }
         public int Personenzahl { get; }
         public int GesamtPersonenzahl { get; }
-        public double Anteil { get; }
+        public decimal Anteil { get; }
 
         public PersonenZeitanteil(
             DateOnly beginn, DateOnly ende, int personenzahl, int gesamtPersonenzahl, Zeitraum zeitraum)
@@ -37,9 +37,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var personenAnteil = gesamtPersonenzahl == 0
                 ? 0
-                : (double)personenzahl / gesamtPersonenzahl;
+                : (decimal)personenzahl / gesamtPersonenzahl;
 
-            var zeitanteil = (double)Tage / zeitraum.Abrechnungszeitraum;
+            var zeitanteil = Tage / zeitraum.Abrechnungszeitraum;
 
             Anteil = personenAnteil * zeitanteil;
         }
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 throw new ArgumentException("Vertrag not in Einheit!");
             }
 
-            var breakPoints = getTimestampsOfPersonenAnzahlChanges(vertraege, zeitraum);
+            var breakPoints = GetTimestampsOfPersonenAnzahlChanges(vertraege, zeitraum);
 
             List<(DateOnly beginn, int personenzahl)> einheitAnteile = new();
 
@@ -68,7 +68,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             List<PersonenZeitanteil> personenzeitanteile = new();
 
-            // Skip the last
             for (var i = 0; i < einheitAnteile.Count; ++i)
             {
                 var current = einheitAnteile[i];
@@ -76,7 +75,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     ? zeitraum.Abrechnungsende
                     : einheitAnteile[i + 1].beginn.AddDays(-1);
 
-                var personenzahl = getVersion(vertrag, current.beginn)?.Personenzahl ?? 0;
+                var personenzahl = GetVersion(vertrag, current.beginn)?.Personenzahl ?? 0;
 
                 var personenZeitanteil = new PersonenZeitanteil(
                     current.beginn,
@@ -92,7 +91,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         }
 
 
-        private static List<DateOnly> getTimestampsOfPersonenAnzahlChanges(List<Vertrag> vertraege, Zeitraum zeitraum)
+        private static List<DateOnly> GetTimestampsOfPersonenAnzahlChanges(List<Vertrag> vertraege, Zeitraum zeitraum)
         {
             List<DateOnly> begins = [];
             foreach (var vertrag in vertraege)
@@ -130,7 +129,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return breakpoints;
         }
 
-        private static VertragVersion? getVersion(Vertrag vertrag, DateOnly timestamp)
+        private static VertragVersion? GetVersion(Vertrag vertrag, DateOnly timestamp)
         {
             return vertrag.Versionen.SingleOrDefault(version =>
             {
@@ -143,19 +142,18 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private static int SumPersonenzahlen(List<Vertrag> vertraege, DateOnly timestamp)
         {
-            var Personenzahl = 0;
+            var personenzahl = 0;
 
             foreach (var vertrag in vertraege)
             {
-                var version = getVersion(vertrag, timestamp);
+                var version = GetVersion(vertrag, timestamp);
                 if (version is VertragVersion v)
                 {
-                    Personenzahl += v.Personenzahl;
+                    personenzahl += v.Personenzahl;
                 }
             }
 
-            return Personenzahl;
+            return personenzahl;
         }
-
     }
 }

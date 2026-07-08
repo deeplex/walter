@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -16,205 +16,135 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
-    public class ErhaltungsaufwednungDbServiceTests
+    public class ErhaltungsaufwendungDbServiceTests
     {
-        [Fact]
-        public async Task GetTest()
+        private static (SaverwalterContext ctx, IAuthorizationService auth, ClaimsPrincipal user) Setup()
         {
             var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => user.IsInRole("Admin")).Returns(true);
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
+            return (ctx, auth, user);
+        }
 
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
+        private static ErhaltungsaufwendungDbService MakeService(SaverwalterContext ctx, IAuthorizationService auth)
+            => new(ctx, auth, new ErhaltungsaufwendungBuchungsService(ctx));
+
+        [Fact]
+        public async Task PostErzeugtBuchungssatzUndGibtEintragZurueck()
+        {
+            var (ctx, auth, user) = Setup();
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var aussteller = new Kontakt("Handwerker GmbH", Rechtsform.gmbh);
             ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
+            await ctx.SaveChangesAsync();
+            var satzCountBefore = ctx.Buchungssaetze.Count();
 
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
+            var service = MakeService(ctx, auth);
+            var entry = new ErhaltungsaufwendungEntry
             {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
+                Betrag = 750m,
+                Datum = new DateOnly(2024, 4, 1),
+                Bezeichnung = "Dachreparatur",
+                Wohnung = new SelectionEntry(vertrag.Wohnung.WohnungId, vertrag.Wohnung.Bezeichnung),
+                Aussteller = new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung),
             };
-            ctx.Erhaltungsaufwendungen.Add(entity);
-            ctx.SaveChanges();
 
-            var result = await service.Get(user, entity.ErhaltungsaufwendungId);
+            var result = await service.Post(user, entry);
 
             result.Value.Should().NotBeNull();
-            result.Value.Should().BeOfType<ErhaltungsaufwendungEntry>();
+            result.Value!.Betrag.Should().Be(750m);
+            result.Value.Bezeichnung.Should().Be("Dachreparatur");
+            // Es wurde genau ein Buchungssatz (auf dem AufwandsKonto) ergänzt.
+            ctx.Buchungssaetze.Count().Should().Be(satzCountBefore + 1);
         }
 
         [Fact]
-        public async Task DeleteTest()
+        public async Task PostOhneAusstellerGibtBadRequest()
         {
-            var ctx = TestUtils.GetContext();
+            var (ctx, auth, user) = Setup();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var user = A.Fake<ClaimsPrincipal>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
 
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
+            var service = MakeService(ctx, auth);
+            var entry = new ErhaltungsaufwendungEntry
             {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
+                Betrag = 100m,
+                Datum = new DateOnly(2024, 1, 1),
+                Wohnung = new SelectionEntry(vertrag.Wohnung.WohnungId, vertrag.Wohnung.Bezeichnung),
+                Aussteller = null,
             };
-            ctx.Erhaltungsaufwendungen.Add(entity);
-            ctx.SaveChanges();
 
-            var result = await service.Delete(user, entity.ErhaltungsaufwendungId);
+            var result = await service.Post(user, entry);
+
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task GetListLiefertGebuchteErhaltungsaufwendung()
+        {
+            var (ctx, auth, user) = Setup();
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var aussteller = new Kontakt("Handwerker GmbH", Rechtsform.gmbh);
+            ctx.Kontakte.Add(aussteller);
+            await ctx.SaveChangesAsync();
+
+            var service = MakeService(ctx, auth);
+            await service.Post(user, new ErhaltungsaufwendungEntry
+            {
+                Betrag = 200m,
+                Datum = new DateOnly(2024, 2, 1),
+                Bezeichnung = "Malerarbeiten",
+                Wohnung = new SelectionEntry(vertrag.Wohnung.WohnungId, vertrag.Wohnung.Bezeichnung),
+                Aussteller = new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung),
+            });
+
+            var list = await service.GetList(user, new PagedQuery());
+
+            list.Items.Should().ContainSingle();
+            list.Items.Single().Betrag.Should().Be(200m);
+        }
+
+        [Fact]
+        public async Task DeleteEntferntBuchungssatz()
+        {
+            var (ctx, auth, user) = Setup();
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var aussteller = new Kontakt("Handwerker GmbH", Rechtsform.gmbh);
+            ctx.Kontakte.Add(aussteller);
+            await ctx.SaveChangesAsync();
+            var satzCountBefore = ctx.Buchungssaetze.Count();
+
+            var service = MakeService(ctx, auth);
+            var posted = await service.Post(user, new ErhaltungsaufwendungEntry
+            {
+                Betrag = 200m,
+                Datum = new DateOnly(2024, 2, 1),
+                Bezeichnung = "Malerarbeiten",
+                Wohnung = new SelectionEntry(vertrag.Wohnung.WohnungId, vertrag.Wohnung.Bezeichnung),
+                Aussteller = new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung),
+            });
+
+            var result = await service.Delete(user, posted.Value!.Id);
 
             result.Should().BeOfType<OkResult>();
-            ctx.Erhaltungsaufwendungen.Find(entity.ErhaltungsaufwendungId).Should().BeNull();
-        }
-
-        [Fact]
-        public async Task PostTest()
-        {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var user = A.Fake<ClaimsPrincipal>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
-
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
-            {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
-            };
-            var entry = new ErhaltungsaufwendungEntry(entity, new());
-
-            var result = await service.Post(user, entry);
-
-            result.Value.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task PostFailedTest()
-        {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var user = A.Fake<ClaimsPrincipal>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
-
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
-            {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
-            };
-            ctx.Erhaltungsaufwendungen.Add(entity);
-            ctx.SaveChanges();
-            var entry = new ErhaltungsaufwendungEntry(entity, new());
-
-            var result = await service.Post(user, entry);
-
-            result.Result.Should().BeOfType<BadRequestResult>();
-        }
-
-        [Fact]
-        public async Task PutTest()
-        {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var user = A.Fake<ClaimsPrincipal>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
-
-            var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
-            {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
-            };
-
-            ctx.Erhaltungsaufwendungen.Add(entity);
-            ctx.SaveChanges();
-
-            var entry = new ErhaltungsaufwendungEntry(entity, new());
-            entry.Betrag = 2000;
-
-            var result = await service.Put(user, entity.ErhaltungsaufwendungId, entry);
-
-            result.Value.Should().NotBeNull();
-            var updatedEntity = ctx.Erhaltungsaufwendungen.Find(entity.ErhaltungsaufwendungId);
-            if (updatedEntity == null)
-            {
-                throw new Exception("Erhaltungsaufwendung not found");
-            }
-            updatedEntity.Betrag.Should().Be(2000);
-        }
-
-        [Fact]
-        public async Task PutFailedTest()
-        {
-            var ctx = TestUtils.GetContext();
-            var user = A.Fake<ClaimsPrincipal>();
-            var auth = A.Fake<IAuthorizationService>();
-            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
-                .Returns(Task.FromResult(AuthorizationResult.Success()));
-            var service = new ErhaltungsaufwendungDbService(ctx, auth);
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-
-            var aussteller = new Kontakt("TestPerson", Rechtsform.ag);
-            ctx.Kontakte.Add(aussteller);
-            ctx.SaveChanges();
-
-            var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", new DateOnly(2021, 1, 1))
-            {
-                Aussteller = aussteller,
-                Wohnung = vertrag.Wohnung
-            };
-            var entry = new ErhaltungsaufwendungEntry(entity, new());
-            entry.Betrag = 2000;
-
-            ctx.Erhaltungsaufwendungen.Add(entity);
-            ctx.SaveChanges();
-
-            var result = await service.Put(user, entity.ErhaltungsaufwendungId + 11, entry);
-
-            result.Result.Should().BeOfType<NotFoundResult>();
+            // Der EA-Buchungssatz wurde wieder entfernt (Ausgangszustand).
+            ctx.Buchungssaetze.Count().Should().Be(satzCountBefore);
         }
     }
 }

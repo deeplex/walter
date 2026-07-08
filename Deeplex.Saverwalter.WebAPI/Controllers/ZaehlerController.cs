@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2024 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -14,10 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
@@ -99,7 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<ZaehlerEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<ZaehlerEntryBase>> Get([FromQuery] PagedQuery query) => DbService.GetList(User!, query);
 
         [HttpPost]
         public Task<ActionResult<ZaehlerEntry>> Post([FromBody] ZaehlerEntry entry) => DbService.Post(User!, entry);

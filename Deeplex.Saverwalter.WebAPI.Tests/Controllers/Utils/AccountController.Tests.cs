@@ -17,13 +17,13 @@ using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.UserController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UserController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInSuccess()
+        public async Task SignInSuccess()
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInFailed()
+        public async Task SignInFailed()
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);

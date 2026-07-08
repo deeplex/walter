@@ -25,7 +25,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         fileURL: fileUrl,
-        entry: WalterAbrechnungsresultatEntry.GetOne<WalterAbrechnungsresultatEntry>(params.id, fetch)
+        entry: WalterAbrechnungsresultatEntry.GetOne<WalterAbrechnungsresultatEntry>(
+            params.id,
+            fetch
+        )
     };
 };
-

@@ -21,16 +21,19 @@ import {
     WalterAbrechnungsresultatEntry,
     WalterAdresseEntry,
     WalterBetriebskostenrechnungEntry,
+    WalterBuchungssatzEntry,
     WalterErhaltungsaufwendungEntry,
+    WalterGarageEntry,
     WalterKontaktEntry,
-    WalterMieteEntry,
     WalterMietminderungEntry,
     WalterTransaktionEntry,
     WalterUmlageEntry,
+    WalterUmlageVersionEntry,
     WalterUmlagetypEntry,
     WalterVertragEntry,
     WalterVertragVersionEntry,
     WalterWohnungEntry,
+    WalterWohnungVersionEntry,
     WalterZaehlerEntry,
     WalterZaehlerstandEntry
 } from '$walter/lib';
@@ -41,19 +44,25 @@ export const fileURL = {
     adresse: (id: string) => `${WalterAdresseEntry.ApiURL}/${id}/files`,
     betriebskostenrechnung: (id: string) =>
         `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,
+    buchungssatz: (id: string) =>
+        `${WalterBuchungssatzEntry.ApiURL}/${id}/files`,
     erhaltungsaufwendung: (id: string) =>
         `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}/files`,
-    miete: (id: string) => `${WalterMieteEntry.ApiURL}/${id}/files`,
+    garage: (id: string) => `${WalterGarageEntry.ApiURL}/${id}/files`,
     mietminderung: (id: string) =>
         `${WalterMietminderungEntry.ApiURL}/${id}/files`,
     kontakt: (id: string) => `${WalterKontaktEntry.ApiURL}/${id}/files`,
     transaktion: (id: string) => `${WalterTransaktionEntry.ApiURL}/${id}/files`,
     umlage: (id: string) => `${WalterUmlageEntry.ApiURL}/${id}/files`,
+    umlageversion: (id: string) =>
+        `${WalterUmlageVersionEntry.ApiURL}/${id}/files`,
     umlagetyp: (id: string) => `${WalterUmlagetypEntry.ApiURL}/${id}/files`,
     vertrag: (id: string) => `${WalterVertragEntry.ApiURL}/${id}/files`,
     vertragversion: (id: string) =>
         `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
     wohnung: (id: string) => `${WalterWohnungEntry.ApiURL}/${id}/files`,
+    wohnungversion: (id: string) =>
+        `${WalterWohnungVersionEntry.ApiURL}/${id}/files`,
     zaehler: (id: string) => `${WalterZaehlerEntry.ApiURL}/${id}/files`,
     zaehlerstand: (id: string) =>
         `${WalterZaehlerstandEntry.ApiURL}/${id}/files`,
@@ -101,7 +110,9 @@ export function download_file_blob(blob: Blob, fileName: string) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Defer revoke so browsers (and Playwright) reliably observe the
+    // download attribute on the anchor before the blob URL goes away.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function walter_get_files(

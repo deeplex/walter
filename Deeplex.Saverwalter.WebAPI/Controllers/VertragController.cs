@@ -14,14 +14,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MietzahlungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -41,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? MieterAuflistung { get; set; }
 
             // For Tabelle
-            public IEnumerable<MieteEntryBase>? Mieten { get; set; }
+            public IEnumerable<MietzahlungListEntry>? Mietzahlungen { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -58,14 +63,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Wohnung = new(
                         wohnung.WohnungId,
                         $"{anschrift} - {wohnung.Bezeichnung}",
-                        wohnung.Besitzer?.Bezeichnung);
+                        wohnung.Eigentuemer.FirstOrDefault(e => e.Bis == null)?.Kontakt.Bezeichnung);
                 }
                 else
                 {
                     Wohnung = new(0, "Unbekannte Wohnung");
                 }
 
-                Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e, permissions));
+                Mietzahlungen = entity.MietBuchungskonto.Buchungszeilen
+                    .Where(z => z.SollHaben == SollHaben.Haben)
+                    .Select(z => new MietzahlungListEntry(z.Buchungssatz, z.Betrag, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
                 MieterAuflistung = string.Join(", ", entity.Mieter.Select(a => a.Bezeichnung));
 
@@ -77,18 +84,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Vertrag Entity { get; } = null!;
 
-            public SelectionEntry Ansprechpartner { get; set; } = null!;
+            public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
             public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
             public IEnumerable<MietminderungEntryBase> Mietminderungen { get; set; } = [];
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
 
             public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
-            // TODO Garagen
+            public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
+            public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
+
+            public decimal? KautionBetrag { get; set; }
+            public DateOnly? KautionEingangsdatum { get; set; }
+            public DateOnly? KautionRueckgabedatum { get; set; }
+            public string? KautionArt { get; set; }
 
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
@@ -100,18 +112,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
                 }
                 Notiz = entity.Notiz;
+                KautionBetrag = entity.KautionBetrag;
+                KautionEingangsdatum = entity.KautionEingangsdatum;
+                KautionRueckgabedatum = entity.KautionRueckgabedatum;
+                KautionArt = entity.KautionArt;
 
                 SelectedMieter = entity.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
-                Betriebskostenrechnungen = entity.Wohnung.Umlagen
-                    .SelectMany(e => e.Betriebskostenrechnungen)
-                    .Where(e => e.BetreffendesJahr >= entity.Beginn().Year && (entity.Ende == null || entity.Ende.Value.Year >= e.BetreffendesJahr))
-                    .Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
                 Mietminderungen = entity.Mietminderungen.ToList().Select(e
                     => new MietminderungEntryBase(e, permissions));
                 Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
                 Abrechnungsresultate = entity.Abrechnungsresultate.Select(e
                     => new AbrechnungsresultatEntry(e, permissions));
+                GarageVertraege = entity.GarageVertraege.Select(e
+                    => new GarageVertragEntryBase(e, permissions));
+                Konten = BuchungskontoRefEntry.Collect(
+                    (entity.MietBuchungskonto, KontoFunktion.Mietforderungen),
+                    (entity.NkBuchungskonto, KontoFunktion.NkVorauszahlungen),
+                    (entity.BkAbrechnungsKonto, KontoFunktion.BkAbrechnung),
+                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge),
+                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
@@ -119,16 +139,60 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<VertragController> _logger;
+        private readonly SaverwalterContext _ctx;
+        private readonly IAuthorizationService _auth;
         protected override VertragDbService DbService { get; }
 
-        public VertragController(ILogger<VertragController> logger, VertragDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+        public VertragController(
+            ILogger<VertragController> logger,
+            VertragDbService dbService,
+            SaverwalterContext ctx,
+            IAuthorizationService auth,
+            HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
+            _ctx = ctx;
+            _auth = auth;
             _logger = logger;
         }
 
         [HttpGet]
-        public Task<ActionResult<IEnumerable<VertragEntryBase>>> Get() => DbService.GetList(User!);
+        public Task<PagedResult<VertragEntryBase>> Get([FromQuery] PagedQuery query)
+            => DbService.GetList(User!, query);
+
+        public record VertragOverlapInfo(int Id, DateOnly Beginn, DateOnly? Ende, string Mieter);
+
+        [HttpGet("check-overlap")]
+        public async Task<ActionResult<VertragOverlapInfo?>> CheckOverlap(
+            [FromQuery] int wohnungId,
+            [FromQuery] DateOnly beginn,
+            [FromQuery] DateOnly? ende,
+            [FromQuery] int excludeId = 0)
+        {
+            var existing = await _ctx.Vertraege
+                .Where(v => v.Wohnung.WohnungId == wohnungId && v.VertragId != excludeId)
+                .Select(v => new
+                {
+                    Id = v.VertragId,
+                    Ende = v.Ende,
+                    Beginn = v.Versionen.Min(vv => (DateOnly?)vv.Beginn),
+                    Mieter = v.Mieter.Select(m => m.Bezeichnung)
+                })
+                .ToListAsync();
+
+            var conflict = existing.FirstOrDefault(v =>
+                v.Beginn.HasValue &&
+                beginn <= (v.Ende ?? DateOnly.MaxValue) &&
+                (ende ?? DateOnly.MaxValue) >= v.Beginn.Value);
+
+            if (conflict is null) return Ok(null);
+
+            return Ok(new VertragOverlapInfo(
+                conflict.Id,
+                conflict.Beginn!.Value,
+                conflict.Ende,
+                string.Join(", ", conflict.Mieter)));
+        }
 
         [HttpPost]
         public Task<ActionResult<VertragEntry>> Post([FromBody] VertragEntry entry) => DbService.Post(User!, entry);
@@ -139,5 +203,87 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<VertragEntry>> Put(int id, VertragEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Returns all Transaktionen that have Buchungssätze touching this Vertrag's
+        /// MietBuchungskonto or NkBuchungskonto.
+        /// </summary>
+        [HttpGet("{id}/transaktionen")]
+        public async Task<ActionResult<IEnumerable<TransaktionEntry>>> GetTransaktionen(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var permissions = await GetPermissions(User!, vertrag, _auth);
+
+            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+
+            var transaktionen = await _ctx.Transaktionen
+                .Include(t => t.Zahler)
+                .Include(t => t.Zahlungsempfaenger)
+                .Include(t => t.Buchungssaetze)
+                    .ThenInclude(s => s.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungskonto)
+                .Where(t => t.Buchungssaetze.Any(s =>
+                    s.Buchungszeilen.Any(z =>
+                        z.Buchungskonto.BuchungskontoId == mietKontoId ||
+                        z.Buchungskonto.BuchungskontoId == nkKontoId)))
+                .OrderByDescending(t => t.Zahlungsdatum)
+                .ToListAsync();
+
+            var result = transaktionen.Select(t => new TransaktionEntry(t, permissions));
+            return Ok(result);
+        }
+
+        public class MietOposMonat
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+            public decimal Soll { get; set; }
+            public decimal Ausgeglichen { get; set; }
+            public decimal Offen => Soll - Ausgeglichen;
+        }
+
+        /// <summary>
+        /// Gibt den Miet-OPOS (offene Posten Kaltmiete) pro Monat zurück.
+        /// Soll = gebuchte Mietforderung, Ausgeglichen = per OffenerPostenAusgleich beglichener Anteil.
+        /// </summary>
+        [HttpGet("{id}/miet-opos")]
+        public async Task<ActionResult<IEnumerable<MietOposMonat>>> GetMietOpos(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+
+            var sollZeilen = await _ctx.Buchungszeilen
+                .Where(z =>
+                    z.Buchungskonto.BuchungskontoId == mietKontoId &&
+                    z.SollHaben == SollHaben.Soll)
+                .Include(z => z.Buchungssatz)
+                .Include(z => z.AlsSollZeile)
+                    .ThenInclude(a => a.HabenZeile)
+                .ToListAsync();
+
+            var result = sollZeilen
+                .GroupBy(z => new { z.Buchungssatz.Buchungsjahr, z.Buchungssatz.Buchungsdatum.Month })
+                .Select(g => new MietOposMonat
+                {
+                    Jahr = g.Key.Buchungsjahr,
+                    Monat = g.Key.Month,
+                    Soll = g.Sum(z => z.Betrag),
+                    Ausgeglichen = g.Sum(z => z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag))
+                })
+                .OrderBy(m => m.Jahr).ThenBy(m => m.Monat);
+
+            return Ok(result);
+        }
     }
 }

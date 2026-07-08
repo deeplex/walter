@@ -17,6 +17,21 @@ namespace Deeplex.Saverwalter.Model
 {
     public static class WohnungExtensions
     {
+        /// <summary>Returns the WohnungVersion active at the given date (latest Beginn ≤ date), falling back to the earliest version.</summary>
+        public static WohnungVersion VersionAt(this Wohnung w, DateOnly date)
+            => w.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault(v => v.Beginn <= date)
+               ?? w.Versionen.OrderBy(v => v.Beginn).First();
+
+        /// <summary>Returns the UmlageVersion active at the given date, falling back to the earliest version.</summary>
+        public static UmlageVersion VersionAt(this Umlage u, DateOnly date)
+            => u.Versionen.OrderByDescending(v => v.Beginn).FirstOrDefault(v => v.Beginn <= date)
+               ?? u.Versionen.OrderBy(v => v.Beginn).First();
+
+        /// <summary>Returns the HKVO active at the given date (latest Beginn ≤ date), or null if none.</summary>
+        public static HKVO? HkvoAt(this Umlage u, DateOnly date)
+            => u.HeizkostenHKVOs.OrderByDescending(h => h.Beginn).FirstOrDefault(h => h.Beginn <= date);
+
+
         public static string GetWohnungenBezeichnung(this Umlage u)
             => u.Wohnungen.ToList().GetWohnungenBezeichnung();
 

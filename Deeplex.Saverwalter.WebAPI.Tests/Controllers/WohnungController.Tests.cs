@@ -17,7 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -46,9 +46,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
             A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = await controller.Get();
+            var result = await controller.Get(new PagedQuery());
 
-            result.Value.Should().NotBeNull();
+            result.Should().NotBeNull();
         }
 
         [Fact]
@@ -66,10 +66,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
+            var entity = new Wohnung("Test")
             {
-                Besitzer = besitzer
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
             };
+            entity.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = entity, Kontakt = besitzer });
+            entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             var entry = new WohnungEntry(entity, new());
 
             var claims = new[]
@@ -125,19 +128,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 100, 1)
+            var entity = new Wohnung("Test")
             {
-                Besitzer = besitzer
+                MietErtragskonto = new Buchungskonto("4000", "Mieterträge", BuchungskontoTyp.Ertrag),
+                AufwandsKonto = new Buchungskonto("4900", "Aufwand", BuchungskontoTyp.Aufwand),
             };
+            entity.Eigentuemer.Add(new WohnungEigentuemer(new DateOnly(2000, 1, 1)) { Wohnung = entity, Kontakt = besitzer });
+            entity.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 100, 100, 100, 1) { Wohnung = entity });
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
             var entry = new WohnungEntry(entity, new());
-            entry.Wohnflaeche = 200;
+            entry.Bezeichnung = "Test geändert";
 
             var result = await controller.Put(entity.WohnungId, entry);
 
             result.Value.Should().NotBeNull();
-            entity.Wohnflaeche.Should().Be(200);
+            ctx.Wohnungen.Find(entity.WohnungId)!.Bezeichnung.Should().Be("Test geändert");
         }
 
         [Fact]

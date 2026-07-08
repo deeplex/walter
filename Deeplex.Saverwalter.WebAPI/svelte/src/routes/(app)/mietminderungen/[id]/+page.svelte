@@ -45,7 +45,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 />
 
 <WalterGrid>
-    <WalterMietminderung entry={data.entry} />
+    <WalterMietminderung bind:entry={data.entry} />
 
     <WalterLinkTile
         bind:fileWrapper

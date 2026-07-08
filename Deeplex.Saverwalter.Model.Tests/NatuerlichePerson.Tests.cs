@@ -62,13 +62,6 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
                     Name = "Test Nachname",
-                    JuristischePersonen = new List<Kontakt>()
-                    {
-                        new Kontakt("Test Nachname", Rechtsform.gmbh)
-                        {
-                            Name = "Test JuristischePerson"
-                        }
-                    }
                 } }
             };
 

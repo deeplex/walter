@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>dotnet-project-licenses</id>
+    <version>2.7.1</version>
+    <title>.NET Core Tool to print a list of the licenses of a projects</title>
+    <authors>Tom Chavakis, Lexy2, senslen</authors>
+    <projectUrl>https://github.com/tomchavakis/nuget-license</projectUrl>
+    <description>Package Description</description>
+    <packageTypes>
+      <packageType name="DotnetTool" />
+    </packageTypes>
+    <repository type="git" />
+  </metadata>
+</package>

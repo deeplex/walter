@@ -15,15 +15,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import {
-        WalterGrid,
-        WalterHeader,
-        WalterLinkTile
-    } from '$walter/components';
+    import { browser } from '$app/environment';
+    import { WalterError, WalterGrid, WalterHeader } from '$walter/components';
     import { ClickableTile } from 'carbon-components-svelte';
+    import { UserRole, getAuthState } from '$walter/services/auth';
+
+    const currentAuthState = browser ? getAuthState() : undefined;
 </script>
 
-<WalterHeader title="Adminbereich" />
-<WalterGrid>
-    <ClickableTile href="/accounts">Nutzeraccounts</ClickableTile>
-</WalterGrid>
+{#if currentAuthState && $currentAuthState?.role === UserRole.Admin}
+    <WalterHeader title="Adminbereich" />
+    <WalterGrid>
+        <ClickableTile href="/accounts">Nutzeraccounts</ClickableTile>
+    </WalterGrid>
+{:else}
+    <WalterHeader title="Fehler" />
+    <WalterError />
+{/if}

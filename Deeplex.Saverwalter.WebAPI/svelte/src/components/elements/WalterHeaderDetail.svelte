@@ -39,10 +39,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } & unknown;
     export let apiURL: string;
     export let fileWrapper: WalterFileWrapper | undefined = undefined;
+    export let disabled = false;
+    export let beforeSave: (() => Promise<void>) | undefined = undefined;
 
     let winWidth = 0;
 
-    function click_save(): void {
+    async function click_save() {
+        if (beforeSave) await beforeSave();
         handle_save(apiURL, entry, title);
     }
 
@@ -60,7 +63,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {#if winWidth < 1056}
             <HeaderAction preventCloseOnClickOutside>
                 <HeaderPanelLinks>
-                    {#if entry?.permissions?.update}
+                    {#if entry?.permissions?.update && !disabled}
                         <HeaderPanelLink on:click={click_save}
                             >Speichern</HeaderPanelLink
                         >
@@ -81,7 +84,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </HeaderAction>
         {:else}
             {#if entry?.permissions?.update}
-                <HeaderGlobalAction on:click={click_save} icon={Save} />
+                <HeaderGlobalAction
+                    {disabled}
+                    on:click={click_save}
+                    icon={Save}
+                />
             {/if}
             {#if entry?.permissions?.remove}
                 <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />

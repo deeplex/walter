@@ -15,13 +15,22 @@
 
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
-import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterUmlageEntry } from './WalterUmlage';
 import { WalterVertragEntry } from './WalterVertrag';
+import { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 import { WalterZaehlerEntry } from './WalterZaehler';
+
+export interface WalterEigentuemerEntry {
+    id: number;
+    kontakt: WalterSelectionEntry;
+    von: string;
+    bis: string | undefined;
+    anteil: number | undefined;
+}
 
 export class WalterWohnungEntry extends WalterApiHandler {
     public static ApiURL = `/api/wohnungen`;
@@ -37,36 +46,47 @@ export class WalterWohnungEntry extends WalterApiHandler {
         public notiz: string,
         public createdAt: Date,
         public lastModified: Date,
-        public besitzer: WalterSelectionEntry | undefined,
+        public eigentuemer: WalterEigentuemerEntry[],
         public haus: WalterWohnungEntry[],
         public zaehler: WalterZaehlerEntry[],
         public vertraege: WalterVertragEntry[],
-        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public erhaltungsaufwendungen: WalterErhaltungsaufwendungEntry[],
         public umlagen: WalterUmlageEntry[],
         public bewohner: string,
-        public permissions: WalterPermissions
+        public versionen: WalterWohnungVersionEntry[],
+        public permissions: WalterPermissions,
+        public konten: Partial<WalterBuchungskontoEntry>[]
     ) {
         super();
+    }
+
+    get currentEigentuemer(): string {
+        const active = this.eigentuemer.filter((e) => e.bis == null);
+        return active.map((e) => e.kontakt.text).join(', ');
     }
 
     static fromJson(json: WalterWohnungEntry) {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
-        const besitzer =
-            json.besitzer && WalterSelectionEntry.fromJson(json.besitzer);
+        const eigentuemer: WalterEigentuemerEntry[] =
+            json.eigentuemer?.map((e) => ({
+                id: e.id,
+                kontakt: WalterSelectionEntry.fromJson(e.kontakt),
+                von: e.von,
+                bis: e.bis ?? undefined,
+                anteil: e.anteil ?? undefined
+            })) ?? [];
         const haus: WalterWohnungEntry[] = json.haus?.map(
             WalterWohnungEntry.fromJson
         );
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
-        const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
-            WalterBetriebskostenrechnungEntry.fromJson
-        );
         const erhaltungsaufwendungen = json.erhaltungsaufwendungen?.map(
             WalterErhaltungsaufwendungEntry.fromJson
         );
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
+        const versionen =
+            json.versionen?.map(WalterWohnungVersionEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -81,15 +101,16 @@ export class WalterWohnungEntry extends WalterApiHandler {
             json.notiz,
             json.createdAt,
             json.lastModified,
-            besitzer,
+            eigentuemer,
             haus,
             zaehler,
             vertraege,
-            betriebskostenrechnungen,
             erhaltungsaufwendungen,
             umlagen,
             json.bewohner,
-            permissions
+            versionen,
+            permissions,
+            json.konten ?? []
         );
     }
 }

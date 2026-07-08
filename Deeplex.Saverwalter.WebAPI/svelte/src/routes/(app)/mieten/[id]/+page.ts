@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,26 +13,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
-import { fileURL } from '$walter/services/files';
+import { WalterMietzahlungDetailEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const apiURL = `${WalterMieteEntry.ApiURL}/${params.id}`;
-    const fileUrl = fileURL.miete(params.id);
-    const entry = WalterMieteEntry.GetOne<WalterMieteEntry>(params.id, fetch);
+    const entry =
+        await WalterMietzahlungDetailEntry.GetOne<WalterMietzahlungDetailEntry>(
+            params.id,
+            fetch
+        );
 
     return {
         fetchImpl: fetch,
         id: params.id,
-        apiURL: apiURL,
-        fileURL: fileUrl,
-        entry,
-        vertrag: entry.then((res) =>
-            WalterVertragEntry.GetOne<WalterVertragEntry>(
-                res.vertrag.id.toString(),
-                fetch
-            )
-        )
+        entry
     };
 };

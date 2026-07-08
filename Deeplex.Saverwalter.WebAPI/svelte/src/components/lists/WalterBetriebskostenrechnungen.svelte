@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -19,41 +19,99 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     import {
         WalterBetriebskostenrechnung,
-        WalterDataWrapper
+        WalterDataTable
     } from '$walter/components';
-    import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
+    import {
+        WalterBetriebskostenrechnungEntry,
+        validateBetriebskostenrechnung
+    } from '$walter/lib';
+    import { convertEuro } from '$walter/services/utils';
     import { navigation } from '$walter/services/navigation';
 
     export let fullHeight = false;
-    export let rows: WalterBetriebskostenrechnungEntry[];
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
+    export let rows: WalterBetriebskostenrechnungEntry[] | undefined =
+        undefined;
+    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
+        {};
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
         { key: 'umlage.text', value: 'Wohnungen' },
         { key: 'betreffendesJahr', value: 'Betreffendes Jahr' },
         { key: 'betrag', value: 'Betrag' },
-        { key: 'datum', value: 'Datum' }
+        { key: 'datum', value: 'Datum' },
+        { key: 'bezahltStatus', value: 'Bezahlt', sort: false as const },
+        { key: 'nkStatus', value: 'NK-Verteilung', sort: false as const }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.betriebskostenrechnung(e.detail.id);
+    // OPOS-Sicht der Rechnung: Zahlungseingang und Verteilung auf die
+    // NK-Anteile als Status-Tags direkt in der Rechnungsliste.
+    function enrich(r: WalterBetriebskostenrechnungEntry) {
+        const nkOffen = Math.max(0, r.betrag - r.verteilt);
+        return {
+            ...r,
+            bezahltStatus: r.isBezahlt
+                ? { text: 'Bezahlt', tag: 'green' }
+                : { text: 'Offen', tag: 'red' },
+            nkStatus:
+                nkOffen <= 0.005
+                    ? { text: 'Verteilt', tag: 'green' }
+                    : {
+                          text: `Offen: ${convertEuro(nkOffen)}`,
+                          tag: 'warm-gray'
+                      }
+        };
+    }
 
-    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
-        undefined;
+    const transformRow = (row: DataTableRow) =>
+        enrich(row as WalterBetriebskostenrechnungEntry);
+
+    const fetchData =
+        rows === undefined
+            ? (
+                  p: Parameters<
+                      typeof WalterBetriebskostenrechnungEntry.GetPaged
+                  >[1]
+              ) =>
+                  WalterBetriebskostenrechnungEntry.GetPaged<WalterBetriebskostenrechnungEntry>(
+                      fetchImpl,
+                      p
+                  )
+            : undefined;
+
+    $: submitDisabled = !validateBetriebskostenrechnung(entry);
+
+    $: enrichedRows = rows
+        ? [...rows].map(enrich).sort((a, b) => {
+              const yearA = a.betreffendesJahr || 0;
+              const yearB = b.betreffendesJahr || 0;
+              if (yearA !== yearB) return yearB - yearA;
+              const dateA = new Date(a.datum).getTime();
+              const dateB = new Date(b.datum).getTime();
+              if (!Number.isNaN(dateA) && !Number.isNaN(dateB))
+                  return dateB - dateA;
+              return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
+          })
+        : undefined;
 </script>
 
-<WalterDataWrapper
+<WalterDataTable
     addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     addEntry={entry}
-    {title}
-    {on_click_row}
-    {rows}
+    {submitDisabled}
+    layout={title !== undefined ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    quickAddTitle={title}
+    rows={enrichedRows}
+    {fetchData}
+    {transformRow}
     {headers}
     {fullHeight}
+    on_click_row={(e) => navigation.buchungssatz(e.detail.id)}
 >
     {#if entry}
-        <WalterBetriebskostenrechnung {fetchImpl} {entry} />
+        <WalterBetriebskostenrechnung {fetchImpl} bind:entry />
     {/if}
-</WalterDataWrapper>
+</WalterDataTable>

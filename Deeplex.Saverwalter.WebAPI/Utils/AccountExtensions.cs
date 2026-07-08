@@ -17,7 +17,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.WebAPI.Helper
+namespace Deeplex.Saverwalter.WebAPI.Utils
 {
     internal static class AccountExtensions
     {

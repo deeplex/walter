@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2025  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -16,61 +16,488 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
-        WalterComboBoxKontakt,
-        WalterTextArea,
-        WalterNumberInput,
-        WalterDatePicker
-    } from '$walter/components';
+        Row,
+        Column,
+        Tile,
+        Button,
+        InlineNotification
+    } from 'carbon-components-svelte';
+    import { Add, TrashCan } from 'carbon-icons-svelte';
+    import WalterTransaktionPositionMiete from './WalterTransaktionPositionMiete.svelte';
+    import WalterTransaktionPositionGarage from './WalterTransaktionPositionGarage.svelte';
+    import WalterTransaktionPositionBK from './WalterTransaktionPositionBK.svelte';
+    import WalterTransaktionPositionEA from './WalterTransaktionPositionEA.svelte';
+    import WalterTransaktionPositionSonstiges from './WalterTransaktionPositionSonstiges.svelte';
+    import WalterTransaktionPositionAbrechnung from './WalterTransaktionPositionAbrechnung.svelte';
+    import {
+        emptyTransaktionsInput,
+        type TransaktionsInput,
+        type WalterTransaktionEntry,
+        type BetriebskostenEingangInput,
+        type NkAnteilEingangInput
+    } from '$walter/lib';
+    import WalterTransaktionRaw from './WalterTransaktionRaw.svelte';
 
-    import { Row } from 'carbon-components-svelte';
-    import type { WalterTransaktionEntry } from '$walter/lib';
-
-    export let entry: Partial<WalterTransaktionEntry> = {};
     export let fetchImpl: typeof fetch;
-    export let readonly = false;
-    $: {
-        readonly = entry?.permissions?.update === false;
+    export let buchung: TransaktionsInput = emptyTransaktionsInput();
+    export let isValid = false;
+
+    let transaktionEntry: Partial<WalterTransaktionEntry> = {};
+
+    // Reset display state (zahler/zahlungsempfaenger) when parent swaps buchung object
+    let _prevBuchung = buchung;
+    $: if (buchung !== _prevBuchung) {
+        _prevBuchung = buchung;
+        transaktionEntry = {};
+    }
+
+    // Objektidentität (Referenzen) synchron gehalten — kein Index-Mapping nötig.
+    type BkTile = {
+        bk: BetriebskostenEingangInput;
+        nk: NkAnteilEingangInput;
+        isDirekt: boolean;
+    };
+    let bkTiles: BkTile[] = [];
+    let bkTileInvalids: boolean[] = [];
+
+    $: verteilterBetrag =
+        buchung.mieten.reduce(
+            (s, m) =>
+                s +
+                (m.kaltmiete || 0) +
+                (m.garagen?.reduce((gs, g) => gs + (g.betrag || 0), 0) || 0) +
+                (m.nkVorauszahlung || 0),
+            0
+        ) +
+        (buchung.garagenEingaenge?.reduce((s, g) => s + (g.betrag || 0), 0) ||
+            0) +
+        bkTiles
+            .filter((t) => !t.isDirekt)
+            .reduce((s, t) => s + (t.bk.betrag || 0), 0) +
+        buchung.erhaltungsaufwendungen.reduce(
+            (s, e) => s + (e.betrag || 0),
+            0
+        ) +
+        buchung.sonstige.reduce((s, s2) => s + (s2.betrag || 0), 0) +
+        (buchung.abrechnungsAusgleiche?.reduce(
+            (s, a) => s + (a.betrag || 0),
+            0
+        ) || 0);
+
+    $: totalPositions =
+        buchung.mieten.length +
+        (buchung.garagenEingaenge?.length || 0) +
+        bkTiles.length +
+        buchung.erhaltungsaufwendungen.length +
+        buchung.sonstige.length +
+        (buchung.abrechnungsAusgleiche?.length || 0);
+
+    $: isSinglePosition = totalPositions === 1;
+
+    $: offenerBetrag = (buchung.betrag || 0) - verteilterBetrag;
+
+    let mieteInvalids: boolean[] = [];
+    let mieteStatusTexts: string[] = [];
+    let garageInvalids: boolean[] = [];
+    let eaInvalids: boolean[] = [];
+    let ausgleichInvalids: boolean[] = [];
+
+    $: hasCashPositions =
+        buchung.mieten.length > 0 ||
+        (buchung.garagenEingaenge?.length || 0) > 0 ||
+        bkTiles.some((t) => !t.isDirekt) ||
+        buchung.erhaltungsaufwendungen.length > 0 ||
+        buchung.sonstige.length > 0 ||
+        (buchung.abrechnungsAusgleiche?.length || 0) > 0;
+
+    $: isValid =
+        (hasCashPositions
+            ? buchung.betrag > 0 && Math.abs(offenerBetrag) < 0.005
+            : bkTiles.some((t) => t.isDirekt)) &&
+        !mieteInvalids.some(Boolean) &&
+        !garageInvalids.some(Boolean) &&
+        !bkTileInvalids.some(Boolean) &&
+        !eaInvalids.some(Boolean) &&
+        !ausgleichInvalids.some(Boolean);
+
+    function addWohnungsmiete() {
+        const available = Math.max(0, offenerBetrag);
+        buchung.mieten = [
+            ...buchung.mieten,
+            { kaltmiete: available, garagen: [], nkVorauszahlung: 0 }
+        ];
+    }
+
+    function addBK() {
+        const available = Math.max(0, offenerBetrag);
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const bkEntry: BetriebskostenEingangInput = {
+            betrag: available,
+            betreffendesJahr: now.getFullYear() - 1,
+            rechnungsDatum: today
+        };
+        const nkEntry: NkAnteilEingangInput = {
+            betrag: 0,
+            betreffendesJahr: now.getFullYear() - 1
+        };
+        bkTiles = [...bkTiles, { bk: bkEntry, nk: nkEntry, isDirekt: false }];
+        bkTileInvalids = [...bkTileInvalids, true];
+        buchung.betriebskostenEingaenge = [
+            ...buchung.betriebskostenEingaenge,
+            bkEntry
+        ];
+    }
+
+    function removeBkTile(i: number) {
+        const tile = bkTiles[i];
+        if (tile.isDirekt) {
+            buchung.nkAnteilEingaenge = (
+                buchung.nkAnteilEingaenge ?? []
+            ).filter((n) => n !== tile.nk);
+        } else {
+            buchung.betriebskostenEingaenge =
+                buchung.betriebskostenEingaenge.filter((b) => b !== tile.bk);
+        }
+        bkTiles = bkTiles.filter((_, idx) => idx !== i);
+        bkTileInvalids = bkTileInvalids.filter((_, idx) => idx !== i);
+    }
+
+    function onTileModeChange(i: number, isDirekt: boolean) {
+        const tile = bkTiles[i];
+        if (isDirekt === tile.isDirekt) return;
+        if (isDirekt) {
+            buchung.betriebskostenEingaenge =
+                buchung.betriebskostenEingaenge.filter((b) => b !== tile.bk);
+            buchung.nkAnteilEingaenge = [
+                ...(buchung.nkAnteilEingaenge ?? []),
+                tile.nk
+            ];
+        } else {
+            buchung.nkAnteilEingaenge = (
+                buchung.nkAnteilEingaenge ?? []
+            ).filter((n) => n !== tile.nk);
+            buchung.betriebskostenEingaenge = [
+                ...buchung.betriebskostenEingaenge,
+                tile.bk
+            ];
+        }
+        bkTiles[i] = { ...tile, isDirekt };
+        bkTiles = bkTiles;
+    }
+
+    function addEA() {
+        const available = Math.max(0, offenerBetrag);
+        buchung.erhaltungsaufwendungen = [
+            ...buchung.erhaltungsaufwendungen,
+            { betrag: available }
+        ];
+    }
+
+    function removeMiete(i: number) {
+        buchung.mieten = buchung.mieten.filter((_, idx) => idx !== i);
+    }
+
+    function removeEA(i: number) {
+        buchung.erhaltungsaufwendungen = buchung.erhaltungsaufwendungen.filter(
+            (_, idx) => idx !== i
+        );
+    }
+
+    function addSonstiges() {
+        const available = Math.max(0, offenerBetrag);
+        buchung.sonstige = [...buchung.sonstige, { betrag: available }];
+    }
+
+    function addAbrechnungsAusgleich() {
+        buchung.abrechnungsAusgleiche = [
+            ...(buchung.abrechnungsAusgleiche ?? []),
+            { betrag: 0 }
+        ];
+    }
+
+    function removeAbrechnungsAusgleich(i: number) {
+        buchung.abrechnungsAusgleiche = buchung.abrechnungsAusgleiche.filter(
+            (_, idx) => idx !== i
+        );
+        ausgleichInvalids = ausgleichInvalids.filter((_, idx) => idx !== i);
+    }
+
+    function addGarage() {
+        const available = Math.max(0, offenerBetrag);
+        const now = new Date();
+        const monat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+        buchung.garagenEingaenge = [
+            ...(buchung.garagenEingaenge ?? []),
+            {
+                garageVertragId: 0,
+                garageKennung: '',
+                betreffenderMonat: monat,
+                betrag: available
+            }
+        ];
+    }
+
+    function removeGarage(i: number) {
+        buchung.garagenEingaenge = buchung.garagenEingaenge.filter(
+            (_, idx) => idx !== i
+        );
+    }
+
+    function removeSonstiges(i: number) {
+        buchung.sonstige = buchung.sonstige.filter((_, idx) => idx !== i);
+    }
+
+    function onZahlerChange(e: CustomEvent) {
+        buchung.zahlerId = e.detail ? +e.detail.id || undefined : undefined;
+    }
+
+    function onZahlerResolved(e: CustomEvent<number | undefined>) {
+        if (buchung.zahlerId) return; // don't overwrite explicit user selection
+        buchung.zahlerId = e.detail;
+    }
+
+    function onZahlungsempfaengerResolved(e: CustomEvent<number | undefined>) {
+        if (buchung.zahlungsempfaengerId) return;
+        buchung.zahlungsempfaengerId = e.detail;
+    }
+
+    function onZahlungsempfaengerChange(e: CustomEvent) {
+        buchung.zahlungsempfaengerId = e.detail
+            ? +e.detail.id || undefined
+            : undefined;
     }
 </script>
 
-<Row>
-    <WalterComboBoxKontakt
-        {fetchImpl}
-        {readonly}
-        bind:value={entry.zahler}
-        title="Zahler"
-    />
+<WalterTransaktionRaw
+    bind:entry={transaktionEntry}
+    bind:betrag={buchung.betrag}
+    bind:zahlungsdatum={buchung.zahlungsdatum}
+    {fetchImpl}
+    initialZahlerId={buchung.zahlerId}
+    initialZahlungsempfaengerId={buchung.zahlungsempfaengerId}
+    on:zahlerChange={onZahlerChange}
+    on:zahlungsempfaengerChange={onZahlungsempfaengerChange}
+/>
 
-    <WalterComboBoxKontakt
-        {fetchImpl}
-        {readonly}
-        bind:value={entry.zahlungsempfaenger}
-        title="Zahlungsempfänger"
+{#if buchung.betrag > 0 && Math.abs(offenerBetrag) >= 0.005}
+    <InlineNotification
+        kind="error"
+        title="Betrag nicht vollständig verteilt:"
+        subtitle="Noch {offenerBetrag > 0
+            ? offenerBetrag.toFixed(2) + ' € offen'
+            : Math.abs(offenerBetrag).toFixed(2) + ' € zu viel verteilt'}"
+        hideCloseButton
     />
-</Row>
+{/if}
 
-<Row>
-    <WalterNumberInput
-        required
-        {readonly}
-        bind:value={entry.betrag}
-        label="Betrag"
-    />
-    <WalterDatePicker
-        required
-        disabled={readonly}
-        bind:value={entry.zahlungsdatum}
-        labelText="Zahlungsdatum"
-    />
-</Row>
-<Row>
-    <WalterTextArea
-        {readonly}
-        labelText="Memo"
-        bind:value={entry.verwendungszweck}
-    />
-</Row>
+<hr style="margin: 1rem 0" />
 
-<Row>
-    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
+<!-- Mieten -->
+{#each buchung.mieten as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <div>
+                <strong>Mietzahlung</strong>
+                {#if mieteStatusTexts[i]}
+                    <span
+                        style="margin-left: 0.75rem; font-size: 0.8rem; opacity: 0.7"
+                        >{mieteStatusTexts[i]}</span
+                    >
+                {/if}
+            </div>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeMiete(i)}
+            />
+        </div>
+        <WalterTransaktionPositionMiete
+            {fetchImpl}
+            bind:miete={buchung.mieten[i]}
+            bind:availableBetrag={buchung.betrag}
+            bind:invalid={mieteInvalids[i]}
+            bind:statusText={mieteStatusTexts[i]}
+            {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- Standalone Garagen -->
+{#each buchung.garagenEingaenge ?? [] as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Garagenmiete</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeGarage(i)}
+            />
+        </div>
+        <WalterTransaktionPositionGarage
+            {fetchImpl}
+            bind:garage={buchung.garagenEingaenge[i]}
+            bind:invalid={garageInvalids[i]}
+        />
+    </Tile>
+{/each}
+
+<!-- Betriebskosten / Direktzuweisung -->
+{#each bkTiles as tile, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong
+                >{tile.isDirekt
+                    ? 'Vertrag-Direktzuweisung'
+                    : 'Betriebskostenrechnung'}</strong
+            >
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeBkTile(i)}
+            />
+        </div>
+        <WalterTransaktionPositionBK
+            {fetchImpl}
+            bind:bk={bkTiles[i].bk}
+            bind:nk={bkTiles[i].nk}
+            isDirekt={tile.isDirekt}
+            availableBetrag={buchung.betrag ?? 0}
+            bind:invalid={bkTileInvalids[i]}
+            {isSinglePosition}
+            on:zahlerResolved={onZahlerResolved}
+            on:modeChange={(e) => onTileModeChange(i, e.detail.isDirekt)}
+        />
+    </Tile>
+{/each}
+
+<!-- Erhaltungsaufwendungen -->
+{#each buchung.erhaltungsaufwendungen as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Erhaltungsaufwendung</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeEA(i)}
+            />
+        </div>
+        <WalterTransaktionPositionEA
+            {fetchImpl}
+            bind:ea={buchung.erhaltungsaufwendungen[i]}
+            availableBetrag={buchung.betrag ?? 0}
+            bind:invalid={eaInvalids[i]}
+            {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- NK-Abrechnungsausgleich (Nachzahlung/Erstattung) -->
+{#each buchung.abrechnungsAusgleiche ?? [] as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>NK-Abrechnung (Nachzahlung/Erstattung)</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeAbrechnungsAusgleich(i)}
+            />
+        </div>
+        <WalterTransaktionPositionAbrechnung
+            {fetchImpl}
+            bind:ausgleich={buchung.abrechnungsAusgleiche[i]}
+            bind:invalid={ausgleichInvalids[i]}
+            on:zahlerResolved={onZahlerResolved}
+            on:zahlungsempfaengerResolved={onZahlungsempfaengerResolved}
+        />
+    </Tile>
+{/each}
+
+<!-- Sonstiges -->
+{#each buchung.sonstige as _, i (i)}
+    <Tile style="margin-bottom: 1rem">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem"
+        >
+            <strong>Sonstiges</strong>
+            <Button
+                kind="ghost"
+                size="small"
+                icon={TrashCan}
+                iconDescription="Entfernen"
+                on:click={() => removeSonstiges(i)}
+            />
+        </div>
+        <WalterTransaktionPositionSonstiges
+            bind:sonstiger={buchung.sonstige[i]}
+            availableBetrag={buchung.betrag ?? 0}
+            {isSinglePosition}
+        />
+    </Tile>
+{/each}
+
+<!-- Position hinzufügen -->
+<Row style="margin-bottom: 1.5rem">
+    <Column>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addWohnungsmiete}
+            >
+                Wohnungsmiete
+            </Button>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addGarage}
+            >
+                Garagenmiete
+            </Button>
+            <Button kind="tertiary" size="small" icon={Add} on:click={addBK}>
+                Betriebskostenrechnung
+            </Button>
+            <Button kind="tertiary" size="small" icon={Add} on:click={addEA}>
+                Erhaltungsaufwendung
+            </Button>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addAbrechnungsAusgleich}
+            >
+                NK-Abrechnung
+            </Button>
+            <Button
+                kind="tertiary"
+                size="small"
+                icon={Add}
+                on:click={addSonstiges}
+            >
+                Sonstiges
+            </Button>
+        </div>
+    </Column>
 </Row>

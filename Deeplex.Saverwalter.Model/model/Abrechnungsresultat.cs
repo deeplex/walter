@@ -24,20 +24,10 @@ public class Abrechnungsresultat
 
     [Required]
     public virtual Vertrag Vertrag { get; set; } = null!;
-    [Required]
-    public int Jahr { get; set; }
-    [Required]
-    public double Kaltmiete { get; set; }
-    [Required]
-    public double Vorauszahlung { get; set; }
-    [Required]
-    public double Minderung { get; set; }
-    [Required]
-    public double Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
-    // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
-    public double Saldo { get; set; }
     public string? Notiz { get; set; }
+    [Required]
+    public virtual Buchungssatz Buchungssatz { get; set; } = null!;
     public DateTime CreatedAt { get; private set; }
     public DateTime LastModified { get; set; }
 }

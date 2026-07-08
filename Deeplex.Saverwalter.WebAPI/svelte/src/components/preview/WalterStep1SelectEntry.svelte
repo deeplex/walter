@@ -37,7 +37,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {#if step === 1}
     {#if rows}
         <WalterDataTable
-            add={click}
+            onAdd={click}
             fullHeight
             on_click_row={selectedEntry_change}
             {headers}

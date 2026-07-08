@@ -22,4 +22,4 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Zähler" />
-<WalterZaehlerList fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />
+<WalterZaehlerList fetchImpl={data.fetchImpl} fullHeight />

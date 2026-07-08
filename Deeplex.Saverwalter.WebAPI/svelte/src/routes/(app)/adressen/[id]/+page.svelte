@@ -25,7 +25,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterWohnungen,
         WalterZaehlerList
     } from '$walter/components';
-    import { WalterFileWrapper, type WalterWohnungEntry } from '$walter/lib';
+    import {
+        WalterFileWrapper,
+        type WalterWohnungEntry,
+        validateAdresse
+    } from '$walter/lib';
     import { Column, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
@@ -56,6 +60,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
+    disabled={!validateAdresse(data.entry)}
 />
 
 <WalterGrid>

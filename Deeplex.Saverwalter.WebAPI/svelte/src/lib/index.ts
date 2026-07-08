@@ -14,25 +14,96 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export { WalterToastContent } from './WalterToastContent';
+export { WalterGarageEntry } from './WalterGarage';
+export { WalterGarageVertragEntry } from './WalterGarageVertrag';
+export { WalterGarageVertragVersionEntry } from './WalterGarageVertragVersion';
 export { WalterAccountEntry } from './WalterAccount';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+export {
+    WalterVertragsNkAnteilEntry,
+    validateVertragsNkAnteil
+} from './WalterVertragsNkAnteil';
 export { WalterHKVOEntry } from './WalterHKVO';
-export { WalterMieteEntry } from './WalterMiete';
+export { validateHKVO } from './WalterValidation';
+export {
+    WalterMietzahlungListEntry,
+    WalterMietzahlungDetailEntry,
+    WalterMietzahlungApiURL,
+    type WalterMietzahlungInput,
+    type WalterForderungsstatusEntry,
+    type WalterGarageForderungsstatusEntry,
+    type WalterOffenerPostenStatus
+} from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterMiettabelleEntry } from './WalterMiettabelle';
-export { WalterKontaktEntry } from './WalterKontakt';
+export { WalterBankkontoEntry } from './WalterBankkonto';
+export {
+    WalterBuchungskontoEntry,
+    kontoVerknuepfungHref,
+    kontoAnzeigeSaldo,
+    kontoStatusTag,
+    type WalterKontoVerknuepfung,
+    type WalterKontoMonatsSumme,
+    type WalterKontoStatusTag
+} from './WalterBuchungskonto';
+export {
+    WalterBuchungssatzEntry,
+    type WalterAusgleich,
+    type WalterBuchungszeile,
+    type WalterBuchungssatzLink,
+    type WalterTransaktionLink
+} from './WalterBuchungssatz';
+export {
+    getJahresUebersicht,
+    getJahresabschluss,
+    getJahresabschlussKontrolle,
+    setzeAbrechnungsverzicht,
+    hebeAbrechnungsverzichtAuf,
+    type WalterJahresUebersicht,
+    type WalterJahresabschluss,
+    type WalterKontoJahres,
+    type WalterAbrechnungsstatus,
+    type WalterJahresabschlussKontrolle,
+    type WalterPruefPosition,
+    type WalterPruefStatus
+} from './WalterJahresabschluss';
+export {
+    WalterKontaktEntry,
+    type WalterMitgliedschaftEntry
+} from './WalterKontakt';
+export { WalterKontaktMitgliedschaftEntry } from './WalterKontaktMitgliedschaft';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
-export { WalterUmlagetypEntry } from './WalterUmlagetyp';
+export { WalterUmlageVersionEntry } from './WalterUmlageVersion';
+export { WalterUmlagetypEntry, BETRK_V_NUMMERN } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';
-export { WalterWohnungEntry } from './WalterWohnung';
+export {
+    WalterWohnungEntry,
+    type WalterEigentuemerEntry
+} from './WalterWohnung';
+export { WalterWohnungEigentuemerEntry } from './WalterWohnungEigentuemer';
+export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
+export {
+    type GaragenmietInput,
+    type StandaloneGaragenmietInput,
+    type MietzahlungsInput,
+    type BetriebskostenEingangInput,
+    type ErhaltungsaufwendungsInput,
+    type SonstigerBuchungssatzInput,
+    type NkAnteilEingangInput,
+    type AbrechnungsAusgleichInput,
+    type TransaktionsInput,
+    emptyMietzahlungsInput,
+    emptyTransaktionsInput
+} from './WalterTransaktion';
+export * from './WalterValidation';

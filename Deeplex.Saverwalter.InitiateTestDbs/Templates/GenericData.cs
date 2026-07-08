@@ -38,6 +38,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
                 new Umlagetyp("Breitbandkabelanschluss"),
                 new Umlagetyp("Dachrinnenreinigung"),
+                new Umlagetyp("Betriebsstrom (Heizung)"),
                 new Umlagetyp("Heizkosten"),
                 new Umlagetyp("Müllbeseitigung"),
                 new Umlagetyp("Entwässerung/Niederschlagswasser"),

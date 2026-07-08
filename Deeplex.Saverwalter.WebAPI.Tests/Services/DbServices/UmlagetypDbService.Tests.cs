@@ -16,7 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
@@ -39,12 +39,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new UmlagetypDbService(ctx, auth);
             var entity = new Umlagetyp("Hausstrom");
 
-            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
-            {
-                Typ = entity
-            };
+            var umlage = new Umlage { Typ = entity };
+            umlage.Versionen.Add(new UmlageVersion(new DateOnly(2000, 1, 1), Umlageschluessel.NachWohnflaeche) { Umlage = umlage });
 
-            var wohnung = new Wohnung("whatever", 0, 0, 0, 0);
+            var wohnung = new Wohnung("whatever");
+            wohnung.Versionen.Add(new WohnungVersion(new DateOnly(2000, 1, 1), 0, 0, 0, 1) { Wohnung = wohnung });
 
             umlage.Wohnungen.Add(wohnung);
 
@@ -75,7 +74,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await service.Delete(user, entity.UmlagetypId);
 
             result.Should().BeOfType<OkResult>();
-            ctx.Umlagen.Find(entity.UmlagetypId).Should().BeNull();
+            ctx.Umlagetypen.Find(entity.UmlagetypId).Should().BeNull();
         }
 
         [Fact]

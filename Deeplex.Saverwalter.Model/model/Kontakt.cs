@@ -35,17 +35,16 @@ namespace Deeplex.Saverwalter.Model
         public string? Fax { get; set; }
         public string? Email { get; set; }
         public virtual Adresse? Adresse { get; set; }
+        public virtual Buchungskonto? VerbindlichkeitsKonto { get; set; }
         public string? Notiz { get; set; }
 
-        // Only valid if Rechtsform != natuerlich
-        public virtual List<Kontakt> JuristischePersonen { get; set; } = [];
-        public virtual List<Kontakt> Mitglieder { get; set; } = [];
+        public virtual List<KontaktMitgliedschaft> AlsMitglied { get; private set; } = [];
+        public virtual List<KontaktMitgliedschaft> AlsJuristischePerson { get; private set; } = [];
 
         public virtual List<Vertrag> VerwaltetVertraege { get; private set; } = [];
         public virtual List<Vertrag> Mietvertraege { get; private set; } = [];
-        public virtual List<Wohnung> Wohnungen { get; private set; } = [];
+        public virtual List<WohnungEigentuemer> EigentuemerIn { get; private set; } = [];
         public virtual List<Garage> Garagen { get; private set; } = [];
-        public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = [];
         public virtual List<UserAccount> Accounts { get; private set; } = [];
 
         public DateTime CreatedAt { get; private set; }

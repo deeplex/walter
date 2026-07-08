@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let addEntry: unknown = {};
     export let onSubmit: undefined | ((e: unknown) => void) = undefined;
     export let title: string | undefined = undefined;
+    export let submitDisabled = false;
 
     let addModalOpen = false;
 </script>
@@ -44,6 +45,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {addUrl}
     bind:addEntry
     {onSubmit}
+    {submitDisabled}
 >
     {#if addModalOpen}
         <slot />

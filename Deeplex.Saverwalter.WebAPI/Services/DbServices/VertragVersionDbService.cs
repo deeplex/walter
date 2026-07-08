@@ -15,12 +15,13 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
+namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class VertragVersionDbService : WalterDbServiceBase<VertragVersionEntry, int, VertragVersion>
     {
@@ -48,6 +49,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
+                var sperre = await AbrechnungsschutzService.SperreVertrag(
+                    Ctx, entity.Vertrag.VertragId, entity.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 Ctx.VertragVersionen.Remove(entity);
                 await Ctx.SaveChangesAsync();
 
@@ -71,6 +76,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
+                var sperre = await AbrechnungsschutzService.SperreVertrag(
+                    Ctx, entry.Vertrag!.Id, entry.Beginn.Year);
+                if (sperre != null) return new ConflictObjectResult(sperre);
+
                 return await Add(entry);
             }
             catch
@@ -84,7 +93,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
             var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
             {
-                Vertrag = vertrag!
+                Vertrag = vertrag!,
+                Nebenkostenvorauszahlung = entry.Nebenkostenvorauszahlung
             };
 
             SetOptionalValues(entity, entry);
@@ -98,9 +108,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                // Beginn/Personenzahl fließen in die Verteilung ein; ändern sie sich für
+                // ein bereits abgerechnetes Jahr, wird gesperrt. (Grundmiete/NK-VZ nicht.)
+                if (entity.Beginn != entry.Beginn || entity.Personenzahl != entry.Personenzahl)
+                {
+                    var sperre = await AbrechnungsschutzService.SperreVertragVersion(
+                        Ctx, entity.Vertrag.VertragId, entity.Beginn, entry.Beginn,
+                        wertGeaendert: entity.Personenzahl != entry.Personenzahl);
+                    if (sperre != null) return new ConflictObjectResult(sperre);
+                }
+
                 entity.Beginn = entry.Beginn;
                 entity.Grundmiete = entry.Grundmiete;
                 entity.Personenzahl = entry.Personenzahl;
+                entity.Nebenkostenvorauszahlung = entry.Nebenkostenvorauszahlung;
 
                 SetOptionalValues(entity, entry);
                 Ctx.VertragVersionen.Update(entity);
