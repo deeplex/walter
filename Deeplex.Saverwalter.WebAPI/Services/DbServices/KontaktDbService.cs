@@ -111,8 +111,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     .Where(t =>
                         (t.Zahler != null && myBankkontoIds.Contains(t.Zahler.BankkontoId)) ||
                         (t.Zahlungsempfaenger != null && myBankkontoIds.Contains(t.Zahlungsempfaenger.BankkontoId)))
-                    .Include(t => t.Zahler)
-                    .Include(t => t.Zahlungsempfaenger)
+                    .Include(t => t.Zahler).ThenInclude(b => b!.Besitzer)
+                    .Include(t => t.Zahlungsempfaenger).ThenInclude(b => b!.Besitzer)
                     .AsEnumerable()
                     .Select(e => new TransaktionEntryBase(e, new(true)))
                     .ToList();

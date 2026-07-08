@@ -223,6 +223,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     public class TransaktionPermissionHandler(SaverwalterContext ctx)
         : AuthorizationHandler<OperationAuthorizationRequirement, Transaktion>
     {
+        // Scoped handler (one instance per request): ManagedBuchungskontoIds is a
+        // 12-way UNION across several joined tables. HandleRequirementAsync runs
+        // once per Transaktion in a list (e.g. ?take=100000), so recomputing that
+        // union as a fresh subquery per row turned bulk listing into tens of
+        // thousands of heavy queries. Materialize it once per (Nutzer, Rolle) per
+        // request and reuse it for every row's check instead.
+        private readonly Dictionary<(Guid, VerwalterRolle), Task<HashSet<int>>> _managedKontoIdsCache = [];
+
+        private Task<HashSet<int>> ManagedBuchungskontoIdsCached(Guid guid, VerwalterRolle rolle)
+        {
+            var key = (guid, rolle);
+            if (!_managedKontoIdsCache.TryGetValue(key, out var task))
+            {
+                task = MaterializeAsHashSetAsync(ManagedBuchungskontoIds(ctx, guid, rolle));
+                _managedKontoIdsCache[key] = task;
+            }
+            return task;
+        }
+
+        private static async Task<HashSet<int>> MaterializeAsHashSetAsync(IQueryable<int> query) =>
+            [.. await query.ToListAsync()];
+
         /// <summary>
         /// Buchungskonto-IDs, die zu einer Wohnung gehören, die der Nutzer in der
         /// gegebenen Rolle verwaltet — inklusive der Konten der zugehörigen Verträge,
@@ -287,7 +309,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 ? VerwalterRolle.Keine
                 : VerwalterRolle.Vollmacht;
 
-            var kontoIds = ManagedBuchungskontoIds(ctx, context.User.GetUserId(), rolle);
+            var kontoIds = await ManagedBuchungskontoIdsCached(context.User.GetUserId(), rolle);
             var darfZugreifen = await ctx.Transaktionen
                 .Where(t => t.TransaktionId == entity.TransaktionId)
                 .AnyAsync(t => t.Buchungssaetze.Any(s =>

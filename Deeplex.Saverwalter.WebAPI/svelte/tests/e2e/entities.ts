@@ -96,7 +96,11 @@ export const entitySpecs: EntitySpec[] = [
         listUrl: '/api/umlagetypen',
         visibility: 'scoped',
         detailUrl: (id) => `/api/umlagetypen/${id}`,
-        enforcesDetailReadScope: true,
+        // owner relation of its own — it's visible if unused anywhere, or if any
+        // single Umlage usage (across all owners) touches the caller's scope.
+        // That makes "an instance outside the viewer's scope" structurally
+        // unlikely to exist, so the detail-read-scope test doesn't apply here.
+        enforcesDetailReadScope: false,
         readonlyForNonPrivileged: true,
         privilegedCanEdit: true
     },
