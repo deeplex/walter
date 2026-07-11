@@ -36,8 +36,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     ///   einheitlich behandelt – keine separate Lücken-Arithmetik.
     ///
     /// Unterstützte Schlüssel: WF, NF, NE, MEA, Personenzahl, Verbrauch.
-    /// Heizkosten-Abzug (HKVO/Strompauschale) wird nicht angewendet –
-    /// HKVO-Umlagen (§7/§8/§9) werden korrekt aufgeteilt.
+    /// HKVO-Umlagen (§7/§8/§9) werden korrekt aufgeteilt; die Strompauschale
+    /// (HeizkostenV) wird über ApplyStrompauschale vom Betriebsstrom auf die
+    /// Heizkosten umgelegt.
     ///
     /// Alle Methoden sind rein funktional (kein DB-Zugriff).
     /// Benötigte Includes auf Umlage (caller-seitig):

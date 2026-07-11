@@ -1,6 +1,6 @@
 # Architektur
 
-Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietverhältnissen und Betriebskostenabrechnungen. Sämtliche Geld­bewegungen werden seit dem Zahlungsmodell-Umbau über eine **doppelte Buchführung** (Buchungssätze auf Buchungskonten) abgebildet.
+Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietverhältnissen und Betriebskostenabrechnungen. Sämtliche Geld­bewegungen werden über eine **doppelte Buchführung** (Buchungssätze auf Buchungskonten) abgebildet.
 
 ---
 
@@ -33,8 +33,6 @@ Deeplex.Saverwalter.InitiateTestDbs/                  ← Testdaten-Seed für En
 
 Test-Projekte (xUnit): `Deeplex.Saverwalter.Model.Tests`, `…PrintService.Tests`, `…WebAPI.Tests`.
 
-> **Hinweis:** Das frühere `Deeplex.Saverwalter.ErhaltungsaufwendungService`-Projekt wurde entfernt. Erhaltungsaufwendungen sind heute reine Buchungssätze auf dem `AufwandsKonto` der Wohnung (siehe `WebAPI/Services/Buchungen/ErhaltungsaufwendungBuchungsService`).
-
 ### Aufbau der WebAPI
 
 ```
@@ -43,12 +41,19 @@ Deeplex.Saverwalter.WebAPI/
 │   └── Utils/                ← Selection-Listen, Datei-Handling, Paging
 ├── Services/
 │   ├── DbServices/           ← CRUD-/Lade-Logik je Entität (von Controllern aufgerufen)
-│   ├── Buchungen/            ← Erzeugen von Buchungssätzen (Transaktion, Erhaltungs-
-│   │                            aufwendung, Betriebskostenrechnung, NK-Anteil, Storno, …)
-│   └── Abrechnung/           ← Abrechnungslauf (Berechnung + Druck + DTOs)
+│   ├── Buchungen/            ← Erzeugen von Buchungssätzen: Transaktion, Betriebskosten-
+│   │                            rechnung, Erhaltungsaufwendung, NK-Anteil, Abrechnungs-
+│   │                            resultat, Storno (+ Schutz-Services gegen Fehlbuchungen)
+│   ├── Abrechnung/           ← Abrechnungslauf (Berechnung + Druck + DTOs),
+│   │                            Abrechnungsgruppen, Jahresabschlusskontrolle, -schutz
+│   └── JahresabschlussService, KontoVerknuepfungService, PermissionHandler, …
 ├── Utils/                    ← Querschnitt (FileHandling, AccountExtensions, …)
 └── svelte/                   ← SvelteKit-Frontend (Quelle); Build landet in wwwroot/
 ```
+
+Buchungen laufen ausschließlich über die Dienste unter `Services/Buchungen/`; ein
+Erhaltungsaufwand ist etwa ein Buchungssatz auf dem `AufwandsKonto` der Wohnung
+(`ErhaltungsaufwendungBuchungsService`).
 
 ---
 
@@ -83,7 +88,7 @@ Deeplex.Saverwalter.WebAPI/
 Alle Geldbewegungen laufen über vier Modell-Typen (Details siehe [Datenmodell](datenmodell.md)):
 
 - **Buchungskonto** — ein Konto im Kontenrahmen (Aktiv / Passiv / Aufwand / Ertrag). Z. B. das `AufwandsKonto` einer Wohnung, das `NkBuchungskonto`/`MietBuchungskonto` eines Vertrags oder das `VerbindlichkeitsKonto` eines Kontakts.
-- **Buchungssatz** — ein vollständiger, gemäß § 239 HGB lückenlos nummerierter Buchungssatz mit Buchungsjahr und optionalem Belegpfad. Korrekturen erfolgen ausschließlich per **Stornobuchung** (`StornoVon`).
+- **Buchungssatz** — ein vollständiger Buchungssatz mit Buchungsjahr, optionalem Belegpfad und einer fortlaufenden Nummer aus einer globalen DB-Sequence. Ein **freier** Satz ist löschbar/bearbeitbar; sobald er über einen Offenen-Posten-Ausgleich verknüpft ist, erfolgt die Korrektur per **Stornobuchung** (`StornoVon`); abrechnungsrelevante Sätze sind gesperrt (`BuchungssatzSchutz`).
 - **Buchungszeile** — eine Soll- oder Haben-Zeile eines Buchungssatzes auf genau einem Buchungskonto.
 - **OffenerPostenAusgleich** — verbindet eine offene Forderung (Soll-Zeile) mit ihrer ausgleichenden Zahlung (Haben-Zeile) auf demselben Konto (OPOS-Prinzip).
 
@@ -107,7 +112,7 @@ Eine importierte oder erfasste **Transaktion** (Kontoauszugseintrag) wird über 
 
 ## Authentifizierung & Autorisierung
 
-Walter verwendet ein eigenes Benutzer- und Rechtesystem. Ein `UserAccount` (mit `Username`, `IsAdmin`) kann mit einem `Kontakt` verknüpft sein. Der Zugriff wird pro Wohnung/Vertrag über `Verwalter`-Einträge gesteuert (`VerwalterRolle`: `Eigentuemer`, `Vollmacht`, `Ableser`). Die API setzt dies über `IAuthorizationHandler`-Implementierungen je Ressource durch; die Authentifizierung erfolgt über einen Token-Scheme-Handler (`TokenAuthenticationHandler`).
+Walter verwendet ein eigenes Benutzer- und Rechtesystem. Ein `UserAccount` (mit `Username`, `Name`, `Role`: `Guest`/`User`/`Admin`/`Owner`) kann mit einem `Kontakt` verknüpft sein. Der Zugriff wird pro Wohnung über `Verwalter`-Einträge gesteuert (`VerwalterRolle`, aufsteigend nach Rechten: `Keine`, `Vollmacht`, `Eigentuemer`). Die API setzt dies über `IAuthorizationHandler`-Implementierungen je Ressource durch; die Authentifizierung erfolgt über einen Token-Scheme-Handler (`TokenAuthenticationHandler`).
 
 ---
 

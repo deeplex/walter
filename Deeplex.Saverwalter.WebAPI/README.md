@@ -8,5 +8,5 @@ DATABASE_PORT=5432
 DATABASE_NAME=saverdb
 DATABASE_USER=postgres
 DATABASE_PASS=postgres
-S3_PROVIDER=s3:9200/saverwalter
+S3_PROVIDER=s3:9000/saverwalter
 ```

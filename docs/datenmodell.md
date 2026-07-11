@@ -5,7 +5,7 @@ Walter verwendet PostgreSQL als Datenbank und Entity Framework Core als ORM. All
 Zwei Dinge prägen das Modell:
 
 1. **Versionierung statt Überschreiben.** Veränderliche Stammdaten (Wohnungsflächen, Miethöhe, Umlageschlüssel, Eigentümer) werden als zeitlich gültige *Versionen* bzw. Zuordnungen mit `Beginn`/`Ende` geführt, nicht direkt auf der Hauptentität.
-2. **Doppelte Buchführung.** Geldbeträge stehen nicht mehr als Felder auf Fachentitäten (es gibt keine `Miete`, `Betriebskostenrechnung` oder `Erhaltungsaufwendung` mehr), sondern als **Buchungssätze** mit Soll-/Haben-**Buchungszeilen** auf **Buchungskonten**. Fachentitäten verweisen auf „ihre“ Konten.
+2. **Doppelte Buchführung.** Geldbeträge werden als **Buchungssätze** mit Soll-/Haben-**Buchungszeilen** auf **Buchungskonten** geführt. Eine Miete, eine Betriebskostenrechnung, ein Erhaltungsaufwand — jeder Betrag ist eine Buchung. Fachentitäten (Wohnung, Vertrag, Umlage, Kontakt) verweisen auf „ihre“ Konten.
 
 ---
 
@@ -83,11 +83,12 @@ erDiagram
         int     Nutzeinheit
     }
     WohnungEigentuemer {
-        int     Id        PK
+        int     WohnungEigentuemerId PK
         int     WohnungId FK
         int     KontaktId FK
-        date    Beginn
-        date    Ende
+        date    Von
+        date    Bis
+        decimal Anteil
     }
     Vertrag {
         int     VertragId          PK
@@ -100,7 +101,8 @@ erDiagram
         int     VertragVersionId PK
         int     VertragId        FK
         date    Beginn
-        double  Grundmiete
+        decimal Grundmiete
+        decimal Nebenkostenvorauszahlung
         int     Personenzahl
     }
     Mietminderung {
@@ -108,7 +110,7 @@ erDiagram
         int     VertragId       FK
         date    Beginn
         date    Ende
-        double  Minderung
+        decimal Minderung
     }
     Umlage {
         int     UmlageId          PK
@@ -128,10 +130,11 @@ erDiagram
     }
     HKVO {
         int     HKVOId        PK
-        double  HKVO_P7
-        double  HKVO_P8
+        date    Beginn
+        decimal HKVO_P7
+        decimal HKVO_P8
         enum    HKVO_P9
-        double  Strompauschale
+        decimal Strompauschale
         int     HeizkostenId  FK
         int     BetriebsstromId FK
     }
@@ -147,7 +150,7 @@ erDiagram
         int     ZaehlerstandId PK
         int     ZaehlerId      FK
         date    Datum
-        double  Stand
+        decimal Stand
     }
     Abrechnungsresultat {
         guid    AbrechnungsresultatId PK
@@ -182,7 +185,7 @@ erDiagram
     Abrechnungsresultat ||--|| Buchungssatz  : "festgehalten als"
 ```
 
-> **HKVO:** Eine `HKVO` referenziert eine `Heizkosten`-Umlage (Pflicht) und optional eine `Betriebsstrom`-Umlage. Eine Umlage kann über `HeizkostenHKVOs` bzw. `BetriebsstromHKVOs` in beiden Rollen auftreten.
+> **HKVO:** Eine `HKVO` referenziert eine `Heizkosten`-Umlage und eine `Betriebsstrom`-Umlage (beide Pflicht). Eine Umlage kann über `HeizkostenHKVOs` bzw. `BetriebsstromHKVOs` in beiden Rollen auftreten.
 
 ---
 
@@ -202,14 +205,18 @@ Ein Konto im Kontenrahmen. Fachentitäten besitzen ihre Konten (z. B. `Wohnung.A
 
 ### Buchungssatz
 
-Ein vollständiger Buchungssatz nach GoB / § 239 HGB. Korrekturen nur per Stornobuchung.
+Ein vollständiger Buchungssatz. Ob er bearbeitet, gelöscht oder nur storniert werden kann, regelt `BuchungssatzSchutz`: ein **freier** Satz (nicht in eine Betriebskostenabrechnung eingeflossen, ohne Offene-Posten-Ausgleich, kein Storno/nicht storniert) ist löschbar/bearbeitbar; mit OPOS-Verknüpfung ist stattdessen ein **Storno** nötig; abrechnungsrelevante Sätze sind gesperrt (nur über die Rückabwicklung/Storno des Abrechnungslaufs).
+
+> Ein noch nicht „verwendeter" Satz darf frei korrigiert oder gelöscht werden. Sobald er
+> ausgeglichen (OPOS) oder in eine Abrechnung eingeflossen ist, bleibt er erhalten und wird
+> nur per Storno korrigiert — so bleiben bereits verwendete Buchungen nachvollziehbar.
 
 | Feld            | Typ          | Pflicht | Beschreibung                                                |
 |-----------------|--------------|---------|------------------------------------------------------------|
 | `BuchungssatzId`| Guid         | PK      | Primärschlüssel                                            |
 | `Buchungsdatum` | DateOnly     | ja      | Datum der Buchung                                          |
 | `Beschreibung`  | string       | ja      | Buchungstext                                              |
-| `Buchungsnummer`| int          | (auto)  | Lückenlose fortlaufende Nummer je Buchungsjahr (DB-Sequence)|
+| `Buchungsnummer`| int          | (auto)  | Fortlaufende Nummer aus einer globalen DB-Sequence (`buchungsnummer_seq`), beim Speichern vergeben; Index über `(Buchungsjahr, Buchungsnummer)` |
 | `Buchungsjahr`  | int          | ja      | Wirtschaftsjahr (Default = Jahr des Buchungsdatums)        |
 | `Belegpfad`     | string       | nein    | S3-Pfad zum Originalbeleg                                  |
 | `StornoVon`     | Buchungssatz | nein    | Gesetzt, wenn dieser Satz ein Storno ist                  |
@@ -341,7 +348,7 @@ Zeitlich gültige Flächen-/Anteilsangaben einer Wohnung.
 
 ### WohnungEigentuemer
 
-Zeitlich begrenzte Eigentümer-Zuordnung (Wohnung ↔ Kontakt) mit `Beginn`/`Ende`.
+Zeitlich begrenzte Eigentümer-Zuordnung (Wohnung ↔ Kontakt) mit `Von`/`Bis` und optionalem `Anteil`.
 
 ### Vertrag
 
@@ -354,7 +361,7 @@ Ein Mietverhältnis für eine Wohnung. Hält mehrere fachliche Buchungskonten.
 | `Ansprechpartner`    | Kontakt       | nein    | Ansprechpartner |
 | `Ende`               | DateOnly      | nein    | Vertragsende (null = laufend) |
 | `MietBuchungskonto`  | Buchungskonto | ja      | Forderungskonto Kaltmiete |
-| `NkBuchungskonto`    | Buchungskonto | ja      | Forderungskonto Nebenkostenvorauszahlung |
+| `NkBuchungskonto`    | Buchungskonto | ja      | Verrechnungskonto der NK-Vorauszahlungen (Passiv) |
 | `BkAbrechnungsKonto` | Buchungskonto | ja      | Konto für das Abrechnungsergebnis |
 | `ZahlungsKonto`      | Buchungskonto | ja      | Zahlungseingangskonto |
 | `MietminderungsKonto`| Buchungskonto | ja      | Konto für Mietminderungen |
@@ -372,7 +379,8 @@ Beziehungen: `Versionen`, `Mietminderungen`, `GarageVertraege`, `Mieter` (List\<
 | `VertragVersionId`| int      | PK      | Primärschlüssel |
 | `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag |
 | `Beginn`          | DateOnly | ja      | Gültig ab |
-| `Grundmiete`      | double   | ja      | Kaltmiete in Euro |
+| `Grundmiete`      | decimal  | ja      | Kaltmiete in Euro |
+| `Nebenkostenvorauszahlung` | decimal | nein | Vereinbarte monatliche NK-Vorauszahlung laut Mietvertrag (Planwert; Vorgabewert im Buchungsdialog) |
 | `Personenzahl`    | int      | ja      | Personen im Haushalt |
 
 ### Mietminderung
@@ -383,11 +391,11 @@ Beziehungen: `Versionen`, `Mietminderungen`, `GarageVertraege`, `Mieter` (List\<
 | `Vertrag`         | Vertrag  | ja      | Zugehöriger Vertrag |
 | `Beginn`          | DateOnly | ja      | Beginn der Minderung |
 | `Ende`            | DateOnly | nein    | Ende (null = unbegrenzt) |
-| `Minderung`       | double   | ja      | Quote als Dezimalzahl (0.1 = 10 %) |
+| `Minderung`       | decimal  | ja      | Quote als Dezimalzahl (0.1 = 10 %) |
 
 ### Umlagetyp
 
-Art einer Betriebskostenposition (z. B. „Heizkosten“, „Wasser“). Felder: `UmlagetypId`, `Bezeichnung`, `Notiz`.
+Art einer Betriebskostenposition (z. B. „Heizkosten“, „Wasser“). Felder: `UmlagetypId`, `Bezeichnung`, `BetrKVNummer` (optional; kanonische Kategorie nach § 2 BetrKV, Nr. 1–14), `Notiz`.
 
 ### Umlage
 
@@ -419,15 +427,20 @@ Beziehungen: `Versionen` (UmlageVersion), `Wohnungen` (n:m), `Zaehler`, `Heizkos
 
 Konfiguration nach Heizkostenverordnung für eine warme Umlage.
 
+Eine `HKVO` ist zeitlich gültig (`Beginn`); zur Abrechnung wird die zum Stichtag gültige
+Konfiguration verwendet.
+
 | Feld            | Typ        | Pflicht | Beschreibung |
 |-----------------|------------|---------|--------------|
 | `HKVOId`        | int        | PK      | Primärschlüssel |
-| `HKVO_P7`       | double     | ja      | Verbrauchsanteil Heizwärme (§ 7) |
-| `HKVO_P8`       | double     | ja      | Verbrauchsanteil Warmwasser (§ 8) |
+| `Beginn`        | DateOnly   | ja      | Gültig ab |
+| `HKVO_P7`       | decimal    | ja      | Verbrauchsanteil Heizwärme (§ 7) |
+| `HKVO_P8`       | decimal    | ja      | Verbrauchsanteil Warmwasser (§ 8) |
 | `HKVO_P9`       | HKVO_P9A2  | ja      | Berechnungssatz § 9 Abs. 2 (`Satz_1`, `Satz_2`, `Satz_4`) |
-| `Strompauschale`| double     | ja      | Anteil Betriebsstrom an den Heizkosten |
+| `Strompauschale`| decimal    | ja      | Anteil Betriebsstrom an den Heizkosten (0 = keine Umlage) |
 | `Heizkosten`    | Umlage     | ja      | Heizkosten-Umlage |
-| `Betriebsstrom` | Umlage     | nein    | Betriebsstrom-Umlage |
+| `Betriebsstrom` | Umlage     | ja      | Betriebsstrom-/Allgemeinstrom-Umlage |
+| `AllgemeinWaermeZaehler` | List\<Zaehler\> | nein | Haus-Wärmezähler (Gas/Wärme) für Q in § 9(2); leer → § 9(2) = 0 |
 
 ### Zaehler
 
@@ -435,7 +448,7 @@ Konfiguration nach Heizkostenverordnung für eine warme Umlage.
 |--------------|------------|---------|--------------|
 | `ZaehlerId`  | int        | PK      | Primärschlüssel |
 | `Kennnummer` | string     | ja      | Zählernummer |
-| `Typ`        | Zaehlertyp | ja      | `Warmwasser`, `Kaltwasser`, `Strom`, `Gas` |
+| `Typ`        | Zaehlertyp | ja      | `Warmwasser`, `Kaltwasser` (m³), `Strom`, `Gas`, `Wärme` (kWh) |
 | `Wohnung`    | Wohnung    | nein    | null = Allgemeinzähler |
 | `Adresse`    | Adresse    | nein    | Standort |
 | `Ende`       | DateOnly   | nein    | Außerbetriebnahme |
@@ -444,17 +457,17 @@ Beziehungen: `Staende` (Zaehlerstand), `Umlagen`.
 
 ### Zaehlerstand
 
-`ZaehlerstandId`, `Zaehler`, `Datum` (DateOnly), `Stand` (double), `Notiz`.
+`ZaehlerstandId`, `Zaehler`, `Datum` (DateOnly), `Stand` (decimal), `Notiz`.
 
 ### Garage / GarageVertrag / GarageVertragVersion
 
-- **Garage**: `GarageId`, `Kennung`, `Adresse`, `GarageVertraege`.
-- **GarageVertrag**: `GarageVertragId`, `Garage`, `Mieter` (Kontakt), `Versionen`.
-- **GarageVertragVersion**: `Beginn` (DateOnly), `Betrag` (decimal) — zeitlich gültige Miete des Stellplatzes.
+- **Garage**: `GarageId`, `Kennung`, `Besitzer` (Kontakt), `Adresse`, `Ertragskonto` (Buchungskonto), `Vertraege`.
+- **GarageVertrag**: `GarageVertragId`, `Garage`, optionaler Verweis auf einen `Vertrag`, `Ende`, `MietBuchungskonto`, `ZahlungsKonto`, `Mieter` (List\<Kontakt\>), `Versionen`.
+- **GarageVertragVersion**: `Beginn` (DateOnly), `GaragenMiete` (decimal) — zeitlich gültige Miete des Stellplatzes.
 
 ### Abrechnungsresultat
 
-Das gespeicherte Ergebnis einer Betriebskostenabrechnung. Die Beträge werden aus dem verknüpften `Buchungssatz` abgeleitet, nicht mehr redundant gespeichert.
+Das gespeicherte Ergebnis einer Betriebskostenabrechnung. Die Beträge ergeben sich aus dem verknüpften `Buchungssatz`.
 
 | Feld                    | Typ          | Pflicht | Beschreibung |
 |-------------------------|--------------|---------|--------------|
@@ -463,6 +476,22 @@ Das gespeicherte Ergebnis einer Betriebskostenabrechnung. Die Beträge werden au
 | `Buchungssatz`          | Buchungssatz | ja      | Buchung des Abrechnungsergebnisses |
 | `Abgesendet`            | bool         | nein    | Ob das Dokument versandt wurde |
 | `Notiz`                 | string       | nein    | |
+
+### Abrechnungsverzicht
+
+Dokumentierter Verzicht auf die Betriebskostenabrechnung eines Vertrags für ein
+Abrechnungsjahr (z. B. Bestandsübernahme, Zeitraum vor Programmeinführung, kein
+Vorschuss vereinnahmt, Verjährung). Bewusst **ohne** Buchungssatz — er hält eine
+geschäftliche Entscheidung fest. Die Jahresabschlusskontrolle wertet einen so
+markierten Vertrag als erledigt.
+
+| Feld                    | Typ      | Pflicht | Beschreibung |
+|-------------------------|----------|---------|--------------|
+| `AbrechnungsverzichtId` | Guid     | PK      | Primärschlüssel |
+| `Vertrag`               | Vertrag  | ja      | Betroffener Vertrag |
+| `Jahr`                  | int      | ja      | Abrechnungsjahr, für das nicht abgerechnet wird |
+| `Grund`                 | string   | ja      | Beleg für die Entscheidung |
+| `Datum`                 | DateOnly | ja      | Datum, zu dem der Verzicht festgehalten wurde |
 
 ### Verwalter
 
@@ -473,21 +502,26 @@ Zugriffs-/Rollenzuordnung eines `UserAccount` zu einer Wohnung.
 | `VerwalterId`| int           | PK      | Primärschlüssel |
 | `UserAccount`| UserAccount   | ja      | Benutzer |
 | `Wohnung`    | Wohnung       | nein    | Betroffene Wohnung |
-| `Rolle`      | VerwalterRolle| ja      | `Eigentuemer`, `Vollmacht`, `Ableser` |
+| `Rolle`      | VerwalterRolle| ja      | `Keine`, `Vollmacht`, `Eigentuemer` (aufsteigend nach Rechten) |
 
 ---
 
 ## Authentifizierung (`Auth/`)
 
-- **UserAccount**: `Id` (Guid), `Username`, `IsAdmin`, optional verknüpfter `Kontakt`, `Verwalter`-Zuordnungen.
+- **UserAccount**: `Id` (Guid), `Username`, `Name`, `Role` (UserRole: `Guest`, `User`, `Admin`, `Owner`), `Email`, optional verknüpfter `Kontakt` (über `Kontakt.Accounts`), `Verwalter`-Zuordnungen.
 - **Pbkdf2PasswordCredential**: Passwort-Hash (PBKDF2) eines Benutzers.
 - **UserResetCredential**: Token zum Zurücksetzen des Passworts.
 
 ---
 
-## Gemeinsame Felder aller Entitäten
+## Gemeinsame Felder
+
+Die meisten Entitäten tragen die folgenden Zeitstempel:
 
 | Feld           | Typ      | Beschreibung |
 |----------------|----------|--------------|
 | `CreatedAt`    | DateTime | Erstellungszeitpunkt (UTC, read-only) |
 | `LastModified` | DateTime | Letzter Änderungszeitpunkt (UTC) |
+
+> Ausnahmen **ohne** diese Felder: `OffenerPostenAusgleich` sowie die Auth-Credentials
+> `Pbkdf2PasswordCredential` und `UserResetCredential`.

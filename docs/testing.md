@@ -9,6 +9,14 @@ Walter wird auf vier Ebenen getestet. Alle laufen in CI (`.github/workflows/reus
 | End-to-End (UI + API) | Playwright | `svelte/tests/e2e/*.spec.ts` | `yarn test:e2e` |
 | Voller Stack (lokal/CI) | Skript | `scripts/test-full-stack.sh` | seedet DB+S3, startet Backend, fährt die E2E-Suite |
 
+## Backend-Tests
+
+- `Deeplex.Saverwalter.Model.Tests` — Modell- und Kontext-Invarianten.
+- `Deeplex.Saverwalter.PrintService.Tests` — Word-/PDF-Erzeugung.
+- `Deeplex.Saverwalter.WebAPI.Tests` — Dienste und Endpunkte, u. a. die
+  Nebenkostenberechnung in `NkGruppenAbrechnungsService.Tests` (Mieterwechsel,
+  Zeitanteile, HKVO-Aufteilung, Ausschluss bereits ausgeglichener Buchungssätze).
+
 ## End-to-End-Suite
 
 Die Playwright-Suite läuft gegen ein laufendes Backend (Standard `http://localhost:5254`,
@@ -35,19 +43,24 @@ Die Playwright-Suite läuft gegen ein laufendes Backend (Standard `http://localh
   nur für Admin, Sichtbarkeit, Detail-403, PUT nur mit Vollmacht, Owner-only-Create).
 - `entity-authz.spec.ts` — **datengetriebene Berechtigungsmatrix über alle Sammlungen**
   (siehe unten).
+- `abrechnungslauf-authz.spec.ts` — Autorisierung des Abrechnungslaufs: `gruppen` liefert
+  nur vollständig verwaltete Gruppen; `preview`/`print` verlangen Lese-Recht, `book`
+  Vollmacht auf **allen** angeforderten Wohnungen (sonst 403; unbekannte IDs → 403, ohne
+  Existenz-Leak).
 - `ui-pages-matrix.spec.ts` — jeder Nutzer öffnet alle Hauptseiten; Admin-Seiten sind für
   Nicht-Admins gesperrt.
 - `ui-detail-authz.spec.ts` — UI-Zugriff auf Wohnungs-/Account-Detail- und Anlegeseiten je Rolle.
 - `ui-crud.spec.ts` — vollständiger Create → Edit → Delete einer Adresse über die echte UI
   sowie Berechtigungs-Gating der Detailseite (Felder schreibgeschützt ohne Update-Recht).
-- `files.spec.ts` — S3-Dateifluss (Upload/List/Download/Trash, Stack) und
+- `files.spec.ts` — S3-Dateifluss (Upload/List/Download/Trash, Ablagestapel) und
   Betriebskostenabrechnungs-Druck.
 - `abrechnung-ui.spec.ts` — Abrechnungslauf-UI: Gruppe wählen → Vorschau → Download.
 
 ### Berechtigungsmatrix (`entity-authz.spec.ts`)
 
 Eine zentrale Beschreibung in `entities.ts` (`entitySpecs`) erzeugt pro Sammlung die
-passenden Invarianten-Tests. So ist „Berechtigungen überall" wartbar statt 10× kopiert.
+passenden Invarianten-Tests. So bleibt „Berechtigungen überall" wartbar statt vielfach
+kopiert.
 
 | Sammlung | Sichtbarkeit | Detail-403 außerhalb Scope | Viewer schreibgeschützt |
 |----------|--------------|----------------------------|--------------------------|
@@ -62,35 +75,15 @@ passenden Invarianten-Tests. So ist „Berechtigungen überall" wartbar statt 10
 Verwaltungsrechten (Admin oder Vollmacht) änderbar.
 
 Geprüfte Invarianten pro scoped-Sammlung: kein Nutzer sieht mehr als den Admin-Scope;
-Viewer/Limited sehen ihre Zeilen ohne `update`/`remove`; eine Vollmacht-Rolle kann mindestens
-eine Zeile ändern; Detail-Reads außerhalb des Scopes liefern 403, im Scope 200.
+Viewer/Limited sehen ihre Zeilen ohne `update`/`remove`; eine Vollmacht-Rolle kann
+mindestens eine Zeile ändern; Detail-Reads außerhalb des Scopes liefern 403, im Scope 200.
 
-## Autorisierungs-Korrekturen (Sicherheitslücken)
+## Autorisierungsmodell (Kurzfassung)
 
-`abrechnungslauf-authz.spec.ts` und die Kontakt-/Zähler-Regeln oben sind Regressionstests für
-folgende behobene Lücken (alle vorgefunden):
-
-1. **Abrechnungslauf-IDOR:** `/api/abrechnungslauf/{gruppen,preview,print/*,book}` wirkten auf
-   beliebige `wohnungIds` ohne Pro-Wohnung-Autorisierung — jeder eingeloggte Nutzer konnte
-   fremde Betriebskostenabrechnungen lesen, drucken und sogar **buchen**. Jetzt: `gruppen`
-   liefert nur vollständig verwaltete Gruppen, `preview`/`print` verlangen Lese-Recht und
-   `book` Vollmacht auf **allen** angeforderten Wohnungen (sonst 403; unbekannte IDs → 403,
-   kein Existenz-Leak). Umgesetzt über `Utils.CanAccessAllWohnungen`.
-2. **Kontakte:** jeder (auch Gast) konnte beliebige Kontakte ändern/löschen. Jetzt nur mit
-   Verwaltungsrechten (`Utils.HasAnyManagementAuthority`); der Detail-`permissions`-Flag wird
-   konsistent berechnet statt hartkodiert.
-3. **Garagen / wohnungslose Zähler / beziehungslose Entitäten:** „immer erlaubt"-Handler bzw.
-   leere Wohnungs-Collection erlaubten jedem Schreibzugriff. Jetzt: lesbar wie zuvor, Schreiben
-   nur mit Verwaltungsrechten (bzw. Admin bei beziehungslosen Entitäten).
-
-## Bekannte, offene Punkte (vorgefunden, nicht durch die Test-Arbeit verursacht)
-
-1. **Backend:** Zwei Tests in `NkGruppenAbrechnungsService.Tests` schlagen fehl
-   (`VollstaendigVerteilterBS_WirdNichtNochmalVerteilt`,
-   `NkAnteilBuchungssatz_WirdNichtAlsBkRechnungVerteilt`). Test und Service wurden im selben
-   Commit (`feat: update abrechnung to fit updated model`) geändert — die Tests beschreiben
-   das **gewünschte** neue Verhalten (ein vollständig verteilter Buchungssatz erzeugt keinen
-   weiteren Rechnungsplan), das `BuildRechnungsplaene` noch nicht umsetzt. Fachliche
-   Entscheidung des Autors.
-2. **Formatierung:** `yarn prettier --check .` meldet ~24 bereits vorhandene Verstöße in
-   nicht von den Tests berührten Dateien (`yarn prettier --write .` behebt sie).
+- **Abrechnungslauf** wirkt pro Wohnung: Lesen/Drucken verlangt Lese-Recht, Buchen
+  Vollmacht, Rückabwicklung/Storno Lösch-Recht — jeweils auf **allen** angeforderten
+  Wohnungen (`Utils.CanAccessAllWohnungen`).
+- **Kontakte** bilden ein gemeinsames Adressbuch: lesbar für alle, änderbar nur mit
+  Verwaltungsrechten (`Utils.HasAnyManagementAuthority`).
+- **Beziehungslose Entitäten** (z. B. wohnungslose Zähler) sind lesbar wie üblich,
+  aber nur mit Verwaltungsrechten (bzw. Admin) schreibbar.

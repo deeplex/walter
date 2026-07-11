@@ -30,8 +30,9 @@ namespace Deeplex.Saverwalter.Model
         public string Beschreibung { get; set; } = string.Empty;
 
         /// <summary>
-        /// Lückenlose fortlaufende Nummer innerhalb des Buchungsjahres (§ 239 HGB).
-        /// Buchungsnummer wird beim Speichern automatisch aus der DB-Sequence zugewiesen.
+        /// Fortlaufende Nummer, beim Speichern automatisch aus der globalen DB-Sequence
+        /// (buchungsnummer_seq) vergeben. Der Index (Buchungsjahr, Buchungsnummer) ordnet
+        /// die Sätze je Wirtschaftsjahr (§ 239 HGB).
         /// </summary>
         public int Buchungsnummer { get; private set; }
 
