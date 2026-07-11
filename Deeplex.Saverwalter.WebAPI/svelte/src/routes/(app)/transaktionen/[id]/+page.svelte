@@ -178,8 +178,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 >
     <p style="margin-bottom: 1rem;">
         Zu jedem Buchungssatz dieser Transaktion wird eine Gegenbuchung mit
-        umgekehrten Soll/Haben-Seiten erstellt. Die Transaktion selbst bleibt als
-        Beleg erhalten.
+        umgekehrten Soll/Haben-Seiten erstellt. Die Transaktion selbst bleibt
+        als Beleg erhalten.
     </p>
     <TextArea
         labelText="Grund (Pflicht)"
@@ -200,8 +200,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 >
     <p>
         Die Transaktion und alle zugehörigen Buchungssätze werden endgültig
-        entfernt. Das ist nur für frische Fehleingaben gedacht — im Zweifel lieber
-        stornieren, damit die Korrektur nachvollziehbar bleibt.
+        entfernt. Das ist nur für frische Fehleingaben gedacht — im Zweifel
+        lieber stornieren, damit die Korrektur nachvollziehbar bleibt.
     </p>
 </Modal>
 
