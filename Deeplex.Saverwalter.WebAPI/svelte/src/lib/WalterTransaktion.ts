@@ -32,7 +32,10 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         public permissions: WalterPermissions,
         public createdAt: Date,
         public lastModified: Date,
-        public buchungssaetze: WalterBuchungssatzEntry[]
+        public buchungssaetze: WalterBuchungssatzEntry[],
+        public kannLoeschen: boolean = false,
+        public kannStornieren: boolean = false,
+        public sperrgrund: string | null = null
     ) {
         super();
     }
@@ -59,7 +62,10 @@ export class WalterTransaktionEntry extends WalterApiHandler {
             permissions,
             new Date(json.createdAt),
             new Date(json.lastModified),
-            buchungssaetze
+            buchungssaetze,
+            json.kannLoeschen ?? false,
+            json.kannStornieren ?? false,
+            json.sperrgrund ?? null
         );
     }
 }

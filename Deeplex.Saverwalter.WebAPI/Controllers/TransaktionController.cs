@@ -66,6 +66,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime LastModified { get; set; }
             public IEnumerable<BuchungssatzEntryBase> Buchungssaetze { get; set; } = [];
 
+            /// <summary>Alle Buchungssätze sind frei → Transaktion vollständig löschbar.</summary>
+            public bool KannLoeschen { get; set; }
+            /// <summary>Alle Buchungssätze sind stornierbar → Transaktion als Ganzes stornierbar.</summary>
+            public bool KannStornieren { get; set; }
+            /// <summary>Grund, warum keine Korrektur möglich ist (abrechnungsrelevant/storniert).</summary>
+            public string? Sperrgrund { get; set; }
+
             public TransaktionEntry() : base() { }
             public TransaktionEntry(Transaktion entity, Permissions permissions) : base(entity, permissions)
             {
@@ -116,6 +123,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<TransaktionEntry>> Put(Guid id, [FromBody] TransaktionEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(Guid id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Storniert alle Buchungssätze der Transaktion (Gegenbuchungen); die Transaktion
+        /// bleibt als Beleg erhalten. Für ausgeglichene Sätze, die nicht gelöscht werden
+        /// können. Grund ist Pflicht.
+        /// </summary>
+        [HttpPost("{id}/storno")]
+        public Task<ActionResult> Storno(Guid id, [FromBody] StornoRequest request)
+            => DbService.Storno(User!, id, request.Grund);
 
         /// <summary>
         /// Erstellt eine Transaktion mit Buchungssätzen aus typisierten Positionen.

@@ -102,6 +102,12 @@ automatisch die Buchungssätze und legt fehlende Forderungen an. Die entstehende
 Buchungssätze sind über die Transaktions-Detailseite und die jeweilige Fachentität
 einsehbar.
 
+Auf der Detailseite lässt sich eine Transaktion **löschen** (nur solange alle ihre
+Buchungssätze frei sind) oder **stornieren** (Gegenbuchungen; die Transaktion bleibt als
+Beleg erhalten). Ist ein Buchungssatz in eine Betriebskostenabrechnung eingeflossen, ist
+beides gesperrt, bis die Abrechnung über den Abrechnungslauf zurückgenommen wurde — der
+Grund wird dann direkt angezeigt.
+
 ---
 
 ## Wohnungen

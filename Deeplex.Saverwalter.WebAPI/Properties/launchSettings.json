@@ -5,7 +5,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_HOST": "localhost",
+        "DATABASE_HOST": "db",
         "DATABASE_PORT": "5432",
         "DATABASE_NAME": "saverdb",
         "DATABASE_USER": "postgres",

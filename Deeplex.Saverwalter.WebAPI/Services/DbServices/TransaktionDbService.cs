@@ -16,6 +16,7 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
     public class TransaktionDbService : WalterDbServiceBase<TransaktionEntry, Guid, Transaktion>
     {
-        public TransaktionDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
+        private readonly BuchungssatzSchutzService _schutzService;
+        private readonly StornoBuchungsService _stornoService;
+
+        public TransaktionDbService(
+            SaverwalterContext ctx,
+            IAuthorizationService authorizationService,
+            BuchungssatzSchutzService schutzService,
+            StornoBuchungsService stornoService) : base(ctx, authorizationService)
         {
+            _schutzService = schutzService;
+            _stornoService = stornoService;
         }
 
         public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
@@ -61,23 +71,117 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
-                var permissions = await Utils.GetPermissions(user, entity, Auth);
-                var entry = new TransaktionEntry(entity, permissions);
+                var transaktion = await LadeMitSaetzenAsync(id) ?? entity;
+                var permissions = await Utils.GetPermissions(user, transaktion, Auth);
+                var entry = new TransaktionEntry(transaktion, permissions);
+
+                // Aggregierter Löschen-/Storno-Schutz über alle Buchungssätze.
+                var kannLoeschen = true;
+                var kannStornieren = transaktion.Buchungssaetze.Count > 0;
+                string? sperrgrund = null;
+                foreach (var satz in transaktion.Buchungssaetze)
+                {
+                    var schutz = await _schutzService.PruefeAsync(satz);
+                    if (!schutz.KannLoeschen) kannLoeschen = false;
+                    if (!schutz.KannStornieren)
+                    {
+                        kannStornieren = false;
+                        sperrgrund ??= schutz.Sperrgrund;
+                    }
+                }
+                entry.KannLoeschen = kannLoeschen;
+                entry.KannStornieren = kannStornieren;
+                entry.Sperrgrund = sperrgrund;
 
                 return entry;
             });
         }
 
+        /// <summary>
+        /// Löscht die Transaktion samt ihren Buchungssätzen — aber nur, wenn <b>alle</b>
+        /// Buchungssätze frei sind (nicht in eine Abrechnung eingeflossen, ohne
+        /// Offene-Posten-Ausgleich, kein Storno). Andernfalls 409 mit Sperrgrund; für
+        /// ausgeglichene Sätze ist stattdessen <see cref="Storno"/> vorgesehen.
+        /// </summary>
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, Guid id)
         {
-            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            return await HandleEntity(user, id, Operations.Delete, async (_) =>
             {
-                Ctx.Transaktionen.Remove(entity);
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null)
+                {
+                    return new NotFoundResult();
+                }
+
+                foreach (var satz in transaktion.Buchungssaetze)
+                {
+                    var schutz = await _schutzService.PruefeAsync(satz);
+                    if (!schutz.KannLoeschen)
+                    {
+                        return new ConflictObjectResult(
+                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
+                    }
+                }
+
+                Ctx.Buchungssaetze.RemoveRange(transaktion.Buchungssaetze);
+                Ctx.Transaktionen.Remove(transaktion);
                 await Ctx.SaveChangesAsync();
 
                 return new OkResult();
             });
         }
+
+        /// <summary>
+        /// Storniert alle Buchungssätze der Transaktion (Gegenbuchungen); die Transaktion
+        /// selbst bleibt als Beleg erhalten. Nur zulässig, wenn <b>alle</b> Sätze
+        /// stornierbar sind — abrechnungsrelevante Sätze sind gesperrt, bis die Abrechnung
+        /// über den Abrechnungslauf zurückgenommen wurde.
+        /// </summary>
+        public async Task<ActionResult> Storno(ClaimsPrincipal user, Guid id, string? grund)
+        {
+            if (string.IsNullOrWhiteSpace(grund))
+            {
+                return new BadRequestObjectResult("Für ein Storno muss ein Grund angegeben werden.");
+            }
+
+            return await HandleEntity(user, id, Operations.Delete, async (_) =>
+            {
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null)
+                {
+                    return new NotFoundResult();
+                }
+
+                if (transaktion.Buchungssaetze.Count == 0)
+                {
+                    return new ConflictObjectResult("Transaktion hat keine Buchungssätze zum Stornieren.");
+                }
+
+                foreach (var satz in transaktion.Buchungssaetze)
+                {
+                    var schutz = await _schutzService.PruefeAsync(satz);
+                    if (!schutz.KannStornieren)
+                    {
+                        return new ConflictObjectResult(
+                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
+                    }
+                }
+
+                foreach (var satz in transaktion.Buchungssaetze.ToList())
+                {
+                    await _stornoService.StornierenAsync(satz.BuchungssatzId, grund);
+                }
+
+                return new OkResult();
+            });
+        }
+
+        private Task<Transaktion?> LadeMitSaetzenAsync(Guid id) =>
+            Ctx.Transaktionen
+                .Include(t => t.Buchungssaetze).ThenInclude(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(t => t.Buchungssaetze).ThenInclude(s => s.StornoVon)
+                .Include(t => t.Buchungssaetze).ThenInclude(s => s.StornoNach)
+                .FirstOrDefaultAsync(t => t.TransaktionId == id);
 
         public override async Task<ActionResult<TransaktionEntry>> Post(ClaimsPrincipal user, TransaktionEntry entry)
         {
