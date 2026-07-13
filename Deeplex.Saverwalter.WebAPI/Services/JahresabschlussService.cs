@@ -286,13 +286,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 return z.Betrag - gedeckt;
             }
 
+            bool IstStorniertOderStorno(Buchungszeile z) =>
+                z.Buchungssatz.StornoVon != null || z.Buchungssatz.StornoNach != null;
+
             var offeneSoll = konto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr == jahr)
+                .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr == jahr && !IstStorniertOderStorno(z))
                 .Select(z => OffenerRest(z, daten.AusgleicheBySollZeile, a => a.HabenZeile.Betrag))
                 .Where(offen => offen > Epsilon)
                 .ToList();
             var offeneHaben = konto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr == jahr)
+                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr == jahr && !IstStorniertOderStorno(z))
                 .Select(z => OffenerRest(z, daten.AusgleicheByHabenZeile, a => a.SollZeile.Betrag))
                 .Where(offen => offen > Epsilon)
                 .ToList();

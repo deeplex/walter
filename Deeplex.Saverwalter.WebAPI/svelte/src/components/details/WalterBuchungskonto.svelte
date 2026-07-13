@@ -62,6 +62,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         labelText="Saldo"
     />
 </Row>
+{#if entry.ausgleichbar}
+    <Row>
+        <WalterTextInput
+            readonly
+            value={convertEuro(entry.forderungSumme ?? 0)}
+            labelText="Forderung"
+        />
+        <WalterTextInput
+            readonly
+            value={convertEuro(entry.forderungAusgeglichen ?? 0)}
+            labelText="Davon ausgeglichen"
+        />
+    </Row>
+{/if}
 {#if statusTag}
     <Row>
         <div class="konto-status">

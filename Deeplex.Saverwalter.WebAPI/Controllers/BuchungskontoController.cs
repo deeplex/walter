@@ -56,6 +56,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public decimal SollSumme { get; set; }
             public decimal HabenSumme { get; set; }
+            public decimal ForderungSumme { get; set; }
+            public decimal ForderungAusgeglichen { get; set; }
             public List<MonatsSumme> MonatsSummen { get; set; } = [];
             public List<BuchungszeileInfo> LetzteZeilen { get; set; } = [];
             public List<KontoVerknuepfungEntry> Verknuepfungen { get; set; } = [];
@@ -186,6 +188,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var konto = await ScopedKonten(VerwalterRolle.Keine)
                 .Include(k => k.Buchungszeilen)
                     .ThenInclude(z => z.Buchungssatz)
+                        .ThenInclude(s => s.Buchungszeilen)
+                            .ThenInclude(z2 => z2.Buchungskonto)
+                .Include(k => k.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile)
+                        .ThenInclude(a => a.HabenZeile)
                 .FirstOrDefaultAsync(k => k.BuchungskontoId == id);
 
             if (konto is null)
@@ -195,6 +202,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     ? Forbid()
                     : NotFound();
             }
+
+            bool IstMietforderungsZeile(Buchungszeile z) =>
+                z.SollHaben == Model.SollHaben.Soll &&
+                z.Buchungssatz.Buchungszeilen.Any(g =>
+                    g.SollHaben == Model.SollHaben.Haben &&
+                    g.Buchungskonto.Kontotyp == BuchungskontoTyp.Ertrag);
 
             var vollmachtIds = await VollmachtKontoIds();
             var verknuepfungen = await KontoVerknuepfungService
@@ -222,6 +235,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 HabenSumme = konto.Buchungszeilen
                     .Where(z => z.SollHaben == Model.SollHaben.Haben)
                     .Sum(z => z.Betrag),
+                ForderungSumme = konto.Buchungszeilen
+                    .Where(IstMietforderungsZeile)
+                    .Sum(z => z.Betrag),
+                ForderungAusgeglichen = konto.Buchungszeilen
+                    .Where(IstMietforderungsZeile)
+                    .Sum(z => z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag)),
                 MonatsSummen = konto.Buchungszeilen
                     .GroupBy(z => (z.Buchungssatz.Buchungsdatum.Year, z.Buchungssatz.Buchungsdatum.Month))
                     .OrderBy(g => g.Key)

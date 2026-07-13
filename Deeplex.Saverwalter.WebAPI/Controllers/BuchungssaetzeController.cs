@@ -298,11 +298,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         {
                             entry.KontoSoll = KontoSeite(s, kId, Model.SollHaben.Soll);
                             entry.KontoHaben = KontoSeite(s, kId, Model.SollHaben.Haben);
-                            entry.KontoOffen = s.Buchungszeilen
-                                .Where(z => z.Buchungskonto.BuchungskontoId == kId)
-                                .Sum(z => Math.Max(0, z.Betrag -
-                                    z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag) -
-                                    z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag)));
+                            entry.KontoOffen = s.StornoVon != null || s.StornoNach != null
+                                ? 0
+                                : s.Buchungszeilen
+                                    .Where(z => z.Buchungskonto.BuchungskontoId == kId)
+                                    .Sum(z => Math.Max(0, z.Betrag -
+                                        z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag) -
+                                        z.AlsHabenZeile.Sum(a => a.SollZeile.Betrag)));
                         }
                         return entry;
                     });

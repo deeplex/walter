@@ -662,9 +662,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         })
                         .ToList() ?? [];
 
-                    var kaltmieteSoll = mietZeilen
-                        .Where(z => z.IstSoll)
-                        .Sum(z => z.Betrag);
+                    var kaltmieteSoll = partei.Vertrag?.MietBuchungskonto.Buchungszeilen
+                        .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungszeilen.Any(g =>
+                            g.SollHaben == SollHaben.Haben && g.Buchungskonto.Kontotyp == BuchungskontoTyp.Ertrag))
+                        .Sum(z => z.Betrag) ?? 0;
 
                     var personenZeitanteile = partei.PersonenZeitanteile
                         .Select(p => new PersonenZeitanteilInfo
