@@ -49,6 +49,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Wohnungen = [vertrag.Wohnung],
                 NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Grundsteuer", BuchungskontoTyp.Passiv),
                 ZahlungsKonto = new Buchungskonto("1201", "Zahlung Grundsteuer", BuchungskontoTyp.Aktiv),
+                NkSonderVerrechnungsKonto = new Buchungskonto("7002", "NK-Sonder Grundsteuer", BuchungskontoTyp.Passiv),
             };
             ctx.Umlagen.Add(umlage);
 
@@ -89,9 +90,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Abrechnungsresultate.Add(resultat);
 
-            // Manueller NK-Anteil — eigener Satz mit Marker-Präfix, bleibt erhalten
+            // Individuelle NK-Sonderforderung — eigener Satz, Haben auf dem
+            // NkSonderVerrechnungsKonto, bleibt bei der Rückabwicklung erhalten.
             var manuell = new Buchungssatz(new DateOnly(Jahr, 7, 1),
-                $"{NkAnteilBuchungsService.BeschreibungPrefix}Grundsteuer {Jahr}")
+                $"NK-Sonderforderung Grundsteuer {Jahr}")
             {
                 Buchungsjahr = Jahr
             };
@@ -103,7 +105,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             manuell.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 50m)
             {
                 Buchungssatz = manuell,
-                Buchungskonto = umlage.NkVerrechnungsKonto
+                Buchungskonto = umlage.NkSonderVerrechnungsKonto!
             });
             ctx.Buchungssaetze.Add(manuell);
 
@@ -213,6 +215,32 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 [vertrag.Wohnung.WohnungId], Jahr, "Abrechnung fehlerhaft");
             zweiter.BereinigteVerteilungen.Should().Be(0);
             zweiter.Resultate.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Storno_MarkiertVerteilzeilePerOpos_UndReversiertNichtDoppelt()
+        {
+            var ctx = TestUtils.GetContext();
+            var (vertrag, _, rechnung, resultat, _) = Seed(ctx);
+            resultat.Abgesendet = true;
+            ctx.SaveChanges();
+            var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
+
+            await Service(ctx).StornoAsync(wohnungIds, Jahr, "grund");
+
+            // Die Verteil-Zeile (Soll 1000 auf dem Vertrags-NkBuchungskonto) ist per OPOS als
+            // storniert markiert — daran (NICHT an der Beschreibung) erkennt der 2. Lauf sie.
+            var verteilZeile = ctx.Buchungszeilen
+                .Include(z => z.AlsSollZeile)
+                .Single(z => z.Buchungskonto.BuchungskontoId == vertrag.NkBuchungskonto.BuchungskontoId
+                    && z.SollHaben == SollHaben.Soll && z.Betrag == 1000m);
+            verteilZeile.AlsSollZeile.Should().ContainSingle("die Verteil-Zeile ist per Ausgleich storniert");
+
+            // Zweiter Lauf: keine weitere Gegenbuchung (keine Über-Reversierung), genau eine bleibt.
+            var zweiter = await Service(ctx).StornoAsync(wohnungIds, Jahr, "grund");
+            zweiter.BereinigteVerteilungen.Should().Be(0);
+            (await ctx.Buchungssaetze.CountAsync(s =>
+                s.Beschreibung == $"Storno NK-Verteilung: {rechnung.Beschreibung}")).Should().Be(1);
         }
     }
 }

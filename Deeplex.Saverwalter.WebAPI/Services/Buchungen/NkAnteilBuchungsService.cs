@@ -42,12 +42,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx = ctx;
         }
 
-        public const string BeschreibungPrefix = NkAnteilMarker;
-
         /// <summary>
-        /// Erstellt einen neuen Buchungssatz für einen manuellen Vertrags-NK-Anteil.
-        ///   Soll  Vertrag.NkBuchungskonto     — NK-Forderung gegen den Mieter
-        ///   Haben Umlage.NkVerrechnungsKonto  — Umlagekosten verteilt
+        /// Erstellt einen neuen Buchungssatz für eine individuelle NK-Sonderforderung.
+        ///   Soll  Vertrag.NkBuchungskonto              — NK-Forderung gegen den Mieter
+        ///   Haben Umlage.NkSonderVerrechnungsKonto     — individuell, NICHT verteilt
+        /// Die Buchung landet bewusst auf dem Sonder-Verrechnungskonto statt auf dem
+        /// regulären NkVerrechnungsKonto: dadurch ist sie strukturell von einer
+        /// verteilten Rechnung unterscheidbar (kein Beschreibungs-Marker nötig) und gerät
+        /// weder in die Verteilung noch in die Rückabwicklung.
         /// </summary>
         public async Task<Buchungssatz> BucheVertragsNkAnteilAsync(
             int vertragId, int umlageId, decimal betrag, int betreffendesJahr, DateOnly datum, string? notiz)
@@ -63,12 +65,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 ?? throw new ArgumentException($"Vertrag {vertragId} nicht gefunden.");
 
             var umlage = await _ctx.Umlagen
-                .Include(u => u.NkVerrechnungsKonto)
+                .Include(u => u.NkSonderVerrechnungsKonto)
                 .Include(u => u.Typ)
                 .FirstOrDefaultAsync(u => u.UmlageId == umlageId)
                 ?? throw new ArgumentException($"Umlage {umlageId} nicht gefunden.");
 
-            var beschreibung = $"{BeschreibungPrefix}{umlage.Typ.Bezeichnung} {betreffendesJahr}";
+            // Sonder-Verrechnungskonto bei Bedarf anlegen (Konto entsteht erst mit der
+            // ersten Sonderforderung — Umlagen ohne solche tragen kein leeres Konto).
+            umlage.NkSonderVerrechnungsKonto ??= new Buchungskonto(
+                $"U{umlage.UmlageId:D5}-NS",
+                $"NK-Sonderverrechnung {umlage.Typ.Bezeichnung}",
+                BuchungskontoTyp.Passiv);
+
+            var beschreibung = $"NK-Sonderforderung {umlage.Typ.Bezeichnung} {betreffendesJahr}";
             var satz = new Buchungssatz(datum, beschreibung)
             {
                 Buchungsjahr = betreffendesJahr,
@@ -82,7 +91,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag)
             {
                 Buchungssatz = satz,
-                Buchungskonto = umlage.NkVerrechnungsKonto
+                Buchungskonto = umlage.NkSonderVerrechnungsKonto
             });
 
             _ctx.Buchungssaetze.Add(satz);

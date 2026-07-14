@@ -38,6 +38,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         // Dienstleisterzahlungen aus, die hier momentan nicht gebucht werden. Sie soll
         // den Jahresabschluss deshalb nicht als offener Punkt blockieren (nur gelistet).
         public static readonly KontoFunktion NkVerrechnung = new("NK-Verrechnung", false);
+        // Wie NkVerrechnung nicht ausgleichbar: reines Verrechnungskonto für individuelle
+        // Sonderforderungen, die über den Vertrag ausgeglichen werden, nicht hier.
+        public static readonly KontoFunktion NkSonderVerrechnung = new("NK-Sonderverrechnung", false);
         public static readonly KontoFunktion Verbindlichkeiten = new("Verbindlichkeiten", true);
     }
 
@@ -119,7 +122,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var umlagen = await ctx.Umlagen
                 .Where(u =>
                     kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId) ||
-                    kontoIds.Contains(u.ZahlungsKonto.BuchungskontoId))
+                    kontoIds.Contains(u.ZahlungsKonto.BuchungskontoId) ||
+                    (u.NkSonderVerrechnungsKonto != null &&
+                     kontoIds.Contains(u.NkSonderVerrechnungsKonto.BuchungskontoId)))
                 .ToListAsync();
             foreach (var u in umlagen)
             {
@@ -127,6 +132,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 var text = u.Typ.Bezeichnung;
                 Add(u.NkVerrechnungsKonto, "Umlage", id, text, KontoFunktion.NkVerrechnung);
                 Add(u.ZahlungsKonto, "Umlage", id, text, KontoFunktion.Zahlungseingaenge);
+                Add(u.NkSonderVerrechnungsKonto, "Umlage", id, text, KontoFunktion.NkSonderVerrechnung);
             }
 
             var kontakte = await ctx.Kontakte

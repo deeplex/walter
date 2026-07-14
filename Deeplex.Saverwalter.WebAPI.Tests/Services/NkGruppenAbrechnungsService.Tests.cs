@@ -283,27 +283,36 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         // ── NK-Anteil-Buchungssatz ────────────────────────────────────────────
 
         [Fact]
-        public void NkAnteilBuchungssatz_WirdNichtAlsBkRechnungVerteilt()
+        public void NkSonderforderung_GehtVollAnVerursacher_NichtVerteilt()
         {
-            var wohnung = MakeWohnung("W1");
-            var vertrag = MakeVertrag(wohnung);
+            var wohnungA = MakeWohnung("W1");
+            var wohnungB = MakeWohnung("W2");
+            var vertragA = MakeVertrag(wohnungA);
+            MakeVertrag(wohnungB);
             var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche, nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
-            umlage.Wohnungen.Add(wohnung);
+            umlage.NkSonderVerrechnungsKonto = new Buchungskonto("7001", "NK-Sonder", BuchungskontoTyp.Passiv);
+            umlage.Wohnungen.AddRange([wohnungA, wohnungB]);
             AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
 
-            // Bereits gebuchter manueller NK-Anteil: Soll NkBuchungskonto, Haben NkVerrechnungsKonto
-            // (genau das, was NkAnteilBuchungsService.BucheVertragsNkAnteilAsync erzeugt)
-            var nkAnteilSatz = new Buchungssatz(new DateOnly(2021, 6, 1), "NK-Anteil: Test 2021") { Buchungsjahr = 2021 };
-            var nkHaben = new Buchungszeile(SollHaben.Haben, 400m) { Buchungssatz = nkAnteilSatz, Buchungskonto = umlage.NkVerrechnungsKonto };
-            nkAnteilSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 400m) { Buchungssatz = nkAnteilSatz, Buchungskonto = vertrag.NkBuchungskonto });
-            nkAnteilSatz.Buchungszeilen.Add(nkHaben);
-            umlage.NkVerrechnungsKonto.Buchungszeilen.Add(nkHaben);
+            // Individuelle NK-Sonderforderung (bereits gebucht): Soll NkBuchungskonto des
+            // Verursachers (Vertrag A), Haben auf dem NkSonderVerrechnungsKonto.
+            var sonderSatz = new Buchungssatz(new DateOnly(2021, 6, 1), "NK-Sonderforderung Test 2021") { Buchungsjahr = 2021 };
+            sonderSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 400m) { Buchungssatz = sonderSatz, Buchungskonto = vertragA.NkBuchungskonto });
+            var sonderHaben = new Buchungszeile(SollHaben.Haben, 400m) { Buchungssatz = sonderSatz, Buchungskonto = umlage.NkSonderVerrechnungsKonto };
+            sonderSatz.Buchungszeilen.Add(sonderHaben);
+            umlage.NkSonderVerrechnungsKonto.Buchungszeilen.Add(sonderHaben);
 
             var einheiten = ComputeEinheiten([umlage], 2021);
 
-            // Erwartet: nur 1 Rechnungsplan (BK-Rechnung 1000 €), nicht 2
-            einheiten.Single().Rechnungsplaene.Should().HaveCount(1);
-            einheiten.Single().Rechnungsplaene.Single().Betrag.Should().Be(1000m);
+            var plaene = einheiten.Single().Rechnungsplaene;
+            // Zwei Pläne: die verteilte BK-Rechnung (1000 €, nach WF auf beide) und die
+            // Sonderforderung (400 €), die zu 100 % an Vertrag A geht — NICHT verteilt.
+            plaene.Should().HaveCount(2);
+            var bkPlan = plaene.Single(p => p.Betrag == 1000m);
+            bkPlan.Anteile.Should().HaveCount(2); // nach WF auf beide Verträge
+            var sonderPlan = plaene.Single(p => p.Betrag == 400m);
+            sonderPlan.Anteile.Should().ContainSingle()
+                .Which.Should().Match<NkRechnungsAnteil>(a => a.Partei.Vertrag == vertragA && a.Betrag == 400m);
         }
 
         [Fact]
@@ -528,27 +537,61 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var wohnung = MakeWohnung("W1");
             MakeVertrag(wohnung);
-            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
-                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
-            umlage.Wohnungen.Add(wohnung);
-            AddBkForderung(umlage, 1000m, new DateOnly(2021, 12, 31), 2021);
+            // Distinkte BuchungskontoIds wie in der DB — sonst kollidieren die
+            // In-Memory-Konten auf Id 0 und die strukturelle Erkennung greift nicht.
+            var heiz = MakeUmlage(Umlageschluessel.NachWohnflaeche, "Heizkosten",
+                nkKonto: new Buchungskonto("7000", "NK-VK Heiz", BuchungskontoTyp.Passiv) { BuchungskontoId = 7000 });
+            heiz.Wohnungen.Add(wohnung);
+            var strom = MakeUmlage(Umlageschluessel.NachWohnflaeche, "Allgemeinstrom",
+                nkKonto: new Buchungskonto("7001", "NK-VK Strom", BuchungskontoTyp.Passiv) { BuchungskontoId = 7001 });
+            strom.Wohnungen.Add(wohnung);
+            AddBkForderung(heiz, 1000m, new DateOnly(2021, 12, 31), 2021);
 
-            // Persistierte Strompauschale-Umbuchung: Haben auf diesem NkVK.
+            // Persistierte Strompauschale-Umbuchung: Soll Strom-NkVK / Haben Heiz-NkVK —
+            // eine Umbuchung ZWISCHEN zwei Verrechnungskonten. Muss strukturell erkannt
+            // und NICHT als Forderung verteilt werden (ohne Beschreibungs-Marker).
             var umbuchung = new Buchungssatz(new DateOnly(2021, 12, 31), $"{StrompauschaleMarker} Heizkosten 2021")
             {
                 Buchungsjahr = 2021
             };
-            var habenZeile = new Buchungszeile(SollHaben.Haben, 50m)
-            {
-                Buchungssatz = umbuchung,
-                Buchungskonto = umlage.NkVerrechnungsKonto
-            };
+            var sollZeile = new Buchungszeile(SollHaben.Soll, 50m) { Buchungssatz = umbuchung, Buchungskonto = strom.NkVerrechnungsKonto };
+            var habenZeile = new Buchungszeile(SollHaben.Haben, 50m) { Buchungssatz = umbuchung, Buchungskonto = heiz.NkVerrechnungsKonto };
+            umbuchung.Buchungszeilen.Add(sollZeile);
             umbuchung.Buchungszeilen.Add(habenZeile);
-            umlage.NkVerrechnungsKonto!.Buchungszeilen.Add(habenZeile);
+            heiz.NkVerrechnungsKonto!.Buchungszeilen.Add(habenZeile);
+            strom.NkVerrechnungsKonto!.Buchungszeilen.Add(sollZeile);
 
-            var plaene = ComputeEinheiten([umlage], 2021).Single().Rechnungsplaene;
+            var plaene = ComputeEinheiten([heiz, strom], 2021)
+                .SelectMany(e => e.Rechnungsplaene).ToList();
 
+            // Nur die echte BK-Rechnung (1000 €) wird verteilt; die Umbuchung taucht nicht auf.
             plaene.Should().ContainSingle().Which.Betrag.Should().Be(1000m);
+        }
+
+        [Fact]
+        public void IstStrompauschaleUmbuchung_ErkenntNurCrossNkVk()
+        {
+            var nkVkA = new Buchungskonto("7000", "A", BuchungskontoTyp.Passiv) { BuchungskontoId = 1 };
+            var nkVkB = new Buchungskonto("7001", "B", BuchungskontoTyp.Passiv) { BuchungskontoId = 2 };
+            var vertragNk = new Buchungskonto("1001", "V-NK", BuchungskontoTyp.Passiv) { BuchungskontoId = 3 };
+            var nkVkIds = new HashSet<int> { 1, 2 };
+
+            // Umbuchung: Soll NkVK-A / Haben NkVK-B → erkannt.
+            var umbuchung = new Buchungssatz(new DateOnly(2021, 12, 31), "x") { Buchungsjahr = 2021 };
+            umbuchung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 50m) { Buchungssatz = umbuchung, Buchungskonto = nkVkA });
+            umbuchung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 50m) { Buchungssatz = umbuchung, Buchungskonto = nkVkB });
+            NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(umbuchung, nkVkIds).Should().BeTrue();
+
+            // Normale Rechnung: Haben NkVK-A / Soll Vertrag-NK → NICHT erkannt.
+            var rechnung = new Buchungssatz(new DateOnly(2021, 12, 31), "x") { Buchungsjahr = 2021 };
+            rechnung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 100m) { Buchungssatz = rechnung, Buchungskonto = nkVkA });
+            rechnung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m) { Buchungssatz = rechnung, Buchungskonto = vertragNk });
+            NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(rechnung, nkVkIds).Should().BeFalse();
+
+            // Gutschrift: nur eine Haben-Zeile auf NkVK-A → NICHT erkannt.
+            var gutschrift = new Buchungssatz(new DateOnly(2021, 12, 31), "x") { Buchungsjahr = 2021 };
+            gutschrift.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, -30m) { Buchungssatz = gutschrift, Buchungskonto = nkVkA });
+            NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(gutschrift, nkVkIds).Should().BeFalse();
         }
 
         // ── Rechnungsplaene ───────────────────────────────────────────────────

@@ -592,19 +592,31 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         {
             var result = new List<NkRechnungsplan>();
 
+            // NkVerrechnungsKonto-IDs der Gruppe: für die strukturelle Erkennung der
+            // Strompauschale-Umbuchung (Umbuchung zwischen zwei dieser Konten).
+            var gruppenNkVkIds = umlagen
+                .Where(u => u.NkVerrechnungsKonto != null)
+                .Select(u => u.NkVerrechnungsKonto.BuchungskontoId)
+                .ToHashSet();
+
             foreach (var umlage in umlagen)
             {
+                // Individuelle NK-Sonderforderungen (auf dem NkSonderVerrechnungsKonto)
+                // gelten für jede Umlage — unabhängig vom Verteilschlüssel/HKVO, sie
+                // gehen zu 100 % an den Verursacher.
+                ProcessSonderforderungen(umlage, parteien, result, jahr);
+
                 var hkvo = umlage.HkvoAt(abrechnungsEnde);
                 if (hkvo != null)
                 {
-                    ProcessHkvoUmlage(umlage, hkvo, parteien, result, beginn, ende, jahr);
+                    ProcessHkvoUmlage(umlage, hkvo, parteien, result, beginn, ende, jahr, gruppenNkVkIds);
                     continue;
                 }
 
                 var schluessel = umlage.VersionAt(abrechnungsEnde).Schluessel;
                 var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                     .Where(z => z.Buchungssatz.Buchungsjahr == jahr
-                             && IstRechnungsZeile(z))
+                             && IstRechnungsZeile(z, gruppenNkVkIds))
                     .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                     .ToList() ?? [];
 
@@ -709,7 +721,49 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return (result, strompauschalen);
         }
 
-        /// <summary>Beschreibungs-Marker der Strompauschale-Umbuchung (HeizkostenV).</summary>
+        /// <summary>
+        /// Individuelle NK-Sonderforderungen: Haben-Zeilen auf dem NkSonderVerrechnungsKonto
+        /// der Umlage. Jede geht zu 100 % an den Verursacher (der Vertrag, dessen
+        /// NkBuchungskonto die Soll-Gegenzeile des Satzes trägt) — NICHT nach Schlüssel
+        /// verteilt. Die Buchung existiert bereits vollständig (Soll auf dem NkBuchungskonto);
+        /// der Plan trägt daher den vorhandenen Satz. Beim Buchen überspringt
+        /// <see cref="NkAnteilBuchungsService.BucheAnteileAsync"/> diese Zeile (Konto bereits
+        /// gebucht), sodass nichts doppelt gebucht wird — der Betrag fließt nur in Kosten/Saldo.
+        /// </summary>
+        private static void ProcessSonderforderungen(
+            Umlage umlage, List<NkPartei> parteien, List<NkRechnungsplan> result, int jahr)
+        {
+            var sonderKonto = umlage.NkSonderVerrechnungsKonto;
+            if (sonderKonto is null) return;
+
+            foreach (var haben in sonderKonto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungssatz.Buchungsjahr == jahr))
+            {
+                if (haben.Betrag == 0) continue;
+
+                var sollKontoId = haben.Buchungssatz.Buchungszeilen
+                    .FirstOrDefault(z => z.SollHaben == SollHaben.Soll)
+                    ?.Buchungskonto.BuchungskontoId;
+                var partei = parteien.FirstOrDefault(p =>
+                    p.Vertrag?.NkBuchungskonto.BuchungskontoId == sollKontoId);
+                if (partei is null) continue; // Verursacher gehört nicht zu dieser Einheit
+
+                result.Add(new NkRechnungsplan
+                {
+                    Buchungssatz = haben.Buchungssatz,
+                    Betrag = haben.Betrag,
+                    Umlage = umlage,
+                    Anteile = [new NkRechnungsAnteil { Partei = partei, Betrag = haben.Betrag }],
+                    Warnungen = [],
+                });
+            }
+        }
+
+        /// <summary>
+        /// Nur die menschenlesbare Beschreibung der Strompauschale-Umbuchung (HeizkostenV).
+        /// KEINE Logik wertet diesen Text aus — die Umbuchung wird strukturell erkannt
+        /// (siehe <see cref="IstStrompauschaleUmbuchung"/>).
+        /// </summary>
         public const string StrompauschaleMarker = "Strompauschale-Umbuchung";
 
         /// <summary>
@@ -718,12 +772,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         /// sonstigen HKVO-Plausibilitätshinweisen).
         /// </summary>
         public const string ZaehlerstandFehltMarker = "Fehler: Zählerstand fehlt — ";
-
-        /// <summary>
-        /// Beschreibungs-Marker manueller NK-Anteil-Sätze (Soll NkBuchungskonto /
-        /// Haben NkVerrechnungsKonto). Wird von NkAnteilBuchungsService verwendet.
-        /// </summary>
-        public const string NkAnteilMarker = "NK-Anteil: ";
 
         /// <summary>
         /// Wendet die Strompauschale (HeizkostenV) an: delta = Heizkosten × Strompauschale wird
@@ -899,7 +947,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<NkRechnungsplan> result,
             DateOnly beginn,
             DateOnly ende,
-            int jahr)
+            int jahr,
+            ISet<int> gruppenNkVkIds)
         {
             var p7 = hkvo.HKVO_P7;
             var p8 = hkvo.HKVO_P8;
@@ -1008,7 +1057,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             // Folgejahr bezahlt wird) und würde die Rechnung sonst doppelt zuordnen.
             var verrechnungsZeilen = umlage.NkVerrechnungsKonto?.Buchungszeilen
                 .Where(z => z.Buchungssatz.Buchungsjahr == jahr
-                         && IstRechnungsZeile(z))
+                         && IstRechnungsZeile(z, gruppenNkVkIds))
                 .Select(z => (Zeile: z, Betrag: z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag))
                 .ToList() ?? [];
 
@@ -1061,13 +1110,32 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         }
 
         /// <summary>
+        /// Eine Strompauschale-Umbuchung ist strukturell erkennbar: sie ist der einzige Satz,
+        /// der eine Soll-Zeile auf einem Umlage-NkVerrechnungsKonto UND eine Haben-Zeile auf
+        /// einem ANDEREN Umlage-NkVerrechnungsKonto trägt (Umbuchung zwischen zwei Pötten).
+        /// Jeder andere Satz, der ein NkVerrechnungsKonto berührt, paart es mit einem
+        /// Vertrags-NkBuchungskonto (Verteilung) oder einem Zahlungskonto (Zahlung) — nie mit
+        /// einem zweiten NkVerrechnungsKonto. Ersetzt den früheren Beschreibungs-Marker.
+        /// </summary>
+        public static bool IstStrompauschaleUmbuchung(Buchungssatz satz, ISet<int> nkVkIds)
+        {
+            var soll = satz.Buchungszeilen.FirstOrDefault(z =>
+                z.SollHaben == SollHaben.Soll && nkVkIds.Contains(z.Buchungskonto.BuchungskontoId));
+            var haben = satz.Buchungszeilen.FirstOrDefault(z =>
+                z.SollHaben == SollHaben.Haben && nkVkIds.Contains(z.Buchungskonto.BuchungskontoId));
+            return soll != null && haben != null
+                && soll.Buchungskonto.BuchungskontoId != haben.Buchungskonto.BuchungskontoId;
+        }
+
+        /// <summary>
         /// Rechnungs-/Gutschriftszeilen auf dem NkVerrechnungskonto sind zu verteilende
         /// Forderungen: Haben-Zeilen (Rechnungen) und Soll-Zeilen ohne OPOS-Ausgleich
         /// (Gutschriften, Stornos). Keine Forderungen sind:
         ///   - Zahlungs-Soll-Zeilen — sie tragen immer einen OffenerPostenAusgleich
         ///     zur Forderungs-Haben-Zeile (TransaktionBuchungsService),
-        ///   - die Strompauschale-Umbuchung (wird als eigener transienter Plan erzeugt),
-        ///   - manuelle NK-Anteil-Sätze (Haben NkVK ist dort die Verteil-Gegenseite).
+        ///   - die Strompauschale-Umbuchung (strukturell erkannt, siehe IstStrompauschaleUmbuchung).
+        /// Individuelle NK-Sonderforderungen erscheinen hier gar nicht: sie buchen auf das
+        /// NkSonderVerrechnungsKonto, das diese Methode nicht auswertet.
         /// Der Ausgleichszustand des Satzes ist bewusst KEIN Kriterium: Nach dem Buchen
         /// der NK-Anteile ist der Forderungssatz ausgeglichen, muss aber im Preview
         /// weiterhin als (gebuchte) Rechnung erscheinen — sonst kippen die Ergebnisse
@@ -1075,9 +1143,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         /// Buchungssatz.Transaktion KEIN Kriterium: importierte Forderungssätze können
         /// eine Transaktion tragen.
         /// </summary>
-        private static bool IstRechnungsZeile(Buchungszeile zeile) =>
-            !zeile.Buchungssatz.Beschreibung.StartsWith(StrompauschaleMarker)
-            && !zeile.Buchungssatz.Beschreibung.StartsWith(NkAnteilMarker)
+        private static bool IstRechnungsZeile(Buchungszeile zeile, ISet<int> nkVkIds) =>
+            !IstStrompauschaleUmbuchung(zeile.Buchungssatz, nkVkIds)
             && (zeile.SollHaben == SollHaben.Haben || zeile.AlsSollZeile.Count == 0);
 
         // Bevorzugt letzten Eigenanteil als Träger der Rundungsdifferenz.

@@ -186,7 +186,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Betriebskostenrechnungen = [];
                 Konten = BuchungskontoRefEntry.Collect(
                     (entity.NkVerrechnungsKonto, KontoFunktion.NkVerrechnung),
-                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge));
+                    (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge),
+                    (entity.NkSonderVerrechnungsKonto, KontoFunktion.NkSonderVerrechnung));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

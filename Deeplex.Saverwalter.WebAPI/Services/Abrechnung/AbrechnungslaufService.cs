@@ -281,9 +281,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var habenKontoId = transient.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben).Buchungskonto.BuchungskontoId;
             var sollKontoId = transient.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Buchungskonto.BuchungskontoId;
 
+            // Die Umbuchung ist über ihr Konten-Paar (Soll auf sollKontoId, Haben auf
+            // habenKontoId — zwei NkVerrechnungsKonten) + Jahr eindeutig identifiziert;
+            // kein Beschreibungs-Marker nötig.
             var vorhanden = await _ctx.Buchungssaetze
                 .Include(b => b.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .Where(b => b.Buchungsjahr == jahr && b.Beschreibung.StartsWith(NkGruppenAbrechnungsService.StrompauschaleMarker))
+                .Where(b => b.Buchungsjahr == jahr)
                 .Where(b => b.StornoNach == null) // bereits stornierte Umbuchungen ignorieren
                 .Where(b => b.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == habenKontoId)
                          && b.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Soll && z.Buchungskonto.BuchungskontoId == sollKontoId))
@@ -331,6 +334,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
             var (verteilKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
+            var nkVkSet = umlageNkVkIds.ToHashSet();
 
             var zuLoeschen = new List<Buchungssatz>();
             foreach (var resultat in resultate)
@@ -345,7 +349,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var anteilZeilen = new List<Buchungszeile>();
             foreach (var satz in verteilSaetze)
             {
-                if (satz.Beschreibung.StartsWith(StrompauschaleMarker))
+                if (NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(satz, nkVkSet))
                 {
                     // Vom Lauf erzeugte Umbuchung — komplett entfernen (inkl. Storno-Paar)
                     zuLoeschen.Add(satz);
@@ -390,6 +394,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var resultate = await LadeResultate(wohnungIds, jahr);
             var (verteilKontoIds, umlageNkVkIds) = await LadeGruppenKonten(wohnungIds);
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
+            var nkVkSet = umlageNkVkIds.ToHashSet();
 
             var stornierteResultate = 0;
             foreach (var resultat in resultate
@@ -403,40 +408,49 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var bereinigt = 0;
             foreach (var satz in verteilSaetze.Where(s => s.StornoNach == null && s.StornoVon == null))
             {
-                if (satz.Beschreibung.StartsWith(StrompauschaleMarker))
+                if (NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(satz, nkVkSet))
                 {
                     await _stornoService.StornierenAsync(satz.BuchungssatzId, grund);
                     umbuchungen++;
                     continue;
                 }
 
+                // Nur noch NICHT stornierte Verteil-Zeilen: eine bereits per Gegenbuchung
+                // ausgeglichene Zeile trägt einen OffenerPostenAusgleich (Soll/Haben je nach
+                // Seite). So ist die Rückabwicklung idempotent — ohne Beschreibungs-Marker —
+                // und ein erneut gebuchter Anteil (frisch, ohne OPOS) wird korrekt storniert.
                 var zeilen = satz.Buchungszeilen
-                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
+                             && (z.SollHaben == SollHaben.Soll
+                                    ? z.AlsSollZeile.Count == 0
+                                    : z.AlsHabenZeile.Count == 0))
                     .ToList();
                 if (zeilen.Count == 0) continue;
 
-                // Schon korrigiert? (Re-Runs dürfen keine doppelten Gegenbuchungen erzeugen)
-                var beschreibung = $"Storno NK-Verteilung: {satz.Beschreibung}";
-                if (await _ctx.Buchungssaetze.AnyAsync(k =>
-                        k.Buchungsjahr == jahr && k.Beschreibung == beschreibung))
-                    continue;
-
-                var korrektur = new Buchungssatz(DateOnly.FromDateTime(DateTime.Today), beschreibung)
+                var korrektur = new Buchungssatz(
+                    DateOnly.FromDateTime(DateTime.Today),
+                    $"Storno NK-Verteilung: {satz.Beschreibung}")
                 {
                     Buchungsjahr = jahr,
                     Notiz = grund
                 };
                 foreach (var zeile in zeilen)
                 {
-                    korrektur.Buchungszeilen.Add(new Buchungszeile(
+                    var gegenZeile = new Buchungszeile(
                         zeile.SollHaben == SollHaben.Soll ? SollHaben.Haben : SollHaben.Soll,
                         zeile.Betrag)
                     {
                         Buchungssatz = korrektur,
                         Buchungskonto = zeile.Buchungskonto
-                    });
+                    };
+                    korrektur.Buchungszeilen.Add(gegenZeile);
+
+                    // Ausgleich zwischen Verteil-Zeile und ihrer Gegenbuchung (gleiches Konto):
+                    // markiert die Zeile strukturell als storniert.
+                    _ctx.OffenePostenAusgleiche.Add(zeile.SollHaben == SollHaben.Soll
+                        ? new OffenerPostenAusgleich { SollZeile = zeile, HabenZeile = gegenZeile }
+                        : new OffenerPostenAusgleich { SollZeile = gegenZeile, HabenZeile = zeile });
                 }
-                await EntferneOpos(zeilen);
                 _ctx.Buchungssaetze.Add(korrektur);
                 bereinigt++;
             }
@@ -493,10 +507,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             _ctx.Buchungssaetze
                 .Include(s => s.Buchungszeilen)
                     .ThenInclude(z => z.Buchungskonto)
+                // OPOS-Navigationen: die Verteil-Zeilen tragen nach einem Storno einen
+                // Ausgleich zu ihrer Gegenbuchung — daran erkennen wir „schon storniert".
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile)
+                .Include(s => s.Buchungszeilen)
+                    .ThenInclude(z => z.AlsHabenZeile)
                 .Include(s => s.StornoNach)
                     .ThenInclude(st => st!.Buchungszeilen)
+                // NK-Sonderforderungen buchen auf das NkSonderVerrechnungsKonto (nicht auf
+                // umlageNkVkIds) und werden hier daher strukturell nicht erfasst.
                 .Where(s => s.Buchungsjahr == jahr
-                         && !s.Beschreibung.StartsWith(NkAnteilBuchungsService.BeschreibungPrefix)
                          && s.Buchungszeilen.Any(z => z.SollHaben == SollHaben.Haben
                                 && umlageNkVkIds.Contains(z.Buchungskonto.BuchungskontoId)))
                 .ToListAsync();
@@ -537,6 +558,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .ThenInclude(k => k.Buchungszeilen
                         .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                     .ThenInclude(z => z.AlsSollZeile)
+                // NkSonderVerrechnungsKonto: individuelle Sonderforderungen des Jahres.
+                // Der Satz + seine Geschwisterzeilen (mit Konto) werden gebraucht, um den
+                // Verursacher (Soll auf einem Vertrags-NkBuchungskonto) zu bestimmen.
+                .Include(u => u.NkSonderVerrechnungsKonto)
+                    .ThenInclude(k => k!.Buchungszeilen
+                        .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
+                    .ThenInclude(z => z.Buchungssatz)
+                        .ThenInclude(s => s.Buchungszeilen)
+                            .ThenInclude(z => z.Buchungskonto)
                 // Wohnungen-Stammdaten
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.AufwandsKonto)

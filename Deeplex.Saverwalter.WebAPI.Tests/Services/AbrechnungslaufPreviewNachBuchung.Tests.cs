@@ -358,6 +358,81 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task Sonderforderung_FliesstInSaldoUndWirdNichtDoppeltGebucht()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+
+            var umlage = new Umlage
+            {
+                Typ = new Umlagetyp("Grundsteuer"),
+                Wohnungen = [vertrag.Wohnung],
+                NkVerrechnungsKonto = new Buchungskonto("7001", "NK-VK Grundsteuer", BuchungskontoTyp.Passiv),
+                ZahlungsKonto = new Buchungskonto("1201", "Zahlung Grundsteuer", BuchungskontoTyp.Aktiv),
+                NkSonderVerrechnungsKonto = new Buchungskonto("7002", "NK-Sonder Grundsteuer", BuchungskontoTyp.Passiv),
+            };
+            ctx.Umlagen.Add(MitVersion(umlage, Umlageschluessel.NachWohnflaeche));
+            AddRechnung(ctx, umlage, 1000m);
+
+            // Individuelle Sonderforderung (bereits vollständig gebucht): 150 € direkt an
+            // den Verursacher — Soll NkBuchungskonto des Vertrags, Haben NkSonderVerrechnungsKonto.
+            var sonder = new Buchungssatz(new DateOnly(Jahr, 7, 1), $"NK-Sonderforderung Grundsteuer {Jahr}") { Buchungsjahr = Jahr };
+            sonder.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 150m) { Buchungssatz = sonder, Buchungskonto = vertrag.NkBuchungskonto });
+            sonder.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 150m) { Buchungssatz = sonder, Buchungskonto = umlage.NkSonderVerrechnungsKonto });
+            ctx.Buchungssaetze.Add(sonder);
+            ctx.SaveChanges();
+            var sonderId = sonder.BuchungssatzId;
+
+            var service = Service(ctx);
+            var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
+
+            // Preview: Rechnungsbetrag = verteilte BK (1000) + Sonderforderung (150).
+            var preview = await service.PreviewAsync(wohnungIds, Jahr);
+            preview.Resultate.Single().Rechnungsbetrag.Should().Be(1150m);
+
+            await service.BookAsync(wohnungIds, Jahr);
+
+            // Der Sonderforderungs-Satz bleibt unangetastet — die Soll-Zeile auf dem
+            // NkBuchungskonto wird NICHT ein zweites Mal gebucht (cost-only).
+            var sonderZeilen = ctx.Buchungssaetze
+                .Where(s => s.BuchungssatzId == sonderId)
+                .SelectMany(s => s.Buchungszeilen)
+                .ToList();
+            sonderZeilen.Should().HaveCount(2);
+            sonderZeilen.Where(z => z.Buchungskonto.BuchungskontoId == vertrag.NkBuchungskonto.BuchungskontoId
+                                    && z.SollHaben == SollHaben.Soll && z.Betrag == 150m)
+                .Should().ContainSingle();
+
+            // Gebuchter Saldo enthält die Sonderforderung und stimmt mit dem Preview überein.
+            var nach = await service.PreviewAsync(wohnungIds, Jahr);
+            var resultat = nach.Resultate.Single();
+            resultat.Rechnungsbetrag.Should().Be(1150m);
+            resultat.GebuchterSaldo.Should().Be(resultat.Saldo);
+        }
+
+        [Fact]
+        public async Task Rueckabwicklung_EntferntStrompauschaleUmbuchung()
+        {
+            var ctx = TestUtils.GetContext();
+            var (vertrag, _, _) = Seed(ctx);
+            var service = Service(ctx);
+            var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
+
+            await service.BookAsync(wohnungIds, Jahr);
+            var result = await service.DeleteAsync(wohnungIds, Jahr);
+
+            // Die Strompauschale-Umbuchung wird strukturell (ohne Beschreibungs-Marker)
+            // erkannt und komplett entfernt.
+            result.Umbuchungen.Should().Be(1);
+            var betriebsstromNkVk = ctx.Umlagen
+                .Single(u => u.Typ.Bezeichnung == "Allgemeinstrom").NkVerrechnungsKonto!;
+            ctx.Buchungszeilen.Any(z =>
+                z.Buchungskonto.BuchungskontoId == betriebsstromNkVk.BuchungskontoId
+                && z.SollHaben == SollHaben.Soll)
+                .Should().BeFalse("die Umbuchungs-Soll-Zeile auf dem Betriebsstrom-NkVK ist entfernt");
+        }
+
+        [Fact]
         public async Task Buchen_VerteiltKalteUndWarmeAnteile()
         {
             var ctx = TestUtils.GetContext();

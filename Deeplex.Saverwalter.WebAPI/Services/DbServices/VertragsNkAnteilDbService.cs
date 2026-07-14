@@ -40,11 +40,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 .ToListAsync();
             var nkMap = vertraege.ToDictionary(v => v.NkBuchungskonto.BuchungskontoId, v => v);
 
+            // NK-Sonderforderungen buchen ihre Haben-Seite auf das
+            // NkSonderVerrechnungsKonto — nur Umlagen mit einem solchen Konto zählen.
             var umlagen = await ctx.Umlagen
-                .Include(u => u.NkVerrechnungsKonto)
+                .Include(u => u.NkSonderVerrechnungsKonto)
                 .Include(u => u.Typ)
+                .Where(u => u.NkSonderVerrechnungsKonto != null)
                 .ToListAsync();
-            var umlageMap = umlagen.ToDictionary(u => u.NkVerrechnungsKonto.BuchungskontoId, u => u);
+            var umlageMap = umlagen.ToDictionary(u => u.NkSonderVerrechnungsKonto!.BuchungskontoId, u => u);
 
             return (nkMap, umlageMap);
         }
@@ -68,13 +71,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
         public async Task<List<VertragsNkAnteilEntry>> GetList(ClaimsPrincipal user, int? vertragId, int? umlageId)
         {
+            var (nkMap, umlageMap) = await BuildMapsAsync();
+            var sonderKontoIds = umlageMap.Keys.ToHashSet();
+
+            // Eine NK-Sonderforderung ist strukturell erkennbar: sie trägt eine Zeile
+            // auf einem NkSonderVerrechnungsKonto einer Umlage.
             var saetze = await ctx.Buchungssaetze
                 .AsSplitQuery()
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .Where(s => s.Beschreibung.StartsWith(NkAnteilBuchungsService.BeschreibungPrefix))
+                .Where(s => s.Buchungszeilen.Any(z => sonderKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
                 .ToListAsync();
-
-            var (nkMap, umlageMap) = await BuildMapsAsync();
 
             var entries = saetze
                 .Select(s =>
@@ -169,7 +175,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
                 .FirstOrDefaultAsync(s => s.BuchungssatzId == id);
 
-            if (satz is null || !satz.Beschreibung.StartsWith(NkAnteilBuchungsService.BeschreibungPrefix))
+            // Nur echte NK-Sonderforderungen sind hier löschbar: der Satz muss eine Zeile
+            // auf einem NkSonderVerrechnungsKonto tragen (verteilte Rechnungen/Anteile nicht).
+            var sonderKontoIds = await ctx.Umlagen
+                .Where(u => u.NkSonderVerrechnungsKonto != null)
+                .Select(u => u.NkSonderVerrechnungsKonto!.BuchungskontoId)
+                .ToListAsync();
+            if (satz is null || !satz.Buchungszeilen.Any(z => sonderKontoIds.Contains(z.Buchungskonto.BuchungskontoId)))
                 return new NotFoundResult();
 
             var nkMap = (await ctx.Vertraege

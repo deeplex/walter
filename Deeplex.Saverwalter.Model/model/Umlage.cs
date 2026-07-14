@@ -32,6 +32,15 @@ namespace Deeplex.Saverwalter.Model
         public virtual Buchungskonto NkVerrechnungsKonto { get; set; } = null!;
         public virtual Buchungskonto ZahlungsKonto { get; set; } = null!;
 
+        /// <summary>
+        /// Verrechnungskonto für individuelle NK-Sonderforderungen: ein einzelner Vertrag
+        /// wird direkt belastet (Verursacher), ohne dass die Kosten über den Umlageschlüssel
+        /// auf die anderen Parteien verteilt werden. Getrennt vom NkVerrechnungsKonto, damit
+        /// diese Buchungen strukturell nicht in die reguläre Verteilung/Rückabwicklung geraten.
+        /// Wird bei Bedarf angelegt (null, solange keine Sonderforderung existiert).
+        /// </summary>
+        public virtual Buchungskonto? NkSonderVerrechnungsKonto { get; set; }
+
         public virtual List<UmlageVersion> Versionen { get; private set; } = [];
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();

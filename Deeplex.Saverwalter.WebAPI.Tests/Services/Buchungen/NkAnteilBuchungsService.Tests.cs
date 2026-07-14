@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
         // ── BucheVertragsNkAnteilAsync ─────────────────────────────────────────
 
         [Fact]
-        public async Task BuchtSollNkKontoHabenVerrechnungsKonto()
+        public async Task BuchtSollNkKontoHabenSonderVerrechnungsKonto()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
@@ -45,12 +45,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             var satz = await service.BucheVertragsNkAnteilAsync(
                 vertrag.VertragId, umlage.UmlageId, 120m, 2024, new DateOnly(2024, 12, 31), null);
 
+            // Individuelle Sonderforderung: Soll auf NkBuchungskonto des Vertrags, Haben
+            // auf dem bei Bedarf angelegten NkSonderVerrechnungsKonto (NICHT NkVerrechnungsKonto).
             satz.Buchungszeilen.Should().HaveCount(2);
             satz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll)
                 .Buchungskonto.Should().Be(vertrag.NkBuchungskonto);
+            umlage.NkSonderVerrechnungsKonto.Should().NotBeNull();
             satz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben)
-                .Buchungskonto.Should().Be(umlage.NkVerrechnungsKonto);
-            satz.Beschreibung.Should().StartWith(NkAnteilBuchungsService.BeschreibungPrefix);
+                .Buchungskonto.Should().Be(umlage.NkSonderVerrechnungsKonto);
+            satz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben)
+                .Buchungskonto.Should().NotBe(umlage.NkVerrechnungsKonto);
         }
 
         [Fact]
