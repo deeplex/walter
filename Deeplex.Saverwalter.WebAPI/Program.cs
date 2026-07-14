@@ -26,6 +26,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -252,6 +254,11 @@ namespace Deeplex.Saverwalter.WebAPI
         /// (transiente Verbindungsfehler werden mit Backoff wiederholt). Kann die
         /// Migration nach Ablauf des Zeitfensters nicht angewandt werden — oder schlägt
         /// sie inhaltlich fehl —, wird die Ausnahme weitergereicht (Fail-Fast).
+        ///
+        /// Ausnahme: eine per <c>EnsureCreated</c> erzeugte Datenbank (Test-/E2E-Seeding
+        /// über InitiateTestDbs) hat das aktuelle Schema, aber KEINE Migrationshistorie.
+        /// Migrate würde dort alle Migrationen für schon existierende Tabellen erneut
+        /// anwenden und scheitern — solche DBs werden daher übersprungen.
         /// </summary>
         private static async Task ApplyMigrationsAsync(Container container)
         {
@@ -264,6 +271,16 @@ namespace Deeplex.Saverwalter.WebAPI
                 {
                     await using var scope = AsyncScopedLifestyle.BeginScope(container);
                     var dbContext = container.GetInstance<SaverwalterContext>();
+
+                    var creator = dbContext.Database.GetService<IRelationalDatabaseCreator>();
+                    var hatTabellen = await creator.HasTablesAsync();
+                    var angewandt = await dbContext.Database.GetAppliedMigrationsAsync();
+                    if (hatTabellen && !angewandt.Any())
+                    {
+                        // Schema per EnsureCreated angelegt (keine Historie) — nicht migrieren.
+                        return;
+                    }
+
                     await dbContext.Database.MigrateAsync();
                     return;
                 }
