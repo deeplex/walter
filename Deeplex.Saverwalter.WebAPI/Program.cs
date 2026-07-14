@@ -49,6 +49,8 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
+            await ApplyMigrationsAsync(container);
+
             // Run DB initialisation after the host starts so that a slow or
             // temporarily unavailable database never prevents the app from
             // binding to its port and writing startup log messages.
@@ -242,6 +244,37 @@ namespace Deeplex.Saverwalter.WebAPI
             optionsBuilder.UseNpgsql(connection);
 
             return optionsBuilder.Options;
+        }
+
+        /// <summary>
+        /// Wendet ausstehende EF-Core-Migrationen an, bevor die App Anfragen bedient.
+        /// Wartet dabei auf eine beim Kaltstart noch nicht erreichbare Datenbank
+        /// (transiente Verbindungsfehler werden mit Backoff wiederholt). Kann die
+        /// Migration nach Ablauf des Zeitfensters nicht angewandt werden — oder schlägt
+        /// sie inhaltlich fehl —, wird die Ausnahme weitergereicht (Fail-Fast).
+        /// </summary>
+        private static async Task ApplyMigrationsAsync(Container container)
+        {
+            const int maxVersuche = 30;
+            var verzoegerung = TimeSpan.FromSeconds(2);
+
+            for (var versuch = 1; ; versuch++)
+            {
+                try
+                {
+                    await using var scope = AsyncScopedLifestyle.BeginScope(container);
+                    var dbContext = container.GetInstance<SaverwalterContext>();
+                    await dbContext.Database.MigrateAsync();
+                    return;
+                }
+                catch (Exception ex) when (versuch < maxVersuche)
+                {
+                    Console.Error.WriteLine(
+                        $"Datenbank noch nicht bereit für Migration (Versuch {versuch}/{maxVersuche}): "
+                        + $"{ex.GetBaseException().Message}");
+                    await Task.Delay(verzoegerung);
+                }
+            }
         }
 
         private static async Task CreateRootIfNoUserExists(Container container)
