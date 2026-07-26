@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungssaetzeController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
-using Operations = Deeplex.Saverwalter.WebAPI.Services.Operations;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -34,7 +33,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly StornoBuchungsService stornoService;
         private readonly BuchungssatzSchutzService schutzService;
         private readonly SaverwalterContext ctx;
-        private readonly IAuthorizationService auth;
         protected override BuchungssatzDbService DbService { get; }
 
         public BuchungssaetzeController(
@@ -43,14 +41,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             StornoBuchungsService stornoService,
             BuchungssatzSchutzService schutzService,
             SaverwalterContext ctx,
-            IAuthorizationService auth,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             this.stornoService = stornoService;
             this.schutzService = schutzService;
             this.ctx = ctx;
-            this.auth = auth;
         }
 
         public class StornoRequest
@@ -376,8 +372,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Autorisierung für Korrekturen: Admin oder Vollzugriff auf die Wohnung
-        /// des ersten Buchungskontos des Satzes.
+        /// Autorisierung für Korrekturen: Admin oder Vollmacht/Eigentümer auf
+        /// (mindestens) eine der Wohnungen, denen ein Buchungskonto des Satzes
+        /// zugeordnet ist — über dieselbe Konto→Wohnung-Auflösung wie bei
+        /// Transaktionen (<see cref="TransaktionPermissionHandler.ManagedBuchungskontoIds"/>),
+        /// die auch Wohnungs-, Garagen- und Umlagekonten abdeckt, nicht nur
+        /// Vertragskonten.
         /// </summary>
         private async Task<ActionResult?> AuthorizeKorrektur(Guid id)
         {
@@ -386,23 +386,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return null;
             }
 
-            var wohnung = await ctx.Buchungssaetze
+            var kontoIds = TransaktionPermissionHandler.ManagedBuchungskontoIds(
+                ctx, User!.GetUserId(), VerwalterRolle.Vollmacht);
+
+            var berechtigt = await ctx.Buchungssaetze
                 .Where(s => s.BuchungssatzId == id)
                 .SelectMany(s => s.Buchungszeilen)
-                .Select(z => z.Buchungskonto)
-                .SelectMany(k =>
-                    ctx.Vertraege
-                        .Where(v =>
-                            v.MietBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
-                            v.NkBuchungskonto.BuchungskontoId == k.BuchungskontoId ||
-                            v.ZahlungsKonto.BuchungskontoId == k.BuchungskontoId)
-                        .Select(v => v.Wohnung))
-                .FirstOrDefaultAsync();
+                .AnyAsync(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId));
 
-            if (wohnung == null) return Forbid();
-
-            var authRx = await auth.AuthorizeAsync(User!, wohnung, [Operations.Delete]);
-            return authRx.Succeeded ? null : Forbid();
+            return berechtigt ? null : Forbid();
         }
 
         private async Task<Buchungssatz?> LadeSatzMitZeilen(Guid id) =>
@@ -455,17 +447,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             catch (InvalidOperationException ex) { return Conflict(ex.Message); }
         }
 
+        public class BuchungszeilePatch
+        {
+            public Guid Id { get; set; }
+            public decimal Betrag { get; set; }
+        }
+
         public class BuchungssatzPatchEntry
         {
             public int Buchungsjahr { get; set; }
             public string Beschreibung { get; set; } = string.Empty;
             public string? Notiz { get; set; }
+            public List<BuchungszeilePatch> Zeilen { get; set; } = [];
         }
 
         /// <summary>
-        /// Aktualisiert Metadaten eines Buchungssatzes (Buchungsjahr, Beschreibung, Notiz).
-        /// Die Buchungszeilen selbst bleiben unverändert — wer den Satz sehen darf,
-        /// darf diese Felder pflegen (analog zum Speichern-Button im Frontend).
+        /// Aktualisiert einen Buchungssatz — Buchungsjahr, Beschreibung, Notiz sind
+        /// frei pflegbar (analog zum Speichern-Button im Frontend). Die Beträge der
+        /// Buchungszeilen lassen sich nur ändern, wenn der Satz auch löschbar wäre
+        /// (<see cref="BuchungssatzSchutz.KannLoeschen"/>) — sonst führt eine
+        /// Korrektur über die Stornobuchung, damit sie nachvollziehbar bleibt.
         /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<BuchungssatzEntry>> Put(Guid id, [FromBody] BuchungssatzPatchEntry patch)
@@ -480,13 +481,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var satz = await LadeSatzMitZeilen(id);
             if (satz is null) return NotFound();
 
+            var schutz = await schutzService.PruefeAsync(satz);
+            var aendertZeilen = patch.Zeilen.Any(p =>
+                satz.Buchungszeilen.FirstOrDefault(z => z.BuchungszeileId == p.Id) is Buchungszeile z &&
+                z.Betrag != p.Betrag);
+
+            if (aendertZeilen && !schutz.KannLoeschen)
+            {
+                return Conflict(schutz.Sperrgrund ??
+                    "Beträge dieses Buchungssatzes können nicht mehr direkt geändert werden — bitte stornieren.");
+            }
+
             satz.Buchungsjahr = patch.Buchungsjahr;
             satz.Beschreibung = patch.Beschreibung;
             satz.Notiz = patch.Notiz;
+
+            foreach (var zeilePatch in patch.Zeilen)
+            {
+                var zeile = satz.Buchungszeilen.FirstOrDefault(z => z.BuchungszeileId == zeilePatch.Id);
+                if (zeile != null)
+                {
+                    zeile.Betrag = zeilePatch.Betrag;
+                }
+            }
+
             await ctx.SaveChangesAsync();
 
             var entry = new BuchungssatzEntry(satz);
-            var schutz = await schutzService.PruefeAsync(satz);
             entry.KannStornieren = schutz.KannStornieren;
             entry.KannLoeschen = schutz.KannLoeschen;
             entry.Sperrgrund = schutz.Sperrgrund;

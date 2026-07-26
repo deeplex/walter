@@ -54,7 +54,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 new StornoBuchungsService(ctx),
                 new BuchungssatzSchutzService(ctx),
                 ctx,
-                auth,
                 A.Fake<HttpClient>())
             {
                 ControllerContext = new ControllerContext
@@ -330,6 +329,81 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var storno = ctx.Buchungssaetze.Single(s => s.BuchungssatzId == info!.BuchungssatzId);
             storno.Notiz.Should().Be("Falscher Betrag erfasst");
             storno.StornoVon!.BuchungssatzId.Should().Be(managedSatz.BuchungssatzId);
+        }
+
+        [Fact]
+        public async Task Put_freier_satz_aendert_betrag()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, managedSatz, _, _) = Seed(ctx);
+            var controller = WithUser(ctx, Principal(manager));
+            var sollZeile = managedSatz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll);
+
+            var result = (await controller.Put(managedSatz.BuchungssatzId, new BuchungssatzPatchEntry
+            {
+                Buchungsjahr = managedSatz.Buchungsjahr,
+                Beschreibung = managedSatz.Beschreibung,
+                Zeilen = [new BuchungszeilePatch { Id = sollZeile.BuchungszeileId, Betrag = 123.45m }]
+            })).Result as OkObjectResult;
+
+            result.Should().NotBeNull();
+            ctx.Buchungszeilen.Single(z => z.BuchungszeileId == sollZeile.BuchungszeileId)
+                .Betrag.Should().Be(123.45m);
+        }
+
+        [Fact]
+        public async Task Put_mit_opos_verknuepfung_lehnt_betragsaenderung_ab()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, forderung, _, vertrag) = Seed(ctx);
+            var zahlung = AddSatz(ctx, vertrag, "Zahlung", 500m);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = forderung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll),
+                HabenZeile = zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben)
+            });
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+            var sollZeile = forderung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll);
+
+            var result = await controller.Put(forderung.BuchungssatzId, new BuchungssatzPatchEntry
+            {
+                Buchungsjahr = forderung.Buchungsjahr,
+                Beschreibung = forderung.Beschreibung,
+                Zeilen = [new BuchungszeilePatch { Id = sollZeile.BuchungszeileId, Betrag = 1m }]
+            });
+
+            result.Result.Should().BeOfType<ConflictObjectResult>();
+            ctx.Buchungszeilen.Single(z => z.BuchungszeileId == sollZeile.BuchungszeileId)
+                .Betrag.Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task Put_mit_opos_verknuepfung_erlaubt_unveraenderte_zeilen()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, forderung, _, vertrag) = Seed(ctx);
+            var zahlung = AddSatz(ctx, vertrag, "Zahlung", 500m);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = forderung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Soll),
+                HabenZeile = zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben)
+            });
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            var result = (await controller.Put(forderung.BuchungssatzId, new BuchungssatzPatchEntry
+            {
+                Buchungsjahr = forderung.Buchungsjahr,
+                Beschreibung = "Neue Beschreibung",
+                Zeilen = forderung.Buchungszeilen
+                    .Select(z => new BuchungszeilePatch { Id = z.BuchungszeileId, Betrag = z.Betrag })
+                    .ToList()
+            })).Result as OkObjectResult;
+
+            result.Should().NotBeNull();
+            ctx.Buchungssaetze.Single(s => s.BuchungssatzId == forderung.BuchungssatzId)
+                .Beschreibung.Should().Be("Neue Beschreibung");
         }
 
         [Fact]

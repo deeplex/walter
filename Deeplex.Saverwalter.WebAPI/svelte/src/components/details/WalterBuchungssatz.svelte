@@ -15,10 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
     import {
-        WalterDataTable,
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput
@@ -26,40 +23,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { WalterBuchungssatzEntry } from '$walter/lib';
     import { convertEuro } from '$walter/services/utils';
     import { formatToTableDate } from '$walter/components/elements/WalterDataTable';
-    import { Row } from 'carbon-components-svelte';
+    import { Column, Row, Tag } from 'carbon-components-svelte';
 
     export let entry: WalterBuchungssatzEntry;
 
-    // Buchungssätze sind nach § 239 HGB unveränderlich — Korrekturen laufen
-    // ausschließlich über Stornobuchungen, daher ist alles readonly.
-    const zeilenHeaders = [
-        { key: 'konto', value: 'Konto' },
-        { key: 'soll', value: 'Soll' },
-        { key: 'haben', value: 'Haben' },
-        { key: 'opos', value: 'OPOS', sort: false as const }
-    ];
+    // Der Betrag jeder Buchungszeile ist direkt editierbar (Speichern-Button) —
+    // Korrekturen überschreiben damit den ursprünglichen Wert, statt über eine
+    // Stornobuchung nachvollziehbar zu bleiben. Bewusste Entscheidung des Nutzers,
+    // daher an dieselbe Regel wie Löschen gekoppelt: nur "freie" Sätze (kannLoeschen)
+    // sind editierbar, alles andere geht nur über Stornieren (vom Backend erzwungen).
 
     // OPOS-Status nur für Zeilen auf Ausgleichskonten — auf Summenkonten
     // (Erträge, Zahlungseingänge, ...) gibt es keine offenen Posten.
     function oposTag(zeile: (typeof entry.zeilen)[number]) {
         if (!zeile.ausgleichbar) {
-            return '';
+            return null;
         }
         return zeile.offen <= 0.005
-            ? { text: 'Ausgeglichen', tag: 'green' }
-            : { text: `Offen: ${convertEuro(zeile.offen)}`, tag: 'red' };
+            ? { text: 'Ausgeglichen', type: 'green' as const }
+            : {
+                  text: `Offen: ${convertEuro(zeile.offen)}`,
+                  type: 'red' as const
+              };
     }
-
-    $: zeilenRows = entry.zeilen.map((zeile) => ({
-        id: zeile.id,
-        kontoId: zeile.kontoId,
-        konto: `${zeile.kontonummer} ${zeile.kontobezeichnung}`,
-        soll: zeile.sollHaben === 'Soll' ? convertEuro(zeile.betrag) : '',
-        haben: zeile.sollHaben === 'Haben' ? convertEuro(zeile.betrag) : '',
-        opos: oposTag(zeile)
-    }));
-
-    const rowHref = (row: DataTableRow) => `/buchungskonten/${row.kontoId}`;
 </script>
 
 <Row>
@@ -96,4 +82,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>
 
-<WalterDataTable {rowHref} rows={zeilenRows} headers={zeilenHeaders} />
+{#each entry.zeilen as zeile (zeile.id)}
+    <Row>
+        <Column>
+            <WalterTextInput
+                readonly
+                value={`${zeile.kontonummer} ${zeile.kontobezeichnung}`}
+                labelText="Konto"
+            />
+        </Column>
+        <Column>
+            <WalterNumberInput
+                bind:value={zeile.betrag}
+                label={zeile.sollHaben === 'Soll' ? 'Soll' : 'Haben'}
+                min={0}
+                readonly={!entry.kannLoeschen}
+            />
+        </Column>
+        <Column>
+            {#if oposTag(zeile)}
+                <Tag type={oposTag(zeile)?.type}>{oposTag(zeile)?.text}</Tag>
+            {/if}
+        </Column>
+    </Row>
+{/each}
