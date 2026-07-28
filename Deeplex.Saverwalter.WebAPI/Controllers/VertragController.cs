@@ -15,6 +15,7 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -141,6 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<VertragController> _logger;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
+        private readonly MietKorrekturService _mietKorrekturService;
         protected override VertragDbService DbService { get; }
 
         public VertragController(
@@ -148,11 +150,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             VertragDbService dbService,
             SaverwalterContext ctx,
             IAuthorizationService auth,
+            MietKorrekturService mietKorrekturService,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _ctx = ctx;
             _auth = auth;
+            _mietKorrekturService = mietKorrekturService;
             _logger = logger;
         }
 
@@ -284,6 +288,109 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .OrderBy(m => m.Jahr).ThenBy(m => m.Monat);
 
             return Ok(result);
+        }
+
+        public class MietKorrekturMonatEntry
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+            public decimal IstKaltmiete { get; set; }
+            public decimal SollKaltmiete { get; set; }
+            public decimal Delta { get; set; }
+            public string Status { get; set; } = string.Empty;
+
+            public MietKorrekturMonatEntry() { }
+            public MietKorrekturMonatEntry(MietKorrekturService.MietKorrekturMonat m)
+            {
+                Jahr = m.Jahr;
+                Monat = m.Monat;
+                IstKaltmiete = m.IstKaltmiete;
+                SollKaltmiete = m.SollKaltmiete;
+                Delta = m.Delta;
+                Status = m.Status.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Ermittelt bereits bezahlte Monate, deren gebuchte Kaltmiete von der zum Monat
+        /// gültigen <see cref="VertragVersion.Grundmiete"/> abweicht (z. B. weil eine
+        /// Mieterhöhung rückwirkend nachgetragen wurde) — siehe
+        /// <see cref="MietKorrekturService"/>.
+        /// </summary>
+        [HttpGet("{id}/miet-korrektur")]
+        public async Task<ActionResult<IEnumerable<MietKorrekturMonatEntry>>> GetMietKorrektur(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var monate = await _mietKorrekturService.ErmittleAsync(id);
+            return Ok(monate.Select(m => new MietKorrekturMonatEntry(m)));
+        }
+
+        public class MietKorrekturRequest
+        {
+            public List<MietKorrekturMonatRequest> Monate { get; set; } = [];
+            public string Grund { get; set; } = string.Empty;
+        }
+
+        public class MietKorrekturMonatRequest
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+        }
+
+        public class MietKorrekturErgebnisEntry
+        {
+            public List<MietKorrekturMonatRequest> Korrigiert { get; set; } = [];
+            public List<MietKorrekturUebersprungenEntry> Uebersprungen { get; set; } = [];
+        }
+
+        public class MietKorrekturUebersprungenEntry
+        {
+            public int Jahr { get; set; }
+            public int Monat { get; set; }
+            public string Grund { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Bucht die Miet-Korrektur für die ausgewählten Monate — siehe
+        /// <see cref="MietKorrekturService.AnwendenAsync"/>.
+        /// </summary>
+        [HttpPost("{id}/miet-korrektur")]
+        public async Task<ActionResult<MietKorrekturErgebnisEntry>> PostMietKorrektur(
+            int id, [FromBody] MietKorrekturRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Grund))
+            {
+                return BadRequest("Für eine Miet-Korrektur muss ein Grund angegeben werden.");
+            }
+
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Update]);
+            if (!authRx.Succeeded) return Forbid();
+
+            var monate = request.Monate.Select(m => (m.Jahr, m.Monat)).ToHashSet();
+
+            try
+            {
+                var ergebnis = await _mietKorrekturService.AnwendenAsync(id, monate, request.Grund);
+                return Ok(new MietKorrekturErgebnisEntry
+                {
+                    Korrigiert = ergebnis.Korrigiert.Select(k => new MietKorrekturMonatRequest { Jahr = k.Jahr, Monat = k.Monat }).ToList(),
+                    Uebersprungen = ergebnis.Uebersprungen.Select(u => new MietKorrekturUebersprungenEntry
+                    {
+                        Jahr = u.Jahr,
+                        Monat = u.Monat,
+                        Grund = u.Grund
+                    }).ToList()
+                });
+            }
+            catch (ArgumentException ex) { return NotFound(ex.Message); }
         }
     }
 }

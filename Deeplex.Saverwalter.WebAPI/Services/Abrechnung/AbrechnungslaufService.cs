@@ -48,24 +48,34 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
     /// </summary>
     public class AbrechnungslaufService
     {
+        /// <summary>
+        /// Markiert Warnungen, die eine mit der aktuellen <see cref="VertragVersion"/>
+        /// nicht übereinstimmende Miet-Forderung melden (siehe <see cref="MietKorrekturService"/>).
+        /// Wie <c>ZaehlerstandFehltMarker</c> blockiert dieser Marker <see cref="BookAsync"/>.
+        /// </summary>
+        public const string MietForderungAbweichungMarker = "Fehler: Miet-Forderung weicht ab — ";
+
         private readonly SaverwalterContext _ctx;
         private readonly NkAnteilBuchungsService _nkAnteilBuchungsService;
         private readonly AbrechnungsresultatBuchungsService _buchungsService;
         private readonly AbrechnungsgruppenService _gruppenService;
         private readonly StornoBuchungsService _stornoService;
+        private readonly MietKorrekturService _mietKorrekturService;
 
         public AbrechnungslaufService(
             SaverwalterContext ctx,
             NkAnteilBuchungsService nkAnteilBuchungsService,
             AbrechnungsresultatBuchungsService buchungsService,
             AbrechnungsgruppenService gruppenService,
-            StornoBuchungsService stornoService)
+            StornoBuchungsService stornoService,
+            MietKorrekturService mietKorrekturService)
         {
             _ctx = ctx;
             _nkAnteilBuchungsService = nkAnteilBuchungsService;
             _buchungsService = buchungsService;
             _gruppenService = gruppenService;
             _stornoService = stornoService;
+            _mietKorrekturService = mietKorrekturService;
         }
 
         public Task<List<AbrechnungsGruppe>> GetGruppenAsync() =>
@@ -119,6 +129,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .ToListAsync())
                 .ToHashSet();
 
+            await PruefeMietForderungenAsync(einheiten, jahr, warnungen);
+
             var resultate = BuildResultate(einheiten, jahr, verzichtVertragIds);
 
             var preview = new AbrechnungslaufGruppeResult
@@ -131,6 +143,37 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             };
 
             return (preview, einheiten);
+        }
+
+        /// <summary>
+        /// Prüft für jeden an der Abrechnung beteiligten Vertrag, ob die gebuchte Miet-Forderung
+        /// noch zur aktuellen <see cref="VertragVersion"/> passt (siehe <see cref="MietKorrekturService"/>).
+        /// Weicht ein Monat des Abrechnungsjahres ab und ist die Abweichung nicht bereits korrigiert,
+        /// wird eine mit <see cref="MietForderungAbweichungMarker"/> markierte Warnung ergänzt — das
+        /// verhindert <see cref="BookAsync"/>, bis die Miet-Korrektur (oder ein manueller Eingriff bei
+        /// <c>NkReichtNichtAus</c>) durchgeführt wurde.
+        /// </summary>
+        private async Task PruefeMietForderungenAsync(List<NkEinheit> einheiten, int jahr, List<string> warnungen)
+        {
+            var vertragIds = einheiten
+                .SelectMany(e => e.Parteien)
+                .Where(p => p.Vertrag is not null)
+                .Select(p => p.Vertrag!.VertragId)
+                .Distinct();
+
+            foreach (var vertragId in vertragIds)
+            {
+                var monate = await _mietKorrekturService.ErmittleAsync(vertragId);
+                foreach (var monat in monate.Where(m => m.Jahr == jahr
+                    && (m.Status == MietKorrekturService.MietKorrekturStatus.Anwendbar
+                        || m.Status == MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus)))
+                {
+                    warnungen.Add(
+                        $"{MietForderungAbweichungMarker}Vertrag {vertragId}: {monat.Monat:00}/{monat.Jahr} " +
+                        $"gebuchte Kaltmiete {monat.IstKaltmiete:C} ≠ Soll-Kaltmiete {monat.SollKaltmiete:C} " +
+                        "— bitte zuerst Miet-Korrektur durchführen.");
+                }
+            }
         }
 
         private async Task<Dictionary<int, decimal>> LadePrevYearBetraege(List<int> umlageIds, int jahr)
@@ -154,10 +197,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         {
             var (preview, einheiten) = await ComputeAsync(wohnungIds, jahr);
 
-            // Nicht zuordenbarer Verbrauch (fehlender Zählerstand) verhindert das Buchen
-            // komplett — erst den Zählerstand ergänzen. Andere Hinweise blockieren nicht.
+            // Nicht zuordenbarer Verbrauch (fehlender Zählerstand) oder eine von der
+            // Vertragsversion abweichende Miet-Forderung verhindern das Buchen komplett —
+            // erst den Zählerstand ergänzen bzw. die Miet-Korrektur durchführen. Andere
+            // Hinweise blockieren nicht.
             var fehler = preview.Warnungen
-                .Where(w => w.Contains(ZaehlerstandFehltMarker, StringComparison.Ordinal))
+                .Where(w => w.Contains(ZaehlerstandFehltMarker, StringComparison.Ordinal)
+                         || w.Contains(MietForderungAbweichungMarker, StringComparison.Ordinal))
                 .Distinct()
                 .ToList();
             if (fehler.Count > 0)
@@ -579,7 +625,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.Mieter)
-                // Vertraege – NK-Buchungskonto mit jahresgefilterter Haben-Vorauszahlung.
+                // Vertraege – NK-Buchungskonto, jahresgefiltert (Soll UND Haben — Soll
+                // wird für die Erkennung von MietKorrekturService-Umbuchungen gebraucht,
+                // siehe NkGruppenAbrechnungsService.IstMietKorrekturUmbuchung).
                 // Inkl. Geschwisterzeilen des Satzes (mit Konto), um echte Vorauszahlungen
                 // von NK-Anteil-Gutschriften (Satz berührt ein NkVerrechnungskonto) zu
                 // unterscheiden.
@@ -587,8 +635,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.NkBuchungskonto)
                             .ThenInclude(k => k.Buchungszeilen
-                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr
-                                            && z.SollHaben == SollHaben.Haben))
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
                             .ThenInclude(z => z.Buchungssatz)
                                 .ThenInclude(s => s.Buchungszeilen)
                                     .ThenInclude(zz => zz.Buchungskonto)

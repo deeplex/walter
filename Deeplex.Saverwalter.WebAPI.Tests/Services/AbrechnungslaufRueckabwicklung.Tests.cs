@@ -32,7 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 new NkAnteilBuchungsService(ctx),
                 new AbrechnungsresultatBuchungsService(ctx),
                 null!,
-                new StornoBuchungsService(ctx));
+                new StornoBuchungsService(ctx),
+                new MietKorrekturService(ctx));
 
         /// <summary>
         /// Gebuchte Abrechnung im Kleinen: eine Umlage mit Rechnungssatz samt

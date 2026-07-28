@@ -36,7 +36,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 new NkAnteilBuchungsService(ctx),
                 new AbrechnungsresultatBuchungsService(ctx),
                 new AbrechnungsgruppenService(ctx),
-                new StornoBuchungsService(ctx));
+                new StornoBuchungsService(ctx),
+                new MietKorrekturService(ctx));
 
         private static void AddRechnung(SaverwalterContext ctx, Umlage umlage, decimal betrag)
         {

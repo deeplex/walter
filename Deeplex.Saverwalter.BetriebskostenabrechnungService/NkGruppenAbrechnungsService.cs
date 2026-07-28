@@ -542,16 +542,32 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 z.Buchungssatz.Buchungszeilen.Any(
                     gz => gruppenVerrechnungsKontoIds.Contains(gz.Buchungskonto.BuchungskontoId));
 
+            // Der MietKorrekturService (rückwirkende Mieterhöhung/-senkung) korrigiert
+            // additiv — nie durch Mutation historischer Sätze — indem er bei einer
+            // Erhöhung eine Soll-Zeile auf dem NkBuchungskonto bucht (Reklassifizierung
+            // von Vorauszahlung zu Kaltmiete). Erkennbar daran, dass derselbe
+            // Buchungssatz auch eine Zeile auf dem MietBuchungskonto trägt — das tut
+            // keine andere NK-Buchung (NK-Anteile/-Sonderforderungen laufen nur gegen
+            // Umlage-Verrechnungskonten). Ohne Gegenrechnung hier bliebe die
+            // Vorauszahlung fälschlich beim alten (zu hohen) Betrag.
+            bool IstMietKorrekturUmbuchung(Buchungszeile z) =>
+                z.Buchungssatz.Buchungszeilen.Any(
+                    mb => mb.Buchungskonto.BuchungskontoId == vertrag.MietBuchungskonto.BuchungskontoId);
+
             var vertragInfo = new NkVertragInfo
             {
                 // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto); die eigene
                 // Glattstellungs-Haben-Zeile der Abrechnung ausklammern (sonst Konflikt
-                // nach dem Buchen) und ebenso Anteil-Gutschriften negativer Rechnungen.
+                // nach dem Buchen), ebenso Anteil-Gutschriften negativer Rechnungen —
+                // und Soll-Umbuchungen des MietKorrekturService werden abgezogen.
                 Vorauszahlung = vertrag.NkBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben
-                             && z.Buchungssatz.BuchungssatzId != abrechnungsSatzId
-                             && !IstAnteilGutschrift(z))
-                    .Sum(z => z.Betrag),
+                    .Where(z => z.Buchungssatz.BuchungssatzId != abrechnungsSatzId)
+                    .Sum(z => z.SollHaben switch
+                    {
+                        SollHaben.Haben when !IstAnteilGutschrift(z) => z.Betrag,
+                        SollHaben.Soll when IstMietKorrekturUmbuchung(z) => -z.Betrag,
+                        _ => 0m
+                    }),
                 MietSaldo = vertrag.MietBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag)
                     - vertrag.MietBuchungskonto.Buchungszeilen

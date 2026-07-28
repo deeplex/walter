@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterMultiSelectKontakt,
         WalterNumberInput
     } from '$walter/components';
+    import WalterMietKorrektur from './WalterMietKorrektur.svelte';
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
@@ -281,6 +282,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 : 'offen'}.
         </svelte:fragment>
     </InlineNotification>
+{/if}
+{#if !isNew && entry.id}
+    <Row>
+        <WalterMietKorrektur vertragId={entry.id} {fetchImpl} />
+    </Row>
 {/if}
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

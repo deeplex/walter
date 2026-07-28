@@ -312,7 +312,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
     $: fehlendeBuchungen = vertragResultate.filter(
-        (r) => r.gebuchterSaldo == null
+        (r) => r.gebuchterSaldo == null && !r.verzichtet
     ).length;
     $: inkonsistenteBuchungen = vertragResultate.filter(
         (r) =>

@@ -17,6 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
@@ -40,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -60,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -102,7 +103,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
 
             var result = await controller.Get(entity.VertragId);
 
@@ -119,7 +120,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
 
             var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
@@ -140,7 +141,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
 
             var id = entity.VertragId;
 

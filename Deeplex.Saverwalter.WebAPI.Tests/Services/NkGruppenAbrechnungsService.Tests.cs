@@ -466,6 +466,63 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             partei.VertragInfo!.Vorauszahlung.Should().Be(0m);
         }
 
+        /// <summary>
+        /// Der MietKorrekturService korrigiert eine rückwirkende Mieterhöhung additiv:
+        /// eine Soll-Zeile auf dem NkBuchungskonto reklassifiziert die Differenz zur
+        /// Kaltmiete (siehe MietKorrekturService.cs). Die Abrechnung muss danach so
+        /// aussehen, als wäre von Anfang an korrekt gebucht worden — die Vorauszahlung
+        /// darf nicht mehr den ursprünglichen (zu hohen) Betrag zeigen.
+        /// </summary>
+        [Fact]
+        public void Vorauszahlung_BeruecksichtigtMietKorrekturUmbuchung()
+        {
+            var wohnung = MakeWohnung("W1");
+            var vertrag = MakeVertrag(wohnung);
+            vertrag.NkBuchungskonto.BuchungskontoId = 300;
+            vertrag.MietBuchungskonto.BuchungskontoId = 301;
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.NkVerrechnungsKonto!.BuchungskontoId = 100;
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 100m, new DateOnly(2024, 12, 31), 2024);
+
+            // Echte NK-Vorauszahlung des Jahres (z.B. aus 12 Monatszahlungen): 1200.
+            var zahlungsSatz = new Buchungssatz(new DateOnly(2024, 1, 5), "Mietzahlung NK-VZ 01/2024") { Buchungsjahr = 2024 };
+            var zahlungsZeile = new Buchungszeile(SollHaben.Haben, 1200m)
+            { Buchungssatz = zahlungsSatz, Buchungskonto = vertrag.NkBuchungskonto };
+            zahlungsSatz.Buchungszeilen.Add(zahlungsZeile);
+            vertrag.NkBuchungskonto.Buchungszeilen.Add(zahlungsZeile);
+
+            // MietKorrekturService (delta>0) bucht ZWEI Sätze: eine Zusatz-Forderung
+            // (Soll MB / Haben Ertragskonto) und die Umbuchung, die sie über NK
+            // gegenfinanziert (Soll NK / Haben MB) — siehe MietKorrekturService.cs.
+            var forderungsSatz = new Buchungssatz(new DateOnly(2024, 7, 1), "Umbuchung Mietsoll-Nachtrag 01/2024 (rückwirkende Erhöhung, Testkorrektur)")
+            { Buchungsjahr = 2024 };
+            var mbSollZeile = new Buchungszeile(SollHaben.Soll, 100m)
+            { Buchungssatz = forderungsSatz, Buchungskonto = vertrag.MietBuchungskonto };
+            forderungsSatz.Buchungszeilen.Add(mbSollZeile);
+            vertrag.MietBuchungskonto.Buchungszeilen.Add(mbSollZeile);
+
+            var umbuchungsSatz = new Buchungssatz(new DateOnly(2024, 7, 1), "Umbuchung NK-Vorauszahlung → Kaltmiete 01/2024 (Testkorrektur)")
+            { Buchungsjahr = 2024 };
+            var nkSollZeile = new Buchungszeile(SollHaben.Soll, 100m)
+            { Buchungssatz = umbuchungsSatz, Buchungskonto = vertrag.NkBuchungskonto };
+            var mbHabenZeile = new Buchungszeile(SollHaben.Haben, 100m)
+            { Buchungssatz = umbuchungsSatz, Buchungskonto = vertrag.MietBuchungskonto };
+            umbuchungsSatz.Buchungszeilen.Add(nkSollZeile);
+            umbuchungsSatz.Buchungszeilen.Add(mbHabenZeile);
+            vertrag.NkBuchungskonto.Buchungszeilen.Add(nkSollZeile);
+            vertrag.MietBuchungskonto.Buchungszeilen.Add(mbHabenZeile);
+
+            var einheiten = ComputeEinheiten([umlage], 2024);
+            var partei = einheiten.Single().Parteien.Single(p => p.Vertrag == vertrag);
+
+            partei.VertragInfo!.Vorauszahlung.Should().Be(1100m,
+                "die per Umbuchung reklassifizierten 100 dürfen nicht mehr als NK-Vorauszahlung zählen");
+            partei.VertragInfo!.MietSaldo.Should().Be(0m,
+                "Zusatz-Forderung/-Gutschrift und die dazugehörige Umbuchung heben sich auf dem Mietforderungskonto auf");
+        }
+
         // ── Preview nach Buchung / Zahlungen ──────────────────────────────────
 
         [Fact]
