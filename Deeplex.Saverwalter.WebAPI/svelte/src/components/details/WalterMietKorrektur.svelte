@@ -92,7 +92,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
     }
 
-    $: vertragId, refresh();
+    $: (vertragId, refresh());
 
     function toggle(m: MietKorrekturMonat) {
         const k = key(m);
@@ -194,7 +194,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 />
             </Column>
             <Column>
-                <Button disabled={!kannAnwenden || anwendenLoading} on:click={anwenden}>
+                <Button
+                    disabled={!kannAnwenden || anwendenLoading}
+                    on:click={anwenden}
+                >
                     {anwendenLoading
                         ? 'Wird gebucht…'
                         : `${selected.size || ''} Monat(e) korrigieren`}
