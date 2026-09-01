@@ -52,6 +52,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             maximumFractionDigits: digits
         });
 
+    type Teilrechnung = {
+        betrag: number;
+        buchungsdatum: string | null;
+        buchungssatzId: string | null;
+    };
+
     type HkvoZeile = {
         zeile: NkZeileInfo;
         gesamtbetrag: number;
@@ -65,31 +71,48 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         heizZaehler: ZaehlerVerbrauchInfo[];
         wwZaehler: ZaehlerVerbrauchInfo[];
         nfZeitanteil: number;
+        rechnungen: Teilrechnung[];
     };
 
-    const hkvoZeilen: HkvoZeile[] = zeilen
-        .filter((z) => z.para9_2 != null)
-        .map((z) => {
-            const anteil = z.anteile.find((a) => a.vertragId === vertragId);
-            const nfZeitanteil = anteil?.nfZeitanteil ?? 0;
-            return {
-                zeile: z,
-                gesamtbetrag: z.betrag,
-                meinBetrag: anteil ? hkvoKosten(z, anteil) : 0,
-                para9_2: z.para9_2!,
-                p9Details: z.p9Details,
-                p7: z.p7!,
-                p8: z.p8!,
-                heizVerbrauchAnteil: anteil?.heizVerbrauchAnteil ?? null,
-                wwVerbrauchAnteil: anteil?.wwVerbrauchAnteil ?? null,
-                heizZaehler: anteil?.heizZaehler ?? [],
-                wwZaehler: anteil?.wwZaehler ?? [],
-                nfZeitanteil
-            };
-        });
+    const hkvoZeilen: HkvoZeile[] = Array.from(
+        zeilen
+            .filter((z) => z.para9_2 != null)
+            .reduce((groups, z) => {
+                const anteil = z.anteile.find((a) => a.vertragId === vertragId);
+                const meinBetrag = anteil ? hkvoKosten(z, anteil) : 0;
+                const rechnung: Teilrechnung = {
+                    betrag: z.betrag,
+                    buchungsdatum: z.buchungsdatum,
+                    buchungssatzId: z.buchungssatzId
+                };
 
-    // Dedupliziert nach umlageId: eine HKVO-Zeile pro Rechnung, aber §9(2) einmal pro Umlage zeigen
-    const gezeigteUmlageIds = new Set<number>();
+                const bestehend = groups.get(z.umlageId);
+                if (bestehend) {
+                    bestehend.gesamtbetrag += z.betrag;
+                    bestehend.meinBetrag += meinBetrag;
+                    bestehend.rechnungen.push(rechnung);
+                } else {
+                    groups.set(z.umlageId, {
+                        zeile: z,
+                        gesamtbetrag: z.betrag,
+                        meinBetrag,
+                        para9_2: z.para9_2!,
+                        p9Details: z.p9Details,
+                        p7: z.p7!,
+                        p8: z.p8!,
+                        heizVerbrauchAnteil:
+                            anteil?.heizVerbrauchAnteil ?? null,
+                        wwVerbrauchAnteil: anteil?.wwVerbrauchAnteil ?? null,
+                        heizZaehler: anteil?.heizZaehler ?? [],
+                        wwZaehler: anteil?.wwZaehler ?? [],
+                        nfZeitanteil: anteil?.nfZeitanteil ?? 0,
+                        rechnungen: [rechnung]
+                    });
+                }
+                return groups;
+            }, new Map<number, HkvoZeile>())
+            .values()
+    );
 
     const betragWarm = hkvoZeilen.reduce((s, hz) => s + hz.meinBetrag, 0);
 </script>
@@ -99,79 +122,73 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </div>
 
 {#each hkvoZeilen as hz}
-    {@const showP9 = !gezeigteUmlageIds.has(hz.zeile.umlageId)}
-    {#if showP9}
-        {@const _add = gezeigteUmlageIds.add(hz.zeile.umlageId)}
-        {#if hz.para9_2 > 0}
-            <div class="p9-block">
-                <strong>§9 Abs. 2 HKVO – Warmwasseranteil</strong>
-                <div class="p9-formel">
-                    <span>2,5</span>
-                    <span class="frac frac--einheit">
-                        <span>kWh</span>
-                        <span>m³ · K</span>
-                    </span>
-                    <span>×</span>
-                    <span class="frac">
-                        <span>V</span>
-                        <span>Q</span>
-                    </span>
-                    <span>× (t<sub>w</sub> − 10 °C)</span>
-                    {#if hz.p9Details}
-                        {@const p9 = hz.p9Details}
-                        <span>&nbsp;=&nbsp; 2,5 ×</span>
-                        <span class="frac">
-                            <span>{formatKommazahl(p9.v)} m³</span>
-                            <span>{formatKommazahl(p9.q)} kWh</span>
-                        </span>
-                        <span>× ({p9.tw} − 10) °C</span>
-                    {/if}
-                    <span>&nbsp;=&nbsp;</span>
-                    <strong class="p9-ergebnis"
-                        >{convertPercent(hz.para9_2)}</strong
-                    >
-                </div>
+    {#if hz.para9_2 > 0}
+        <div class="p9-block">
+            <strong>§9 Abs. 2 HKVO – Warmwasseranteil</strong>
+            <div class="p9-formel">
+                <span>2,5</span>
+                <span class="frac frac--einheit">
+                    <span>kWh</span>
+                    <span>m³ · K</span>
+                </span>
+                <span>×</span>
+                <span class="frac">
+                    <span>V</span>
+                    <span>Q</span>
+                </span>
+                <span>× (t<sub>w</sub> − 10 °C)</span>
                 {#if hz.p9Details}
                     {@const p9 = hz.p9Details}
-                    <div class="p9-legende">
-                        <span>
-                            <strong>Q</strong> = {formatKommazahl(p9.q)} kWh — Allgemeinzähler
-                            {p9.allgemeinZaehler} ({formatDate(
-                                p9.qAnfangsdatum
-                            )} – {formatDate(p9.qEnddatum)})
-                        </span>
-                        <span>
-                            <strong>V</strong> = {formatKommazahl(p9.v)} m³ — Warmwasserzähler:
-                            {#each p9.wwZaehler as z, i}
-                                {i > 0 ? ', ' : ''}{z.kennnummer} ({formatKommazahl(
-                                    z.verbrauch
-                                )}
-                                {z.einheit})
-                            {/each}
-                        </span>
-                        <span>
-                            <strong>t<sub>w</sub></strong> = {p9.tw} °C — angenommene
-                            Warmwassertemperatur
-                        </span>
-                    </div>
+                    <span>&nbsp;=&nbsp; 2,5 ×</span>
+                    <span class="frac">
+                        <span>{formatKommazahl(p9.v)} m³</span>
+                        <span>{formatKommazahl(p9.q)} kWh</span>
+                    </span>
+                    <span>× ({p9.tw} − 10) °C</span>
                 {/if}
+                <span>&nbsp;=&nbsp;</span>
+                <strong class="p9-ergebnis">{convertPercent(hz.para9_2)}</strong
+                >
             </div>
-        {:else}
-            <p style="padding: 0.5rem 1rem; color: var(--cds-text-helper);">
-                {#if hz.p9Details}
-                    Keine Warmwasser-Trennung nach §9 Abs. 2 HKVO
-                    (Allgemeinzähler
-                    {hz.p9Details.allgemeinZaehler}: Q = {formatKommazahl(
-                        hz.p9Details.q
-                    )} kWh, V = {formatKommazahl(hz.p9Details.v)} m³) – der gesamte
-                    Betrag wird als Heizung (§7) abgerechnet.
-                {:else}
-                    Keine Warmwasser-Trennung nach §9 Abs. 2 HKVO (kein
-                    AllgemeinWärme-Zähler konfiguriert) – der gesamte Betrag
-                    wird als Heizung (§7) abgerechnet.
-                {/if}
-            </p>
-        {/if}
+            {#if hz.p9Details}
+                {@const p9 = hz.p9Details}
+                <div class="p9-legende">
+                    <span>
+                        <strong>Q</strong> = {formatKommazahl(p9.q)} kWh — Allgemeinzähler
+                        {p9.allgemeinZaehler} ({formatDate(p9.qAnfangsdatum)} – {formatDate(
+                            p9.qEnddatum
+                        )})
+                    </span>
+                    <span>
+                        <strong>V</strong> = {formatKommazahl(p9.v)} m³ — Warmwasserzähler:
+                        {#each p9.wwZaehler as z, i}
+                            {i > 0 ? ', ' : ''}{z.kennnummer} ({formatKommazahl(
+                                z.verbrauch
+                            )}
+                            {z.einheit})
+                        {/each}
+                    </span>
+                    <span>
+                        <strong>t<sub>w</sub></strong> = {p9.tw} °C — angenommene
+                        Warmwassertemperatur
+                    </span>
+                </div>
+            {/if}
+        </div>
+    {:else}
+        <p style="padding: 0.5rem 1rem; color: var(--cds-text-helper);">
+            {#if hz.p9Details}
+                Keine Warmwasser-Trennung nach §9 Abs. 2 HKVO (Allgemeinzähler
+                {hz.p9Details.allgemeinZaehler}: Q = {formatKommazahl(
+                    hz.p9Details.q
+                )} kWh, V = {formatKommazahl(hz.p9Details.v)} m³) – der gesamte Betrag
+                wird als Heizung (§7) abgerechnet.
+            {:else}
+                Keine Warmwasser-Trennung nach §9 Abs. 2 HKVO (kein
+                AllgemeinWärme-Zähler konfiguriert) – der gesamte Betrag wird
+                als Heizung (§7) abgerechnet.
+            {/if}
+        </p>
     {/if}
 
     <!-- §7 Heizkosten -->
@@ -415,10 +432,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     <p style="padding: 0.5rem 1rem;">
         <strong>{hz.zeile.bezeichnung}:</strong>
-        {convertEuro(hz.gesamtbetrag)} gesamt · Ihr Anteil: {convertEuro(
-            hz.meinBetrag
-        )}
+        {convertEuro(hz.gesamtbetrag)} gesamt
+        {#if hz.zeile.betragLetztesJahr}
+            <span style="color: var(--cds-text-helper);"
+                >(Vorjahr: {convertEuro(hz.zeile.betragLetztesJahr)})</span
+            >
+        {/if}
+        · Ihr Anteil: {convertEuro(hz.meinBetrag)}
     </p>
+    {#if hz.rechnungen.length > 1}
+        <p
+            style="padding: 0 1rem 0.5rem; color: var(--cds-text-helper); font-size: 0.875rem;"
+        >
+            davon
+            {#each hz.rechnungen as r, i}
+                {i > 0 ? ', ' : ''}{#if r.buchungssatzId}<a
+                        href={`/buchungssaetze/${r.buchungssatzId}`}
+                        >{convertEuro(r.betrag)}{#if r.buchungsdatum}
+                            ({formatDate(r.buchungsdatum)}){/if}</a
+                    >{:else}{convertEuro(r.betrag)}{#if r.buchungsdatum}
+                        ({formatDate(r.buchungsdatum)}){/if}{/if}
+            {/each}
+        </p>
+    {/if}
     {#each strompauschalen.filter((sp) => sp.heizUmlageId === hz.zeile.umlageId) as sp}
         <p
             style="padding: 0 1rem 0.5rem; color: var(--cds-text-secondary); font-size: 0.875rem;"

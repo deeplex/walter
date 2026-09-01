@@ -853,8 +853,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     var buchungssatz = plan.Buchungssatz;
 
                     if (plan.Warnungen.Count > 0)
-                        warnungen.AddRange(plan.Warnungen.Select(
-                            w => $"BS {buchungssatz.BuchungssatzId}: {w}"));
+                        warnungen.AddRange(plan.Warnungen);
 
                     // Strompauschale-Umbuchung: reines Buchungs-Artefakt, keine Anzeigezeile.
                     if (plan.IstStrompauschale)
@@ -996,6 +995,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Schluessel = plan.Umlage.VersionAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31)).Schluessel.ToDescriptionString(),
                         UmlagetypId = plan.Umlage.Typ.UmlagetypId,
                         BuchungssatzId = buchungssatz.BuchungssatzId,
+                        Buchungsdatum = buchungssatz.Buchungsdatum,
                         Betrag = plan.Betrag,
                         BetragLetztesJahr = prevYearBetragByUmlage.GetValueOrDefault(plan.Umlage.UmlageId),
                         IstVollstaendigGebucht = istVollstaendigGebucht,

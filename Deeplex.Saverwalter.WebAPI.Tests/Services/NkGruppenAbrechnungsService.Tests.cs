@@ -905,6 +905,27 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public void P9_2_MehrereHeizrechnungenImJahr_WerdenAlleVerteilt()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            // P = 2,5 × 100 × (60 − 10) / 25000 = 0,5
+            var heiz = MakeP9Setup(wohnung, q: 25000m, v: 100m, jahr: 2021);
+            // Zweite Heizrechnung im selben Jahr, auf derselben Umlage/Konto (z.B.
+            // eine Abschlagsrechnung zusätzlich zur Jahresendabrechnung).
+            AddBkForderung(heiz, 400m, new DateOnly(2021, 6, 30), 2021);
+
+            var plaene = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene;
+
+            // Beide Rechnungen (1000 + 400) müssen als eigene Pläne auftauchen und
+            // jeweils mit der §9(2)-Quote gesplittet worden sein — keine geht verloren.
+            plaene.Should().HaveCount(2);
+            plaene.Sum(p => p.Betrag).Should().Be(1400m);
+            plaene.Should().OnlyContain(p => p.Para9_2 == 0.5m);
+            plaene.Sum(p => p.Anteile.Sum(a => a.Betrag)).Should().Be(1400m);
+        }
+
+        [Fact]
         public void P9_2_Q_SummiertMehrereAllgemeinzaehler()
         {
             var wohnung = MakeWohnung("W1");
@@ -991,6 +1012,39 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 w.Contains("Zählerwechsel erkannt") &&
                 w.Contains("ALLG-ALT") &&
                 w.Contains("ALLG-NEU"));
+        }
+
+        [Fact]
+        public void P9_2_ZaehlerwechselMitEinTagVersatz_WirdTrotzdemAlsWechselErkannt()
+        {
+            // In der Praxis wird ein Zählerwechsel oft nicht taggenau erfasst: der
+            // alte Zähler wird am Ausbautag zum letzten Mal abgelesen, der neue
+            // erst am (nächsten) Einbautag — hier ein Tag Versatz (30.06. / 01.07.).
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var heiz = MakeP9Setup(wohnung, q: 0m, v: 100m, jahr: 2021);
+            var hkvo = heiz.HeizkostenHKVOs.Single();
+            hkvo.AllgemeinWaermeZaehler.Clear();
+
+            var alt = new Zaehler("ALLG-ALT", Zaehlertyp.Gas) { Ende = new DateOnly(2021, 6, 30) };
+            alt.Staende.Add(new Zaehlerstand(new DateOnly(2020, 12, 31), 0m) { Zaehler = alt });
+            alt.Staende.Add(new Zaehlerstand(new DateOnly(2021, 6, 30), 15000m) { Zaehler = alt });
+
+            var neu = new Zaehler("ALLG-NEU", Zaehlertyp.Gas);
+            neu.Staende.Add(new Zaehlerstand(new DateOnly(2021, 7, 1), 0m) { Zaehler = neu });
+            neu.Staende.Add(new Zaehlerstand(new DateOnly(2021, 12, 31), 10000m) { Zaehler = neu });
+
+            hkvo.AllgemeinWaermeZaehler.Add(alt);
+            hkvo.AllgemeinWaermeZaehler.Add(neu);
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            plan.P9Details!.Q.Should().Be(25000m);
+            plan.Warnungen.Should().Contain(w =>
+                w.Contains("Zählerwechsel erkannt") &&
+                w.Contains("ALLG-ALT") &&
+                w.Contains("ALLG-NEU"));
+            plan.Warnungen.Should().NotContain(w => w.Contains("Kein Endstand"));
         }
 
         [Fact]

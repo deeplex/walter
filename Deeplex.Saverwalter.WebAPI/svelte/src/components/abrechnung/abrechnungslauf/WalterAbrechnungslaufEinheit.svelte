@@ -111,23 +111,51 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
     $: hkvoZeilen = alleZeilen.filter((z) => z.para9_2 != null);
 
-    $: meineZeilen = kalteZeilen.map((z) => {
-        const anteil = z.anteile.find((a) => a.vertragId === vertragId);
-        const faktor = anteil?.anteilFaktor ?? 0;
-        return {
-            id: `${z.umlageId}-${z.buchungssatzId ?? 'none'}`,
-            umlageId: z.umlageId,
-            rechnungId: z.buchungssatzId,
-            typ: z.bezeichnung,
-            typId: z.umlagetypId,
-            schluessel: z.schluessel,
-            gesamtBetrag: z.betrag,
-            betragLetztesJahr: z.betragLetztesJahr,
-            anteil: faktor,
-            betrag: z.betrag * faktor,
-            istFehlend: z.istFehlend
-        };
-    });
+    type MeineZeile = {
+        id: string;
+        umlageId: number;
+        rechnungId: string | null;
+        typ: string;
+        typId: number;
+        schluessel: string;
+        gesamtBetrag: number;
+        betragLetztesJahr: number;
+        anteil: number;
+        betrag: number;
+        istFehlend: boolean;
+    };
+
+    $: meineZeilen = Array.from(
+        kalteZeilen
+            .map((z): MeineZeile => {
+                const anteil = z.anteile.find((a) => a.vertragId === vertragId);
+                const faktor = anteil?.anteilFaktor ?? 0;
+                return {
+                    id: `${z.umlageId}-${z.buchungssatzId ?? 'none'}`,
+                    umlageId: z.umlageId,
+                    rechnungId: z.buchungssatzId,
+                    typ: z.bezeichnung,
+                    typId: z.umlagetypId,
+                    schluessel: z.schluessel,
+                    gesamtBetrag: z.betrag,
+                    betragLetztesJahr: z.betragLetztesJahr,
+                    anteil: faktor,
+                    betrag: z.betrag * faktor,
+                    istFehlend: z.istFehlend
+                };
+            })
+            .reduce((groups, zeile) => {
+                const bestehend = groups.get(zeile.umlageId);
+                if (bestehend) {
+                    bestehend.gesamtBetrag += zeile.gesamtBetrag;
+                    bestehend.betrag += zeile.betrag;
+                } else {
+                    groups.set(zeile.umlageId, zeile);
+                }
+                return groups;
+            }, new Map<number, MeineZeile>())
+            .values()
+    );
 
     $: betragKalt = meineZeilen.reduce((s, r) => s + r.betrag, 0);
 

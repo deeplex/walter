@@ -15,14 +15,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import {
         Button,
         InlineNotification,
         Row,
         Tile
     } from 'carbon-components-svelte';
+    import { walter_selection } from '$walter/services/requests';
+    import WalterAbrechnungslaufHinweisZeile from './WalterAbrechnungslaufHinweisZeile.svelte';
 
+    export let fetchImpl: typeof fetch | undefined = undefined;
     export let hatHinweise = false;
     export let fehlendeBuchungen = 0;
     export let inkonsistenteBuchungen = 0;
@@ -48,6 +51,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const onDownload = () => dispatch('download');
     const onBook = () => dispatch('book');
+
+    let zaehlerIds = new Map<string, number>();
+    onMount(async () => {
+        if (!fetchImpl) return;
+        const liste = await walter_selection.zaehler(fetchImpl);
+        zaehlerIds = new Map(
+            liste.map((e) => [`${e.text}`.split(' - ')[0], Number(e.id)])
+        );
+    });
 </script>
 
 <Tile>
@@ -64,9 +76,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <div slot="subtitle">
                 <ul style="margin: 0.25rem 0 0 1.1rem;">
                     {#each fehler as f}
-                        <li style="margin: 0.15rem 0;">
-                            {f.replace(/^.*?Fehler:\s*/, '')}
-                        </li>
+                        <WalterAbrechnungslaufHinweisZeile
+                            text={f}
+                            {zaehlerIds}
+                        />
                     {/each}
                 </ul>
             </div>
@@ -103,7 +116,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 style="margin: 0.1rem 0 0 1.25rem; color: var(--cds-text-secondary);"
             >
                 {#each warnungenZaehlerstaende as warnung}
-                    <li style="margin: 0.15rem 0;">{warnung}</li>
+                    <WalterAbrechnungslaufHinweisZeile
+                        text={warnung}
+                        {zaehlerIds}
+                    />
                 {/each}
             </ul>
         {/if}
@@ -116,7 +132,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 style="margin: 0.1rem 0 0 1.25rem; color: var(--cds-text-secondary);"
             >
                 {#each warnungenMieten as warnung}
-                    <li style="margin: 0.15rem 0;">{warnung}</li>
+                    <WalterAbrechnungslaufHinweisZeile
+                        text={warnung}
+                        {zaehlerIds}
+                    />
                 {/each}
             </ul>
         {/if}
@@ -131,7 +150,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 style="margin: 0.1rem 0 0 1.25rem; color: var(--cds-text-secondary);"
             >
                 {#each warnungenSonstige as warnung}
-                    <li style="margin: 0.15rem 0;">{warnung}</li>
+                    <WalterAbrechnungslaufHinweisZeile
+                        text={warnung}
+                        {zaehlerIds}
+                    />
                 {/each}
             </ul>
         {/if}

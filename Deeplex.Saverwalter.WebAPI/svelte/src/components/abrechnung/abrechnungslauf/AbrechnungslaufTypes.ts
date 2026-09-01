@@ -54,6 +54,7 @@ export type NkZeileInfo = {
     schluessel: string;
     umlagetypId: number;
     buchungssatzId: string | null;
+    buchungsdatum: string | null;
     betrag: number;
     betragLetztesJahr: number;
     istVollstaendigGebucht: boolean;

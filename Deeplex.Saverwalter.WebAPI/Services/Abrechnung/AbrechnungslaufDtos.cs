@@ -78,6 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public string Schluessel { get; init; } = "";
         public int UmlagetypId { get; init; }
         public Guid? BuchungssatzId { get; init; }
+        public DateOnly? Buchungsdatum { get; init; }
         public decimal Betrag { get; init; }
         public decimal BetragLetztesJahr { get; init; }
         public bool IstVollstaendigGebucht { get; init; }

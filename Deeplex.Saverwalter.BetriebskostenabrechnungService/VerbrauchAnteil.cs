@@ -107,6 +107,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<Note> notes)
         {
             const int thresholdOfDaysBeforeNotOkay = 14;
+            // Ein Zählerwechsel wird in der Praxis nicht immer taggenau erfasst
+            // (alter Zähler letzte Ablesung am Ausbautag, neuer Zähler erste
+            // Ablesung erst am Einbautag) — daher wird auf den Tag genau nicht
+            // verlangt, sondern eine kleine Toleranz erlaubt.
+            const int zaehlerwechselToleranzTage = 3;
 
             foreach (var verbrauch in verbraeuche)
             {
@@ -119,7 +124,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 {
                     var candidates = verbraeuche.Where(other =>
                         other.Zaehler != verbrauch.Zaehler &&
-                        other.Anfangsdatum == verbrauch.Enddatum &&
+                        Math.Abs(other.Anfangsdatum.DayNumber - verbrauch.Enddatum.DayNumber) <= zaehlerwechselToleranzTage &&
                         other.Zaehler.Typ == verbrauch.Zaehler.Typ &&
                         other.Zaehler.Staende?.OrderBy(stand => stand.Datum).FirstOrDefault()?.Datum == other.Anfangsdatum &&
                         verbrauch.Zaehler.Wohnung == other.Zaehler.Wohnung);
@@ -153,7 +158,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var candidates = verbraeuche.Where(other =>
                         other.Anfangsdatum != other.Enddatum &&
                         other.Zaehler != verbrauch.Zaehler &&
-                        other.Enddatum == verbrauch.Anfangsdatum &&
+                        Math.Abs(other.Enddatum.DayNumber - verbrauch.Anfangsdatum.DayNumber) <= zaehlerwechselToleranzTage &&
                         other.Zaehler.Typ == verbrauch.Zaehler.Typ &&
                         verbrauch.Zaehler.Wohnung == other.Zaehler.Wohnung);
 

@@ -322,7 +322,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: abweichendeMieten = vertragResultate.filter(
         (r) => Math.abs(r.mietSaldo) > 0.005
     ).length;
-    $: warnungen = result?.warnungen ?? [];
+    $: warnungen = [...new Set(result?.warnungen ?? [])];
     $: warnungenZaehlerstaende = warnungen.filter((w) =>
         /z(a|ä)hler|zaehlerstand/i.test(w)
     );
@@ -464,6 +464,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/each}
 
         <WalterAbrechnungslaufHinweiseAktionen
+            fetchImpl={data.fetchImpl}
             {hatHinweise}
             {fehlendeBuchungen}
             {inkonsistenteBuchungen}
