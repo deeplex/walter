@@ -53,9 +53,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ] || undefined;
 
     const umlage: WalterSelectionEntry = {
-        id: '' + data.entry.id,
+        id: data.entry.id,
         text: data.entry.wohnungenBezeichnung,
-        filter: '' + data.entry.typ
+        filter: '' + data.entry.typ.id
     };
     const betriebskostenrechungEntry: Partial<WalterBetriebskostenrechnungEntry> =
         {
