@@ -44,7 +44,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         zaehler: { id: '' + data.entry.id, text: data.entry.kennnummer },
         datum: convertDateCanadian(new Date()),
         stand: lastZaehlerstand?.stand || 0,
-        einheit: lastZaehlerstand?.einheit,
+        einheit: lastZaehlerstand?.einheit ?? data.entry.einheit,
         permissions: data.entry.permissions
     };
 

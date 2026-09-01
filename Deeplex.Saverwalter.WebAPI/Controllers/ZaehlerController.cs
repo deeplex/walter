@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public string Kennnummer { get; set; } = null!;
             public SelectionEntry Typ { get; set; } = null!;
+            public string? Einheit { get; set; }
             public AdresseEntryBase? Adresse { get; set; }
             public SelectionEntry? Wohnung { get; set; }
             public ZaehlerstandEntryBase? LastZaehlerstand { get; set; }
@@ -52,6 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
                 Kennnummer = entity.Kennnummer;
                 Typ = new((int)entity.Typ, entity.Typ.ToString());
+                Einheit = entity.Typ.ToUnitString();
                 Wohnung = entity.Wohnung is Wohnung w ? new(w.WohnungId, w.Bezeichnung) : null;
                 var letzterStand = entity.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
                 Ende = entity.Ende;
