@@ -22,6 +22,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
@@ -150,6 +151,51 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 throw new Exception("Umlage not found");
             }
             updatedEntity.Beschreibung.Should().Be("Test");
+        }
+
+        [Fact]
+        public async Task GetList_LiefertLetztesRechnungsjahr_UndSortiertDanach()
+        {
+            var ctx = TestUtils.GetContext();
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new UmlageDbService(ctx, auth);
+
+            var mitRechnungen = MakeUmlage(Umlageschluessel.NachWohnflaeche);
+            AddRechnung(mitRechnungen, 2021);
+            AddRechnung(mitRechnungen, 2023);
+
+            var ohneRechnung = MakeUmlage(Umlageschluessel.NachWohnflaeche);
+
+            ctx.Umlagen.AddRange(mitRechnungen, ohneRechnung);
+            ctx.SaveChanges();
+
+            var list = await service.GetList(user, new PagedQuery());
+
+            var mitEntry = list.Items.Single(e => e.Id == mitRechnungen.UmlageId);
+            var ohneEntry = list.Items.Single(e => e.Id == ohneRechnung.UmlageId);
+            mitEntry.LetztesRechnungsjahr.Should().Be(2023);
+            ohneEntry.LetztesRechnungsjahr.Should().BeNull();
+
+            var sortedAsc = await service.GetList(
+                user,
+                new PagedQuery { SortBy = "letztesRechnungsjahr", SortDir = "asc" });
+            sortedAsc.Items.First().Id.Should().Be(ohneRechnung.UmlageId);
+
+            var sortedDesc = await service.GetList(
+                user,
+                new PagedQuery { SortBy = "letztesRechnungsjahr", SortDir = "desc" });
+            sortedDesc.Items.First().Id.Should().Be(mitRechnungen.UmlageId);
+        }
+
+        private static void AddRechnung(Umlage umlage, int jahr)
+        {
+            var satz = new Buchungssatz(new DateOnly(jahr, 12, 31), $"BK-Forderung {jahr}") { Buchungsjahr = jahr };
+            var zeile = new Buchungszeile(SollHaben.Haben, 1000m) { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto };
+            satz.Buchungszeilen.Add(zeile);
+            umlage.NkVerrechnungsKonto!.Buchungszeilen.Add(zeile);
         }
 
         [Fact]

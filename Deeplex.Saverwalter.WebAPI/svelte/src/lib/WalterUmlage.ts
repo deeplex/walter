@@ -46,7 +46,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public permissions: WalterPermissions,
         public ende: string | undefined = undefined,
         public betriebskostenrechnungsJahre: number[] = [],
-        public konten: Partial<WalterBuchungskontoEntry>[] = []
+        public konten: Partial<WalterBuchungskontoEntry>[] = [],
+        public letztesRechnungsjahr: number | undefined = undefined
     ) {
         super();
     }
@@ -95,7 +96,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
             permissions,
             json.ende ?? undefined,
             json.betriebskostenrechnungsJahre ?? [],
-            json.konten ?? []
+            json.konten ?? [],
+            json.letztesRechnungsjahr ?? undefined
         );
     }
 }

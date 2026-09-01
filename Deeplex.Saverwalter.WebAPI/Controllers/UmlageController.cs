@@ -112,6 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? WohnungenBezeichnung { get; set; }
             public DateOnly? Ende { get; set; }
             public IEnumerable<int> BetriebskostenrechnungsJahre { get; set; } = [];
+            public int? LetztesRechnungsjahr { get; set; }
 
             // For Tabelle
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
@@ -130,6 +131,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .Select(z => z.Buchungssatz.Buchungsjahr)
                     .Distinct()
                     .ToList() ?? [];
+                LetztesRechnungsjahr = BetriebskostenrechnungsJahre.Any()
+                    ? BetriebskostenrechnungsJahre.Max()
+                    : null;
 
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(

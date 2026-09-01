@@ -57,6 +57,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     applySort: (q, sortBy, dir) => sortBy switch
                     {
                         "wohnungenBezeichnung" => q.SortBy(e => e.Wohnungen.Count, dir),
+                        "letztesRechnungsjahr" => q.SortBy(e => e.NkVerrechnungsKonto == null
+                            ? null
+                            : e.NkVerrechnungsKonto.Buchungszeilen
+                                .Where(z => z.SollHaben == SollHaben.Haben)
+                                .Select(z => (int?)z.Buchungssatz.Buchungsjahr)
+                                .Max(), dir),
                         _ => q.SortBy(e => e.Typ.Bezeichnung, dir)
                     },
                     toEntry: async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth)));

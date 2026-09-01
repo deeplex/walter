@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
-        { key: 'wohnungenBezeichnung', value: 'Wohnungen' }
+        { key: 'wohnungenBezeichnung', value: 'Wohnungen' },
+        { key: 'letztesRechnungsjahr', value: 'Letzte Rechnung' }
     ];
 
     export let fullHeight = false;
