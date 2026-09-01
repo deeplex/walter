@@ -158,6 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => user.IsInRole("Admin")).Returns(true);
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
