@@ -49,9 +49,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Where(r => r.VertragId.HasValue)
                 .ToDictionary(r => r.VertragId!.Value, r => r.GebuchterSaldo);
 
+            var verzichtVertragIds = preview.Resultate
+                .Where(r => r.VertragId.HasValue && r.Verzichtet)
+                .Select(r => r.VertragId!.Value)
+                .ToHashSet();
+
             var mieterParteien = alleEinheiten
                 .SelectMany(e => e.Parteien)
-                .Where(p => p.Vertrag != null)
+                .Where(p => p.Vertrag != null && !verzichtVertragIds.Contains(p.Vertrag!.VertragId))
                 .Where(p => vertragId == null || p.Vertrag!.VertragId == vertragId)
                 .GroupBy(p => (p.Vertrag!.VertragId, p.Nutzungsbeginn, p.Nutzungsende))
                 .Select(g => g.First())

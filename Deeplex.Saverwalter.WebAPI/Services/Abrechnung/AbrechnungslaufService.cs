@@ -129,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .ToListAsync())
                 .ToHashSet();
 
-            await PruefeMietForderungenAsync(einheiten, jahr, warnungen);
+            await PruefeMietForderungenAsync(einheiten, jahr, warnungen, verzichtVertragIds);
 
             var resultate = BuildResultate(einheiten, jahr, verzichtVertragIds);
 
@@ -153,11 +153,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// verhindert <see cref="BookAsync"/>, bis die Miet-Korrektur (oder ein manueller Eingriff bei
         /// <c>NkReichtNichtAus</c>) durchgeführt wurde.
         /// </summary>
-        private async Task PruefeMietForderungenAsync(List<NkEinheit> einheiten, int jahr, List<string> warnungen)
+        private async Task PruefeMietForderungenAsync(
+            List<NkEinheit> einheiten, int jahr, List<string> warnungen, HashSet<int> verzichtVertragIds)
         {
             var vertragIds = einheiten
                 .SelectMany(e => e.Parteien)
-                .Where(p => p.Vertrag is not null)
+                .Where(p => p.Vertrag is not null && !verzichtVertragIds.Contains(p.Vertrag!.VertragId))
                 .Select(p => p.Vertrag!.VertragId)
                 .Distinct();
 

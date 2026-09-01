@@ -963,6 +963,37 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public void P9_2_ZaehlerwechselBeiAllgemeinzaehler_WirdErkanntUndSummiert()
+        {
+            var wohnung = MakeWohnung("W1");
+            MakeVertrag(wohnung);
+            var heiz = MakeP9Setup(wohnung, q: 0m, v: 100m, jahr: 2021);
+            var hkvo = heiz.HeizkostenHKVOs.Single();
+            hkvo.AllgemeinWaermeZaehler.Clear();
+
+            // Alter Zähler wird zur Jahresmitte gegen einen neuen ausgetauscht.
+            var alt = new Zaehler("ALLG-ALT", Zaehlertyp.Gas) { Ende = new DateOnly(2021, 6, 30) };
+            alt.Staende.Add(new Zaehlerstand(new DateOnly(2020, 12, 31), 0m) { Zaehler = alt });
+            alt.Staende.Add(new Zaehlerstand(new DateOnly(2021, 6, 30), 15000m) { Zaehler = alt });
+
+            var neu = new Zaehler("ALLG-NEU", Zaehlertyp.Gas);
+            neu.Staende.Add(new Zaehlerstand(new DateOnly(2021, 6, 30), 0m) { Zaehler = neu });
+            neu.Staende.Add(new Zaehlerstand(new DateOnly(2021, 12, 31), 10000m) { Zaehler = neu });
+
+            hkvo.AllgemeinWaermeZaehler.Add(alt);
+            hkvo.AllgemeinWaermeZaehler.Add(neu);
+
+            var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
+
+            // Q = 15000 + 10000 = 25000, wie bei zwei gleichzeitig aktiven Zählern.
+            plan.P9Details!.Q.Should().Be(25000m);
+            plan.Warnungen.Should().Contain(w =>
+                w.Contains("Zählerwechsel erkannt") &&
+                w.Contains("ALLG-ALT") &&
+                w.Contains("ALLG-NEU"));
+        }
+
+        [Fact]
         public void P9_2_OhneAllgemeinzaehlerVerbrauch_NullMitWarnung()
         {
             var wohnung = MakeWohnung("W1");

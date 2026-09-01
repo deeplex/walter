@@ -327,7 +327,11 @@ namespace Deeplex.Saverwalter.PrintService
             var ende = new DateOnly(jahr, 12, 31);
 
             // Q = Summe der Verbräuche aller Allgemein-Wärmezähler (mehrere möglich).
-            var Q = hkvo.AllgemeinWaermeZaehler.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
+            var qVerbraeuche = hkvo.AllgemeinWaermeZaehler
+                .Select(z => new Verbrauch(z, beginn, ende, notes))
+                .ToList();
+            VerbrauchAnteil.CheckIfZaehlerstaendeValid(qVerbraeuche, beginn, ende, notes);
+            var Q = qVerbraeuche.Sum(v => v.Delta);
             var V = wohnungWWZaehler.Sum(z => new Verbrauch(z, beginn, ende, notes).Delta);
 
             if (Q <= 0 || V <= 0) return null;

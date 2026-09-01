@@ -95,7 +95,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
         }
 
-        private static void CheckIfZaehlerstaendeValid(
+        /// <summary>
+        /// Erkennt Zählerwechsel innerhalb einer Gruppe von Verbräuchen (gleicher Zaehler.Wohnung,
+        /// z.B. auch mehrere Allgemeinzähler mit Wohnung == null): meldet einen erkannten Wechsel als
+        /// Info, oder einen fehlenden Vorgänger-/Nachfolgerstand als Error.
+        /// </summary>
+        public static void CheckIfZaehlerstaendeValid(
             List<Verbrauch> verbraeuche,
             DateOnly beginn,
             DateOnly ende,

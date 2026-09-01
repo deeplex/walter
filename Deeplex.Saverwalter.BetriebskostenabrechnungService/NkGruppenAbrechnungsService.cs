@@ -1006,6 +1006,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 var qVerbraeuche = hkvo.AllgemeinWaermeZaehler
                     .Select(z => new Verbrauch(z, beginn, ende, notes))
                     .ToList();
+                VerbrauchAnteil.CheckIfZaehlerstaendeValid(qVerbraeuche, beginn, ende, notes);
                 var Q = qVerbraeuche.Sum(v => v.Delta);
                 var qKennnummern = string.Join(", ", hkvo.AllgemeinWaermeZaehler.Select(z => z.Kennnummer));
                 var qAnfang = qVerbraeuche.Min(v => v.Anfangsdatum);

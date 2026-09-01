@@ -54,6 +54,11 @@ namespace Deeplex.Saverwalter.PrintService
 
         public static string Gruss(List<Kontakt> mieter)
         {
+            if (mieter.Count == 0)
+            {
+                return "Sehr geehrte Damen und Herren, ";
+            }
+
             var gruss = mieter.Aggregate("", (text, mieter) =>
             {
                 if (mieter.Rechtsform == Rechtsform.natuerlich)

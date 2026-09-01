@@ -222,6 +222,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return Conflict(ex.Message);
             }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.GetBaseException().Message);
+            }
         }
 
         /// <summary>
@@ -249,6 +253,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             catch (InvalidOperationException ex)
             {
                 return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.GetBaseException().Message);
             }
         }
     }
