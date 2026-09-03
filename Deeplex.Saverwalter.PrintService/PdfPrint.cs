@@ -136,11 +136,6 @@ namespace Deeplex.Saverwalter.PrintService
             var section = body.AddSection();
             section.AddPageBreak();
         }
-        private string frac(string num, string den)
-        {
-            return $"{num} / {den}";
-        }
-
         public void Break()
         {
             var section = body.LastSection;
@@ -189,11 +184,67 @@ namespace Deeplex.Saverwalter.PrintService
 
         public void EqHeizkostenV9_2(HkvoP9_2Berechnung b)
         {
-            Text($"Berechnung Warmwasseranteil §9 Abs. 2 HKVO:");
-            Text($"2,5 × ({Utils.Unit(b.V, "m³")} / {Utils.Unit(b.Q, "kWh")}) × ({Utils.Celsius((int)b.Tw)} − 10°C) = {Utils.Prozent(b.Para9_2)}");
-            Text($"V = {Utils.Unit(b.V, "m³")} = Warmwassermenge");
-            Text($"Q = {Utils.Unit(b.Q, "kWh")} = Wärmemenge Allgemeinzähler");
-            Text($"tw = {Utils.Celsius((int)b.Tw)} = geschätzte Temperatur Warmwasser");
+            const double formulaSize = 14;
+            var section = body.LastSection;
+
+            Text("Berechnung Warmwasseranteil §9 Abs. 2 HKVO:");
+
+            // Formel groß, zentriert und mathematisch gesetzt (kursive Variablen, echte
+            // Subscripts) — Formelform aus §9 Abs. 2 HKVO: QW = 2,5 × V × (tw − 10°C) / Q.
+            var formel = section.AddParagraph();
+            formel.Format.Alignment = ParagraphAlignment.Center;
+            formel.Format.SpaceBefore = spacing;
+            formel.Format.SpaceAfter = spacing;
+
+            FormattedText Sym(string text, bool sub = false)
+            {
+                var ft = formel.AddFormattedText(text);
+                ft.Font.Name = font;
+                ft.Size = formulaSize;
+                ft.Italic = true;
+                ft.Subscript = sub;
+                return ft;
+            }
+            FormattedText Op(string text)
+            {
+                var ft = formel.AddFormattedText(text);
+                ft.Font.Name = font;
+                ft.Size = formulaSize;
+                return ft;
+            }
+
+            Sym("Q"); Sym("W", sub: true); Op("  =  2,5 × "); Sym("V"); Op(" × (");
+            Sym("t"); Sym("w", sub: true); Op(" − 10°C) / "); Sym("Q");
+
+            // Legende: eingerückter, geschlossener Block statt loser Fließtext-Zeilen.
+            var legende = section.AddParagraph();
+            legende.Format.Font.Size = fontSize;
+            legende.Format.Font.Name = font;
+            legende.Format.LeftIndent = Unit.FromMillimeter(6);
+            legende.Format.SpaceAfter = spacing;
+
+            void LegendVar(string text, bool sub = false, bool bold = false)
+            {
+                var ft = legende.AddFormattedText(text);
+                ft.Italic = true;
+                ft.Subscript = sub;
+                ft.Bold = bold;
+            }
+            void LegendRest(string text, bool bold = false)
+            {
+                var ft = legende.AddFormattedText(text);
+                ft.Bold = bold;
+            }
+
+            LegendVar("V"); LegendRest($" = {Utils.Unit(b.V, "m³")}  (Warmwassermenge)");
+            legende.AddLineBreak();
+            LegendVar("Q"); LegendRest($" = {Utils.Unit(b.Q, "kWh")}  (Wärmemenge Allgemeinzähler)");
+            legende.AddLineBreak();
+            LegendVar("t"); LegendVar("w", sub: true);
+            LegendRest($" = {Utils.Celsius((int)b.Tw)}  (geschätzte Warmwassertemperatur)");
+            legende.AddLineBreak();
+            LegendVar("Q", bold: true); LegendVar("W", sub: true, bold: true);
+            LegendRest($" = {Utils.Prozent(b.Para9_2)}", bold: true);
         }
 
         private static string font = "Times New Roman";

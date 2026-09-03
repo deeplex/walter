@@ -189,27 +189,73 @@ namespace Deeplex.Saverwalter.PrintService
 
         public void EqHeizkostenV9_2(HkvoP9_2Berechnung b)
         {
+            const int formulaFontSize = 14;
+
             DocumentFormat.OpenXml.Math.RunProperties MathRp() =>
-                new(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" });
+                new(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" },
+                    new FontSize() { Val = (formulaFontSize * 2).ToString() });
             DocumentFormat.OpenXml.Math.Run T(string str) =>
                 new(MathRp(), new DocumentFormat.OpenXml.Math.Text(str));
-            DocumentFormat.OpenXml.Math.Subscript Tw() =>
-                new(new DocumentFormat.OpenXml.Math.Base(T("t")),
-                    new DocumentFormat.OpenXml.Math.SubArgument(T("w")));
-            DocumentFormat.OpenXml.Math.Fraction Frac(string num, string den) =>
-                new(new DocumentFormat.OpenXml.Math.Numerator(T(num)),
-                    new DocumentFormat.OpenXml.Math.Denominator(T(den)));
-            DocumentFormat.OpenXml.Math.Fraction Units() => Frac("kWh", "m³ × K");
+            DocumentFormat.OpenXml.Math.Subscript Sub(string baseStr, string subStr) =>
+                new(new DocumentFormat.OpenXml.Math.Base(T(baseStr)),
+                    new DocumentFormat.OpenXml.Math.SubArgument(T(subStr)));
+
+            // Q_W als Kürzel für den Warmwasseranteil; die Formel als ein Bruch über Q,
+            // in der Form von §9 Abs. 2 HKVO: Q_W = 2,5 × V × (tw − 10°C) / Q.
+            var numerator = new DocumentFormat.OpenXml.Math.Numerator(
+                T("2,5 × V × ("), Sub("t", "w"), T("-10°C)"));
+            var bruch = new DocumentFormat.OpenXml.Math.Fraction(
+                numerator, new DocumentFormat.OpenXml.Math.Denominator(T("Q")));
 
             body.Append(new Paragraph(Font(), new Run(Font(), new Text("Berechnung Warmwasseranteil §9 Abs. 2 HKVO:"))));
-            body.Append(new Paragraph(Font(), NoSpace(),
-                new DocumentFormat.OpenXml.Math.OfficeMath(
-                    T("2,5 ×"), Frac("V", "Q"), T(" × ("), Tw(), T("-10°C)"), Units(), T(" ⟹ "),
-                    T("2,5 ×"), Frac(Unit(b.V, "m³"), Unit(b.Q, "kWh")), T(" × ("),
-                    T(Celsius((int)b.Tw)), T("-10°C)"), Units(), T(" = "), T(Prozent(b.Para9_2)))));
-            body.Append(new Paragraph(Font(), new Run(Font(), new Text($"V = {Unit(b.V, "m³")} = Warmwassermenge"))));
-            body.Append(new Paragraph(Font(), new Run(Font(), new Text($"Q = {Unit(b.Q, "kWh")} = Wärmemenge Allgemeinzähler"))));
-            body.Append(new Paragraph(Font(), new Run(Font(), new Text($"tw = {Celsius((int)b.Tw)} = geschätzte Temperatur Warmwasser"))));
+            body.Append(new Paragraph(
+                new ParagraphProperties(
+                    new SpacingBetweenLines() { After = "0" },
+                    new Justification() { Val = JustificationValues.Center }),
+                new DocumentFormat.OpenXml.Math.OfficeMath(Sub("Q", "W"), T(" = "), bruch)));
+
+            // Reihenfolge innerhalb von w:rPr ist schemapflichtig (rFonts, i, sz, vertAlign, …) —
+            // Italic/VerticalTextAlignment müssen in dasselbe RunProperties-Element wie Font().
+            RunProperties VarRp() => new(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font },
+                new Italic(),
+                new FontSize() { Val = (fontSize * 2).ToString() });
+            RunProperties SubVarRp() => new(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font },
+                new Italic(),
+                new FontSize() { Val = (fontSize * 2).ToString() },
+                new VerticalTextAlignment() { Val = VerticalPositionValues.Subscript });
+
+            RunProperties BoldVarRp() => new(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font },
+                new Bold(), new Italic(),
+                new FontSize() { Val = (fontSize * 2).ToString() });
+            RunProperties BoldSubVarRp() => new(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font },
+                new Bold(), new Italic(),
+                new FontSize() { Val = (fontSize * 2).ToString() },
+                new VerticalTextAlignment() { Val = VerticalPositionValues.Subscript });
+            RunProperties BoldTextRp() => new(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font },
+                new Bold(),
+                new FontSize() { Val = (fontSize * 2).ToString() });
+
+            Run VarRun(string s) => new(VarRp(), new Text(s));
+            Run SubVarRun(string s) => new(SubVarRp(), new Text(s));
+            Run TextRun(string s) => new(Font(), new Text(s) { Space = SpaceProcessingModeValues.Preserve });
+            Run BoldVarRun(string s) => new(BoldVarRp(), new Text(s));
+            Run BoldSubVarRun(string s) => new(BoldSubVarRp(), new Text(s));
+            Run BoldTextRun(string s) => new(BoldTextRp(), new Text(s) { Space = SpaceProcessingModeValues.Preserve });
+            Run Br() => new(new Break());
+
+            var legendeProps = new ParagraphProperties(
+                new SpacingBetweenLines() { After = "0" },
+                new Indentation() { Left = "340" });
+            body.Append(new Paragraph(legendeProps,
+                VarRun("V"), TextRun($" = {Unit(b.V, "m³")}  (Warmwassermenge)"), Br(),
+                VarRun("Q"), TextRun($" = {Unit(b.Q, "kWh")}  (Wärmemenge Allgemeinzähler)"), Br(),
+                VarRun("t"), SubVarRun("w"), TextRun($" = {Celsius((int)b.Tw)}  (geschätzte Warmwassertemperatur)"), Br(),
+                BoldVarRun("Q"), BoldSubVarRun("W"), BoldTextRun($" = {Prozent(b.Para9_2)}")));
         }
     }
 }

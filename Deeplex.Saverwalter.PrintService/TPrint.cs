@@ -351,9 +351,55 @@ namespace Deeplex.Saverwalter.PrintService
             p.Table(widths, new int[] { 0, 0, 1, 2, 2, 2 }, bold.ToArray(), underlined.ToArray(), cols);
         }
 
+        /// <summary>
+        /// Ermittelt die Anteile für §7 (Heizung) und §8 (Warmwasser) — nach Verbrauch
+        /// und nach Nutzfläche —, analog zu <see cref="ErmittlungKalteEinheitenNk"/>.
+        /// </summary>
+        private static void ErmittlungWarmeEinheitenNk(NkDruckHkvoRechnung hr, NkDruckEinheit einheit, NkDruckdaten d, IPrint<T> p)
+        {
+            var widths = new int[] { 41, 25, 17, 17 };
+            var col1 = new List<string> { "Ermittlung Ihrer Anteile" };
+            var col2 = new List<string> { "Nutzungsintervall" };
+            var col3 = new List<string> { "Tage" };
+            var col4 = new List<string> { "Ihr Anteil" };
+            var bold = new List<bool> { true };
+            var underlined = new List<bool> { false };
+
+            var nutzungszeitraum = d.Nutzungsende.DayNumber - d.Nutzungsbeginn.DayNumber + 1;
+            var nutzungsIntervall = Datum(d.Nutzungsbeginn) + " - " + Datum(d.Nutzungsende);
+            var zeitraumFraction = nutzungszeitraum.ToString() + " / " + d.Abrechnungstage.ToString();
+
+            if (hr.HeizVerbrauchAlle > 0)
+            {
+                col1.Add("nach Verbrauch Heizung (n. V.)"); col2.Add(""); col3.Add(""); col4.Add("");
+                bold.Add(true); underlined.Add(false);
+                col1.Add(Unit(hr.HeizVerbrauchDiese, "kWh") + " / " + Unit(hr.HeizVerbrauchAlle, "kWh"));
+                col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(hr.HeizVerbrauchAnteil));
+                bold.Add(false); underlined.Add(true);
+            }
+
+            col1.Add("nach Nutzfläche (n. NF)"); col2.Add(""); col3.Add(""); col4.Add("");
+            bold.Add(true); underlined.Add(false);
+            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche) + " / " + Quadrat(einheit.GesamtNutzflaeche));
+            col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(hr.NFZeitanteil));
+            bold.Add(false); underlined.Add(true);
+
+            if (hr.WWVerbrauchAlle > 0)
+            {
+                col1.Add("nach Verbrauch Warmwasser (n. V.)"); col2.Add(""); col3.Add(""); col4.Add("");
+                bold.Add(true); underlined.Add(false);
+                col1.Add(Unit(hr.WWVerbrauchDiese, "m³") + " / " + Unit(hr.WWVerbrauchAlle, "m³"));
+                col2.Add(nutzungsIntervall); col3.Add(zeitraumFraction); col4.Add(Prozent(hr.WWVerbrauchAnteil));
+                bold.Add(false); underlined.Add(true);
+            }
+
+            var cols = new List<List<string>> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
+            p.Table(widths, new int[] { 0, 1, 1, 1 }, bold.ToArray(), underlined.ToArray(), cols);
+        }
+
         private static void ErmittlungWarmeKostenNk(NkDruckHkvoRechnung hr, NkDruckdaten d, IPrint<T> p)
         {
-            var widths = new int[] { 38, 10, 24, 11, 11, 6 };
+            var widths = new int[] { 32, 9, 25, 10, 11, 13 };
             var col1 = new List<string> { "Kostenanteil" };
             var col2 = new List<string> { "Anteil" };
             var col3 = new List<string> { "Nutzungsintervall" };
@@ -365,48 +411,16 @@ namespace Deeplex.Saverwalter.PrintService
 
             var nutzungsIntervall = Datum(d.Nutzungsbeginn) + " - " + Datum(d.Nutzungsende);
 
-            // §7 Heizungsanteil
-            col1.Add("§7 Heizung (" + Prozent(1 - hr.P9_2.Para9_2) + " des Gesamtbetrags)");
-            col2.Add(""); col3.Add(""); col4.Add(Euro(hr.HeizBetrag));
-            col5.Add(""); col6.Add("");
-            bold.Add(true); underlined.Add(false);
-
-            if (hr.HeizVerbrauchAlle > 0)
-            {
-                var unit = "kWh";
-                col1.Add(Unit(hr.HeizVerbrauchDiese, unit) + " / " + Unit(hr.HeizVerbrauchAlle, unit));
-                col2.Add(Prozent(hr.P7) + " n.V."); col3.Add(nutzungsIntervall);
-                col4.Add(""); col5.Add(Prozent(hr.P7 * hr.HeizVerbrauchAnteil));
-                col6.Add(Euro(hr.HeizBetrag * hr.P7 * hr.HeizVerbrauchAnteil));
-                bold.Add(false); underlined.Add(false);
-            }
-
-            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche));
-            col2.Add(Prozent(1 - hr.P7) + " n.NF"); col3.Add(nutzungsIntervall);
-            col4.Add(""); col5.Add(Prozent((1 - hr.P7) * hr.NFZeitanteil));
-            col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.NFZeitanteil));
+            col1.Add("Heizung (§7 HKVO)");
+            col2.Add(Prozent(1 - hr.P9_2.Para9_2)); col3.Add(nutzungsIntervall);
+            col4.Add(Euro(hr.HeizBetrag)); col5.Add(Prozent(hr.HeizAnteilFaktor));
+            col6.Add(Euro(hr.HeizBetrag * hr.HeizAnteilFaktor));
             bold.Add(false); underlined.Add(true);
 
-            // §8 Warmwasseranteil
-            col1.Add("§8 Warmwasser (" + Prozent(hr.P9_2.Para9_2) + " des Gesamtbetrags)");
-            col2.Add(""); col3.Add(""); col4.Add(Euro(hr.WWBetrag));
-            col5.Add(""); col6.Add("");
-            bold.Add(true); underlined.Add(false);
-
-            if (hr.WWVerbrauchAlle > 0)
-            {
-                var unit = "m³";
-                col1.Add(Unit(hr.WWVerbrauchDiese, unit) + " / " + Unit(hr.WWVerbrauchAlle, unit));
-                col2.Add(Prozent(hr.P8) + " n.V."); col3.Add(nutzungsIntervall);
-                col4.Add(""); col5.Add(Prozent(hr.P8 * hr.WWVerbrauchAnteil));
-                col6.Add(Euro(hr.WWBetrag * hr.P8 * hr.WWVerbrauchAnteil));
-                bold.Add(false); underlined.Add(false);
-            }
-
-            col1.Add(Quadrat(d.Wohnung.VersionAt(new DateOnly(d.Jahr, 12, 31)).Nutzflaeche));
-            col2.Add(Prozent(1 - hr.P8) + " n.NF"); col3.Add(nutzungsIntervall);
-            col4.Add(""); col5.Add(Prozent((1 - hr.P8) * hr.NFZeitanteil));
-            col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.NFZeitanteil));
+            col1.Add("Warmwasser (§8 HKVO)");
+            col2.Add(Prozent(hr.P9_2.Para9_2)); col3.Add(nutzungsIntervall);
+            col4.Add(Euro(hr.WWBetrag)); col5.Add(Prozent(hr.WWAnteilFaktor));
+            col6.Add(Euro(hr.WWBetrag * hr.WWAnteilFaktor));
             bold.Add(false); underlined.Add(true);
 
             col1.Add(""); col2.Add(""); col3.Add(""); col4.Add(Euro(hr.Gesamtbetrag));
@@ -507,6 +521,8 @@ namespace Deeplex.Saverwalter.PrintService
                     foreach (var hr in einheit.HkvoRechnungen)
                     {
                         printImpl.EqHeizkostenV9_2(hr.P9_2);
+                        printImpl.Break();
+                        ErmittlungWarmeEinheitenNk(hr, einheit, druckdaten, printImpl);
                         printImpl.Break();
                         ErmittlungWarmeKostenNk(hr, druckdaten, printImpl);
                     }
