@@ -263,6 +263,7 @@ namespace Deeplex.Saverwalter.PrintService
                     WWVerbrauchAlle = totalWW,
                     NFZeitanteil = partei.NFZeitanteil,
                     MeinBetragGesamt = meinBetrag,
+                    Strompauschale = hkvo!.Strompauschale,
                 });
             }
 
@@ -393,6 +394,13 @@ namespace Deeplex.Saverwalter.PrintService
         // Autoritativer Gesamtbetrag dieser Partei (aus Rechnungsplan)
         public required decimal MeinBetragGesamt { get; init; }
 
+        /// <summary>
+        /// Betriebsstrompauschale (HeizkostenV): Anteil, der bereits VOR der §7/§8-Aufteilung
+        /// vom Betriebsstrom auf die Heizkosten umgelegt wurde und somit in <see cref="Gesamtbetrag"/>
+        /// enthalten ist (0, wenn keine Pauschale vereinbart ist).
+        /// </summary>
+        public required decimal Strompauschale { get; init; }
+
         // Abgeleitete Werte für Detailanzeige
         public decimal HeizBetrag => Gesamtbetrag * (1 - P9_2.Para9_2);
         public decimal WWBetrag => Gesamtbetrag * P9_2.Para9_2;
@@ -402,5 +410,10 @@ namespace Deeplex.Saverwalter.PrintService
         public decimal WWAnteilFaktor => WWVerbrauchAlle > 0
             ? P8 * WWVerbrauchAnteil + (1 - P8) * NFZeitanteil
             : NFZeitanteil;
+
+        /// <summary>Ihr Anteil an der Betriebsstrompauschale in €, bereits in <see cref="Gesamtbetrag"/> enthalten.</summary>
+        public decimal StrompauschaleBetrag => Strompauschale > 0
+            ? Gesamtbetrag * Strompauschale / (1 + Strompauschale)
+            : 0;
     }
 }

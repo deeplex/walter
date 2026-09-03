@@ -399,54 +399,62 @@ namespace Deeplex.Saverwalter.PrintService
 
         private static void ErmittlungWarmeKostenNk(NkDruckHkvoRechnung hr, NkDruckdaten d, IPrint<T> p)
         {
-            var widths = new int[] { 32, 9, 25, 10, 11, 13 };
+            // Jede Zeile zeigt die volle Faktoren-Kette: Betrag × §9 Abs. 2 × §7/§8 × Anteil
+            // (Verbrauchs-/Flächenanteil, aus der Ermittlung Ihrer Anteile oben) = Gesamtanteil,
+            // damit "Gesamtanteil" nicht mit dem "Ihr Anteil" von dort verwechselt wird.
+            var widths = new int[] { 14, 8, 13, 12, 11, 9, 16, 17 };
             var col1 = new List<string> { "Kostenanteil" };
-            var col2 = new List<string> { "Anteil" };
-            var col3 = new List<string> { "Nutzungsintervall" };
-            var col4 = new List<string> { "Betrag" };
-            var col5 = new List<string> { "Ihr Anteil" };
-            var col6 = new List<string> { "Ihre Kosten" };
+            var col2 = new List<string> { "Schlüssel" };
+            var col3 = new List<string> { "Betrag" };
+            var col4 = new List<string> { "§9 Abs. 2" };
+            var col5 = new List<string> { "§7 / §8" };
+            var col6 = new List<string> { "Anteil" };
+            var col7 = new List<string> { "Gesamtanteil" };
+            var col8 = new List<string> { "Ihre Kosten" };
             var bold = new List<bool> { true };
             var underlined = new List<bool> { false };
 
-            var nutzungsIntervall = Datum(d.Nutzungsbeginn) + " - " + Datum(d.Nutzungsende);
+            void Row(string kostenanteil, string schluessel, string abs2, string p78,
+                decimal anteil, decimal gesamtanteil, decimal kosten, bool underline)
+            {
+                col1.Add(kostenanteil); col2.Add(schluessel); col3.Add(Euro(hr.Gesamtbetrag));
+                col4.Add(abs2); col5.Add(p78); col6.Add(Prozent(anteil));
+                col7.Add(Prozent(gesamtanteil)); col8.Add(Euro(kosten));
+                bold.Add(false); underlined.Add(underline);
+            }
 
-            // §7 Heizung: nach Verbrauch und nach Nutzfläche als getrennte Zeilen.
+            var heizAbs2 = Prozent(1 - hr.P9_2.Para9_2);
             var heizFirst = true;
             if (hr.HeizVerbrauchAlle > 0)
             {
-                col1.Add("Heizung (§7 HKVO)"); col2.Add("n. V."); col3.Add(nutzungsIntervall);
-                col4.Add(Euro(hr.HeizBetrag * hr.P7)); col5.Add(Prozent(hr.P7 * hr.HeizVerbrauchAnteil));
-                col6.Add(Euro(hr.HeizBetrag * hr.P7 * hr.HeizVerbrauchAnteil));
-                bold.Add(false); underlined.Add(false);
+                Row("Heizung", "n. V.", heizAbs2, Prozent(hr.P7), hr.HeizVerbrauchAnteil,
+                    (1 - hr.P9_2.Para9_2) * hr.P7 * hr.HeizVerbrauchAnteil,
+                    hr.HeizBetrag * hr.P7 * hr.HeizVerbrauchAnteil, false);
                 heizFirst = false;
             }
-            col1.Add(heizFirst ? "Heizung (§7 HKVO)" : ""); col2.Add("n. NF"); col3.Add(nutzungsIntervall);
-            col4.Add(Euro(hr.HeizBetrag * (1 - hr.P7))); col5.Add(Prozent((1 - hr.P7) * hr.NFZeitanteil));
-            col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.NFZeitanteil));
-            bold.Add(false); underlined.Add(true);
+            Row(heizFirst ? "Heizung" : "", "n. NF", heizAbs2, Prozent(1 - hr.P7), hr.NFZeitanteil,
+                (1 - hr.P9_2.Para9_2) * (1 - hr.P7) * hr.NFZeitanteil,
+                hr.HeizBetrag * (1 - hr.P7) * hr.NFZeitanteil, true);
 
-            // §8 Warmwasser: nach Verbrauch und nach Nutzfläche als getrennte Zeilen.
+            var wwAbs2 = Prozent(hr.P9_2.Para9_2);
             var wwFirst = true;
             if (hr.WWVerbrauchAlle > 0)
             {
-                col1.Add("Warmwasser (§8 HKVO)"); col2.Add("n. V."); col3.Add(nutzungsIntervall);
-                col4.Add(Euro(hr.WWBetrag * hr.P8)); col5.Add(Prozent(hr.P8 * hr.WWVerbrauchAnteil));
-                col6.Add(Euro(hr.WWBetrag * hr.P8 * hr.WWVerbrauchAnteil));
-                bold.Add(false); underlined.Add(false);
+                Row("Warmwasser", "n. V.", wwAbs2, Prozent(hr.P8), hr.WWVerbrauchAnteil,
+                    hr.P9_2.Para9_2 * hr.P8 * hr.WWVerbrauchAnteil,
+                    hr.WWBetrag * hr.P8 * hr.WWVerbrauchAnteil, false);
                 wwFirst = false;
             }
-            col1.Add(wwFirst ? "Warmwasser (§8 HKVO)" : ""); col2.Add("n. NF"); col3.Add(nutzungsIntervall);
-            col4.Add(Euro(hr.WWBetrag * (1 - hr.P8))); col5.Add(Prozent((1 - hr.P8) * hr.NFZeitanteil));
-            col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.NFZeitanteil));
-            bold.Add(false); underlined.Add(true);
+            Row(wwFirst ? "Warmwasser" : "", "n. NF", wwAbs2, Prozent(1 - hr.P8), hr.NFZeitanteil,
+                hr.P9_2.Para9_2 * (1 - hr.P8) * hr.NFZeitanteil,
+                hr.WWBetrag * (1 - hr.P8) * hr.NFZeitanteil, true);
 
-            col1.Add(""); col2.Add(""); col3.Add(""); col4.Add(Euro(hr.Gesamtbetrag));
-            col5.Add("Summe: "); col6.Add(Euro(hr.MeinBetragGesamt));
+            col1.Add(""); col2.Add(""); col3.Add(""); col4.Add(""); col5.Add(""); col6.Add("");
+            col7.Add("Summe: "); col8.Add(Euro(hr.MeinBetragGesamt));
             bold.Add(true); underlined.Add(false);
 
-            var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6 }.Select(w => w.ToArray()).ToArray();
-            p.Table(widths, new int[] { 0, 0, 1, 2, 2, 2 }, bold.ToArray(), underlined.ToArray(), cols);
+            var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6, col7, col8 }.Select(w => w.ToArray()).ToArray();
+            p.Table(widths, new int[] { 0, 0, 2, 2, 2, 2, 2, 2 }, bold.ToArray(), underlined.ToArray(), cols);
         }
 
         private static void GesamtErgebnisNk(NkDruckdaten d, IPrint<T> p)
@@ -542,6 +550,13 @@ namespace Deeplex.Saverwalter.PrintService
                         printImpl.Break();
                         ErmittlungWarmeEinheitenNk(hr, einheit, druckdaten, printImpl);
                         printImpl.Break();
+                        if (hr.Strompauschale > 0)
+                        {
+                            var basisBetrag = hr.Gesamtbetrag - hr.StrompauschaleBetrag;
+                            printImpl.Text($"{Euro(basisBetrag)} + {Euro(hr.StrompauschaleBetrag)} "
+                                + $"({Prozent(hr.Strompauschale)} Betriebsstrompauschale, HeizkostenV) = {Euro(hr.Gesamtbetrag)}");
+                            printImpl.Break();
+                        }
                         ErmittlungWarmeKostenNk(hr, druckdaten, printImpl);
                     }
                 }
