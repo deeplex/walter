@@ -411,16 +411,34 @@ namespace Deeplex.Saverwalter.PrintService
 
             var nutzungsIntervall = Datum(d.Nutzungsbeginn) + " - " + Datum(d.Nutzungsende);
 
-            col1.Add("Heizung (§7 HKVO)");
-            col2.Add(Prozent(1 - hr.P9_2.Para9_2)); col3.Add(nutzungsIntervall);
-            col4.Add(Euro(hr.HeizBetrag)); col5.Add(Prozent(hr.HeizAnteilFaktor));
-            col6.Add(Euro(hr.HeizBetrag * hr.HeizAnteilFaktor));
+            // §7 Heizung: nach Verbrauch und nach Nutzfläche als getrennte Zeilen.
+            var heizFirst = true;
+            if (hr.HeizVerbrauchAlle > 0)
+            {
+                col1.Add("Heizung (§7 HKVO)"); col2.Add("n. V."); col3.Add(nutzungsIntervall);
+                col4.Add(Euro(hr.HeizBetrag * hr.P7)); col5.Add(Prozent(hr.P7 * hr.HeizVerbrauchAnteil));
+                col6.Add(Euro(hr.HeizBetrag * hr.P7 * hr.HeizVerbrauchAnteil));
+                bold.Add(false); underlined.Add(false);
+                heizFirst = false;
+            }
+            col1.Add(heizFirst ? "Heizung (§7 HKVO)" : ""); col2.Add("n. NF"); col3.Add(nutzungsIntervall);
+            col4.Add(Euro(hr.HeizBetrag * (1 - hr.P7))); col5.Add(Prozent((1 - hr.P7) * hr.NFZeitanteil));
+            col6.Add(Euro(hr.HeizBetrag * (1 - hr.P7) * hr.NFZeitanteil));
             bold.Add(false); underlined.Add(true);
 
-            col1.Add("Warmwasser (§8 HKVO)");
-            col2.Add(Prozent(hr.P9_2.Para9_2)); col3.Add(nutzungsIntervall);
-            col4.Add(Euro(hr.WWBetrag)); col5.Add(Prozent(hr.WWAnteilFaktor));
-            col6.Add(Euro(hr.WWBetrag * hr.WWAnteilFaktor));
+            // §8 Warmwasser: nach Verbrauch und nach Nutzfläche als getrennte Zeilen.
+            var wwFirst = true;
+            if (hr.WWVerbrauchAlle > 0)
+            {
+                col1.Add("Warmwasser (§8 HKVO)"); col2.Add("n. V."); col3.Add(nutzungsIntervall);
+                col4.Add(Euro(hr.WWBetrag * hr.P8)); col5.Add(Prozent(hr.P8 * hr.WWVerbrauchAnteil));
+                col6.Add(Euro(hr.WWBetrag * hr.P8 * hr.WWVerbrauchAnteil));
+                bold.Add(false); underlined.Add(false);
+                wwFirst = false;
+            }
+            col1.Add(wwFirst ? "Warmwasser (§8 HKVO)" : ""); col2.Add("n. NF"); col3.Add(nutzungsIntervall);
+            col4.Add(Euro(hr.WWBetrag * (1 - hr.P8))); col5.Add(Prozent((1 - hr.P8) * hr.NFZeitanteil));
+            col6.Add(Euro(hr.WWBetrag * (1 - hr.P8) * hr.NFZeitanteil));
             bold.Add(false); underlined.Add(true);
 
             col1.Add(""); col2.Add(""); col3.Add(""); col4.Add(Euro(hr.Gesamtbetrag));
