@@ -824,6 +824,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 var betrTotal = betrPlaene.Sum(p => p.Betrag);
                 if (betrTotal <= 0)
                 {
+                    // Negativ (Gutschriften übersteigen die Rechnungen) ist ein anderer,
+                    // eher besorgniserregenderer Fall als "noch gar nicht gebucht" — eigene Meldung.
+                    var grund = betrTotal < 0
+                        ? $"'{hkvo.Betriebsstrom.Typ.Bezeichnung}' ist negativ ({betrTotal:N2} €) für {jahr}"
+                        : $"'{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}";
+                    var meldung = $"Strompauschale kann nicht angewandt werden: {grund}.";
+
                     var dummy = new Buchungssatz(endeJahr, $"{StrompauschaleMarker} {heiz.Typ.Bezeichnung} {jahr}")
                     {
                         Buchungsjahr = jahr
@@ -834,14 +841,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         Betrag = 0,
                         Umlage = heiz,
                         Anteile = [],
-                        Warnungen = [$"Strompauschale kann nicht angewandt werden: '{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}."],
+                        Warnungen = [meldung],
                         IstStrompauschale = true
                     });
                     strompauschalen.Add(new NkStrompauschaleInfo(
                         heiz.UmlageId, heiz.Typ.Bezeichnung,
                         betrId, hkvo.Betriebsstrom.Typ.Bezeichnung,
                         0,
-                        [$"Strompauschale kann nicht angewandt werden: '{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}."]));
+                        [meldung]));
                     continue;
                 }
 

@@ -216,8 +216,11 @@ namespace Deeplex.Saverwalter.PrintService
                 var p9_2 = HkvoP9_2Berechnung.Compute(hkvo!, wohnungWW, jahr, notes);
                 if (p9_2 == null) continue;
 
+                // Die Strompauschale-Umbuchung ist ein reines Buchungs-Artefakt (Betrag = Delta,
+                // KEINE Anteile — das Delta steckt schon im skalierten Heizkosten-Plan). Sie muss
+                // hier ausgeschlossen werden, sonst würde das Delta im Gesamtbetrag doppelt gezählt.
                 var plaene = einheit.Rechnungsplaene
-                    .Where(p => p.Umlage.UmlageId == umlage.UmlageId)
+                    .Where(p => p.Umlage.UmlageId == umlage.UmlageId && !p.IstStrompauschale)
                     .ToList();
                 if (plaene.Count == 0) continue;
 
@@ -226,6 +229,12 @@ namespace Deeplex.Saverwalter.PrintService
                     .SelectMany(p => p.Anteile)
                     .Where(a => a.Partei == partei)
                     .Sum(a => a.Betrag);
+
+                // Strompauschale ist nur dann tatsächlich im Gesamtbetrag enthalten, wenn sie
+                // auch angewandt wurde (Betriebsstrom vorhanden + Buchungen im Jahr) — sonst
+                // wäre die "Vorrechnen"-Zeile im Druck irreführend (Betrag enthält dann keine Pauschale).
+                var strompauschaleAngewandt = einheit.Rechnungsplaene.Any(p =>
+                    p.Umlage.UmlageId == umlage.UmlageId && p.IstStrompauschale && p.Betrag > 0);
 
                 // Individuelle Zähler für Detailanzeige (§7 Wärme, §8 WW)
                 var wohnungWaerme = umlage.Zaehler
@@ -263,7 +272,7 @@ namespace Deeplex.Saverwalter.PrintService
                     WWVerbrauchAlle = totalWW,
                     NFZeitanteil = partei.NFZeitanteil,
                     MeinBetragGesamt = meinBetrag,
-                    Strompauschale = hkvo!.Strompauschale,
+                    Strompauschale = strompauschaleAngewandt ? hkvo!.Strompauschale : 0,
                 });
             }
 
