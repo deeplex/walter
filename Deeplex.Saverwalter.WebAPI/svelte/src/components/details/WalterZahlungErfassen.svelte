@@ -16,8 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <!--
     Schlankes Erfassen einer Zahlung für ein Ziel aus dem Kontext — Miete eines Monats,
-    Garagenmiete, Zahlung einer erfassten oder neuen Betriebskostenrechnung: Datum,
-    Betrag, optional das Bankkonto des Zahlers und ein Verwendungszweck. Wie eine
+    Garagenmiete, Zahlung einer erfassten oder neuen Betriebskostenrechnung, Nachzahlung
+    oder Erstattung einer Nebenkostenabrechnung: Datum, Betrag, optional das Bankkonto
+    des Mieters (bei einer Erstattung der Empfänger, sonst der Zahler) und ein
+    Verwendungszweck. Wie eine
     Mietzahlung auf Kaltmiete, Garagen und NK-Vorauszahlung verteilt wird, entscheidet
     der Server; die Vorschau zeigt es vor dem Speichern. „Erweitert …“ öffnet das volle
     Transaktionsformular mit denselben Werten. Event `gebucht` nach dem Speichern.
@@ -54,8 +56,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let titel: string;
     /** Vorbelegter Betrag (offener Rest). */
     export let vorschlag = 0;
-    /** Bankkonto des Empfängers, falls bekannt (z. B. Konto des Vermieters). */
-    export let zahlungsempfaengerId: number | undefined = undefined;
+    /**
+     * Bankkonto des Vermieters, falls bekannt: Empfänger der Zahlung, bei einer
+     * Erstattung der Zahler.
+     */
+    export let vermieterBankkontoId: number | undefined = undefined;
     export let open = false;
 
     const dispatch = createEventDispatcher<{ gebucht: void }>();
@@ -63,7 +68,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let datum: string | undefined;
     let betrag: number | undefined;
-    let zahler: WalterSelectionEntry | undefined;
+    /** Bankkonto der Gegenseite (Mieter bzw. Zahler einer Rechnung). */
+    let gegenkonto: WalterSelectionEntry | undefined;
     let verwendungszweck = '';
     let erweitert = false;
     let erweitertInput: TransaktionsInput = emptyTransaktionsInput();
@@ -81,7 +87,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         tracker = get(changeTracker);
         datum = convertDateCanadian(new Date());
         betrag = vorschlag > 0 ? Math.round(vorschlag * 100) / 100 : undefined;
-        zahler = undefined;
+        gegenkonto = undefined;
         verwendungszweck = '';
         erweitert = false;
         fehler = null;
@@ -138,16 +144,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         }
                     ]
                 };
+            case 'abrechnung':
+                return {
+                    abrechnungsAusgleiche: [
+                        {
+                            abrechnungsresultatId: ziel.abrechnungsresultatId,
+                            betrag
+                        }
+                    ]
+                };
         }
     }
+
+    $: auszahlung = ziel.art === 'abrechnung' && ziel.erstattung;
 
     function eingabeFuer(aufteilen: boolean): TransaktionsInput {
         return {
             ...emptyTransaktionsInput(),
             betrag: betrag ?? 0,
             zahlungsdatum: datum ?? '',
-            zahlerId: zahler?.id as number | undefined,
-            zahlungsempfaengerId,
+            zahlerId: auszahlung
+                ? vermieterBankkontoId
+                : (gegenkonto?.id as number | undefined),
+            zahlungsempfaengerId: auszahlung
+                ? (gegenkonto?.id as number | undefined)
+                : vermieterBankkontoId,
             verwendungszweck,
             ...positionen(betrag ?? 0, datum ?? '', aufteilen)
         };
@@ -157,10 +178,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: einfacheEingabe = neuBerechnen(
         datum,
         betrag,
-        zahler,
+        gegenkonto,
         verwendungszweck,
-        zahlungsempfaengerId,
-        ziel
+        vermieterBankkontoId,
+        ziel,
+        auszahlung
     );
     function neuBerechnen(...felder: unknown[]): TransaktionsInput | undefined {
         void felder;
@@ -227,9 +249,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 bind:value={betrag}
             />
             <WalterComboBox
-                titleText="Bankkonto des Zahlers (optional)"
+                titleText={auszahlung
+                    ? 'Bankkonto des Empfängers (optional)'
+                    : 'Bankkonto des Zahlers (optional)'}
                 entries={bankkonten}
-                bind:value={zahler}
+                bind:value={gegenkonto}
             />
             <TextInput
                 labelText="Verwendungszweck (optional)"

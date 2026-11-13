@@ -29,7 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
     import WalterMietKorrektur from './WalterMietKorrektur.svelte';
-    import WalterRueckgaengig from './WalterRueckgaengig.svelte';
+    import WalterZahlungsliste from '../lists/WalterZahlungsliste.svelte';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import {
         mietkontoZeilen,
@@ -60,7 +60,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const eur = (v: number) =>
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 
     $: url = vertragId
         ? `/api/vertraege/${vertragId}/mietkonto`
@@ -137,42 +136,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             on:geaendert={refresh}
         />
 
-        {#if nichtZugeordnet.length > 0}
-            <h5 style="margin-top: 1rem">Guthaben (keinem Monat zugeordnet)</h5>
-            <ul class="liste">
-                {#each nichtZugeordnet.map(zahlungsEintrag) as z (z.id)}
-                    <li>
-                        <span>{datumText(z.datum)}</span>
-                        <span>{eur(z.betrag)}</span>
-                        <span class="text">{z.text}</span>
-                        <a href={z.href}>Details →</a>
-                        {#if bearbeitbar}
-                            <WalterRueckgaengig
-                                {fetchImpl}
-                                transaktionId={z.transaktionId}
-                                buchungssatzId={z.buchungssatzId}
-                                on:erledigt={refresh}
-                            />
-                        {/if}
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-
-        {#if rueckgaengig.length > 0}
-            <h5 style="margin-top: 1rem">Rückgängig gemachte Zahlungen</h5>
-            <ul class="liste">
-                {#each rueckgaengig.map(zahlungsEintrag) as z (z.id)}
-                    <li>
-                        <span>{datumText(z.datum)}</span>
-                        <span>{eur(z.betrag)}</span>
-                        <span class="text">{z.text}</span>
-                        <Tag size="sm" type="gray">Rückgängig gemacht</Tag>
-                        <a href={z.href}>Details →</a>
-                    </li>
-                {/each}
-            </ul>
-        {/if}
+        <WalterZahlungsliste
+            titel="Guthaben (keinem Monat zugeordnet)"
+            eintraege={nichtZugeordnet.map(zahlungsEintrag)}
+            {bearbeitbar}
+            {fetchImpl}
+            on:erledigt={refresh}
+        />
+        <WalterZahlungsliste
+            titel="Rückgängig gemachte Zahlungen"
+            eintraege={rueckgaengig.map(zahlungsEintrag)}
+            rueckgaengigGemacht
+        />
     {/if}
 </Tile>
 
@@ -186,21 +161,3 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         on:gebucht={refresh}
     />
 {/if}
-
-<style>
-    .liste {
-        list-style: none;
-        margin: 0.5rem 0 0 0;
-        padding: 0;
-    }
-    .liste li {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 0.25rem 0;
-    }
-    .text {
-        flex: 1;
-    }
-</style>

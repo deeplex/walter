@@ -441,7 +441,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ziel={zahlungZiel}
         titel={zahlungTitel}
         vorschlag={zahlungVorschlag}
-        zahlungsempfaengerId={zahlungEmpfaenger}
+        vermieterBankkontoId={zahlungEmpfaenger}
         bind:open={zahlungOffen}
         on:gebucht={nachZahlung}
     />

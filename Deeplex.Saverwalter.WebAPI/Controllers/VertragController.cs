@@ -20,7 +20,6 @@ using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
@@ -89,7 +88,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<MietminderungEntryBase> Mietminderungen { get; set; } = [];
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
 
-            public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
             /// <summary>Gehaltene Kaution: Saldo des KautionsKontos (Haben positiv).</summary>
@@ -115,8 +113,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Mietminderungen = entity.Mietminderungen.ToList().Select(e
                     => new MietminderungEntryBase(e, permissions));
                 Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
-                Abrechnungsresultate = entity.Abrechnungsresultate.Select(e
-                    => new AbrechnungsresultatEntry(e, permissions));
                 GarageVertraege = entity.GarageVertraege.Select(e
                     => new GarageVertragEntryBase(e, permissions));
                 Konten = BuchungskontoRefEntry.Collect(
@@ -162,6 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly MietKorrekturService _mietKorrekturService;
         private readonly TransaktionBuchungsService _buchungsService;
         private readonly MietkontoService _mietkontoService;
+        private readonly NebenkostenabrechnungenService _abrechnungenService;
         protected override VertragDbService DbService { get; }
 
         public VertragController(
@@ -172,8 +169,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             MietKorrekturService mietKorrekturService,
             TransaktionBuchungsService buchungsService,
             MietkontoService mietkontoService,
+            NebenkostenabrechnungenService abrechnungenService,
             HttpClient httpClient) : base(logger, httpClient)
         {
+            _abrechnungenService = abrechnungenService;
             DbService = dbService;
             _ctx = ctx;
             _auth = auth;
@@ -282,6 +281,22 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             if (!authRx.Succeeded) return Forbid();
 
             return Ok(await _mietkontoService.ErmittleAsync(id, DateOnly.FromDateTime(DateTime.Today)));
+        }
+
+        /// <summary>
+        /// Nebenkostenabrechnungen des Vertrags: je Abrechnung Nachzahlung bzw. Erstattung,
+        /// bezahlt, offen und die Zahlungen — siehe <see cref="NebenkostenabrechnungenService"/>.
+        /// </summary>
+        [HttpGet("{id}/abrechnungen")]
+        public async Task<ActionResult<NebenkostenabrechnungenService.Nebenkostenabrechnungen>> GetAbrechnungen(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            return Ok(await _abrechnungenService.ErmittleAsync(id));
         }
 
         public class MietKorrekturMonatEntry

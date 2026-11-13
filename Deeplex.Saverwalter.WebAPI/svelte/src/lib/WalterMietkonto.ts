@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import type { WalterZahlungsStatus } from './WalterZahlungsStatus';
+
 // ── Antwort von GET /api/vertraege/{id}/mietkonto ───────────────────────────
 // und GET /api/garage-vertraege/{id}/mietkonto (nur Garagenmiete, keine NK-VZ)
 
@@ -92,13 +94,20 @@ export interface WalterZahlungsTeil {
 export interface WalterZahlungsZeile {
     id: string;
     periode: string;
+    /** Link der Periode, z. B. zur Abrechnung. */
+    href?: string;
     faellig: number;
     bezahlt: number;
     offen: number;
     aufschluesselung: WalterZahlungsTeil[];
     zahlungen: WalterZahlungsEintrag[];
-    /** Monat (`yyyy-mm-01`), für den sich hier eine Zahlung erfassen lässt. */
+    /**
+     * Wofür sich hier eine Zahlung erfassen lässt: Monat (`yyyy-mm-01`) im Mietkonto,
+     * Id der Abrechnung bei Nebenkostenabrechnungen.
+     */
     erfassenFuer?: string;
+    /** Status statt des aus Fällig/Bezahlt ermittelten, z. B. nicht versendet. */
+    status?: WalterZahlungsStatus;
 }
 
 const MONAT = [
@@ -241,4 +250,6 @@ export type WalterZahlungsZiel =
     /** Zahlung einer erfassten Betriebskostenrechnung. */
     | { art: 'bkRechnung'; buchungssatzId: string }
     /** Neue Betriebskostenrechnung, gleich bezahlt. */
-    | { art: 'bkNeu'; umlageId: number; jahr: number };
+    | { art: 'bkNeu'; umlageId: number; jahr: number }
+    /** Nachzahlung oder Erstattung einer Nebenkostenabrechnung. */
+    | { art: 'abrechnung'; abrechnungsresultatId: string; erstattung: boolean };

@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
 
             var result = await controller.Get(entity.VertragId);
 
@@ -121,7 +121,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
 
             var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
 
             var id = entity.VertragId;
 
@@ -211,7 +211,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             return new VertragController(
                 A.Fake<ILogger<VertragController>>(), new VertragDbService(ctx, auth), ctx, auth,
-                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), A.Fake<HttpClient>());
+                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), new MietkontoService(ctx), new NebenkostenabrechnungenService(ctx), A.Fake<HttpClient>());
         }
 
         /// <summary>Bezahlter Monat 01/2024 (500 Kaltmiete, 150 NK-VZ) mit nachgetragener Erhöhung auf 600.</summary>

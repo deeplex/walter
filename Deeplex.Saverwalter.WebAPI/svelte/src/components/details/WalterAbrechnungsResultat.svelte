@@ -15,7 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterLinks, WalterTransaktion } from '$walter/components';
+    import { WalterLinks } from '$walter/components';
+    import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import {
         Button,
         Checkbox,
@@ -30,7 +31,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Add } from 'carbon-icons-svelte';
     import { invalidateAll } from '$app/navigation';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
-    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { fileURL } from '$walter/services/files';
     import type { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
@@ -38,10 +38,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertEuro,
         walter_subscribe_reset_changeTracker
     } from '$walter/services/utils';
-    import {
-        emptyTransaktionsInput,
-        type TransaktionsInput
-    } from '$walter/lib';
 
     export let entry: WalterAbrechnungsresultatEntry;
     export let fetchImpl: typeof fetch;
@@ -70,31 +66,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
 
-    // Ausgleich als Transaktion erfassen — vorausgefüllt mit diesem Resultat.
+    // Nachzahlung bzw. Erstattung erfassen.
     let ausgleichModalOpen = false;
-    let ausgleichInput: TransaktionsInput = emptyTransaktionsInput();
-    let transaktionValid = false;
-
-    function openAusgleichModal() {
-        ausgleichInput = {
-            ...emptyTransaktionsInput(),
-            betrag: entry.offenerBetrag,
-            verwendungszweck:
-                `BK-Abrechnung ${entry.jahr} ${entry.vertrag?.text ?? ''}`.trim(),
-            // Vermieter-Bankkonto: bei Erstattung fließt das Geld davon ab,
-            // bei Nachzahlung kommt es dort an.
-            zahlerId: entry.saldo < 0 ? entry.vermieterBankkontoId : undefined,
-            zahlungsempfaengerId:
-                entry.saldo > 0 ? entry.vermieterBankkontoId : undefined,
-            abrechnungsAusgleiche: [
-                {
-                    abrechnungsresultatId: entry.id,
-                    betrag: entry.offenerBetrag
-                }
-            ]
-        };
-        ausgleichModalOpen = true;
-    }
+    $: erstattung = entry.saldo < 0;
 </script>
 
 {#if entry.storniert}
@@ -185,9 +159,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     size="small"
                     icon={Add}
                     style="margin-top: 0.5rem"
-                    on:click={openAusgleichModal}
+                    on:click={() => (ausgleichModalOpen = true)}
                 >
-                    Ausgleich als Transaktion erfassen
+                    {erstattung ? 'Erstattung' : 'Nachzahlung'} erfassen
                 </Button>
             {:else if entry.abgesendet && !abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
                 <p
@@ -200,20 +174,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Column>
 </Row>
 
-<WalterDataWrapperQuickAdd
-    title="Ausgleich BK-Abrechnung {entry.jahr}"
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={ausgleichInput}
-    bind:addModalOpen={ausgleichModalOpen}
-    submitDisabled={!transaktionValid}
-    onSubmit={() => invalidateAll()}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={ausgleichInput}
-        bind:isValid={transaktionValid}
-    />
-</WalterDataWrapperQuickAdd>
+<WalterZahlungErfassen
+    {fetchImpl}
+    ziel={{ art: 'abrechnung', abrechnungsresultatId: entry.id, erstattung }}
+    titel={`${erstattung ? 'Erstattung' : 'Nachzahlung'} Abrechnung ${entry.jahr}`}
+    vorschlag={entry.offenerBetrag}
+    vermieterBankkontoId={entry.vermieterBankkontoId ?? undefined}
+    bind:open={ausgleichModalOpen}
+    on:gebucht={() => invalidateAll()}
+/>
 
 <!-- Ausgleichszahlungen -->
 {#if entry.ausgleichsZahlungen?.length > 0}

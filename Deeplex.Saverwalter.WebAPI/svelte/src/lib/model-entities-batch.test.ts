@@ -152,7 +152,6 @@ describe('lib entity mappers batch', () => {
             mieter: [],
             mietzahlungen: [],
             mietminderungen: [mietminderung],
-            abrechnungsresultate: [],
             permissions: { read: true, update: true, remove: false }
         } as never);
 

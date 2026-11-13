@@ -152,41 +152,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             permissions.Remove = false;
             var entry = new AbrechnungsresultatEntry(entity, permissions)
             {
-                VermieterBankkontoId = await ResolveVermieterBankkonto(entity)
+                VermieterBankkontoId = await VermieterBankkonto.ErmittleAsync(Ctx, entity.Vertrag)
             };
 
             return entry;
-        }
-
-        /// <summary>
-        /// Bankkonto des Vermieters für den Zahlungsverkehr dieses Vertrags —
-        /// Vorbelegung für den Abrechnungs-Ausgleich. Das Vertrags-Zahlungskonto
-        /// ist meist ein rein virtuelles Buchungskonto ohne Bankkonto dahinter;
-        /// dann greift das Bankkonto der aktuellen Wohnungs-Eigentümer
-        /// (gleiche Auflösung wie beim Betriebskosten-Eingang).
-        /// </summary>
-        private async Task<int?> ResolveVermieterBankkonto(Abrechnungsresultat entity)
-        {
-            var direkt = await Ctx.Bankkontos
-                .Where(b => b.BuchungsKonto.BuchungskontoId
-                    == entity.Vertrag.ZahlungsKonto.BuchungskontoId)
-                .Select(b => (int?)b.BankkontoId)
-                .FirstOrDefaultAsync();
-            if (direkt != null) return direkt;
-
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var besitzerIds = await Ctx.Wohnungen
-                .Where(w => w.WohnungId == entity.Vertrag.Wohnung.WohnungId)
-                .SelectMany(w => w.Eigentuemer)
-                .Where(e => e.Bis == null || e.Bis >= today)
-                .Select(e => e.Kontakt.KontaktId)
-                .ToListAsync();
-            if (besitzerIds.Count == 0) return null;
-
-            return await Ctx.Bankkontos
-                .Where(b => b.Besitzer.Any(k => besitzerIds.Contains(k.KontaktId)))
-                .Select(b => (int?)b.BankkontoId)
-                .FirstOrDefaultAsync();
         }
 
         public override async Task<ActionResult<AbrechnungsresultatEntry>> Get(ClaimsPrincipal user, Guid id)
@@ -198,7 +167,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 permissions.Remove = false;
                 var entry = new AbrechnungsresultatEntry(entity, permissions)
                 {
-                    VermieterBankkontoId = await ResolveVermieterBankkonto(entity)
+                    VermieterBankkontoId = await VermieterBankkonto.ErmittleAsync(Ctx, entity.Vertrag)
                 };
 
                 return entry;

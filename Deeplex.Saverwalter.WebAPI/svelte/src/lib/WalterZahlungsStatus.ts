@@ -21,7 +21,9 @@ export type WalterZahlungsStatusArt =
     | 'teilweise'
     | 'bezahlt'
     | 'guthaben'
-    | 'rueckgaengig';
+    | 'rueckgaengig'
+    | 'nichtVersendet'
+    | 'storniert';
 
 /** Status-Tag im Format, das `WalterDataTable` als Zelle darstellt. */
 export type WalterZahlungsStatus = {
@@ -42,7 +44,13 @@ export const ZAHLUNGS_STATUS: Readonly<
         art: 'rueckgaengig',
         text: 'Rückgängig gemacht',
         tag: 'gray'
-    }
+    },
+    nichtVersendet: {
+        art: 'nichtVersendet',
+        text: 'Nicht versendet',
+        tag: 'gray'
+    },
+    storniert: { art: 'storniert', text: 'Storniert', tag: 'gray' }
 };
 
 /**

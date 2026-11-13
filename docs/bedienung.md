@@ -189,13 +189,20 @@ Die Vertrags-Detailseite zeigt:
   Datum und Betrag gebucht; eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
   Jede Buchung ist eine eigene Transaktion und lässt sich direkt in der Liste rückgängig
   machen.
+- **Nebenkostenabrechnungen** — je Abrechnung die **Nachzahlung** des Mieters bzw. die
+  **Erstattung** an den Mieter, was davon bezahlt ist und was offen ist. Der Name der
+  Zeile führt zur Abrechnung. Nicht versendete Abrechnungen tragen den Status „Nicht
+  versendet“ und lassen sich noch nicht ausgleichen; stornierte bleiben mit „Storniert“
+  als Beleg stehen. Bei versendeten, offenen Abrechnungen erfasst **+ Zahlung** die
+  Nachzahlung bzw. Erstattung (bei einer Erstattung ist das optionale Bankkonto das des
+  Mieters als Empfänger). Aufgeklappt zeigt eine Zeile die Zahlungen mit **Rückgängig
+  machen**.
 - **Mieter** — die zugeordneten Kontakte.
 - **Nachträge** — die Vertragsversionen (Grundmiete/Kaltmiete und Personenzahl, zeitlich
   gültig).
 - **Mietminderungen** — Quote und Zeitraum.
 - **Garagenverträge** — dem Vertrag zugeordnete Stellplätze.
 - **NK-Anteile** — direkte Nebenkosten-Anteile des Vertrags.
-- **Abrechnungsresultate** — die gebuchten Jahresabrechnungen.
 - **Buchhaltung** (eingeklappt, ganz unten) — die Buchungskonten des Vertrags (Miete,
   NK-Vorauszahlung, Abrechnung, Zahlung, Mietminderung, Kaution) mit ihren Buchungen und
   Offenen Posten.
@@ -250,7 +257,9 @@ Der Abrechnungslauf erstellt die Betriebskostenabrechnung je **Abrechnungsgruppe
    steht das Mietkonto des Vertrags für das Abrechnungsjahr.
 3. **Buchen** — hält je Vertrag ein Abrechnungsresultat als Buchungssatz fest.
 4. **Drucken** — erzeugt PDF- oder Word-Dokumente (einzeln oder als ZIP für die Gruppe).
-5. Nach dem Versand das Resultat als **Abgesendet** markieren.
+5. Nach dem Versand das Resultat als **Abgesendet** markieren. Danach lässt sich die
+   Nachzahlung bzw. Erstattung auf der Abrechnung oder im Abschnitt
+   **Nebenkostenabrechnungen** des Vertrags erfassen.
 
 Korrekturen: **Rückabwicklung** (solange nicht abgesendet) oder **Storno** (nach dem
 Versand, mit Pflicht-Grund). Nach einem Storno gilt das Jahr wieder als offen: Daten

@@ -273,7 +273,8 @@ Nach dem Versand wird das Abrechnungsresultat als **Abgesendet** markiert.
 
 Zahlt der Mieter nach oder erhält er eine Erstattung, wird das als Transaktion mit der
 Position **Abrechnungsausgleich** erfasst (Teilzahlungen sind erlaubt). Damit gilt der
-Abrechnungssaldo als gedeckt.
+Abrechnungssaldo als gedeckt. In der Oberfläche geht das über **+ Zahlung** im Abschnitt
+*Nebenkostenabrechnungen* des Vertrags oder über die Schaltfläche auf der Abrechnung.
 
 ---
 

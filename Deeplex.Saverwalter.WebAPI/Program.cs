@@ -219,6 +219,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<RueckgaengigService>(Lifestyle.Scoped);
             container.Register<MietKorrekturService>(Lifestyle.Scoped);
             container.Register<MietkontoService>(Lifestyle.Scoped);
+            container.Register<NebenkostenabrechnungenService>(Lifestyle.Scoped);
             container.Register<AbrechnungsresultatBuchungsService>(Lifestyle.Scoped);
             container.Register<NkAnteilBuchungsService>(Lifestyle.Scoped);
             container.Register<AbrechnungsgruppenService>(Lifestyle.Scoped);

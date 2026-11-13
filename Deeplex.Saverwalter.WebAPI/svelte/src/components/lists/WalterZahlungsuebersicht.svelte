@@ -76,7 +76,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <svelte:fragment slot="cell" let:row let:cell>
             {@const zeile = zeileVon(row)}
             {#if cell.key === 'status'}
-                {@const status = zahlungsStatus(zeile.faellig, zeile.bezahlt)}
+                {@const status =
+                    zeile.status ??
+                    zahlungsStatus(zeile.faellig, zeile.bezahlt)}
                 <Tag size="sm" type={status.tag}>{status.text}</Tag>
             {:else if cell.key === 'aktion'}
                 {#if zeile.erfassenFuer}
@@ -96,6 +98,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {eur(cell.value)}
             {:else if cell.key === 'offen'}
                 {betragOderStrich(cell.value)}
+            {:else if cell.key === 'periode' && zeile.href}
+                <a href={zeile.href} on:click|stopPropagation>{cell.value}</a>
             {:else}
                 {cell.value}
             {/if}

@@ -113,9 +113,10 @@ export { default as WalterWohnungVersionen } from './lists/WalterWohnungVersione
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
-export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';
 export { default as WalterZahlungsuebersicht } from './lists/WalterZahlungsuebersicht.svelte';
 export { default as WalterMietkonto } from './details/WalterMietkonto.svelte';
+export { default as WalterNebenkostenabrechnungen } from './details/WalterNebenkostenabrechnungen.svelte';
+export { default as WalterZahlungsliste } from './lists/WalterZahlungsliste.svelte';
 export { default as WalterVertragKaution } from './details/WalterVertragKaution.svelte';
 export { default as WalterJahresabschlussKontrolle } from './lists/WalterJahresabschlussKontrolle.svelte';
 export { default as WalterSimpleList } from './lists/WalterSimpleList.svelte';

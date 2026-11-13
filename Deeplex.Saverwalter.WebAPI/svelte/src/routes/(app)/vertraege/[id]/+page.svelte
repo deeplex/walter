@@ -17,7 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterAbrechnungsresultate,
         WalterBuchhaltungAbschnitt,
         WalterGarageVertraege,
         WalterKontakte,
@@ -29,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterLinks,
         WalterMietkonto,
+        WalterNebenkostenabrechnungen,
         WalterVertragKaution,
         WalterVertragsNkAnteile
     } from '$walter/components';
@@ -102,6 +102,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     </Tile>
 
+    <WalterNebenkostenabrechnungen
+        vertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        bearbeitbar={data.entry.permissions?.update !== false}
+    />
+
     <WalterLinks>
         <WalterKontakte
             fetchImpl={data.fetchImpl}
@@ -129,11 +135,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             vertragId={data.entry.id}
             title="NK-Anteile"
-        />
-
-        <WalterAbrechnungsresultate
-            title="Abrechnungsresultate"
-            rows={data.entry.abrechnungsresultate}
         />
 
         {#if data.entry.ansprechpartner?.id}

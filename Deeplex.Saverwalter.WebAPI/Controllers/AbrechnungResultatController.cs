@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
@@ -66,15 +67,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entity.Notiz;
                 BuchungssatzId = entity.Buchungssatz.BuchungssatzId;
 
-                var bkAbrKontoId = entity.Vertrag.BkAbrechnungsKonto.BuchungskontoId;
-
                 // Saldo als Glattstellung auf dem BkAbrechnungsKonto:
-                // Soll = Nachzahlung des Mieters (positiv), Haben = Guthaben (negativ).
-                var saldoZeilen = entity.Buchungssatz.Buchungszeilen
-                    .Where(z => z.Buchungskonto.BuchungskontoId == bkAbrKontoId)
-                    .ToList();
-                Saldo = saldoZeilen
-                    .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
+                // Nachzahlung des Mieters positiv, Erstattung an den Mieter negativ.
+                Saldo = AbrechnungsSaldo.Saldo(entity);
 
                 // Dieselbe Berechnung wie in der Abrechnung; Rechnungsbetrag folgt aus dem Saldo.
                 var jahr = entity.Buchungssatz.Buchungsjahr;
@@ -82,38 +77,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     entity.Vertrag, entity.Vertrag.NkBuchungskonto.Buchungszeilen, jahr);
                 Rechnungsbetrag = Vorauszahlung + Saldo;
 
-                // Ausgleich per OPOS auf der Saldo-Zeile:
-                //   Nachzahlung (Soll-Forderung): gedeckt durch Zahlungs-Haben-Zeilen.
-                //   Guthaben (Haben-Verbindlichkeit): gedeckt durch Auszahlungs-Soll-Zeilen.
-                decimal gedeckt = 0;
-                var nachzahlungsZeile = saldoZeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Soll);
-                var guthabenZeile = saldoZeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-                if (nachzahlungsZeile != null)
+                // Ausgleich per OPOS auf der Saldo-Zeile.
+                var zahlungen = AbrechnungsSaldo.Zahlungen(entity);
+                var gedeckt = zahlungen.Sum(z => z.Betrag);
+                AusgleichsZahlungen = zahlungen.Select(z => new AusgleichsZahlungInfo
                 {
-                    foreach (var ausgleich in nachzahlungsZeile.AlsSollZeile)
-                    {
-                        gedeckt += ausgleich.HabenZeile.Betrag;
-                        AusgleichsZahlungen.Add(new AusgleichsZahlungInfo
-                        {
-                            Datum = ausgleich.HabenZeile.Buchungssatz.Buchungsdatum,
-                            Betrag = ausgleich.HabenZeile.Betrag,
-                            BuchungssatzId = ausgleich.HabenZeile.Buchungssatz.BuchungssatzId
-                        });
-                    }
-                }
-                else if (guthabenZeile != null)
-                {
-                    foreach (var ausgleich in guthabenZeile.AlsHabenZeile)
-                    {
-                        gedeckt += ausgleich.SollZeile.Betrag;
-                        AusgleichsZahlungen.Add(new AusgleichsZahlungInfo
-                        {
-                            Datum = ausgleich.SollZeile.Buchungssatz.Buchungsdatum,
-                            Betrag = ausgleich.SollZeile.Betrag,
-                            BuchungssatzId = ausgleich.SollZeile.Buchungssatz.BuchungssatzId
-                        });
-                    }
-                }
+                    Datum = z.Buchungssatz.Buchungsdatum,
+                    Betrag = z.Betrag,
+                    BuchungssatzId = z.Buchungssatz.BuchungssatzId
+                }).ToList();
 
                 AusgleichsZahlungen = [.. AusgleichsZahlungen.OrderBy(z => z.Datum)];
                 OffenerBetrag = Math.Max(0, Math.Abs(Saldo) - gedeckt);
