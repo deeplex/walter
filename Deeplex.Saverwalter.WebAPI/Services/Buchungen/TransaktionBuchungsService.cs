@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
@@ -277,7 +278,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (miete.NkVorauszahlung > 0)
             {
-                var nkSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}");
+                // Die NK-VZ zählt zur Abrechnung des Jahres des betreffenden Monats.
+                // Ein bereits abgerechnetes Jahr nimmt keine weiteren Vorauszahlungen an.
+                var abgerechnet = await AbrechnungsschutzService.AbgerechneteJahreVertrag(_ctx, vertrag.VertragId);
+                if (abgerechnet.Contains(monat.Year))
+                    throw new InvalidOperationException(
+                        $"NK-Vorauszahlung für {monat:MM/yyyy} nicht möglich: Das Jahr {monat.Year} ist für diesen Vertrag bereits abgerechnet.");
+
+                var nkSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}")
+                {
+                    Buchungsjahr = monat.Year
+                };
                 AddZeile(nkSatz, SollHaben.Soll, miete.NkVorauszahlung, vertrag.ZahlungsKonto);
                 AddZeile(nkSatz, SollHaben.Haben, miete.NkVorauszahlung, vertrag.NkBuchungskonto);
                 nkSatz.Transaktion = transaktion;

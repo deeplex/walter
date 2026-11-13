@@ -153,18 +153,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         {
             var monatsDatum = new DateOnly(monat.Jahr, monat.Monat, 1);
             var heute = DateOnly.FromDateTime(DateTime.Today);
+            // Buchungsdatum ist der Tag der Korrektur, Buchungsjahr das Jahr des korrigierten Monats.
+            Buchungssatz NeuerSatz(string beschreibung) =>
+                new(heute, beschreibung) { Buchungsjahr = monat.Jahr };
 
             if (monat.Delta > 0)
             {
                 var delta = monat.Delta;
 
-                var forderungsSatz = new Buchungssatz(heute,
+                var forderungsSatz = NeuerSatz(
                     $"Umbuchung Mietsoll-Nachtrag {monatsDatum:MM/yyyy} (rückwirkende Erhöhung, {grund})");
                 AddZeile(forderungsSatz, SollHaben.Soll, delta, vertrag.MietBuchungskonto);
                 AddZeile(forderungsSatz, SollHaben.Haben, delta, vertrag.Wohnung.MietErtragskonto);
                 ctx.Buchungssaetze.Add(forderungsSatz);
 
-                var umbuchungsSatz = new Buchungssatz(heute,
+                var umbuchungsSatz = NeuerSatz(
                     $"Umbuchung NK-Vorauszahlung → Kaltmiete {monatsDatum:MM/yyyy} ({grund})");
                 AddZeile(umbuchungsSatz, SollHaben.Soll, delta, vertrag.NkBuchungskonto);
                 AddZeile(umbuchungsSatz, SollHaben.Haben, delta, vertrag.MietBuchungskonto);
@@ -180,13 +183,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             {
                 var d = -monat.Delta;
 
-                var gutschriftSatz = new Buchungssatz(heute,
+                var gutschriftSatz = NeuerSatz(
                     $"Umbuchung Mietsoll-Gutschrift {monatsDatum:MM/yyyy} (rückwirkende Reduzierung, {grund})");
                 AddZeile(gutschriftSatz, SollHaben.Haben, d, vertrag.MietBuchungskonto);
                 AddZeile(gutschriftSatz, SollHaben.Soll, d, vertrag.Wohnung.MietErtragskonto);
                 ctx.Buchungssaetze.Add(gutschriftSatz);
 
-                var umbuchungsSatz = new Buchungssatz(heute,
+                var umbuchungsSatz = NeuerSatz(
                     $"Umbuchung Kaltmiete → NK-Vorauszahlung {monatsDatum:MM/yyyy} ({grund})");
                 AddZeile(umbuchungsSatz, SollHaben.Haben, d, vertrag.NkBuchungskonto);
                 AddZeile(umbuchungsSatz, SollHaben.Soll, d, vertrag.MietBuchungskonto);

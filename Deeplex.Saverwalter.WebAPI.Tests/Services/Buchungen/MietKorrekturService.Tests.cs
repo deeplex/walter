@@ -120,6 +120,33 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             nkSaldo.Should().Be(150m - 100m);
         }
 
+        [Theory]
+        [InlineData(600)] // Erhöhung
+        [InlineData(400)] // Reduzierung
+        public async Task KorrekturZaehltZumJahrDesKorrigiertenMonats(int neueGrundmiete)
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            // Korrigierter Monat in einem Vorjahr, damit Buchungsdatum und Buchungsjahr auseinanderfallen.
+            var monat = new DateOnly(DateTime.Today.Year - 2, 3, 1);
+            await ZahleMonatAsync(ctx, vertrag, monat, kaltmiete: 500m, nk: 150m);
+            var vorher = await ctx.Buchungssaetze.Select(s => s.BuchungssatzId).ToListAsync();
+
+            vertrag.Versionen.Add(new VertragVersion(monat, neueGrundmiete, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+
+            var ergebnis = await new MietKorrekturService(ctx).AnwendenAsync(
+                vertrag.VertragId, new HashSet<(int, int)> { (monat.Year, monat.Month) }, "Grund");
+            ergebnis.Korrigiert.Should().ContainSingle();
+
+            var neu = await ctx.Buchungssaetze.Where(s => !vorher.Contains(s.BuchungssatzId)).ToListAsync();
+            neu.Should().HaveCount(2);
+            neu.Should().OnlyContain(s => s.Buchungsjahr == monat.Year);
+            neu.Should().OnlyContain(s => s.Buchungsdatum == DateOnly.FromDateTime(DateTime.Today));
+        }
+
         [Fact]
         public async Task BezahlterMonatMitReduzierungWirdUmgekehrtKorrigiert()
         {

@@ -102,6 +102,69 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
         }
 
         [Fact]
+        public async Task NkVorauszahlungZaehltZumJahrDesBetreffendenMonats()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            // Dezember-Miete, erst im Januar des Folgejahres gezahlt.
+            var service = new TransaktionBuchungsService(ctx);
+            await service.BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = 650m,
+                Zahlungsdatum = new DateOnly(2025, 1, 3),
+                Mieten =
+                {
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId,
+                        BetreffenderMonat = new DateOnly(2024, 12, 1),
+                        Kaltmiete = 500m,
+                        NkVorauszahlung = 150m,
+                    }
+                }
+            });
+
+            var nkZeile = await ctx.Buchungszeilen
+                .Include(z => z.Buchungssatz)
+                .SingleAsync(z => z.Buchungskonto.BuchungskontoId == vertrag.NkBuchungskonto.BuchungskontoId);
+            nkZeile.Buchungssatz.Buchungsjahr.Should().Be(2024);
+            nkZeile.Buchungssatz.Buchungsdatum.Should().Be(new DateOnly(2025, 1, 3));
+        }
+
+        [Fact]
+        public async Task NkVorauszahlungFuerAbgerechnetesJahrWirdAbgelehnt()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var resultat = new Abrechnungsresultat { Vertrag = vertrag };
+            new AbrechnungsresultatBuchungsService(ctx).BucheAbrechnung(resultat, 2024, 0m);
+            ctx.Abrechnungsresultate.Add(resultat);
+            await ctx.SaveChangesAsync();
+
+            var service = new TransaktionBuchungsService(ctx);
+            var act = () => service.BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = 150m,
+                Zahlungsdatum = new DateOnly(2025, 1, 3),
+                Mieten =
+                {
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId,
+                        BetreffenderMonat = new DateOnly(2024, 12, 1),
+                        Kaltmiete = 0m,
+                        NkVorauszahlung = 150m,
+                    }
+                }
+            });
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*2024*bereits abgerechnet*");
+        }
+
+        [Fact]
         public async Task WirftWennSummeNichtZumBetragPasst()
         {
             var ctx = TestUtils.GetContext();
