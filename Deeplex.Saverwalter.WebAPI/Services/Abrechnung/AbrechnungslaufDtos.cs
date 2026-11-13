@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+
 namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 {
     /// <summary>Verbrauch eines einzelnen Zählers für eine Partei in einem Abrechnungszeitraum.</summary>
@@ -156,7 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<int> WohnungIds { get; init; } = [];
         public List<AbrechnungsresultatInfo> Resultate { get; init; } = [];
         public List<AbrechnungseinheitInfo> Abrechnungseinheiten { get; init; } = [];
-        public List<string> Warnungen { get; init; } = [];
+        public List<Hinweis> Warnungen { get; init; } = [];
     }
 
     /// <summary>
@@ -197,6 +199,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
     public class AbrechnungslaufResult
     {
         public List<AbrechnungslaufGruppeResult> Gruppen { get; init; } = [];
-        public List<string> Warnungen { get; init; } = [];
+        public List<Hinweis> Warnungen { get; init; } = [];
     }
 }

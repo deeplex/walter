@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
@@ -48,11 +50,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// und lässt sich direkt über den bestehenden Buchungssatz-Bearbeiten-Endpunkt
     /// korrigieren.
     ///
-    /// Idempotenz: eine bereits angewandte Korrektur für einen Monat wird über den
-    /// eigenen Umbuchungssatz wiedergefunden — identifiziert über das Konto-Paar
-    /// (MietBuchungskonto/NkBuchungskonto) und den im Beschreibungstext eingebetteten
-    /// Zielmonat (analog zu <c>AbrechnungslaufService.EnsureStrompauschaleUmbuchungAsync</c>,
-    /// das Umbuchungen über Konto-Paar + Jahr wiederfindet).
+    /// Alle Sätze einer Korrektur verweisen über <see cref="Buchungssatz.KorrigiertSollstellung"/>
+    /// auf die Sollstellung des korrigierten Monats. Ein Monat gilt als korrigiert, solange
+    /// einer dieser Sätze nicht storniert ist.
+    ///
+    /// Eine Erhöhung wird aus den NK-Vorauszahlungen des Jahres gedeckt (siehe
+    /// <see cref="NkVorauszahlung"/>). Mehrere Monate eines Jahres teilen sich diesen Betrag.
     /// </summary>
     public class MietKorrekturService(SaverwalterContext ctx)
     {
@@ -84,21 +87,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         {
             public int Jahr { get; set; }
             public int Monat { get; set; }
+            public required Buchungssatz Sollstellung { get; set; }
             public decimal SollstellungsBetrag { get; set; }
-            public required Buchungszeile? NkZahlungHabenZeile { get; set; }
         }
+
+        private record Kandidat(MietKorrekturMonat Monat, Buchungssatz Sollstellung);
 
         public async Task<IReadOnlyList<MietKorrekturMonat>> ErmittleAsync(int vertragId)
         {
             var vertrag = await LadeVertragAsync(vertragId);
-            return await ErmittleAsync(vertrag);
+            var nkVorauszahlungen = await LadeNkVorauszahlungenAsync(vertrag);
+            var kandidaten = await ErmittleKandidatenAsync(vertrag, nkVorauszahlungen);
+            return kandidaten.Select(k => k.Monat).ToList();
         }
 
-        private async Task<IReadOnlyList<MietKorrekturMonat>> ErmittleAsync(Vertrag vertrag)
+        private async Task<List<Kandidat>> ErmittleKandidatenAsync(
+            Vertrag vertrag, IReadOnlyDictionary<int, decimal> nkVorauszahlungen)
         {
             var monate = await LadeBezahlteMonateAsync(vertrag);
-            var result = new List<MietKorrekturMonat>();
+            var sollstellungIds = monate.Select(m => m.Sollstellung.BuchungssatzId).ToList();
+            var korrigiert = (await ctx.Buchungssaetze
+                .Where(s => s.KorrigiertSollstellung != null
+                    && sollstellungIds.Contains(s.KorrigiertSollstellung.BuchungssatzId)
+                    && s.StornoNach == null)
+                .Select(s => s.KorrigiertSollstellung!.BuchungssatzId)
+                .ToListAsync())
+                .ToHashSet();
+            var abgerechnet = await AbrechnungsschutzService.AbgerechneteJahreVertrag(ctx, vertrag.VertragId);
 
+            var result = new List<Kandidat>();
             foreach (var m in monate)
             {
                 var version = vertrag.Versionen
@@ -109,19 +126,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 var delta = version.Grundmiete - m.SollstellungsBetrag;
                 if (Math.Abs(delta) <= 0.005m) continue;
 
-                var status = await BestimmeStatusAsync(vertrag, m, delta);
-                result.Add(new MietKorrekturMonat
+                var status =
+                    korrigiert.Contains(m.Sollstellung.BuchungssatzId) ? MietKorrekturStatus.BereitsKorrigiert
+                    : abgerechnet.Contains(m.Jahr) ? MietKorrekturStatus.Abgerechnet
+                    : !NkReichtAus(nkVorauszahlungen.GetValueOrDefault(m.Jahr), delta) ? MietKorrekturStatus.NkReichtNichtAus
+                    : MietKorrekturStatus.Anwendbar;
+
+                result.Add(new Kandidat(new MietKorrekturMonat
                 {
                     Jahr = m.Jahr,
                     Monat = m.Monat,
                     IstKaltmiete = m.SollstellungsBetrag,
                     SollKaltmiete = version.Grundmiete,
                     Status = status
-                });
+                }, m.Sollstellung));
             }
 
             return result;
         }
+
+        private static bool NkReichtAus(decimal nkVorauszahlung, decimal delta) =>
+            delta <= 0 || nkVorauszahlung >= delta - 0.005m;
 
         public async Task<MietKorrekturErgebnis> AnwendenAsync(
             int vertragId, IReadOnlySet<(int Jahr, int Monat)> monate, string grund)
@@ -130,18 +155,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 throw new ArgumentException("Für eine Miet-Korrektur muss ein Grund angegeben werden.");
 
             var vertrag = await LadeVertragAsync(vertragId);
-            var alle = await ErmittleAsync(vertrag);
+            var nkVorauszahlungen = await LadeNkVorauszahlungenAsync(vertrag);
+            var kandidaten = await ErmittleKandidatenAsync(vertrag, nkVorauszahlungen);
+            var verbleibend = new Dictionary<int, decimal>(nkVorauszahlungen);
 
             var ergebnis = new MietKorrekturErgebnis();
-            foreach (var monat in alle.Where(m => monate.Contains((m.Jahr, m.Monat))))
+            foreach (var (monat, sollstellung) in kandidaten
+                .Where(k => monate.Contains((k.Monat.Jahr, k.Monat.Monat)))
+                .OrderBy(k => k.Monat.Jahr).ThenBy(k => k.Monat.Monat))
             {
-                if (monat.Status != MietKorrekturStatus.Anwendbar)
+                var status = monat.Status == MietKorrekturStatus.Anwendbar
+                    && !NkReichtAus(verbleibend.GetValueOrDefault(monat.Jahr), monat.Delta)
+                    ? MietKorrekturStatus.NkReichtNichtAus
+                    : monat.Status;
+                if (status != MietKorrekturStatus.Anwendbar)
                 {
-                    ergebnis.Uebersprungen.Add((monat.Jahr, monat.Monat, monat.Status.ToString()));
+                    ergebnis.Uebersprungen.Add((monat.Jahr, monat.Monat, status.ToString()));
                     continue;
                 }
 
-                BucheKorrektur(vertrag, monat, grund);
+                BucheKorrektur(vertrag, monat, sollstellung, grund);
+                verbleibend[monat.Jahr] = verbleibend.GetValueOrDefault(monat.Jahr) - monat.Delta;
                 ergebnis.Korrigiert.Add((monat.Jahr, monat.Monat));
             }
 
@@ -149,13 +183,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             return ergebnis;
         }
 
-        private void BucheKorrektur(Vertrag vertrag, MietKorrekturMonat monat, string grund)
+        private void BucheKorrektur(Vertrag vertrag, MietKorrekturMonat monat, Buchungssatz sollstellung, string grund)
         {
             var monatsDatum = new DateOnly(monat.Jahr, monat.Monat, 1);
             var heute = DateOnly.FromDateTime(DateTime.Today);
             // Buchungsdatum ist der Tag der Korrektur, Buchungsjahr das Jahr des korrigierten Monats.
             Buchungssatz NeuerSatz(string beschreibung) =>
-                new(heute, beschreibung) { Buchungsjahr = monat.Jahr };
+                new(heute, beschreibung) { Buchungsjahr = monat.Jahr, KorrigiertSollstellung = sollstellung };
 
             if (monat.Delta > 0)
             {
@@ -203,32 +237,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             }
         }
 
-        private async Task<MietKorrekturStatus> BestimmeStatusAsync(Vertrag vertrag, MonatsDaten m, decimal delta)
+        /// <summary>NK-Vorauszahlungen je Buchungsjahr, berechnet wie in der Abrechnung.</summary>
+        private async Task<Dictionary<int, decimal>> LadeNkVorauszahlungenAsync(Vertrag vertrag)
         {
-            var monatsToken = new DateOnly(m.Jahr, m.Monat, 1).ToString("MM/yyyy");
-            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
-            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+            var zeilen = await ctx.Buchungszeilen
+                .Where(NkVorauszahlung.Zaehlt(vertrag))
+                .Select(z => new { z.Buchungssatz.Buchungsjahr, z.SollHaben, z.Betrag })
+                .ToListAsync();
 
-            var bereitsKorrigiert = await ctx.Buchungssaetze
-                .Where(s => s.Beschreibung.StartsWith("Umbuchung") && s.Beschreibung.Contains(monatsToken))
-                .Where(s => s.StornoNach == null)
-                .Where(s =>
-                    s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == mietKontoId) &&
-                    s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == nkKontoId))
-                .AnyAsync();
-            if (bereitsKorrigiert) return MietKorrekturStatus.BereitsKorrigiert;
-
-            var abgerechnet = await ctx.Abrechnungsresultate
-                .AnyAsync(r => r.Vertrag.VertragId == vertrag.VertragId && r.Buchungssatz.Buchungsjahr == m.Jahr);
-            if (abgerechnet) return MietKorrekturStatus.Abgerechnet;
-
-            if (delta > 0)
-            {
-                var nkBetrag = m.NkZahlungHabenZeile?.Betrag ?? 0m;
-                if (nkBetrag < delta - 0.005m) return MietKorrekturStatus.NkReichtNichtAus;
-            }
-
-            return MietKorrekturStatus.Anwendbar;
+            return zeilen
+                .GroupBy(z => z.Buchungsjahr)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag));
         }
 
         private async Task<Vertrag> LadeVertragAsync(int vertragId) =>
@@ -236,6 +257,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .Include(v => v.Versionen)
                 .Include(v => v.MietBuchungskonto)
                 .Include(v => v.NkBuchungskonto)
+                .Include(v => v.ZahlungsKonto)
                 .Include(v => v.Wohnung).ThenInclude(w => w.MietErtragskonto)
                 .FirstOrDefaultAsync(v => v.VertragId == vertragId)
                 ?? throw new ArgumentException($"Vertrag {vertragId} nicht gefunden.");
@@ -248,7 +270,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private async Task<List<MonatsDaten>> LadeBezahlteMonateAsync(Vertrag vertrag)
         {
             var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
-            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
 
             var sollZeilen = await ctx.Buchungszeilen
                 .Where(z =>
@@ -271,22 +292,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     .FirstOrDefault(h => h.Buchungssatz.Transaktion != null);
                 if (kaltmieteHabenZeile is null) continue; // unbezahlt: anderer Weg (siehe oben)
 
-                var transaktionId = kaltmieteHabenZeile.Buchungssatz.Transaktion!.TransaktionId;
-                var nkHabenZeile = await ctx.Buchungszeilen
-                    .Where(z =>
-                        z.Buchungskonto.BuchungskontoId == nkKontoId &&
-                        z.SollHaben == SollHaben.Haben &&
-                        z.Buchungssatz.Transaktion != null &&
-                        z.Buchungssatz.Transaktion.TransaktionId == transaktionId &&
-                        z.Buchungssatz.Buchungsdatum == kaltmieteHabenZeile.Buchungssatz.Buchungsdatum)
-                    .FirstOrDefaultAsync();
-
                 monate.Add(new MonatsDaten
                 {
                     Jahr = gruppe.Key.Buchungsjahr,
                     Monat = gruppe.Key.Month,
-                    SollstellungsBetrag = sollZeile.Betrag,
-                    NkZahlungHabenZeile = nkHabenZeile
+                    Sollstellung = sollZeile.Buchungssatz,
+                    SollstellungsBetrag = sollZeile.Betrag
                 });
             }
 

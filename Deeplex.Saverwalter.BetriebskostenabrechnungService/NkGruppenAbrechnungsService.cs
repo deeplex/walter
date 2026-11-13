@@ -80,7 +80,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             int BetriebsstromUmlageId,
             string BetriebsstromBezeichnung,
             decimal Delta,
-            IReadOnlyList<string> Warnungen);
+            IReadOnlyList<Hinweis> Warnungen);
 
         /// <summary>
         /// Finanzielle Kennzahlen eines Vertrags im Abrechnungsjahr.
@@ -190,7 +190,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             public decimal Betrag { get; init; }
             public Umlage Umlage { get; init; } = null!;
             public IReadOnlyList<NkRechnungsAnteil> Anteile { get; init; } = [];
-            public IReadOnlyList<string> Warnungen { get; init; } = [];
+            public IReadOnlyList<Hinweis> Warnungen { get; init; } = [];
 
             /// <summary>§9(2)-Warmwasseranteil. Nur für HKVO-Umlagen gesetzt.</summary>
             public decimal? Para9_2 { get; init; }
@@ -262,21 +262,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var abrechnungstage = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
             var alleUmlagen = umlagen as IReadOnlyCollection<Umlage> ?? umlagen.ToList();
 
-            // Verrechnungskonten ALLER Umlagen der Gruppe (nicht nur der einer einzelnen
-            // Einheit) — eine Umlage kann eine andere Wohnungskombination als die des
-            // Vertrags haben und würde sonst beim Vorauszahlungs-Gutschrift-Abgleich
-            // (s.u.) übersehen.
-            var gruppenVerrechnungsKontoIds = alleUmlagen
-                .Select(u => u.NkVerrechnungsKonto?.BuchungskontoId)
-                .Where(id => id.HasValue)
-                .Select(id => id!.Value)
-                .ToHashSet();
-
             return [.. alleUmlagen
                 .GroupBy(u => string.Join(",", u.Wohnungen.Select(w => w.WohnungId).OrderBy(id => id)))
                 .Select(group =>
-                    BuildEinheit(group.ToList(), jahr, abrechnungsbeginn, abrechnungsende, abrechnungstage,
-                        gruppenVerrechnungsKontoIds))];
+                    BuildEinheit(group.ToList(), jahr, abrechnungsbeginn, abrechnungsende, abrechnungstage))];
         }
 
         // ── Interne Berechnung ────────────────────────────────────────────────
@@ -286,8 +275,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             int jahr,
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
-            int abrechnungstage,
-            HashSet<int> gruppenVerrechnungsKontoIds)
+            int abrechnungstage)
         {
             var wohnungen = umlagenInGruppe.First().Wohnungen
                 .OrderBy(w => w.WohnungId)
@@ -301,8 +289,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var parteien = BuildParteien(
                 wohnungen, umlagenInGruppe,
                 gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
-                abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr,
-                gruppenVerrechnungsKontoIds);
+                abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
 
             var (rechnungsplaene, strompauschalen) = BuildRechnungsplaene(
                 umlagenInGruppe, parteien, abrechnungsbeginn, abrechnungsende, jahr, abrechnungsende);
@@ -336,8 +323,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
             int abrechnungstage,
-            int jahr,
-            HashSet<int> gruppenVerrechnungsKontoIds)
+            int jahr)
         {
             var parteien = new List<NkPartei>();
 
@@ -349,8 +335,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var partei = BuildVertragsPartei(
                         vertrag, wohnung, wohnungen, umlagenInGruppe,
                         gesamtWF, gesamtNF, gesamtNE, gesamtMEA,
-                        abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr,
-                        gruppenVerrechnungsKontoIds);
+                        abrechnungsbeginn, abrechnungsende, abrechnungstage, jahr);
                     if (partei is not null)
                         parteien.Add(partei);
                 }
@@ -492,8 +477,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
             int abrechnungstage,
-            int jahr,
-            HashSet<int> gruppenVerrechnungsKontoIds)
+            int jahr)
         {
             var nutzungsbeginn = DateOnly.FromDayNumber(
                 Math.Max(vertrag.Beginn().DayNumber, abrechnungsbeginn.DayNumber));
@@ -529,45 +513,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var gebuchterSaldo = existing?.Buchungssatz.Buchungszeilen
                 .Where(z => z.Buchungskonto.BuchungskontoId == vertrag.BkAbrechnungsKonto.BuchungskontoId)
                 .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
-            var abrechnungsSatzId = existing?.Buchungssatz.BuchungssatzId;
-
-            // NK-Verrechnungskonten der GESAMTEN Gruppe (nicht nur der Einheit dieser
-            // Umlagen-Wohnungskombination — eine Umlage kann eine andere Wohnungskombination
-            // haben als der Vertrag und würde sonst hier übersehen): Sätze, die eines davon
-            // berühren, sind Betriebskostenrechnungen/NK-Anteile. Eine dort gebuchte
-            // Haben-Zeile auf dem NkBuchungskonto ist eine Anteil-GUTSCHRIFT (negative
-            // Rechnung), KEINE echte Vorauszahlung — sie steckt bereits im Rechnungsbetrag
-            // und darf nicht noch einmal als Vorauszahlung abgezogen werden.
-            bool IstAnteilGutschrift(Buchungszeile z) =>
-                z.Buchungssatz.Buchungszeilen.Any(
-                    gz => gruppenVerrechnungsKontoIds.Contains(gz.Buchungskonto.BuchungskontoId));
-
-            // Der MietKorrekturService (rückwirkende Mieterhöhung/-senkung) korrigiert
-            // additiv — nie durch Mutation historischer Sätze — indem er bei einer
-            // Erhöhung eine Soll-Zeile auf dem NkBuchungskonto bucht (Reklassifizierung
-            // von Vorauszahlung zu Kaltmiete). Erkennbar daran, dass derselbe
-            // Buchungssatz auch eine Zeile auf dem MietBuchungskonto trägt — das tut
-            // keine andere NK-Buchung (NK-Anteile/-Sonderforderungen laufen nur gegen
-            // Umlage-Verrechnungskonten). Ohne Gegenrechnung hier bliebe die
-            // Vorauszahlung fälschlich beim alten (zu hohen) Betrag.
-            bool IstMietKorrekturUmbuchung(Buchungszeile z) =>
-                z.Buchungssatz.Buchungszeilen.Any(
-                    mb => mb.Buchungskonto.BuchungskontoId == vertrag.MietBuchungskonto.BuchungskontoId);
 
             var vertragInfo = new NkVertragInfo
             {
-                // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto); die eigene
-                // Glattstellungs-Haben-Zeile der Abrechnung ausklammern (sonst Konflikt
-                // nach dem Buchen), ebenso Anteil-Gutschriften negativer Rechnungen —
-                // und Soll-Umbuchungen des MietKorrekturService werden abgezogen.
-                Vorauszahlung = vertrag.NkBuchungskonto.Buchungszeilen
-                    .Where(z => z.Buchungssatz.BuchungssatzId != abrechnungsSatzId)
-                    .Sum(z => z.SollHaben switch
-                    {
-                        SollHaben.Haben when !IstAnteilGutschrift(z) => z.Betrag,
-                        SollHaben.Soll when IstMietKorrekturUmbuchung(z) => -z.Betrag,
-                        _ => 0m
-                    }),
+                Vorauszahlung = NkVorauszahlung.Summe(vertrag, vertrag.NkBuchungskonto.Buchungszeilen, jahr),
                 MietSaldo = vertrag.MietBuchungskonto.Buchungszeilen
                     .Where(z => z.SollHaben == SollHaben.Soll).Sum(z => z.Betrag)
                     - vertrag.MietBuchungskonto.Buchungszeilen
@@ -641,7 +590,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 // Zeitraums kann nicht gemessen werden, landet (korrekt) beim Eigenanteil,
                 // muss aber vor dem Buchen bereinigt werden. Ein Zähler, der über den
                 // gesamten Zeitraum 0 misst, ist KEIN Fehler (echter Nullverbrauch).
-                var verbrauchsFehler = new List<string>();
+                var verbrauchsFehler = new List<Hinweis>();
                 if (schluessel == Umlageschluessel.NachVerbrauch)
                 {
                     foreach (var mp in parteien.Where(p => p.Vertrag != null))
@@ -671,10 +620,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                             var name = mp.Vertrag!.Mieter.Any()
                                 ? string.Join(", ", mp.Vertrag.Mieter.Select(m => m.Bezeichnung))
                                 : $"Vertrag {mp.Vertrag.VertragId}";
-                            verbrauchsFehler.Add(
-                                $"{ZaehlerstandFehltMarker}Für '{name}' ({mp.Nutzungsbeginn:dd.MM.yyyy}–{mp.Nutzungsende:dd.MM.yyyy}) "
+                            verbrauchsFehler.Add(new Hinweis(
+                                HinweisArt.Verbrauch,
+                                $"Zählerstand fehlt: Für '{name}' ({mp.Nutzungsbeginn:dd.MM.yyyy}–{mp.Nutzungsende:dd.MM.yyyy}) "
                                 + $"fehlt bei '{umlage.Typ.Bezeichnung}' ein Zählerstand zum Nutzungsbeginn/-ende — der Verbrauch "
-                                + "dieses Zeitraums kann nicht zugeordnet werden. Bitte Zählerstand ergänzen.");
+                                + "dieses Zeitraums kann nicht zugeordnet werden. Bitte Zählerstand ergänzen.",
+                                SperrtBuchung: true));
                         }
                     }
                 }
@@ -682,16 +633,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 foreach (var (zeile, betrag) in verrechnungsZeilen)
                 {
                     if (betrag == 0) continue;
-                    var warnungen = new List<string>(verbrauchsFehler);
+                    var warnungen = new List<Hinweis>(verbrauchsFehler);
 
                     // Negative Rechnung (Gutschrift/Korrektur): buchbar, aber ungewöhnlich.
                     // Die Anteile werden den Parteien gutgeschrieben (Haben auf der
                     // NK-Vorauszahlungs-Seite). Bewusst nicht-blockierend, nur Hinweis.
                     if (betrag < 0)
-                        warnungen.Add(
+                        warnungen.Add(new Hinweis(
+                            HinweisArt.Sonstiges,
                             $"Rechnung '{umlage.Typ.Bezeichnung}' ist negativ ({betrag:0.00} €) — "
                             + "Gutschrift/Korrektur. Der Betrag wird den Parteien als Gutschrift auf "
-                            + "die NK-Vorauszahlung gebucht. Bitte prüfen, ob das gewollt ist.");
+                            + "die NK-Vorauszahlung gebucht. Bitte prüfen, ob das gewollt ist."));
 
                     var anteile = new List<NkRechnungsAnteil>();
 
@@ -783,13 +735,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public const string StrompauschaleMarker = "Strompauschale-Umbuchung";
 
         /// <summary>
-        /// Marker für den harten Fehler „Zählerstand fehlt / Verbrauch nicht zuordenbar".
-        /// Das Buchen wird ausschließlich bei genau diesem Fehler blockiert (nicht bei
-        /// sonstigen HKVO-Plausibilitätshinweisen).
-        /// </summary>
-        public const string ZaehlerstandFehltMarker = "Fehler: Zählerstand fehlt — ";
-
-        /// <summary>
         /// Wendet die Strompauschale (HeizkostenV) an: delta = Heizkosten × Strompauschale wird
         /// vom Allgemeinstrom/Betriebsstrom abgezogen und auf die Heizkosten umgelegt.
         /// Die Anteile der Betriebsstrom-Pläne werden anteilig um delta gekürzt; zusätzlich
@@ -829,7 +774,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var grund = betrTotal < 0
                         ? $"'{hkvo.Betriebsstrom.Typ.Bezeichnung}' ist negativ ({betrTotal:N2} €) für {jahr}"
                         : $"'{hkvo.Betriebsstrom.Typ.Bezeichnung}' hat keine Buchungen für {jahr}";
-                    var meldung = $"Strompauschale kann nicht angewandt werden: {grund}.";
+                    var meldung = new Hinweis(HinweisArt.Sonstiges, $"Strompauschale kann nicht angewandt werden: {grund}.");
 
                     var dummy = new Buchungssatz(endeJahr, $"{StrompauschaleMarker} {heiz.Typ.Bezeichnung} {jahr}")
                     {
@@ -852,11 +797,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     continue;
                 }
 
-                var warnungen = new List<string>();
+                var warnungen = new List<Hinweis>();
                 if (delta > betrTotal)
                 {
-                    warnungen.Add(
-                        $"Strompauschale ({delta:N2} €) übersteigt die Allgemeinstromrechnung ({betrTotal:N2} €) — auf diese gekürzt.");
+                    warnungen.Add(new Hinweis(
+                        HinweisArt.Sonstiges,
+                        $"Strompauschale ({delta:N2} €) übersteigt die Allgemeinstromrechnung ({betrTotal:N2} €) — auf diese gekürzt."));
                     delta = betrTotal;
                 }
 
@@ -932,7 +878,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private static NkRechnungsplan CopyPlanMitAnteilen(
             NkRechnungsplan plan, List<NkRechnungsAnteil> anteile, decimal? betrag = null,
-            List<string>? warnungen = null) =>
+            List<Hinweis>? warnungen = null) =>
             new()
             {
                 Buchungssatz = plan.Buchungssatz,
@@ -1069,11 +1015,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         WwZaehler: wwZaehlerByPartei[p]);
                 });
 
-            // Notes (fehlende/abweichende Zählerstände, §9(2)-Plausibilität) als
-            // Warnungen an alle Pläne dieser Umlage hängen — vorher gingen sie verloren.
+            // Notes (fehlende/abweichende Zählerstände, §9(2)-Plausibilität) hängen als
+            // Hinweise an allen Plänen dieser Umlage.
             var warnungen = notes
                 .Distinct()
-                .Select(n => n.Severity == Severity.Error ? $"Fehler: {n.Message}" : n.Message)
+                .Select(n => new Hinweis(
+                    HinweisArt.Verbrauch,
+                    n.Severity == Severity.Error ? $"Fehler: {n.Message}" : n.Message))
                 .ToList();
 
             // Maßgeblich ist ausschließlich das Buchungsjahr (Wirtschaftsjahr) — das

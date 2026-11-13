@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
@@ -106,9 +107,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var preview = await service.PreviewAsync(wohnungIds, Jahr);
 
             preview.Warnungen.Should().Contain(w =>
-                w.Contains(AbrechnungslaufService.MietForderungAbweichungMarker)
-                && w.Contains($"Vertrag {vertrag.VertragId}")
-                && w.Contains("01/2024"));
+                w.Art == HinweisArt.Miete
+                && w.SperrtBuchung
+                && w.Text.Contains($"Vertrag {vertrag.VertragId}")
+                && w.Text.Contains("01/2024"));
         }
 
         [Fact]
@@ -153,7 +155,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
 
             var preview = await service.PreviewAsync(wohnungIds, Jahr);
-            preview.Warnungen.Should().NotContain(w => w.Contains(AbrechnungslaufService.MietForderungAbweichungMarker));
+            preview.Warnungen.Should().NotContain(w => w.SperrtBuchung);
 
             Func<Task> buchen = () => service.BookAsync(wohnungIds, Jahr);
             await buchen.Should().NotThrowAsync();

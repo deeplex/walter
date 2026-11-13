@@ -1,4 +1,5 @@
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
@@ -72,14 +73,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Saldo = saldoZeilen
                     .Sum(z => z.SollHaben == SollHaben.Soll ? z.Betrag : -z.Betrag);
 
-                // Vorauszahlung = geleistete NK-Vorauszahlungen des Jahres (Haben auf
-                // dem NkBuchungskonto), ohne die Glattstellungs-Zeile der Abrechnung
-                // selbst; Rechnungsbetrag folgt aus dem Saldo.
-                Vorauszahlung = entity.Vertrag.NkBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben
-                             && z.Buchungssatz.Buchungsjahr == Jahr
-                             && z.Buchungssatz.BuchungssatzId != BuchungssatzId)
-                    .Sum(z => z.Betrag);
+                // Dieselbe Berechnung wie in der Abrechnung; Rechnungsbetrag folgt aus dem Saldo.
+                var jahr = entity.Buchungssatz.Buchungsjahr;
+                Vorauszahlung = NkVorauszahlung.Summe(
+                    entity.Vertrag, entity.Vertrag.NkBuchungskonto.Buchungszeilen, jahr);
                 Rechnungsbetrag = Vorauszahlung + Saldo;
 
                 // Ausgleich per OPOS auf der Saldo-Zeile:

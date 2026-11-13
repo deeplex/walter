@@ -168,7 +168,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .SelectMany(e => e.NkZeilen)
                 .Single(z => z.Betrag < 0);
             negativeZeile.Betrag.Should().Be(-100m);
-            preview.Warnungen.Should().Contain(w => w.Contains("negativ"));
+            preview.Warnungen.Should().Contain(w => w.Text.Contains("negativ"));
 
             // Buchen möglich; die Gutschrift landet als Haben auf dem NkBuchungskonto
             // (NK-Vorauszahlungs-Seite) des Mieters.

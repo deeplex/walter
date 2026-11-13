@@ -209,7 +209,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Where(p => !p.IstStrompauschale).ToList();
 
             plaene.SelectMany(p => p.Warnungen)
-                .Should().NotContain(w => w.Contains("Zählerstand fehlt"));
+                .Should().NotContain(w => w.SperrtBuchung);
         }
 
         [Fact]
@@ -249,7 +249,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             // Summe bleibt vollständig verteilt.
             plan.Anteile.Sum(a => a.Betrag).Should().BeApproximately(203m, 0.02m);
             // Fehlender Einzugsstand für den Nachmieter wird als Fehler gemeldet.
-            plan.Warnungen.Should().Contain(w => w.Contains("Fehler:"));
+            plan.Warnungen.Should().Contain(w => w.Art == HinweisArt.Verbrauch && w.SperrtBuchung);
         }
 
         [Fact]
@@ -480,6 +480,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var vertrag = MakeVertrag(wohnung);
             vertrag.NkBuchungskonto.BuchungskontoId = 300;
             vertrag.MietBuchungskonto.BuchungskontoId = 301;
+            vertrag.ZahlungsKonto.BuchungskontoId = 302;
             var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
                 nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
             umlage.NkVerrechnungsKonto!.BuchungskontoId = 100;
@@ -487,11 +488,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             AddBkForderung(umlage, 100m, new DateOnly(2024, 12, 31), 2024);
 
             // Echte NK-Vorauszahlung des Jahres (z.B. aus 12 Monatszahlungen): 1200.
-            var zahlungsSatz = new Buchungssatz(new DateOnly(2024, 1, 5), "Mietzahlung NK-VZ 01/2024") { Buchungsjahr = 2024 };
-            var zahlungsZeile = new Buchungszeile(SollHaben.Haben, 1200m)
-            { Buchungssatz = zahlungsSatz, Buchungskonto = vertrag.NkBuchungskonto };
-            zahlungsSatz.Buchungszeilen.Add(zahlungsZeile);
-            vertrag.NkBuchungskonto.Buchungszeilen.Add(zahlungsZeile);
+            BucheNkZahlung(vertrag, 1200m);
 
             // MietKorrekturService (delta>0) bucht ZWEI Sätze: eine Zusatz-Forderung
             // (Soll MB / Haben Ertragskonto) und die Umbuchung, die sie über NK
@@ -521,6 +518,95 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 "die per Umbuchung reklassifizierten 100 dürfen nicht mehr als NK-Vorauszahlung zählen");
             partei.VertragInfo!.MietSaldo.Should().Be(0m,
                 "Zusatz-Forderung/-Gutschrift und die dazugehörige Umbuchung heben sich auf dem Mietforderungskonto auf");
+        }
+
+        private static Buchungssatz BucheNkZahlung(Vertrag vertrag, decimal betrag, int jahr = 2024)
+        {
+            var satz = new Buchungssatz(new DateOnly(jahr, 1, 5), "Mietzahlung NK-VZ")
+            {
+                Buchungsjahr = jahr,
+                Transaktion = new Transaktion { Zahlungsdatum = new DateOnly(jahr, 1, 5), Betrag = betrag }
+            };
+            var zeile = new Buchungszeile(SollHaben.Haben, betrag)
+            { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto };
+            satz.Buchungszeilen.Add(zeile);
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag)
+            { Buchungssatz = satz, Buchungskonto = vertrag.ZahlungsKonto });
+            vertrag.NkBuchungskonto.Buchungszeilen.Add(zeile);
+            return satz;
+        }
+
+        private static (Wohnung wohnung, Vertrag vertrag, Umlage umlage) VorauszahlungSetup()
+        {
+            var wohnung = MakeWohnung("W1");
+            var vertrag = MakeVertrag(wohnung);
+            vertrag.NkBuchungskonto.BuchungskontoId = 300;
+            vertrag.MietBuchungskonto.BuchungskontoId = 301;
+            vertrag.ZahlungsKonto.BuchungskontoId = 302;
+            var umlage = MakeUmlage(Umlageschluessel.NachWohnflaeche,
+                nkKonto: new Buchungskonto("7000", "NK-VK", BuchungskontoTyp.Passiv));
+            umlage.NkVerrechnungsKonto!.BuchungskontoId = 100;
+            umlage.Wohnungen.Add(wohnung);
+            AddBkForderung(umlage, 100m, new DateOnly(2024, 12, 31), 2024);
+            return (wohnung, vertrag, umlage);
+        }
+
+        [Fact]
+        public void Vorauszahlung_NkAnteilZaehltNicht()
+        {
+            var (_, vertrag, umlage) = VorauszahlungSetup();
+            BucheNkZahlung(vertrag, 1200m);
+
+            // NK-Anteil (Soll NK-Konto / Haben Verrechnungskonto) und eine Anteil-Gutschrift
+            // (Haben NK-Konto / Soll Verrechnungskonto) sind Kosten, keine Vorauszahlungen.
+            foreach (var (seite, betrag) in new[] { (SollHaben.Soll, 400m), (SollHaben.Haben, 50m) })
+            {
+                var satz = new Buchungssatz(new DateOnly(2024, 12, 31), "NK-Anteil") { Buchungsjahr = 2024 };
+                var nk = new Buchungszeile(seite, betrag) { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto };
+                var vk = new Buchungszeile(seite == SollHaben.Soll ? SollHaben.Haben : SollHaben.Soll, betrag)
+                { Buchungssatz = satz, Buchungskonto = umlage.NkVerrechnungsKonto! };
+                satz.Buchungszeilen.Add(nk);
+                satz.Buchungszeilen.Add(vk);
+                vertrag.NkBuchungskonto.Buchungszeilen.Add(nk);
+            }
+
+            var partei = ComputeEinheiten([umlage], 2024).Single().Parteien.Single(p => p.Vertrag == vertrag);
+            partei.VertragInfo!.Vorauszahlung.Should().Be(1200m);
+        }
+
+        [Fact]
+        public void Vorauszahlung_VerteilzeileAnBezahlterRechnungZaehltNicht()
+        {
+            var (_, vertrag, umlage) = VorauszahlungSetup();
+            BucheNkZahlung(vertrag, 1200m);
+
+            // Per Bank bezahlte BK-Rechnung (Satz mit Transaktion), an die der Lauf die
+            // Verteil-Zeile auf das NK-Konto des Vertrags angefügt hat.
+            var rechnung = new Buchungssatz(new DateOnly(2024, 3, 1), "BK-Rechnung")
+            {
+                Buchungsjahr = 2024,
+                Transaktion = new Transaktion { Zahlungsdatum = new DateOnly(2024, 3, 1), Betrag = 400m }
+            };
+            rechnung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 400m)
+            { Buchungssatz = rechnung, Buchungskonto = umlage.NkVerrechnungsKonto! });
+            var verteil = new Buchungszeile(SollHaben.Soll, 400m)
+            { Buchungssatz = rechnung, Buchungskonto = vertrag.NkBuchungskonto };
+            rechnung.Buchungszeilen.Add(verteil);
+            vertrag.NkBuchungskonto.Buchungszeilen.Add(verteil);
+
+            var partei = ComputeEinheiten([umlage], 2024).Single().Parteien.Single(p => p.Vertrag == vertrag);
+            partei.VertragInfo!.Vorauszahlung.Should().Be(1200m);
+        }
+
+        [Fact]
+        public void Vorauszahlung_NurDesAbrechnungsjahres()
+        {
+            var (_, vertrag, umlage) = VorauszahlungSetup();
+            BucheNkZahlung(vertrag, 1200m);
+            BucheNkZahlung(vertrag, 999m, jahr: 2023);
+
+            var partei = ComputeEinheiten([umlage], 2024).Single().Parteien.Single(p => p.Vertrag == vertrag);
+            partei.VertragInfo!.Vorauszahlung.Should().Be(1200m);
         }
 
         // ── Preview nach Buchung / Zahlungen ──────────────────────────────────
@@ -954,7 +1040,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
 
             plan.Para9_2.Should().Be(1m);
-            plan.Warnungen.Should().Contain(w => w.Contains("100 %"));
+            plan.Warnungen.Should().Contain(w => w.Text.Contains("100 %"));
         }
 
         [Fact]
@@ -1009,9 +1095,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             // Q = 15000 + 10000 = 25000, wie bei zwei gleichzeitig aktiven Zählern.
             plan.P9Details!.Q.Should().Be(25000m);
             plan.Warnungen.Should().Contain(w =>
-                w.Contains("Zählerwechsel erkannt") &&
-                w.Contains("ALLG-ALT") &&
-                w.Contains("ALLG-NEU"));
+                w.Text.Contains("Zählerwechsel erkannt") &&
+                w.Text.Contains("ALLG-ALT") &&
+                w.Text.Contains("ALLG-NEU"));
         }
 
         [Fact]
@@ -1041,10 +1127,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             plan.P9Details!.Q.Should().Be(25000m);
             plan.Warnungen.Should().Contain(w =>
-                w.Contains("Zählerwechsel erkannt") &&
-                w.Contains("ALLG-ALT") &&
-                w.Contains("ALLG-NEU"));
-            plan.Warnungen.Should().NotContain(w => w.Contains("Kein Endstand"));
+                w.Text.Contains("Zählerwechsel erkannt") &&
+                w.Text.Contains("ALLG-ALT") &&
+                w.Text.Contains("ALLG-NEU"));
+            plan.Warnungen.Should().NotContain(w => w.Text.Contains("Kein Endstand"));
         }
 
         [Fact]
@@ -1057,7 +1143,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var plan = ComputeEinheiten([heiz], 2021).Single().Rechnungsplaene.Single();
 
             plan.Para9_2.Should().Be(0m);
-            plan.Warnungen.Should().Contain(w => w.Contains("ALLG-1"));
+            plan.Warnungen.Should().Contain(w => w.Text.Contains("ALLG-1"));
         }
     }
 

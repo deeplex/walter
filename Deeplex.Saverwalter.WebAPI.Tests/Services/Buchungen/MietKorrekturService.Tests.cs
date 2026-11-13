@@ -308,5 +308,116 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             (await service.ErmittleAsync(vertrag.VertragId)).Should()
                 .OnlyContain(m => m.Status == MietKorrekturService.MietKorrekturStatus.BereitsKorrigiert);
         }
+
+        [Fact]
+        public async Task KorrekturVerweistAufSollstellungDesMonats()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var monat = new DateOnly(2024, 1, 1);
+            await ZahleMonatAsync(ctx, vertrag, monat, kaltmiete: 500m, nk: 150m);
+            var vorher = await ctx.Buchungssaetze.Select(s => s.BuchungssatzId).ToListAsync();
+            vertrag.Versionen.Add(new VertragVersion(monat, 600m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+
+            await new MietKorrekturService(ctx).AnwendenAsync(
+                vertrag.VertragId, new HashSet<(int, int)> { (2024, 1) }, "Grund");
+
+            var sollstellung = await ctx.Buchungszeilen
+                .Where(z => z.Buchungskonto.BuchungskontoId == vertrag.MietBuchungskonto.BuchungskontoId
+                    && z.SollHaben == SollHaben.Soll
+                    && z.Buchungssatz.Transaktion == null
+                    && vorher.Contains(z.Buchungssatz.BuchungssatzId))
+                .Select(z => z.Buchungssatz)
+                .SingleAsync();
+            var neu = await ctx.Buchungssaetze
+                .Include(s => s.KorrigiertSollstellung)
+                .Where(s => !vorher.Contains(s.BuchungssatzId))
+                .ToListAsync();
+            neu.Should().HaveCount(2);
+            neu.Should().OnlyContain(s => s.KorrigiertSollstellung == sollstellung);
+        }
+
+        [Fact]
+        public async Task StornierteKorrekturIstWiederAnwendbar()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var monat = new DateOnly(2024, 1, 1);
+            await ZahleMonatAsync(ctx, vertrag, monat, kaltmiete: 500m, nk: 150m);
+            vertrag.Versionen.Add(new VertragVersion(monat, 600m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+
+            var service = new MietKorrekturService(ctx);
+            await service.AnwendenAsync(vertrag.VertragId, new HashSet<(int, int)> { (2024, 1) }, "Grund");
+
+            var korrektur = await ctx.Buchungssaetze
+                .Where(s => s.KorrigiertSollstellung != null)
+                .Select(s => s.BuchungssatzId)
+                .ToListAsync();
+            var storno = new StornoBuchungsService(ctx);
+            foreach (var id in korrektur)
+                await storno.StornierenAsync(id, "zurück");
+
+            var m = (await service.ErmittleAsync(vertrag.VertragId)).Should().ContainSingle().Subject;
+            m.Status.Should().Be(MietKorrekturService.MietKorrekturStatus.Anwendbar);
+        }
+
+        [Fact]
+        public async Task ErhoehungWirdAusNkVorauszahlungenDesJahresGedeckt()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var jan = new DateOnly(2024, 1, 1);
+            var feb = new DateOnly(2024, 2, 1);
+            // Januar ohne NK-VZ, Februar mit doppelter NK-VZ.
+            await ZahleMonatAsync(ctx, vertrag, jan, kaltmiete: 500m, nk: 0m);
+            await ZahleMonatAsync(ctx, vertrag, feb, kaltmiete: 500m, nk: 300m, zahlungsTag: 6);
+            vertrag.Versionen.Add(new VertragVersion(jan, 600m, 1) { Vertrag = vertrag });
+            vertrag.Versionen.Add(new VertragVersion(feb, 500m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+
+            var service = new MietKorrekturService(ctx);
+            var m = (await service.ErmittleAsync(vertrag.VertragId)).Should().ContainSingle().Subject;
+            m.Monat.Should().Be(1);
+            m.Status.Should().Be(MietKorrekturService.MietKorrekturStatus.Anwendbar);
+
+            var ergebnis = await service.AnwendenAsync(
+                vertrag.VertragId, new HashSet<(int, int)> { (2024, 1) }, "Grund");
+            ergebnis.Korrigiert.Should().ContainSingle();
+        }
+
+        [Fact]
+        public async Task MonateEinesJahresTeilenSichDieNkVorauszahlungen()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var jan = new DateOnly(2024, 1, 1);
+            var feb = new DateOnly(2024, 2, 1);
+            await ZahleMonatAsync(ctx, vertrag, jan, kaltmiete: 500m, nk: 75m);
+            await ZahleMonatAsync(ctx, vertrag, feb, kaltmiete: 500m, nk: 75m, zahlungsTag: 6);
+            vertrag.Versionen.Add(new VertragVersion(jan, 600m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+
+            var service = new MietKorrekturService(ctx);
+            (await service.ErmittleAsync(vertrag.VertragId)).Should()
+                .HaveCount(2).And
+                .OnlyContain(m => m.Status == MietKorrekturService.MietKorrekturStatus.Anwendbar);
+
+            // 150 NK-VZ im Jahr decken nur eine der beiden Erhöhungen um je 100.
+            var ergebnis = await service.AnwendenAsync(
+                vertrag.VertragId, new HashSet<(int, int)> { (2024, 1), (2024, 2) }, "Grund");
+            ergebnis.Korrigiert.Should().ContainSingle(k => k.Monat == 1);
+            ergebnis.Uebersprungen.Should().ContainSingle(u =>
+                u.Monat == 2 && u.Grund == nameof(MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus));
+        }
     }
 }

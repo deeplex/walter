@@ -448,6 +448,10 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<Guid?>("KorrigiertSollstellungId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("korrigiert_sollstellung_id");
+
                     b.Property<DateTime>("LastModified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -468,6 +472,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.HasKey("BuchungssatzId")
                         .HasName("pk_buchungssaetze");
+
+                    b.HasIndex("KorrigiertSollstellungId")
+                        .HasDatabaseName("ix_buchungssaetze_korrigiert_sollstellung_id");
 
                     b.HasIndex("StornoVonId")
                         .IsUnique()
@@ -1836,6 +1843,12 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Buchungssatz", b =>
                 {
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungssatz", "KorrigiertSollstellung")
+                        .WithMany()
+                        .HasForeignKey("KorrigiertSollstellungId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_buchungssaetze_buchungssaetze_korrigiert_sollstellung_id");
+
                     b.HasOne("Deeplex.Saverwalter.Model.Buchungssatz", "StornoVon")
                         .WithOne("StornoNach")
                         .HasForeignKey("Deeplex.Saverwalter.Model.Buchungssatz", "StornoVonId")
@@ -1845,6 +1858,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .WithMany("Buchungssaetze")
                         .HasForeignKey("TransaktionId")
                         .HasConstraintName("fk_buchungssaetze_transaktionen_transaktion_id");
+
+                    b.Navigation("KorrigiertSollstellung");
 
                     b.Navigation("StornoVon");
 

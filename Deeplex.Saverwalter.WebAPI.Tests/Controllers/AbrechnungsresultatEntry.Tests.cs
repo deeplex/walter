@@ -38,7 +38,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             // Geleistete NK-Vorauszahlungen (Haben auf NkBuchungskonto) — Basis für
             // die abgeleitete Vorauszahlung (1.000 €).
-            var vzSatz = new Buchungssatz(new DateOnly(2024, 6, 1), "NK-VZ 2024") { Buchungsjahr = 2024 };
+            var vzSatz = new Buchungssatz(new DateOnly(2024, 6, 1), "NK-VZ 2024")
+            {
+                Buchungsjahr = 2024,
+                Transaktion = new Transaktion { Zahlungsdatum = new DateOnly(2024, 6, 1), Betrag = 1000m }
+            };
             vzSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 1000m)
             { Buchungssatz = vzSatz, Buchungskonto = vertrag.NkBuchungskonto });
             vzSatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 1000m)
