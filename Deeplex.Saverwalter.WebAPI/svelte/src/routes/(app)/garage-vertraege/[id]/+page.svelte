@@ -24,7 +24,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderDetail,
         WalterKontakte,
         WalterLinks,
-        WalterLinkTile
+        WalterLinkTile,
+        WalterMietkonto
     } from '$walter/components';
     import {
         WalterFileWrapper,
@@ -59,6 +60,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterGrid>
     <WalterGarageVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
+
+    <WalterMietkonto
+        garageVertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        title="Garagenmietkonto"
+        bearbeitbar={data.entry.permissions?.update !== false}
+    >
+        {#if data.entry.vertrag?.id}
+            <p class="hinweis">
+                Die Garage gehört zum
+                <a href={`/vertraege/${data.entry.vertrag.id}#mietkonto`}
+                    >Mietkonto des Wohnungsvertrags</a
+                >; dort erscheinen dieselben Monate, und eine Zahlung für
+                Wohnung und Garage zusammen wird dort erfasst.
+            </p>
+        {/if}
+    </WalterMietkonto>
 
     <WalterLinks>
         <WalterKontakte
@@ -95,3 +113,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>
+
+<style>
+    .hinweis {
+        margin-bottom: 0.75rem;
+    }
+</style>

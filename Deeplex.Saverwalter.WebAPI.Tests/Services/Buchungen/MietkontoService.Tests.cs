@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             return vertrag;
         }
 
-        private static async Task<GarageVertrag> GarageAsync(SaverwalterContext ctx, Vertrag vertrag, decimal miete)
+        private static async Task<GarageVertrag> GarageAsync(SaverwalterContext ctx, Vertrag vertrag, decimal miete, bool gebunden = true)
         {
             var garage = new Garage("G1")
             {
@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var gv = new GarageVertrag
             {
                 Garage = garage,
-                Vertrag = vertrag,
+                Vertrag = gebunden ? vertrag : null,
                 MietBuchungskonto = new Buchungskonto("1100", "Garage", BuchungskontoTyp.Aktiv),
                 ZahlungsKonto = new Buchungskonto("1101", "Garage Zahlung", BuchungskontoTyp.Aktiv),
             };
@@ -292,6 +292,99 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             konto.Monate.Select(m => m.Monat).Should().Equal(2, 1);
             konto.NkVorauszahlungen.Single().Faellig.Should().Be(300m);
+        }
+
+        private static Task<Transaktion> ZahleGarageAsync(
+            SaverwalterContext ctx, GarageVertrag gv, DateOnly monat, DateOnly datum, decimal betrag) =>
+            new TransaktionBuchungsService(ctx).BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = betrag,
+                Zahlungsdatum = datum,
+                GaragenEingaenge =
+                {
+                    new TransaktionBuchungsService.StandaloneGaragenmietInput
+                    {
+                        GarageVertragId = gv.GarageVertragId,
+                        BetreffenderMonat = monat,
+                        Betrag = betrag,
+                    }
+                },
+            });
+
+        private static Task<Mietkonto> GaragenkontoAsync(SaverwalterContext ctx, GarageVertrag gv) =>
+            new MietkontoService(ctx).ErmittleGarageAsync(gv.GarageVertragId, Heute);
+
+        [Fact]
+        public async Task GaragenmietkontoZeigtDieGaragenmieteJeMonat()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAsync(ctx);
+            var gv = await GarageAsync(ctx, vertrag, 50m, gebunden: false);
+            // Januarmiete, gezahlt im Februar.
+            await ZahleGarageAsync(ctx, gv, Januar, new DateOnly(2024, 2, 4), 50m);
+            await ZahleGarageAsync(ctx, gv, Februar, new DateOnly(2024, 2, 5), 20m);
+
+            var konto = await GaragenkontoAsync(ctx, gv);
+
+            konto.Monate.Select(m => m.Monat).Should().Equal(3, 2, 1);
+            konto.Monate.Should().AllSatisfy(m =>
+            {
+                m.Kaltmiete.Should().Be(0m);
+                m.Garagen.Should().ContainSingle().Which.Kennung.Should().Be("G1");
+            });
+            Monat(konto, Januar).Offen.Should().Be(0m);
+            Monat(konto, Januar).Zahlungen.Should().ContainSingle()
+                .Which.Should().Match<MietkontoZahlung>(z => z.Art == MietkontoZahlungsArt.Garage && z.Garage == "G1");
+            Monat(konto, Februar).Offen.Should().Be(30m);
+            Monat(konto, Maerz).Offen.Should().Be(50m, "auch ohne Sollstellung ist die Garagenmiete fällig");
+            konto.NkVorauszahlungen.Should().BeEmpty();
+            konto.Offen.Should().Be(80m);
+        }
+
+        [Fact]
+        public async Task GaragenmietkontoEinerGebundenenGarageZeigtNurDieGarage()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAsync(ctx);
+            var gv = await GarageAsync(ctx, vertrag, 50m);
+            await ZahleAsync(ctx, vertrag, Januar, new DateOnly(2024, 1, 5), 500m, 150m, gv, 50m);
+
+            var konto = await GaragenkontoAsync(ctx, gv);
+
+            Monat(konto, Januar).Bezahlt.Should().Be(50m);
+            Monat(konto, Januar).Zahlungen.Should().ContainSingle().Which.Betrag.Should().Be(50m);
+            konto.Offen.Should().Be(100m);
+        }
+
+        [Fact]
+        public async Task GaragenmietkontoMitGuthabenUndStorno()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAsync(ctx);
+            var gv = await GarageAsync(ctx, vertrag, 50m, gebunden: false);
+            var transaktion = await ZahleGarageAsync(ctx, gv, Januar, new DateOnly(2024, 1, 5), 50m);
+            foreach (var satz in await ctx.Buchungssaetze
+                .Where(s => s.Transaktion!.TransaktionId == transaktion.TransaktionId).ToListAsync())
+            {
+                await new StornoBuchungsService(ctx).StornierenAsync(satz.BuchungssatzId, "falsche Garage");
+            }
+            var ueber = new Buchungssatz(new DateOnly(2024, 2, 5), "Überzahlung")
+            {
+                Transaktion = new Transaktion { Zahlungsdatum = new DateOnly(2024, 2, 5), Betrag = 10m },
+            };
+            ueber.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 10m) { Buchungssatz = ueber, Buchungskonto = gv.ZahlungsKonto });
+            ueber.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 10m) { Buchungssatz = ueber, Buchungskonto = gv.MietBuchungskonto });
+            ctx.Buchungssaetze.Add(ueber);
+            await ctx.SaveChangesAsync();
+
+            var konto = await GaragenkontoAsync(ctx, gv);
+
+            Monat(konto, Januar).Bezahlt.Should().Be(0m);
+            konto.RueckgaengigGemacht.Should().ContainSingle()
+                .Which.Should().Match<MietkontoZahlung>(z => z.Betrag == 50m && z.Garage == "G1");
+            konto.NichtZugeordnet.Should().ContainSingle()
+                .Which.Should().Match<MietkontoZahlung>(z => z.Betrag == 10m && z.Garage == "G1");
+            konto.Offen.Should().Be(3 * 50m - 10m);
         }
     }
 }

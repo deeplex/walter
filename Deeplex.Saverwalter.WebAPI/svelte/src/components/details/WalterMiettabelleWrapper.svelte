@@ -287,7 +287,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {
                     art: 'garage',
                     garageVertragId: f.garageVertragId,
-                    monat: f.monat
+                    monat: f.monat,
+                    kennung: f.bezeichnung
                 },
                 `${f.bezeichnung} – ${monatText(f.monat)}`,
                 f.offen,

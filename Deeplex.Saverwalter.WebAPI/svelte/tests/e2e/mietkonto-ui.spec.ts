@@ -10,7 +10,8 @@ import { unwrapList } from './api';
 /**
  * Mietkonto am Vertrag: Miete über „+ Zahlung“ erfassen → im Mietkonto als bezahlt
  * sichtbar → über „Rückgängig machen“ zurücknehmen → der Monat ist wieder offen und
- * die Zahlung steht unter „Rückgängig gemachte Zahlungen“.
+ * die Zahlung steht unter „Rückgängig gemachte Zahlungen“. Außerdem: Miete von der
+ * Startseite aus erfassen; Garagenmiete im Garagenmietkonto erfassen und zurücknehmen.
  */
 
 type Monat = {
@@ -238,4 +239,94 @@ test('Miete von der Startseite aus erfassen', async ({ page }) => {
             )
         )
         .toBe(false);
+});
+
+/** Ein Garagenvertrag ohne Wohnungsvertrag mit einem offenen Monat im laufenden Jahr. */
+async function findeOffeneGarage(): Promise<
+    { garageVertragId: number; monat: Monat } | undefined
+> {
+    return withFreshApiContext(async (api) => {
+        const login = await signInApi(api, 'admin.dev');
+        const r = await api.get('/api/garage-vertraege', {
+            headers: authHeader(login.token)
+        });
+        expect(r.ok()).toBeTruthy();
+        const vertraege = unwrapList<{ id: number; vertrag?: unknown }>(
+            await r.json()
+        ).filter((g) => !g.vertrag);
+        const jahr = new Date().getFullYear();
+
+        for (const g of vertraege) {
+            const k = await api.get(`/api/garage-vertraege/${g.id}/mietkonto`, {
+                headers: authHeader(login.token)
+            });
+            expect(k.ok()).toBeTruthy();
+            const konto = (await k.json()) as Mietkonto;
+            const monat = konto.monate.find(
+                (m) => m.jahr === jahr && m.bezahlt === 0 && m.offen > 0
+            );
+            if (monat) return { garageVertragId: g.id, monat };
+        }
+        return undefined;
+    });
+}
+
+test('Garagenmiete im Garagenmietkonto erfassen und rückgängig machen', async ({
+    page
+}) => {
+    const gefunden = await findeOffeneGarage();
+    expect(
+        gefunden,
+        'erwartet einen Garagenvertrag mit offenem Monat im Dev-Seed'
+    ).toBeDefined();
+    const { garageVertragId, monat } = gefunden!;
+    const periode = `${KURZ[monat.monat - 1]} ${monat.jahr}`;
+    const offen = () =>
+        withFreshApiContext(async (api) => {
+            const login = await signInApi(api, 'admin.dev');
+            const r = await api.get(
+                `/api/garage-vertraege/${garageVertragId}/mietkonto`,
+                { headers: authHeader(login.token) }
+            );
+            const konto = (await r.json()) as Mietkonto;
+            return monatVon(konto, monat.jahr, monat.monat)?.offen;
+        });
+
+    await authenticatePage(page, 'admin.dev');
+    await page.goto(`/garage-vertraege/${garageVertragId}`);
+    await expect(page.getByText('Garagenmietkonto')).toBeVisible();
+
+    const zeile = page.getByRole('row').filter({ hasText: periode }).first();
+    await zeile.getByRole('button', { name: 'Zahlung' }).click();
+
+    const dialog = page.locator('.bx--modal.is-visible');
+    await expect(
+        dialog.getByText(`Zahlung erfassen – ${periode}`)
+    ).toBeVisible();
+    await expect(
+        dialog.getByText(
+            new RegExp(`Garagenmiete .* ${LANG[monat.monat - 1]} ${monat.jahr}`)
+        )
+    ).toBeVisible();
+    const buchen = dialog.getByRole('button', { name: 'Buchen' });
+    await expect(buchen).toBeEnabled();
+    await buchen.click();
+    await expect(page.locator('.bx--modal.is-visible')).toHaveCount(0);
+
+    await expect.poll(offen).toBe(0);
+    await expect(zeile.getByText('Bezahlt', { exact: true })).toBeVisible();
+
+    await zeile.getByRole('button', { name: /expand/i }).click();
+    await page
+        .locator('[data-child-row]')
+        .getByRole('button', { name: 'Rückgängig machen' })
+        .first()
+        .click();
+    const undo = page.locator('.bx--modal.is-visible');
+    await expect(undo.getByText(/Gegenbuchung/)).toBeVisible();
+    await undo.getByLabel('Grund (Pflicht)').fill('E2E-Test');
+    await undo.getByRole('button', { name: 'Rückgängig machen' }).click();
+    await expect(page.locator('.bx--modal.is-visible')).toHaveCount(0);
+
+    await expect.poll(offen).toBe(monat.offen);
 });

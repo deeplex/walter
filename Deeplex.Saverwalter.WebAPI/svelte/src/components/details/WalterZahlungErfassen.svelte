@@ -115,7 +115,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     garagenEingaenge: [
                         {
                             garageVertragId: ziel.garageVertragId,
-                            garageKennung: titel,
+                            garageKennung: ziel.kennung ?? '',
                             betreffenderMonat: ziel.monat,
                             betrag
                         }

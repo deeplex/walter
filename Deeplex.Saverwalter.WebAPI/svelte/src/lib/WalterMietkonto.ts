@@ -14,6 +14,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 // ── Antwort von GET /api/vertraege/{id}/mietkonto ───────────────────────────
+// und GET /api/garage-vertraege/{id}/mietkonto (nur Garagenmiete, keine NK-VZ)
 
 export type WalterMietkontoZahlungsArt =
     | 'Kaltmiete'
@@ -156,18 +157,23 @@ function monatsZeile(m: WalterMietkontoMonat): WalterZahlungsZeile {
         faellig: g.faellig,
         bezahlt: g.bezahlt
     }));
-    const aufschluesselung =
-        garagen.length > 0
+    const kaltmieteBezahlt =
+        m.bezahlt - garagen.reduce((s, g) => s + g.bezahlt, 0);
+    // Garagenmietkonto: keine Kaltmiete.
+    const teile = [
+        ...(m.kaltmiete !== 0 || Math.abs(kaltmieteBezahlt) > 0.005
             ? [
                   {
                       text: 'Kaltmiete',
                       faellig: m.kaltmiete,
-                      bezahlt:
-                          m.bezahlt - garagen.reduce((s, g) => s + g.bezahlt, 0)
-                  },
-                  ...garagen
+                      bezahlt: kaltmieteBezahlt
+                  }
               ]
-            : [];
+            : []),
+        ...garagen
+    ];
+    // Aufgeschlüsselt nur, wenn der Monat aus mehreren Teilen besteht.
+    const aufschluesselung = teile.length > 1 ? teile : [];
     return {
         id: `monat-${m.jahr}-${m.monat}`,
         periode: monatText(m.jahr, m.monat),
@@ -225,8 +231,13 @@ export function mietkontoZeilen(
 export type WalterZahlungsZiel =
     /** Miete eines Monats (`yyyy-mm-01`); der Server teilt auf. */
     | { art: 'miete'; vertragId: number; monat: string }
-    /** Miete eines Garagenvertrags ohne Wohnungsvertrag. */
-    | { art: 'garage'; garageVertragId: number; monat: string }
+    /** Miete eines Garagenvertrags. */
+    | {
+          art: 'garage';
+          garageVertragId: number;
+          monat: string;
+          kennung?: string;
+      }
     /** Zahlung einer erfassten Betriebskostenrechnung. */
     | { art: 'bkRechnung'; buchungssatzId: string }
     /** Neue Betriebskostenrechnung, gleich bezahlt. */

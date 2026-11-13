@@ -97,6 +97,41 @@ describe('mietkontoZeilen', () => {
         )!;
         expect(februar.aufschluesselung).toEqual([]);
     });
+
+    it('schlüsselt Monate des Garagenmietkontos nicht auf', () => {
+        const garagenkonto: WalterMietkonto = {
+            monate: [
+                {
+                    jahr: 2024,
+                    monat: 1,
+                    faellig: 50,
+                    bezahlt: 20,
+                    offen: 30,
+                    kaltmiete: 0,
+                    garagen: [
+                        {
+                            garageVertragId: 1,
+                            kennung: 'G1',
+                            faellig: 50,
+                            bezahlt: 20
+                        }
+                    ],
+                    zahlungen: []
+                }
+            ],
+            nkVorauszahlungen: [],
+            nichtZugeordnet: [],
+            rueckgaengigGemacht: [],
+            offen: 30
+        };
+        const [januar] = mietkontoZeilen(garagenkonto);
+        expect(januar).toMatchObject({
+            periode: 'Jan 2024',
+            offen: 30,
+            aufschluesselung: [],
+            erfassenFuer: '2024-01-01'
+        });
+    });
 });
 
 describe('zahlungsEintrag', () => {

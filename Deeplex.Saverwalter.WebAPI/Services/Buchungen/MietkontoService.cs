@@ -121,23 +121,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .Append(nkKontoId)
                 .ToList();
 
-            var zeilen = await ctx.Buchungszeilen
-                .AsSplitQuery()
-                .Where(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))
-                .Include(z => z.Buchungskonto)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.Buchungszeilen).ThenInclude(g => g.Buchungskonto)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.StornoVon)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.StornoNach)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.Transaktion).ThenInclude(t => t!.Zahler).ThenInclude(b => b!.Besitzer)
-                .Include(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile).ThenInclude(h => h.Buchungssatz)
-                    .ThenInclude(s => s.Transaktion).ThenInclude(t => t!.Zahler).ThenInclude(b => b!.Besitzer)
-                .Include(z => z.AlsHabenZeile)
-                .ToListAsync();
+            var zeilen = await LadeZeilenAsync(kontoIds);
 
             var aktuellerMonat = ErsterDesMonats(heute);
             var monate = new Dictionary<DateOnly, MietkontoMonat>();
-            MietkontoMonat MonatEintrag(DateOnly m) =>
-                monate.TryGetValue(m, out var e) ? e : monate[m] = new MietkontoMonat { Jahr = m.Year, Monat = m.Month };
 
             // Kaltmiete
             var mietZeilen = zeilen.Where(z => z.Buchungskonto.BuchungskontoId == mietKontoId).ToList();
@@ -147,39 +134,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 m => vertrag.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.Grundmiete);
             foreach (var (monat, posten) in kaltmiete)
             {
-                var eintrag = MonatEintrag(monat);
+                var eintrag = MonatEintrag(monate, monat);
                 eintrag.Kaltmiete = posten.Faellig;
                 eintrag.Bezahlt += posten.Bezahlt;
                 eintrag.Zahlungen.AddRange(posten.Zahlungen.Select(z => Zahlung(z, MietkontoZahlungsArt.Kaltmiete)));
             }
 
-            // Garagen
             foreach (var gv in vertrag.GarageVertraege)
-            {
-                var gvKontoId = gv.MietBuchungskonto.BuchungskontoId;
-                var garage = Monatsposten(
-                    zeilen.Where(z => z.Buchungskonto.BuchungskontoId == gvKontoId && Sollstellung.Ist(z)),
-                    VertragsMonate(gv.Beginn(), gv.Ende, aktuellerMonat),
-                    m => gv.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.GaragenMiete);
-                foreach (var (monat, posten) in garage)
-                {
-                    var eintrag = MonatEintrag(monat);
-                    eintrag.Garagen.Add(new MietkontoGarage
-                    {
-                        GarageVertragId = gv.GarageVertragId,
-                        Kennung = gv.Garage.Kennung,
-                        Faellig = posten.Faellig,
-                        Bezahlt = posten.Bezahlt,
-                    });
-                    eintrag.Bezahlt += posten.Bezahlt;
-                    eintrag.Zahlungen.AddRange(posten.Zahlungen.Select(z =>
-                    {
-                        var zahlung = Zahlung(z, MietkontoZahlungsArt.Garage);
-                        zahlung.Garage = gv.Garage.Kennung;
-                        return zahlung;
-                    }));
-                }
-            }
+                TrageGarageEin(monate, gv, zeilen, aktuellerMonat);
 
             // NK-Vorauszahlungen je Buchungsjahr
             var zaehlt = NkVorauszahlung.Zaehlt(vertrag).Compile();
@@ -217,22 +179,111 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .OrderByDescending(n => n.Jahr)
                 .ToList();
 
-            // Zahlungen ohne Ausgleich auf Miet- und Garagenkonten
-            var nkLos = kontoIds.Where(id => id != nkKontoId).ToHashSet();
-            var nichtZugeordnet = zeilen
-                .Where(z => nkLos.Contains(z.Buchungskonto.BuchungskontoId)
-                    && z.SollHaben == SollHaben.Haben
+            var garagen = vertrag.GarageVertraege.ToDictionary(g => g.MietBuchungskonto.BuchungskontoId, g => g.Garage.Kennung);
+            MietkontoZahlung ZahlungAufKonto(Buchungszeile z)
+            {
+                var kontoId = z.Buchungskonto.BuchungskontoId;
+                if (kontoId == mietKontoId) return Zahlung(z, MietkontoZahlungsArt.Kaltmiete);
+                if (kontoId == nkKontoId) return Zahlung(z, MietkontoZahlungsArt.NkVorauszahlung);
+                return GaragenZahlung(z, garagen[kontoId]);
+            }
+
+            return new Mietkonto
+            {
+                Monate = Sortiert(monate),
+                NkVorauszahlungen = nkVorauszahlungen,
+                NichtZugeordnet = NichtZugeordnet(zeilen.Where(z => z.Buchungskonto.BuchungskontoId != nkKontoId), ZahlungAufKonto),
+                RueckgaengigGemacht = RueckgaengigGemacht(zeilen, ZahlungAufKonto),
+            };
+        }
+
+        /// <summary>
+        /// Mietkonto eines Garagenvertrags: die Garagenmiete je Monat, nach denselben Regeln wie
+        /// beim Vertrag; ohne NK-Vorauszahlungen. Ist die Garage an einen Wohnungsvertrag gebunden,
+        /// erscheinen dieselben Monate auch in dessen Mietkonto.
+        /// </summary>
+        public async Task<Mietkonto> ErmittleGarageAsync(int garageVertragId, DateOnly heute)
+        {
+            var gv = await ctx.GarageVertraege
+                .Include(g => g.Versionen)
+                .Include(g => g.Garage)
+                .Include(g => g.MietBuchungskonto)
+                .FirstOrDefaultAsync(g => g.GarageVertragId == garageVertragId)
+                ?? throw new ArgumentException($"Garagenvertrag {garageVertragId} nicht gefunden.");
+
+            var zeilen = await LadeZeilenAsync([gv.MietBuchungskonto.BuchungskontoId]);
+            var monate = new Dictionary<DateOnly, MietkontoMonat>();
+            TrageGarageEin(monate, gv, zeilen, ErsterDesMonats(heute));
+            MietkontoZahlung ZahlungAufKonto(Buchungszeile z) => GaragenZahlung(z, gv.Garage.Kennung);
+
+            return new Mietkonto
+            {
+                Monate = Sortiert(monate),
+                NichtZugeordnet = NichtZugeordnet(zeilen, ZahlungAufKonto),
+                RueckgaengigGemacht = RueckgaengigGemacht(zeilen, ZahlungAufKonto),
+            };
+        }
+
+        private async Task<List<Buchungszeile>> LadeZeilenAsync(List<int> kontoIds) =>
+            await ctx.Buchungszeilen
+                .AsSplitQuery()
+                .Where(z => kontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                .Include(z => z.Buchungskonto)
+                .Include(z => z.Buchungssatz).ThenInclude(s => s.Buchungszeilen).ThenInclude(g => g.Buchungskonto)
+                .Include(z => z.Buchungssatz).ThenInclude(s => s.StornoVon)
+                .Include(z => z.Buchungssatz).ThenInclude(s => s.StornoNach)
+                .Include(z => z.Buchungssatz).ThenInclude(s => s.Transaktion).ThenInclude(t => t!.Zahler).ThenInclude(b => b!.Besitzer)
+                .Include(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile).ThenInclude(h => h.Buchungssatz)
+                    .ThenInclude(s => s.Transaktion).ThenInclude(t => t!.Zahler).ThenInclude(b => b!.Besitzer)
+                .Include(z => z.AlsHabenZeile)
+                .ToListAsync();
+
+        private static MietkontoMonat MonatEintrag(Dictionary<DateOnly, MietkontoMonat> monate, DateOnly m) =>
+            monate.TryGetValue(m, out var e) ? e : monate[m] = new MietkontoMonat { Jahr = m.Year, Monat = m.Month };
+
+        private static List<MietkontoMonat> Sortiert(Dictionary<DateOnly, MietkontoMonat> monate) =>
+            monate.Values.OrderByDescending(m => m.Jahr).ThenByDescending(m => m.Monat).ToList();
+
+        /// <summary>Garagenmiete je Monat in die Monate eintragen.</summary>
+        private static void TrageGarageEin(
+            Dictionary<DateOnly, MietkontoMonat> monate, GarageVertrag gv, List<Buchungszeile> zeilen, DateOnly aktuellerMonat)
+        {
+            var kontoId = gv.MietBuchungskonto.BuchungskontoId;
+            var posten = Monatsposten(
+                zeilen.Where(z => z.Buchungskonto.BuchungskontoId == kontoId && Sollstellung.Ist(z)),
+                VertragsMonate(gv.Beginn(), gv.Ende, aktuellerMonat),
+                m => gv.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.GaragenMiete);
+            foreach (var (monat, p) in posten)
+            {
+                var eintrag = MonatEintrag(monate, monat);
+                eintrag.Garagen.Add(new MietkontoGarage
+                {
+                    GarageVertragId = gv.GarageVertragId,
+                    Kennung = gv.Garage.Kennung,
+                    Faellig = p.Faellig,
+                    Bezahlt = p.Bezahlt,
+                });
+                eintrag.Bezahlt += p.Bezahlt;
+                eintrag.Zahlungen.AddRange(p.Zahlungen.Select(z => GaragenZahlung(z, gv.Garage.Kennung)));
+            }
+        }
+
+        /// <summary>Zahlungen ohne Ausgleich (Guthaben).</summary>
+        private static List<MietkontoZahlung> NichtZugeordnet(
+            IEnumerable<Buchungszeile> zeilen, Func<Buchungszeile, MietkontoZahlung> zahlung) =>
+            zeilen
+                .Where(z => z.SollHaben == SollHaben.Haben
                     && z.Buchungssatz.Transaktion != null
                     && !IstStornoBeteiligt(z.Buchungssatz)
                     && z.AlsHabenZeile.Count == 0)
                 .OrderBy(z => z.Buchungssatz.Buchungsdatum)
-                .Select(z => Zahlung(z, z.Buchungskonto.BuchungskontoId == mietKontoId
-                    ? MietkontoZahlungsArt.Kaltmiete
-                    : MietkontoZahlungsArt.Garage))
+                .Select(zahlung)
                 .ToList();
 
-            // Stornierte Zahlungen: je Satz eine Zeile, Betrag auf Miet-, Garagen- und NK-Konto
-            var rueckgaengig = zeilen
+        /// <summary>Stornierte Zahlungen: je Satz eine Zeile mit der Summe auf den geladenen Konten.</summary>
+        private static List<MietkontoZahlung> RueckgaengigGemacht(
+            IEnumerable<Buchungszeile> zeilen, Func<Buchungszeile, MietkontoZahlung> zahlung) =>
+            zeilen
                 .Where(z => z.SollHaben == SollHaben.Haben
                     && z.Buchungssatz.Transaktion != null
                     && z.Buchungssatz.StornoNach != null)
@@ -240,25 +291,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .OrderBy(g => g.Key.Buchungsdatum)
                 .Select(g =>
                 {
-                    var erste = g.First();
-                    var art = erste.Buchungskonto.BuchungskontoId == mietKontoId ? MietkontoZahlungsArt.Kaltmiete
-                        : erste.Buchungskonto.BuchungskontoId == nkKontoId ? MietkontoZahlungsArt.NkVorauszahlung
-                        : MietkontoZahlungsArt.Garage;
-                    var zahlung = Zahlung(erste, art);
-                    zahlung.Betrag = g.Sum(z => z.Betrag);
-                    return zahlung;
+                    var eintrag = zahlung(g.First());
+                    eintrag.Betrag = g.Sum(z => z.Betrag);
+                    return eintrag;
                 })
                 .ToList();
 
-            return new Mietkonto
-            {
-                Monate = monate.Values
-                    .OrderByDescending(m => m.Jahr).ThenByDescending(m => m.Monat)
-                    .ToList(),
-                NkVorauszahlungen = nkVorauszahlungen,
-                NichtZugeordnet = nichtZugeordnet,
-                RueckgaengigGemacht = rueckgaengig,
-            };
+        private static MietkontoZahlung GaragenZahlung(Buchungszeile z, string kennung)
+        {
+            var zahlung = Zahlung(z, MietkontoZahlungsArt.Garage);
+            zahlung.Garage = kennung;
+            return zahlung;
         }
 
         private record Posten(decimal Faellig, decimal Bezahlt, List<Buchungszeile> Zahlungen);

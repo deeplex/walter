@@ -204,6 +204,17 @@ Die Vertrags-Detailseite zeigt:
 Neue Verträge werden meist aus der Wohnung heraus angelegt, damit die Wohnung bereits
 vorbelegt ist.
 
+### Garagenverträge
+
+Die Garagenvertrags-Detailseite zeigt unter den Stammdaten das **Garagenmietkonto**: die
+Garagenmiete je Monat, nach denselben Regeln wie das Mietkonto eines Vertrags (fällig,
+bezahlt, offen; aufklappen, **+ Zahlung**, **Rückgängig machen**, Guthaben, rückgängig
+gemachte Zahlungen). NK-Vorauszahlungen gibt es hier nicht.
+
+Gehört die Garage zu einem Wohnungsvertrag, erscheinen dieselben Monate auch im Mietkonto
+des Vertrags; ein Hinweis verlinkt dorthin. Eine Zahlung für Wohnung und Garage zusammen
+wird im Mietkonto des Vertrags erfasst, eine Zahlung nur für die Garage geht auch hier.
+
 ---
 
 ## Umlagen und Umlagetypen

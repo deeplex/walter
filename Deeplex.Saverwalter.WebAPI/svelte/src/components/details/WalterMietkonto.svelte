@@ -17,6 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <!--
     Mietkonto eines Vertrags: Kaltmiete und Garagen je Monat, NK-Vorauszahlungen je
     Jahr. Mit `jahr` nur dieses Jahr (Abrechnungslauf), dann ohne Miet-Korrektur-Hinweis.
+    Mit `garageVertragId` statt `vertragId` das Garagenmietkonto: nur die Garagenmiete
+    je Monat.
 -->
 <script lang="ts">
     import {
@@ -33,11 +35,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         mietkontoZeilen,
         zahlungsEintrag,
         type WalterMietkonto,
-        type WalterZahlungsZeile
+        type WalterZahlungsZeile,
+        type WalterZahlungsZiel
     } from '$walter/lib';
     import { walter_fetch } from '$walter/services/requests';
 
-    export let vertragId: number;
+    export let vertragId: number | undefined = undefined;
+    export let garageVertragId: number | undefined = undefined;
     export let fetchImpl: typeof fetch;
     export let jahr: number | undefined = undefined;
     export let title = 'Mietkonto';
@@ -58,18 +62,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
     const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 
+    $: url = vertragId
+        ? `/api/vertraege/${vertragId}/mietkonto`
+        : garageVertragId
+          ? `/api/garage-vertraege/${garageVertragId}/mietkonto`
+          : undefined;
+
     export async function refresh() {
-        if (!vertragId) return;
+        if (!url) return;
         fehler = null;
-        const response = await walter_fetch(
-            fetchImpl,
-            `/api/vertraege/${vertragId}/mietkonto`
-        );
+        const response = await walter_fetch(fetchImpl, url);
         if (response.ok) konto = (await response.json()) as WalterMietkonto;
         else fehler = await response.text();
     }
 
-    $: (vertragId, refresh());
+    $: (url, refresh());
+
+    function zielFuer(monat: string): WalterZahlungsZiel | undefined {
+        if (vertragId) return { art: 'miete', vertragId, monat };
+        if (garageVertragId) return { art: 'garage', garageVertragId, monat };
+        return undefined;
+    }
+    $: erfassenZiel = erfassenZeile?.erfassenFuer
+        ? zielFuer(erfassenZeile.erfassenFuer)
+        : undefined;
 
     $: zeilen = konto ? mietkontoZeilen(konto, jahr) : [];
     $: offen = zeilen.reduce((s, z) => s + z.offen, 0);
@@ -97,7 +113,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     </h4>
 
-    {#if jahr === undefined}
+    <slot />
+
+    {#if jahr === undefined && vertragId}
         <WalterMietKorrektur {vertragId} {fetchImpl} on:geaendert={refresh} />
     {/if}
 
@@ -158,10 +176,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {/if}
 </Tile>
 
-{#if bearbeitbar && erfassenZeile?.erfassenFuer}
+{#if bearbeitbar && erfassenZeile && erfassenZiel}
     <WalterZahlungErfassen
         {fetchImpl}
-        ziel={{ art: 'miete', vertragId, monat: erfassenZeile.erfassenFuer }}
+        ziel={erfassenZiel}
         titel={erfassenZeile.periode}
         vorschlag={Math.max(0, erfassenZeile.offen)}
         bind:open={erfassenOffen}
