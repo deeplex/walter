@@ -106,6 +106,12 @@ export {
     type NkAnteilEingangInput,
     type AbrechnungsAusgleichInput,
     type TransaktionsInput,
+    type TransaktionsVorschau,
+    type VorschauPosition,
+    type VorschauSatz,
+    type VorschauZeile,
+    type RueckgaengigPlan,
+    type BetroffeneAbrechnung,
     emptyMietzahlungsInput,
     emptyTransaktionsInput
 } from './WalterTransaktion';

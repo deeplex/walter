@@ -87,12 +87,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:commitVersionIfPending
     />
 
-    <WalterMietkonto vertragId={data.entry.id} fetchImpl={data.fetchImpl} />
+    <WalterMietkonto
+        vertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        bearbeitbar={data.entry.permissions?.update !== false}
+    />
 
     <Tile style="margin-bottom: 1rem">
         <h4 style="margin-bottom: 0.75rem">Kaution</h4>
         <WalterVertragKaution
             bind:entry={data.entry}
+            fetchImpl={data.fetchImpl}
             readonly={data.entry.permissions?.update === false}
         />
     </Tile>

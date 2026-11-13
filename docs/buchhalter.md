@@ -163,7 +163,8 @@ dafür je eine Transaktion an:
 - **Rückzahlung:** Soll `KautionsKonto` / Haben `ZahlungsKonto`; sie darf die gehaltene
   Kaution (Saldo des `KautionsKontos`) nicht übersteigen.
 
-Rückgängig gemacht wird über die Seite der Transaktion.
+Rückgängig gemacht wird mit **Rückgängig machen** in der Kautionsliste oder auf der Seite der
+Transaktion.
 
 ### Offene Forderungen (Startseite)
 

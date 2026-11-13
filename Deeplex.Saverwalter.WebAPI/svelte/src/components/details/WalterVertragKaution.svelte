@@ -29,11 +29,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterDatePicker, WalterNumberInput } from '$walter/components';
     import { WalterToastContent, WalterVertragEntry } from '$walter/lib';
     import { convertDateCanadian } from '$walter/services/utils';
-    import { walter_post } from '$walter/services/requests';
-    import { addToast } from '$walter/store';
+    import { walter_get, walter_post } from '$walter/services/requests';
+    import WalterRueckgaengig from './WalterRueckgaengig.svelte';
+    import { addToast, changeTracker } from '$walter/store';
+    import { get } from 'svelte/store';
 
     export let entry: Partial<WalterVertragEntry>;
     export let readonly = false;
+    export let fetchImpl: typeof fetch = fetch;
+
+    async function neuLaden() {
+        if (!entry.id) return;
+        const aktualisiert = WalterVertragEntry.fromJson(
+            (await walter_get(
+                `${WalterVertragEntry.ApiURL}/${entry.id}`,
+                fetchImpl
+            )) as WalterVertragEntry
+        );
+        entry.kaution = aktualisiert.kaution;
+        entry.kautionsBuchungen = aktualisiert.kautionsBuchungen;
+    }
 
     const eur = (v: number) =>
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -49,6 +64,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let notiz = '';
     let busy = false;
     let fehler: string | null = null;
+
+    // Die Eingabefelder melden Änderungen an den Seiten-Änderungszähler; der Dialog
+    // stellt ihn beim Schließen wieder her, damit die Seite nicht als geändert gilt.
+    let tracker = 0;
+    let warOffen = false;
+    $: if (open && !warOffen) {
+        warOffen = true;
+        tracker = get(changeTracker);
+    } else if (!open && warOffen) {
+        warOffen = false;
+        changeTracker.set(tracker);
+    }
 
     function oeffnen(alsRueckzahlung: boolean) {
         rueckzahlung = alsRueckzahlung;
@@ -116,8 +143,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <StructuredListCell>
                         {#if b.transaktionId}
                             <a href={`/transaktionen/${b.transaktionId}`}
-                                >Transaktion</a
+                                >Details →</a
                             >
+                            {#if !readonly}
+                                <WalterRueckgaengig
+                                    {fetchImpl}
+                                    transaktionId={b.transaktionId}
+                                    on:erledigt={neuLaden}
+                                />
+                            {/if}
                         {/if}
                     </StructuredListCell>
                 </StructuredListRow>

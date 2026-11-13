@@ -134,11 +134,11 @@ automatisch die Buchungssätze und legt fehlende Forderungen an. Die entstehende
 Buchungssätze sind über die Transaktions-Detailseite und die jeweilige Fachentität
 einsehbar.
 
-Auf der Detailseite lässt sich eine Transaktion **löschen** (nur solange alle ihre
-Buchungssätze frei sind) oder **stornieren** (Gegenbuchungen; die Transaktion bleibt als
-Beleg erhalten). Ist ein Buchungssatz in eine Betriebskostenabrechnung eingeflossen, ist
-beides gesperrt, bis die Abrechnung über den Abrechnungslauf zurückgenommen wurde — der
-Grund wird dann direkt angezeigt.
+Auf der Detailseite macht **Rückgängig machen** die ganze Transaktion rückgängig. Was dabei
+passiert, entscheidet Walter: Hängt nichts daran, wird sie vollständig entfernt; sonst wird
+sie mit einer Gegenbuchung storniert (mit Pflicht-Grund, beides bleibt sichtbar). Sind
+Abrechnungen betroffen, zeigt der Dialog sie vorher an; sie werden nach Bestätigung mit
+zurückgenommen. Die Buchungssätze stehen eingeklappt im Abschnitt **Buchhaltung**.
 
 ---
 
@@ -170,7 +170,12 @@ Die Vertrags-Detailseite zeigt:
     Zahlungsdatums. Monate in der Zukunft erscheinen erst, wenn dafür etwas gebucht ist.
   - **NK-Vorauszahlungen je Jahr**, gezählt wie in der Abrechnung (einschließlich
     Miet-Korrekturen).
-  - Aufgeklappt zeigt eine Zeile die einzelnen Zahlungen mit Link zur Transaktion.
+  - Aufgeklappt zeigt eine Zeile die einzelnen Zahlungen mit Link zur Transaktion und
+    **Rückgängig machen** (macht die ganze Zahlung rückgängig, also auch ihre anderen Teile).
+  - **+ Zahlung** an einem Monat erfasst eine Zahlung mit Datum, Betrag und optional dem
+    Bankkonto des Zahlers. Walter teilt den Betrag auf: zuerst die offene Kaltmiete, dann
+    offene Garagenmieten, der Rest ist NK-Vorauszahlung. Die **Vorschau** zeigt vor dem
+    Buchen, was passiert; **Erweitert …** öffnet das volle Transaktionsformular.
   - Darunter, falls vorhanden: **Guthaben** (Zahlungen ohne Monat) und **rückgängig gemachte
     Zahlungen**.
   - Weicht die gebuchte Kaltmiete vom Vertrag ab (z. B. rückwirkend erfasste
@@ -178,7 +183,8 @@ Die Vertrags-Detailseite zeigt:
 - **Kaution** — die gehaltene Kaution (Saldo des KautionsKontos) und die bisherigen Eingänge
   und Rückzahlungen. Über **Kaution erhalten** und **Kaution zurückzahlen** werden sie mit
   Datum und Betrag gebucht; eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
-  Jede Buchung ist eine eigene Transaktion und wird über deren Seite rückgängig gemacht.
+  Jede Buchung ist eine eigene Transaktion und lässt sich direkt in der Liste rückgängig
+  machen.
 - **Mieter** — die zugeordneten Kontakte.
 - **Nachträge** — die Vertragsversionen (Grundmiete/Kaltmiete und Personenzahl, zeitlich
   gültig).

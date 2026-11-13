@@ -45,7 +45,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const vertraege = walter_selection.vertraege(fetchImpl);
 
     const now = new Date();
-    let betreffenderMonat: string = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    let betreffenderMonat: string =
+        miete.betreffenderMonat ??
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     miete.betreffenderMonat = betreffenderMonat;
 
     $: statusText = forderungsstatus?.sollstellungVorhanden

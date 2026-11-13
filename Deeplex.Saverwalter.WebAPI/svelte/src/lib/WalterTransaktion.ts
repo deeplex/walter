@@ -89,6 +89,8 @@ export interface MietzahlungsInput {
     kaltmiete: number;
     garagen: GaragenmietInput[];
     nkVorauszahlung: number;
+    /** Gesamtbetrag statt Aufteilung: der Server teilt in Kaltmiete, Garagen und NK-VZ. */
+    gesamtbetrag?: number;
 }
 
 export interface BetriebskostenEingangInput {
@@ -163,4 +165,52 @@ export function emptyTransaktionsInput(): TransaktionsInput {
         nkAnteilEingaenge: [],
         abrechnungsAusgleiche: []
     };
+}
+
+// ── Vorschau (POST /api/transaktionen/buchen/vorschau) ──────────────────────
+
+export interface VorschauPosition {
+    text: string;
+    betrag: number;
+    danachOffen?: number | null;
+}
+
+export interface VorschauZeile {
+    kontonummer: string;
+    kontobezeichnung: string;
+    sollHaben: 'Soll' | 'Haben';
+    betrag: number;
+}
+
+export interface VorschauSatz {
+    buchungsdatum: string;
+    buchungsjahr: number;
+    beschreibung: string;
+    istZahlung: boolean;
+    zeilen: VorschauZeile[];
+}
+
+export interface TransaktionsVorschau {
+    betrag: number;
+    verwendungszweck: string;
+    zahler?: string | null;
+    zahlungsempfaenger?: string | null;
+    positionen: VorschauPosition[];
+    saetze: VorschauSatz[];
+    ausgleiche: number;
+}
+
+// ── Rückgängig machen (GET/POST …/rueckgaengig) ─────────────────────────────
+
+export interface BetroffeneAbrechnung {
+    jahr: number;
+    wohnungIds: number[];
+    bezeichnung: string;
+    versendet: boolean;
+}
+
+export interface RueckgaengigPlan {
+    art: 'Loeschen' | 'Storno' | 'Gesperrt';
+    sperrgrund?: string | null;
+    abrechnungen: BetroffeneAbrechnung[];
 }

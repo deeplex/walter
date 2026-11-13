@@ -55,6 +55,9 @@ Die Playwright-Suite läuft gegen ein laufendes Backend (Standard `http://localh
 - `files.spec.ts` — S3-Dateifluss (Upload/List/Download/Trash, Ablagestapel) und
   Betriebskostenabrechnungs-Druck.
 - `abrechnung-ui.spec.ts` — Abrechnungslauf-UI: Gruppe wählen → Vorschau → Download.
+- `mietkonto-ui.spec.ts` — Mietkonto am Vertrag: „+ Zahlung“ erfassen (Vorschau in Klartext) →
+  Monat bezahlt → „Rückgängig machen“ (Storno mit Grund) → Monat wieder offen, Zahlung unter
+  „Rückgängig gemachte Zahlungen“.
 
 ### Berechtigungsmatrix (`entity-authz.spec.ts`)
 

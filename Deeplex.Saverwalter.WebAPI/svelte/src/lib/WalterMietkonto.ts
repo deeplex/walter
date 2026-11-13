@@ -75,6 +75,9 @@ export interface WalterZahlungsEintrag {
     text: string;
     /** Ziel des Links „Details“: Transaktion, sonst Buchungssatz. */
     href: string;
+    /** Für „Rückgängig machen“: die ganze Zahlung, sonst der einzelne Buchungssatz. */
+    transaktionId?: string;
+    buchungssatzId: string;
 }
 
 /** Teilbetrag einer Zeile, z. B. Kaltmiete und Garage eines Monats. */
@@ -93,6 +96,8 @@ export interface WalterZahlungsZeile {
     offen: number;
     aufschluesselung: WalterZahlungsTeil[];
     zahlungen: WalterZahlungsEintrag[];
+    /** Monat (`yyyy-mm-01`), für den sich hier eine Zahlung erfassen lässt. */
+    erfassenFuer?: string;
 }
 
 const MONAT = [
@@ -139,7 +144,9 @@ export function zahlungsEintrag(
         text: z.zahler ? `${art} – von ${z.zahler}` : art,
         href: z.transaktionId
             ? `/transaktionen/${z.transaktionId}`
-            : `/buchungssaetze/${z.buchungssatzId}`
+            : `/buchungssaetze/${z.buchungssatzId}`,
+        transaktionId: z.transaktionId ?? undefined,
+        buchungssatzId: z.buchungssatzId
     };
 }
 
@@ -168,7 +175,8 @@ function monatsZeile(m: WalterMietkontoMonat): WalterZahlungsZeile {
         bezahlt: m.bezahlt,
         offen: m.offen,
         aufschluesselung,
-        zahlungen: m.zahlungen.map(zahlungsEintrag)
+        zahlungen: m.zahlungen.map(zahlungsEintrag),
+        erfassenFuer: `${m.jahr}-${String(m.monat).padStart(2, '0')}-01`
     };
 }
 

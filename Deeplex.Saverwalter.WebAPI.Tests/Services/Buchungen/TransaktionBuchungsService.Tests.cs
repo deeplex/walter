@@ -574,6 +574,113 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             ctx.ChangeTracker.HasChanges().Should().BeFalse();
         }
 
+        private static TransaktionBuchungsService.TransaktionsInput Gesamt(Vertrag vertrag, DateOnly monat, decimal betrag) => new()
+        {
+            Betrag = betrag,
+            Zahlungsdatum = monat.AddDays(4),
+            Mieten =
+            {
+                new TransaktionBuchungsService.MietzahlungsInput
+                {
+                    VertragId = vertrag.VertragId,
+                    BetreffenderMonat = monat,
+                    Gesamtbetrag = betrag,
+                }
+            }
+        };
+
+        private static decimal Haben(Buchungskonto konto) =>
+            konto.Buchungszeilen.Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+
+        [Fact]
+        public async Task GesamtbetragDecktZuerstDieKaltmieteDerRestIstNkVorauszahlung()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            await new TransaktionBuchungsService(ctx).BucheAsync(Gesamt(vertrag, new DateOnly(2024, 3, 1), 650m));
+
+            Haben(vertrag.NkBuchungskonto).Should().Be(150m);
+            vertrag.MietBuchungskonto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag).Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task GesamtbetragDecktNurDieNochOffeneKaltmiete()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var monat = new DateOnly(2024, 3, 1);
+            var service = new TransaktionBuchungsService(ctx);
+            await service.BucheAsync(Miete(vertrag, monat, 300m, 0m));
+
+            await service.BucheAsync(Gesamt(vertrag, monat, 250m));
+
+            vertrag.MietBuchungskonto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag).Should().Be(500m);
+            Haben(vertrag.NkBuchungskonto).Should().Be(50m);
+        }
+
+        [Fact]
+        public async Task GesamtbetragUnterDerKaltmieteIstGanzKaltmiete()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            await new TransaktionBuchungsService(ctx).BucheAsync(Gesamt(vertrag, new DateOnly(2024, 3, 1), 200m));
+
+            vertrag.MietBuchungskonto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag).Should().Be(200m);
+            vertrag.NkBuchungskonto.Buchungszeilen.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GesamtbetragDecktDanachDieGaragenmiete()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var gv = new GarageVertrag
+            {
+                Garage = new Garage("G1")
+                {
+                    Besitzer = vertrag.Ansprechpartner!,
+                    Ertragskonto = new Buchungskonto("4100", "Garagenmiete", BuchungskontoTyp.Ertrag),
+                },
+                Vertrag = vertrag,
+                MietBuchungskonto = new Buchungskonto("1100", "Garage", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1101", "Garage Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            gv.Versionen.Add(new GarageVertragVersion(new DateOnly(2024, 1, 1), 50m) { GarageVertrag = gv });
+            ctx.GarageVertraege.Add(gv);
+            await ctx.SaveChangesAsync();
+
+            await new TransaktionBuchungsService(ctx).BucheAsync(Gesamt(vertrag, new DateOnly(2024, 3, 1), 600m));
+
+            gv.MietBuchungskonto.Buchungszeilen
+                .Where(z => z.SollHaben == SollHaben.Haben).Sum(z => z.Betrag).Should().Be(50m);
+            Haben(vertrag.NkBuchungskonto).Should().Be(50m);
+        }
+
+        [Fact]
+        public async Task VorschauBeschreibtDiePositionenInKlartext()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var monat = new DateOnly(2024, 3, 1);
+            await new TransaktionBuchungsService(ctx).BucheAsync(Miete(vertrag, monat, 100m, 0m));
+
+            var vorschau = await new TransaktionBuchungsService(ctx).VorschauAsync(Gesamt(vertrag, monat, 450m));
+
+            vorschau.Positionen.Select(p => (p.Text, p.Betrag, p.DanachOffen)).Should().Equal(
+                ("Kaltmiete März 2024", 400m, 0m),
+                ("NK-Vorauszahlung März 2024 (Abrechnung 2024)", 50m, (decimal?)null));
+        }
+
         private static TransaktionBuchungsService.TransaktionsInput Kaution(Vertrag vertrag, decimal betrag, bool rueckzahlung) => new()
         {
             Betrag = betrag,

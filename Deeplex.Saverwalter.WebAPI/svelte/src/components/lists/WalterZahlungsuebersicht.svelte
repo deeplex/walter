@@ -19,13 +19,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bzw. Forderung, aufklappbar zu den einzelnen Zahlungen.
 -->
 <script lang="ts">
-    import { DataTable, Tag } from 'carbon-components-svelte';
+    import { Button, DataTable, Tag } from 'carbon-components-svelte';
+    import { Add } from 'carbon-icons-svelte';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+    import WalterRueckgaengig from '../details/WalterRueckgaengig.svelte';
     import { zahlungsStatus, type WalterZahlungsZeile } from '$walter/lib';
+    import { createEventDispatcher } from 'svelte';
 
     export let rows: WalterZahlungsZeile[] = [];
     /** Leere Liste: dieser Text statt der Tabelle. */
     export let leerText = 'Keine Forderungen vorhanden.';
+    /** „+ Zahlung“ bei Zeilen mit `erfassenFuer` und „Rückgängig machen“ je Zahlung. */
+    export let bearbeitbar = false;
+    export let fetchImpl: typeof fetch = fetch;
+
+    /** `zahlung`: „+ Zahlung“ geklickt; `geaendert`: eine Zahlung wurde rückgängig gemacht. */
+    const dispatch = createEventDispatcher<{
+        zahlung: WalterZahlungsZeile;
+        geaendert: void;
+    }>();
 
     const eur = (v: number) =>
         v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -33,12 +45,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const betragOderStrich = (v: number) =>
         Math.abs(v) < 0.005 ? '—' : eur(v);
 
-    const headers = [
+    $: headers = [
         { key: 'periode', value: 'Zeitraum' },
         { key: 'faellig', value: 'Fällig' },
         { key: 'bezahlt', value: 'Bezahlt' },
         { key: 'offen', value: 'Offen' },
-        { key: 'status', value: 'Status' }
+        { key: 'status', value: 'Status' },
+        ...(bearbeitbar ? [{ key: 'aktion', empty: true }] : [])
     ];
 
     $: tableRows = rows as unknown as DataTableRow[];
@@ -65,6 +78,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if cell.key === 'status'}
                 {@const status = zahlungsStatus(zeile.faellig, zeile.bezahlt)}
                 <Tag size="sm" type={status.tag}>{status.text}</Tag>
+            {:else if cell.key === 'aktion'}
+                {#if zeile.erfassenFuer}
+                    <Button
+                        kind="ghost"
+                        size="small"
+                        icon={Add}
+                        on:click={(e) => {
+                            e.stopPropagation();
+                            dispatch('zahlung', zeile);
+                        }}
+                    >
+                        Zahlung
+                    </Button>
+                {/if}
             {:else if cell.key === 'faellig' || cell.key === 'bezahlt'}
                 {eur(cell.value)}
             {:else if cell.key === 'offen'}
@@ -95,6 +122,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             <span class="betrag">{eur(zahlung.betrag)}</span>
                             <span class="text">{zahlung.text}</span>
                             <a href={zahlung.href}>Details →</a>
+                            {#if bearbeitbar}
+                                <WalterRueckgaengig
+                                    {fetchImpl}
+                                    transaktionId={zahlung.transaktionId}
+                                    buchungssatzId={zahlung.buchungssatzId}
+                                    on:erledigt={() => dispatch('geaendert')}
+                                />
+                            {/if}
                         </li>
                     {/each}
                 </ul>

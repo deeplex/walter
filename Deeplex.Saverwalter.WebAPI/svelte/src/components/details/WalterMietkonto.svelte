@@ -27,10 +27,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
     import WalterMietKorrektur from './WalterMietKorrektur.svelte';
+    import WalterRueckgaengig from './WalterRueckgaengig.svelte';
+    import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import {
         mietkontoZeilen,
         zahlungsEintrag,
-        type WalterMietkonto
+        type WalterMietkonto,
+        type WalterZahlungsZeile
     } from '$walter/lib';
     import { walter_fetch } from '$walter/services/requests';
 
@@ -38,6 +41,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let fetchImpl: typeof fetch;
     export let jahr: number | undefined = undefined;
     export let title = 'Mietkonto';
+    /** Zahlungen erfassen und rückgängig machen. */
+    export let bearbeitbar = false;
+
+    let erfassenOffen = false;
+    let erfassenZeile: WalterZahlungsZeile | undefined;
+    function zahlungErfassen(e: CustomEvent<WalterZahlungsZeile>) {
+        erfassenZeile = e.detail;
+        erfassenOffen = true;
+    }
 
     let konto: WalterMietkonto | undefined;
     let fehler: string | null = null;
@@ -99,7 +111,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {:else if !konto}
         <InlineLoading description="Lade Mietkonto…" />
     {:else}
-        <WalterZahlungsuebersicht rows={zeilen} />
+        <WalterZahlungsuebersicht
+            rows={zeilen}
+            {bearbeitbar}
+            {fetchImpl}
+            on:zahlung={zahlungErfassen}
+            on:geaendert={refresh}
+        />
 
         {#if nichtZugeordnet.length > 0}
             <h5 style="margin-top: 1rem">Guthaben (keinem Monat zugeordnet)</h5>
@@ -110,6 +128,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <span>{eur(z.betrag)}</span>
                         <span class="text">{z.text}</span>
                         <a href={z.href}>Details →</a>
+                        {#if bearbeitbar}
+                            <WalterRueckgaengig
+                                {fetchImpl}
+                                transaktionId={z.transaktionId}
+                                buchungssatzId={z.buchungssatzId}
+                                on:erledigt={refresh}
+                            />
+                        {/if}
                     </li>
                 {/each}
             </ul>
@@ -131,6 +157,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     {/if}
 </Tile>
+
+{#if bearbeitbar && erfassenZeile?.erfassenFuer}
+    <WalterZahlungErfassen
+        {fetchImpl}
+        {vertragId}
+        monat={erfassenZeile.erfassenFuer}
+        periode={erfassenZeile.periode}
+        vorschlag={Math.max(0, erfassenZeile.offen)}
+        bind:open={erfassenOffen}
+        on:gebucht={refresh}
+    />
+{/if}
 
 <style>
     .liste {
