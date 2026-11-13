@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const headers = [
         { key: 'jahr', value: 'Jahr' },
         { key: 'saldo', value: 'Saldo' },
-        { key: 'istAbgesendet', value: 'Ist abgesendet' },
+        { key: 'status', value: 'Status' },
         { key: 'istBeglichen', value: 'Ist beglichen' }
     ];
     export let rows: WalterAbrechnungsresultatEntry[];
@@ -34,10 +34,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 id: row.id,
                 jahr: row.jahr,
                 saldo: row.saldo,
-                istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
-                istBeglichen: row.ausgeglichen
-                    ? 'Ja'
-                    : `Nein (offen: ${row.offenerBetrag.toFixed(2)} €)`
+                status: row.storniert
+                    ? 'Storniert'
+                    : row.abgesendet
+                      ? 'Abgesendet'
+                      : 'Entwurf',
+                istBeglichen: row.storniert
+                    ? '—'
+                    : row.ausgeglichen
+                      ? 'Ja'
+                      : `Nein (offen: ${row.offenerBetrag.toFixed(2)} €)`
             };
         })
         .sort((a, b) => b.jahr - a.jahr);

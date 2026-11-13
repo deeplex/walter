@@ -273,6 +273,35 @@ Eine gebuchte Abrechnung wird nie überschrieben. Es gibt zwei Wege zurück:
 | **Rückabwicklung** | Solange **nicht** abgesendet | Nimmt Resultate, Verteilungs- und Umbuchungen der Gruppe für das Jahr vollständig zurück |
 | **Storno** | Wenn **bereits abgesendet** | Stornobuchung; ein **Grund ist Pflicht**. Der Originalsatz bleibt erhalten |
 
+### Neu abrechnen nach einem Storno
+
+Typischer Anlass: Der Mieter widerspricht einer versendeten Abrechnung, eine Rechnung
+fehlte oder ein Zählerstand war falsch. Der Ablauf:
+
+1. **Storno** der Gruppe im Abrechnungslauf, mit Grund (z. B. „Widerspruch vom 12.03.,
+   Wasserrechnung fehlte“).
+2. **Daten korrigieren** — das Jahr gilt nach dem Storno nicht mehr als abgerechnet;
+   Rechnungen, Zählerstände und Zahlungen des Jahres lassen sich wieder ändern.
+3. **Vorschau und Buchen** im Abrechnungslauf wie beim ersten Mal. Es entsteht ein
+   neues Abrechnungsresultat.
+4. Neue Abrechnung **versenden** und als **Abgesendet** markieren.
+
+Was dabei mit den Büchern passiert:
+
+- Das stornierte Resultat bleibt als **Beleg** erhalten (Status „Storniert“) und ist nicht
+  mehr änderbar. Es zählt nirgends mehr als Abrechnung des Jahres — weder in der
+  Abrechnungsfrist noch in den Sperren für Buchungen des Jahres.
+- Der Abrechnungssatz und die Strompauschale-Umbuchung bekommen je eine **Stornobuchung**,
+  die Verteilung auf die Mieter je Rechnung eine **Gegenbuchung**. Auf den Konten heben
+  sich Original und Storno auf; beides bleibt sichtbar.
+- Eine schon geleistete Nachzahlung oder ausgezahlte Erstattung bleibt gebucht; ihr
+  Ausgleich mit der stornierten Abrechnung wird gelöst. Sie wird dann mit der neuen
+  Abrechnung ausgeglichen.
+- Wird die **neue** Abrechnung vor dem Versand zurückgenommen (Rückabwicklung), betrifft das
+  nur sie — der Storno der früheren Abrechnung bleibt unverändert stehen.
+- Wird nach dem Storno eine Rechnung des Jahres selbst storniert, kehrt der Storno nur die
+  Rechnung um; ihre Verteilung ist durch die Gegenbuchung bereits aufgehoben.
+
 Einzelne Buchungssätze lassen sich bearbeiten oder löschen, solange sie **frei** sind —
 also nicht in eine Betriebskostenabrechnung eingeflossen und ohne Offene-Posten-Ausgleich.
 Sobald ein Satz mit einer Zahlung ausgeglichen wurde, ist statt Löschen ein **Storno**
@@ -378,7 +407,7 @@ wird dann monatsweise aus der jeweils gültigen Version berechnet.
 
 **Ich habe mich bei einer gebuchten Abrechnung vertan.**
 Noch nicht versendet → **Rückabwicklung**. Bereits versendet → **Storno** mit Grund.
-Danach neu buchen.
+Danach korrigieren und neu buchen (siehe „Neu abrechnen nach einem Storno“).
 
 **Ich möchte einen Vertrag für ein Jahr gar nicht abrechnen.**
 Einen **Abrechnungsverzicht** mit Grund hinterlegen — die Jahresabschlusskontrolle wertet

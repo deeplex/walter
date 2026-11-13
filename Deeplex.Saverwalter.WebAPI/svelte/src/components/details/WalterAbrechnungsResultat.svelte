@@ -49,7 +49,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let readonly = false;
     $: {
         readonly =
-            entry?.permissions?.update === false || entry?.abgesendet === true;
+            entry?.permissions?.update === false ||
+            entry?.abgesendet === true ||
+            entry?.storniert === true;
     }
 
     // Persistierter (in der DB gespeicherter) Abgesendet-Zustand — NICHT der bloß
@@ -95,7 +97,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-{#if entry.abgesendet}
+{#if entry.storniert}
+    <Row>
+        <InlineNotification
+            kind="warning"
+            title="Storniert:"
+            subtitle="Diese Abrechnung wurde storniert und gilt nicht mehr. Sie bleibt als Beleg erhalten; das Jahr kann im Abrechnungslauf neu abgerechnet werden."
+            hideCloseButton
+        />
+    </Row>
+{:else if entry.abgesendet}
     <Row>
         <InlineNotification
             kind="info"
@@ -112,12 +123,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <Tile>
             <h4 style="margin-bottom: 0.75rem">
                 Betriebskostenabrechnung {entry.jahr}
-                {#if entry.abgesendet}
+                {#if entry.storniert}
+                    <Tag type="red">Storniert</Tag>
+                {:else if entry.abgesendet}
                     <Tag type="blue">Abgesendet</Tag>
                 {:else}
                     <Tag type="gray">Entwurf</Tag>
                 {/if}
-                {#if entry.ausgeglichen}
+                {#if entry.storniert}
+                    <!-- kein offener Betrag: die Forderung ist storniert -->
+                {:else if entry.ausgeglichen}
                     <Tag type="green">Ausgeglichen</Tag>
                 {:else}
                     <Tag type="red"
@@ -164,7 +179,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 bind:checked={entry.abgesendet}
                 on:change={abgesendet}
             />
-            {#if abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
+            {#if abgesendetPersistiert && !entry.storniert && !entry.ausgeglichen && entry.saldo !== 0}
                 <Button
                     kind="tertiary"
                     size="small"

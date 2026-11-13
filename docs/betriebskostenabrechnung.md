@@ -229,6 +229,12 @@ GET  /api/abrechnungslauf/kontrolle/{jahr} ← prüft, ob eine Neuberechnung das
 POST /api/abrechnungslauf/rueckabwicklung ← nimmt die gebuchte, noch nicht abgesendete Abrechnung zurück
 POST /api/abrechnungslauf/storno          ← storniert eine abgesendete Abrechnung (Grund Pflicht)
 ```
+
+Ein storniertes Resultat (`Buchungssatz.StornoNach` gesetzt) bleibt als Beleg bestehen,
+gilt aber nicht als gebucht: `book` legt für das Jahr ein neues Resultat an. Stornierte
+Verteil-Zeilen einer Rechnung sind mit ihrer Gegenbuchung ausgeglichen (OPOS) und zählen
+weder als gebucht noch werden sie erneut storniert oder zurückgenommen. `rueckabwicklung`
+betrifft nur den aktuellen, nicht stornierten Stand.
 Body von `preview`/`book`: `{ Jahr, Gruppen: [ { WohnungIds: [...] } ] }`.
 Body von `rueckabwicklung`/`storno`: `{ WohnungIds: [...], Jahr, Grund? }` — `Grund` ist beim Storno Pflicht.
 

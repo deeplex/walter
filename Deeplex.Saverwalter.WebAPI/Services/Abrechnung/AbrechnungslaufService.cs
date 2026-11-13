@@ -368,15 +368,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         }
 
         /// <summary>
-        /// Nimmt die gebuchte Abrechnung einer Gruppe für ein Jahr vollständig zurück:
-        /// löscht die Abrechnungsresultate samt Buchungssätzen, entfernt die vom Lauf
-        /// gebuchten Verteil-Zeilen von den Rechnungssätzen und löscht die
+        /// Nimmt die gebuchte, noch nicht versendete Abrechnung einer Gruppe für ein Jahr
+        /// vollständig zurück: löscht die Abrechnungsresultate samt Buchungssätzen, entfernt
+        /// die vom Lauf gebuchten Verteil-Zeilen von den Rechnungssätzen und löscht die
         /// Strompauschale-Umbuchungen. Manuelle NK-Anteil-Sätze bleiben erhalten.
-        /// Gesperrt, sobald ein Resultat als abgesendet markiert ist.
+        ///
+        /// Betroffen ist nur der aktuelle Stand. Eine früher stornierte Abrechnung desselben
+        /// Jahres (Resultat, Storno-Sätze, stornierte Verteil-Zeilen samt Gegenbuchung)
+        /// bleibt als Beleg unverändert. Gesperrt, sobald ein aktuelles Resultat als
+        /// abgesendet markiert ist — dann bleibt nur der Storno.
         /// </summary>
         public async Task<RueckabwicklungResult> DeleteAsync(List<int> wohnungIds, int jahr)
         {
-            var resultate = await LadeResultate(wohnungIds, jahr);
+            var resultate = (await LadeResultate(wohnungIds, jahr))
+                .Where(r => r.Buchungssatz.StornoNach == null)
+                .ToList();
             if (resultate.Any(r => r.Abgesendet))
                 throw new InvalidOperationException(
                     "Mindestens eine Abrechnung wurde bereits versendet — die Gruppe kann nur noch storniert werden.");
@@ -385,33 +391,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
             var nkVkSet = umlageNkVkIds.ToHashSet();
 
-            var zuLoeschen = new List<Buchungssatz>();
-            foreach (var resultat in resultate)
-            {
-                zuLoeschen.Add(resultat.Buchungssatz);
-                if (resultat.Buchungssatz.StornoNach is Buchungssatz storno)
-                    zuLoeschen.Add(storno);
-            }
+            var zuLoeschen = resultate.Select(r => r.Buchungssatz).ToList();
 
             var umbuchungen = 0;
             var bereinigt = 0;
             var anteilZeilen = new List<Buchungszeile>();
-            foreach (var satz in verteilSaetze)
+            foreach (var satz in verteilSaetze.Where(s => s.StornoNach == null && s.StornoVon == null))
             {
                 if (NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(satz, nkVkSet))
                 {
-                    // Vom Lauf erzeugte Umbuchung — komplett entfernen (inkl. Storno-Paar)
+                    // Vom Lauf erzeugte Umbuchung — komplett entfernen
                     zuLoeschen.Add(satz);
-                    if (satz.StornoNach is Buchungssatz storno)
-                        zuLoeschen.Add(storno);
                     umbuchungen++;
                     continue;
                 }
 
-                // Rechnungssatz: nur die vom Lauf angefügten Verteil-Zeilen
+                // Rechnungssatz: nur die aktiven, vom Lauf angefügten Verteil-Zeilen
                 // (Vertrags-NK- und Eigenanteil-/AufwandsKonten) entfernen, die Rechnung bleibt.
                 var zeilen = satz.Buchungszeilen
-                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
+                             && NkVerteilung.IstAktiv(z))
                     .ToList();
                 if (zeilen.Count == 0) continue;
                 anteilZeilen.AddRange(zeilen);
@@ -464,15 +463,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     continue;
                 }
 
-                // Nur noch NICHT stornierte Verteil-Zeilen: eine bereits per Gegenbuchung
-                // ausgeglichene Zeile trägt einen OffenerPostenAusgleich (Soll/Haben je nach
-                // Seite). So ist die Rückabwicklung idempotent — ohne Beschreibungs-Marker —
-                // und ein erneut gebuchter Anteil (frisch, ohne OPOS) wird korrekt storniert.
+                // Nur noch nicht stornierte Verteil-Zeilen (siehe NkVerteilung) — so ist der
+                // Storno idempotent und ein erneut gebuchter Anteil wird korrekt storniert.
                 var zeilen = satz.Buchungszeilen
                     .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
-                             && (z.SollHaben == SollHaben.Soll
-                                    ? z.AlsSollZeile.Count == 0
-                                    : z.AlsHabenZeile.Count == 0))
+                             && NkVerteilung.IstAktiv(z))
                     .ToList();
                 if (zeilen.Count == 0) continue;
 
@@ -683,6 +678,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ThenInclude(r => r.Buchungssatz)
                             .ThenInclude(s => s.Buchungszeilen)
                                 .ThenInclude(z => z.Buchungskonto)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.Abrechnungsresultate
+                            .Where(r => r.Buchungssatz.Buchungsjahr == jahr))
+                        .ThenInclude(r => r.Buchungssatz)
+                            .ThenInclude(s => s.StornoNach)
                 // Versionen für Schluessel-Lookup
                 .Include(u => u.Versionen)
                 // HKVO-Verlauf für warme Betriebskosten
@@ -893,11 +894,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ToDictionary(g => g.Key, g => g.ToList());
 
                     // Bereits gebuchte Anteil-Zeilen (Transfer-/Umbuchungszeilen auf
-                    // Verrechnungskonten ausgeschlossen – das sind keine Anteile).
+                    // Verrechnungskonten ausgeschlossen – das sind keine Anteile; stornierte
+                    // Verteil-Zeilen zählen nicht, siehe NkVerteilung).
                     // Soll positiv, Haben negativ — Gutschrift-Anteile werden als
                     // Haben-Zeilen gebucht und müssen negativ gegen den Plan stehen.
                     var bookedByKonto = buchungssatz.Buchungszeilen
-                        .Where(z => !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                        .Where(z => !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
+                                 && NkVerteilung.IstAktiv(z))
                         .GroupBy(z => z.Buchungskonto.BuchungskontoId)
                         .ToDictionary(
                             g => g.Key,

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.BetriebskostenabrechnungService.NkGruppenAbrechnungsService;
@@ -114,7 +115,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             Buchungssatz satz,
             IReadOnlyList<NkRechnungsAnteil> anteile)
         {
+            // Stornierte Verteil-Zeilen zählen nicht als gebucht (siehe NkVerteilung).
             var bereitsGebuchteKontoIds = satz.Buchungszeilen
+                .Where(NkVerteilung.IstAktiv)
                 .Select(z => z.Buchungskonto.BuchungskontoId)
                 .ToHashSet();
 

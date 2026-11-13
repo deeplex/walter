@@ -184,7 +184,9 @@ Der Abrechnungslauf erstellt die Betriebskostenabrechnung je **Abrechnungsgruppe
 5. Nach dem Versand das Resultat als **Abgesendet** markieren.
 
 Korrekturen: **Rückabwicklung** (solange nicht abgesendet) oder **Storno** (nach dem
-Versand, mit Pflicht-Grund). Für Verträge, die bewusst nicht abgerechnet werden, lässt
+Versand, mit Pflicht-Grund). Nach einem Storno gilt das Jahr wieder als offen: Daten
+korrigieren, neu buchen und die neue Abrechnung versenden. Die stornierte Abrechnung
+bleibt mit dem Status „Storniert“ als Beleg sichtbar. Für Verträge, die bewusst nicht abgerechnet werden, lässt
 sich ein **Abrechnungsverzicht** mit Grund hinterlegen.
 
 Details der Berechnung: [Betriebskostenabrechnung](betriebskostenabrechnung.md).

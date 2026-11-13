@@ -40,7 +40,9 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
         public permissions: WalterPermissions,
         // Vermieter-Bankkonto für den Ausgleich: Zahler bei Erstattungen,
         // Zahlungsempfänger bei Nachzahlungen.
-        public vermieterBankkontoId?: number
+        public vermieterBankkontoId?: number,
+        // Storniert: bleibt als Beleg, gilt aber nicht mehr als Abrechnung des Jahres.
+        public storniert: boolean = false
     ) {
         super();
     }
@@ -67,7 +69,8 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
             json.createdAt,
             json.lastModified,
             permissions,
-            json.vermieterBankkontoId ?? undefined
+            json.vermieterBankkontoId ?? undefined,
+            json.storniert ?? false
         );
     }
 }

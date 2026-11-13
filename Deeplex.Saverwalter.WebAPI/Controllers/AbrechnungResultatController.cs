@@ -28,6 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime LastModified { get; set; }
             public int Jahr { get; set; }
             public bool Abgesendet { get; set; }
+            /// <summary>Storniert: bleibt als Beleg, gilt aber nicht mehr als Abrechnung des Jahres.</summary>
+            public bool Storniert { get; set; }
             /// <summary>Positiv = Mieter muss nachzahlen, negativ = Vermieter erstattet.</summary>
             public decimal Saldo { get; set; }
             /// <summary>Abgerechneter Gesamtbetrag (Vorauszahlung + Saldo).</summary>
@@ -60,6 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 LastModified = entity.LastModified;
                 Jahr = entity.Buchungssatz.Buchungsdatum.Year;
                 Abgesendet = entity.Abgesendet;
+                Storniert = entity.Buchungssatz.StornoNach != null;
                 Notiz = entity.Notiz;
                 BuchungssatzId = entity.Buchungssatz.BuchungssatzId;
 

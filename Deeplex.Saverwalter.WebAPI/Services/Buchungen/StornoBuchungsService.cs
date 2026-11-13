@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         /// Erstellt eine Stornobuchung für den angegebenen Buchungssatz.
         /// Alle Buchungszeilen werden mit umgekehrten Soll/Haben-Seiten gebucht.
         /// Bestehende OPOS-Ausgleiche der Originalzeilen werden entfernt.
+        /// Ausgenommen sind Verteil-Zeilen einer BK-Rechnung, die mit einer Abrechnung
+        /// bereits storniert wurden (<see cref="NkVerteilung"/>): sie sind durch ihre
+        /// Gegenbuchung schon neutralisiert und bleiben samt Ausgleich unverändert.
         /// Der Grund wird als Notiz am Storno-Satz festgehalten.
         /// </summary>
         public async Task<Buchungssatz> StornierenAsync(Guid buchungssatzId, string? grund = null)
@@ -54,7 +58,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 Notiz = string.IsNullOrWhiteSpace(grund) ? null : grund.Trim(),
             };
 
-            foreach (var zeile in original.Buchungszeilen)
+            var neutralisiert = await NeutralisierteVerteilZeilenAsync(original);
+
+            foreach (var zeile in original.Buchungszeilen.Where(z => !neutralisiert.Contains(z)))
             {
                 // OPOS-Ausgleiche der Originalzeile entfernen
                 ctx.OffenePostenAusgleiche.RemoveRange(zeile.AlsSollZeile);
@@ -75,6 +81,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             await ctx.SaveChangesAsync();
 
             return storno;
+        }
+
+        private async Task<HashSet<Buchungszeile>> NeutralisierteVerteilZeilenAsync(Buchungssatz satz)
+        {
+            var kontoIds = satz.Buchungszeilen.Select(z => z.Buchungskonto.BuchungskontoId).Distinct().ToList();
+            var istRechnung = await ctx.Umlagen
+                .AnyAsync(u => kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId));
+            if (!istRechnung) return [];
+
+            var verteilKontoIds = (await ctx.Vertraege
+                    .Where(v => kontoIds.Contains(v.NkBuchungskonto.BuchungskontoId))
+                    .Select(v => v.NkBuchungskonto.BuchungskontoId)
+                    .ToListAsync())
+                .Concat(await ctx.Wohnungen
+                    .Where(w => kontoIds.Contains(w.AufwandsKonto.BuchungskontoId))
+                    .Select(w => w.AufwandsKonto.BuchungskontoId)
+                    .ToListAsync())
+                .ToHashSet();
+
+            return satz.Buchungszeilen
+                .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId) && !NkVerteilung.IstAktiv(z))
+                .ToHashSet();
         }
     }
 }

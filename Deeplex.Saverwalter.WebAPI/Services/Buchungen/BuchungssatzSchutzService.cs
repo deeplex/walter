@@ -26,7 +26,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   Rückabwicklung des Abrechnungslaufs (ganze Gruppe) veränderbar.
     /// - Sätze, die in eine existierende Abrechnung eingeflossen sind
     ///   (NK-Vorauszahlungen/NK-Anteile des abgerechneten Jahres, Rechnungen
-    ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert.
+    ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert
+    ///   und nicht storniert ist.
     /// - Löschen ist nur für "freie" Sätze erlaubt: zusätzlich keine
     ///   OPOS-Verknüpfung mit einem anderen Satz und kein Storno(-Partner) — sonst
     ///   stornieren. Ausgleiche zwischen Zeilen desselben Satzes zählen nicht.
@@ -81,6 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             var vertragBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
                     r.Buchungssatz.Buchungsjahr == pruefJahr &&
+                    r.Buchungssatz.StornoNach == null &&
                     kontoIds.Contains(r.Vertrag.NkBuchungskonto.BuchungskontoId));
 
             // ... oder über das NK-Verrechnungskonto einer Umlage, deren Wohnungen
@@ -88,6 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             var umlageBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
                     r.Buchungssatz.Buchungsjahr == pruefJahr &&
+                    r.Buchungssatz.StornoNach == null &&
                     r.Vertrag.Wohnung.Umlagen.Any(u =>
                         kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)));
 

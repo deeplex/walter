@@ -233,8 +233,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
             if (resultat.Abgesendet)
                 return new ConflictObjectResult("Abgesendete Abrechnungen können nicht mehr geändert werden. Bitte zuerst stornieren.");
+            if (resultat.Buchungssatz.StornoNach != null)
+                return new ConflictObjectResult("Stornierte Abrechnungen bleiben als Beleg unverändert.");
 
-            var authRx = await Auth.AuthorizeAsync(user, resultat.Vertrag, Operations.Read);
+            var authRx = await Auth.AuthorizeAsync(user, resultat.Vertrag, Operations.Update);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();

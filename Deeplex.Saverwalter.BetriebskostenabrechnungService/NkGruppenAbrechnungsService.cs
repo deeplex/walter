@@ -506,8 +506,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToDictionary(kv => kv.Key, kv => kv.Value.Anteil.Values.Sum());
 
             // Buchungszeilen sind durch den Include bereits auf das Abrechnungsjahr gefiltert.
+            // Ein storniertes Resultat bleibt als Beleg bestehen, gilt aber nicht als gebucht.
             var existing = vertrag.Abrechnungsresultate
-                .FirstOrDefault(r => r.Buchungssatz.Buchungsjahr == jahr);
+                .FirstOrDefault(r => r.Buchungssatz.Buchungsjahr == jahr && r.Buchungssatz.StornoNach == null);
             // Glattstellungs-Saldo auf dem BkAbrechnungsKonto: Soll = Nachzahlung,
             // Haben = Guthaben. Leerer Satz (saldo 0) ergibt 0.
             var gebuchterSaldo = existing?.Buchungssatz.Buchungszeilen
