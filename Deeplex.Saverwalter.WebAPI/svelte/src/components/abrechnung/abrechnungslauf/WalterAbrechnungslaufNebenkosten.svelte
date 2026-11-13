@@ -28,12 +28,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     export let zeilen: NkZeileInfo[];
 
-    const nWF = zeilen.some((z) => z.schluessel === 'n. WF');
-    const nNF = zeilen.some((z) => z.schluessel === 'n. NF');
-    const nNE = zeilen.some((z) => z.schluessel === 'n. NE');
-    const nMEA = zeilen.some((z) => z.schluessel === 'n. MEA');
-    const nPs = zeilen.some((z) => z.schluessel === 'n. Pers.');
-    const nVb = zeilen.some((z) => z.schluessel === 'n. Verb.');
+    const nWF = zeilen.some((z) => z.schluesselTyp === 'NachWohnflaeche');
+    const nNF = zeilen.some((z) => z.schluesselTyp === 'NachNutzflaeche');
+    const nNE = zeilen.some((z) => z.schluesselTyp === 'NachNutzeinheit');
+    const nMEA = zeilen.some(
+        (z) => z.schluesselTyp === 'NachMiteigentumsanteil'
+    );
+    const nPs = zeilen.some((z) => z.schluesselTyp === 'NachPersonenzahl');
+    const nVb = zeilen.some((z) => z.schluesselTyp === 'NachVerbrauch');
 </script>
 
 <Accordion>

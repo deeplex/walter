@@ -41,7 +41,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             var verbindlichkeitsKonto = await EnsureVerbindlichkeitsKontoAsync(aussteller);
 
-            var buchungssatz = new Buchungssatz(datum, $"Erhaltungsaufwendung: {bezeichnung}");
+            // Die Art des Vorgangs ergibt sich aus dem Aufwandskonto; die Beschreibung ist nur die Bezeichnung.
+            var buchungssatz = new Buchungssatz(datum, bezeichnung);
             buchungssatz.Notiz = notiz;
             AddZeile(buchungssatz, SollHaben.Soll, betrag, wohnung.AufwandsKonto);
             AddZeile(buchungssatz, SollHaben.Haben, betrag, verbindlichkeitsKonto);

@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Text.Json.Serialization;
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 {
@@ -77,7 +79,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public int UmlageId { get; init; }
         public string Bezeichnung { get; init; } = "";
         public string Beschreibung { get; init; } = "";
+        /// <summary>Anzeigebezeichnung des Schlüssels (z. B. „n. WF“) — nur für Menschen.</summary>
         public string Schluessel { get; init; } = "";
+        /// <summary>Umlageschlüssel als Wert; danach richtet sich die Darstellung.</summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Umlageschluessel SchluesselTyp { get; init; }
         public int UmlagetypId { get; init; }
         public Guid? BuchungssatzId { get; init; }
         public DateOnly? Buchungsdatum { get; init; }

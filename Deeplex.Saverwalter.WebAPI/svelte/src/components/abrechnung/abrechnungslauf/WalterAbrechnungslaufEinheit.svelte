@@ -17,7 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type {
         AbrechnungseinheitInfo,
-        PersonenZeitanteilInfo
+        PersonenZeitanteilInfo,
+        SchluesselTyp
     } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufHeizkosten from './WalterAbrechnungslaufHeizkosten.svelte';
     import WalterDataWrapperQuickAdd from '../../elements/WalterDataWrapperQuickAdd.svelte';
@@ -86,10 +87,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     // Erste Zeile mit einem Anteil DIESES Vertrags nehmen — die erste Zeile des
     // Schlüssels kann eine fehlende Umlage ohne Anteile sein (→ fälschlich 0).
-    $: anteilFaktorFuerSchluessel = (schluessel: string): number => {
+    $: anteilFaktorFuerSchluessel = (schluessel: SchluesselTyp): number => {
         const zeile = einheit.nkZeilen.find(
             (z) =>
-                z.schluessel === schluessel &&
+                z.schluesselTyp === schluessel &&
                 z.anteile.some((a) => a.vertragId === vertragId)
         );
         return (
@@ -102,10 +103,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const formatAnzahl = (n: number) =>
         Number(n.toFixed(2)) % 1 === 0 ? String(Math.round(n)) : n.toFixed(2);
 
-    $: wfZeitanteil = anteilFaktorFuerSchluessel('n. WF');
-    $: nfZeitanteil = anteilFaktorFuerSchluessel('n. NF');
-    $: meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
-    $: neZeitanteil = anteilFaktorFuerSchluessel('n. NE');
+    $: wfZeitanteil = anteilFaktorFuerSchluessel('NachWohnflaeche');
+    $: nfZeitanteil = anteilFaktorFuerSchluessel('NachNutzflaeche');
+    $: meaZeitanteil = anteilFaktorFuerSchluessel('NachMiteigentumsanteil');
+    $: neZeitanteil = anteilFaktorFuerSchluessel('NachNutzeinheit');
 
     $: alleZeilen = einheit.nkZeilen;
     $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
@@ -118,6 +119,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         typ: string;
         typId: number;
         schluessel: string;
+        schluesselTyp: SchluesselTyp;
         gesamtBetrag: number;
         betragLetztesJahr: number;
         anteil: number;
@@ -137,6 +139,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     typ: z.bezeichnung,
                     typId: z.umlagetypId,
                     schluessel: z.schluessel,
+                    schluesselTyp: z.schluesselTyp,
                     gesamtBetrag: z.betrag,
                     betragLetztesJahr: z.betragLetztesJahr,
                     anteil: faktor,
@@ -159,14 +162,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: betragKalt = meineZeilen.reduce((s, r) => s + r.betrag, 0);
 
-    $: hasWF = meineZeilen.some((r) => r.schluessel === 'n. WF');
-    $: hasNF = meineZeilen.some((r) => r.schluessel === 'n. NF');
-    $: hasNE = meineZeilen.some((r) => r.schluessel === 'n. NE');
-    $: hasMEA = meineZeilen.some((r) => r.schluessel === 'n. MEA');
-    $: hasPs = meineZeilen.some((r) => r.schluessel === 'n. Pers.');
+    $: hasWF = meineZeilen.some((r) => r.schluesselTyp === 'NachWohnflaeche');
+    $: hasNF = meineZeilen.some((r) => r.schluesselTyp === 'NachNutzflaeche');
+    $: hasNE = meineZeilen.some((r) => r.schluesselTyp === 'NachNutzeinheit');
+    $: hasMEA = meineZeilen.some(
+        (r) => r.schluesselTyp === 'NachMiteigentumsanteil'
+    );
+    $: hasPs = meineZeilen.some((r) => r.schluesselTyp === 'NachPersonenzahl');
 
     $: verbrauchZeilen = kalteZeilen
-        .filter((z) => z.schluessel === 'n. Verb.')
+        .filter((z) => z.schluesselTyp === 'NachVerbrauch')
         .map((z) => {
             const anteil = z.anteile.find((a) => a.vertragId === vertragId);
             return {
@@ -179,13 +184,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             };
         });
 
-    const schluesselLabel: Record<string, string> = {
-        'n. WF': 'Wohnfläche',
-        'n. NF': 'Nutzfläche',
-        'n. NE': 'Nutzeinheiten',
-        'n. MEA': 'Miteigentumsanteile',
-        'n. Pers.': 'Personenzahl',
-        'n. Verb.': 'Verbrauch'
+    const schluesselTitel = (typ: SchluesselTyp) => schluesselLabel[typ];
+    const schluesselLabel: Record<SchluesselTyp, string> = {
+        NachWohnflaeche: 'Wohnfläche',
+        NachNutzflaeche: 'Nutzfläche',
+        NachNutzeinheit: 'Nutzeinheiten',
+        NachMiteigentumsanteil: 'Miteigentumsanteile',
+        NachPersonenzahl: 'Personenzahl',
+        NachVerbrauch: 'Verbrauch'
     };
 </script>
 
@@ -499,9 +505,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 </div>
             {/each}
         {:else if cell.key === 'schluessel'}
-            <span title={schluesselLabel[cell.value] ?? cell.value}
-                >{cell.value}</span
-            >
+            <span title={schluesselTitel(row.schluesselTyp)}>{cell.value}</span>
         {:else}
             {cell.value}
         {/if}

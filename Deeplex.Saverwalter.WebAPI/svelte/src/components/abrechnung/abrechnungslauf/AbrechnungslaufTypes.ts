@@ -47,11 +47,21 @@ export type P9DetailsInfo = {
     wwZaehler: ZaehlerVerbrauchInfo[];
 };
 
+/** Umlageschlüssel als Wert (Enum-Name); `schluessel` ist nur die Anzeigebezeichnung. */
+export type SchluesselTyp =
+    | 'NachWohnflaeche'
+    | 'NachNutzeinheit'
+    | 'NachPersonenzahl'
+    | 'NachVerbrauch'
+    | 'NachNutzflaeche'
+    | 'NachMiteigentumsanteil';
+
 export type NkZeileInfo = {
     umlageId: number;
     bezeichnung: string;
     beschreibung: string;
     schluessel: string;
+    schluesselTyp: SchluesselTyp;
     umlagetypId: number;
     buchungssatzId: string | null;
     buchungsdatum: string | null;
