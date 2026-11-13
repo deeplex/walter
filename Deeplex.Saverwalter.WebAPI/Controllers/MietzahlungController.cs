@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public decimal VerbleibenderBetrag { get; set; }
         }
 
-        /// <summary>Eintrag in der Zahlungsliste eines Vertrags.</summary>
+        /// <summary>Kaltmiete-Zahlung eines Vertrags (Miettabelle der Startseite).</summary>
         public class MietzahlungListEntry
         {
             public Guid Id { get; set; }
@@ -80,39 +80,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public decimal Grundmiete { get; set; }
             public DateOnly? GrundmieteSeit { get; set; }
             public List<GarageForderungsstatusEntry> Garagen { get; set; } = [];
-        }
-
-        /// <summary>
-        /// Listet alle Kaltmiete-Zahlungs-Buchungssätze eines Vertrags.
-        /// </summary>
-        [HttpGet("{vertragId}")]
-        public async Task<ActionResult<IEnumerable<MietzahlungListEntry>>> GetByVertrag(int vertragId)
-        {
-            var vertrag = await ctx.Vertraege.FindAsync(vertragId);
-            if (vertrag is null) return NotFound();
-
-            var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
-            if (!authRx.Succeeded) return Forbid();
-
-            var permissions = await GetPermissions(User, vertrag, auth);
-            var kontoId = vertrag.MietBuchungskonto.BuchungskontoId;
-
-            var saetze = await ctx.Buchungssaetze
-                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .Where(s => s.Buchungszeilen.Any(z =>
-                    z.SollHaben == SollHaben.Haben
-                    && z.Buchungskonto.BuchungskontoId == kontoId))
-                .ToListAsync();
-
-            var result = saetze.Select(s =>
-            {
-                var betrag = s.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == kontoId)
-                    .Sum(z => z.Betrag);
-                return new MietzahlungListEntry(s, betrag, permissions);
-            });
-
-            return Ok(result);
         }
 
         public class BkForderungInfo

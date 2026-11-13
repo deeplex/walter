@@ -99,14 +99,6 @@ export type AbrechnungseinheitInfo = {
     strompauschalen: StrompauschaleInfo[];
 };
 
-export type MietZeileInfo = {
-    buchungsdatum: string;
-    buchungsjahr: number;
-    beschreibung: string;
-    istSoll: boolean;
-    betrag: number;
-};
-
 export type PersonenZeitanteilInfo = {
     beginn: string;
     ende: string;
@@ -131,7 +123,6 @@ export type AbrechnungsresultatInfo = {
     mietSaldo: number;
     kaltmieteSoll: number;
     wohnflaeche: number;
-    mieten: MietZeileInfo[];
     personenZeitanteile: PersonenZeitanteilInfo[];
     gebuchterSaldo: number | null;
     abgesendet: boolean | null;

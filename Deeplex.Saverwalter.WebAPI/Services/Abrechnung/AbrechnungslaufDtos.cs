@@ -135,17 +135,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<StrompauschaleInfo> Strompauschalen { get; init; } = [];
     }
 
-    /// <summary>Miet-Buchungszeile (Soll oder Haben) auf dem MietBuchungskonto eines Vertrags.</summary>
-    public class MietZeileInfo
-    {
-        public DateOnly Buchungsdatum { get; init; }
-        /// <summary>Abrechnungs-/Buchungsjahr des Satzes (maßgeblich für die Zuordnung).</summary>
-        public int Buchungsjahr { get; init; }
-        public string Beschreibung { get; init; } = "";
-        public bool IstSoll { get; init; }
-        public decimal Betrag { get; init; }
-    }
-
     /// <summary>Personenzeitanteil-Intervall für die Darstellung im Abrechnungsresultat.</summary>
     public class PersonenZeitanteilInfo
     {
@@ -189,7 +178,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public decimal Wohnflaeche { get; init; }
         public decimal Nutzflaeche { get; init; }
         public int Nutzeinheiten { get; init; }
-        public List<MietZeileInfo> Mieten { get; init; } = [];
         public List<PersonenZeitanteilInfo> PersonenZeitanteile { get; init; } = [];
         /// <summary>
         /// Bereits gebuchter Abrechnungs-Saldo, oder null wenn noch nicht gebucht.

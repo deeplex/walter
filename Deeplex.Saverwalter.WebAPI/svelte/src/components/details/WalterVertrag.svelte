@@ -23,13 +23,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterMultiSelectKontakt,
         WalterNumberInput
     } from '$walter/components';
-    import WalterMietKorrektur from './WalterMietKorrektur.svelte';
-    import WalterVertragKaution from './WalterVertragKaution.svelte';
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
-        Accordion,
-        AccordionItem,
         Row,
         TextInput,
         InlineNotification
@@ -284,17 +280,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </svelte:fragment>
     </InlineNotification>
 {/if}
-{#if !isNew && entry.id}
-    <Row>
-        <WalterMietKorrektur vertragId={entry.id} {fetchImpl} />
-    </Row>
-{/if}
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>
-
-<Accordion style="margin-bottom: 1rem;">
-    <AccordionItem title="Kaution">
-        <WalterVertragKaution bind:entry {readonly} />
-    </AccordionItem>
-</Accordion>

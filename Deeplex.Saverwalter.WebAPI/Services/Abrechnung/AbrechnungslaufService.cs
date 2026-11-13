@@ -753,18 +753,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     var rechnungsbetrag = gruppe.Sum(a => a.Betrag);
                     var info = partei.VertragInfo;
 
-                    var mietZeilen = partei.Vertrag?.MietBuchungskonto.Buchungszeilen
-                        .OrderBy(z => z.Buchungssatz.Buchungsdatum)
-                        .Select(z => new MietZeileInfo
-                        {
-                            Buchungsdatum = z.Buchungssatz.Buchungsdatum,
-                            Buchungsjahr = z.Buchungssatz.Buchungsjahr,
-                            Beschreibung = z.Buchungssatz.Beschreibung,
-                            IstSoll = z.SollHaben == SollHaben.Soll,
-                            Betrag = z.Betrag,
-                        })
-                        .ToList() ?? [];
-
                     var kaltmieteSoll = partei.Vertrag?.MietBuchungskonto.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungszeilen.Any(g =>
                             g.SollHaben == SollHaben.Haben && g.Buchungskonto.Kontotyp == BuchungskontoTyp.Ertrag))
@@ -805,7 +793,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Wohnflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Wohnflaeche,
                         Nutzflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzflaeche,
                         Nutzeinheiten = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzeinheit,
-                        Mieten = mietZeilen,
                         PersonenZeitanteile = personenZeitanteile,
                         GebuchterSaldo = info?.GebuchterSaldo,
                         Abgesendet = info?.ExistingResultat?.Abgesendet,

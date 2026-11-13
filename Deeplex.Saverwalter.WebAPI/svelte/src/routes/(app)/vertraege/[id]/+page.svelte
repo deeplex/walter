@@ -28,8 +28,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterVertragVersionen,
         WalterLinkTile,
         WalterLinks,
+        WalterMietkonto,
+        WalterVertragKaution,
         WalterVertragsNkAnteile
     } from '$walter/components';
+    import { Tile } from 'carbon-components-svelte';
     import { getMietminderungEntry, getVertragversionEntry } from './utils';
     import {
         WalterFileWrapper,
@@ -83,6 +86,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:blockSave
         bind:commitVersionIfPending
     />
+
+    <WalterMietkonto vertragId={data.entry.id} fetchImpl={data.fetchImpl} />
+
+    <Tile style="margin-bottom: 1rem">
+        <h4 style="margin-bottom: 0.75rem">Kaution</h4>
+        <WalterVertragKaution
+            bind:entry={data.entry}
+            readonly={data.entry.permissions?.update === false}
+        />
+    </Tile>
 
     <WalterLinks>
         <WalterKontakte

@@ -164,6 +164,17 @@ Die Wohnungs-Detailseite bündelt alles zu einer Einheit:
 Die Vertrags-Detailseite zeigt:
 
 - **Stammdaten** — Vertragsdaten.
+- **Mietkonto** — was fällig war, was bezahlt wurde und was offen ist:
+  - Kaltmiete (und Garagenmiete) **je Monat**. Fällig ist die Miete laut Vertrag;
+    eine Zahlung zählt für den Monat, für den sie erfasst wurde, nicht für den Monat ihres
+    Zahlungsdatums. Monate in der Zukunft erscheinen erst, wenn dafür etwas gebucht ist.
+  - **NK-Vorauszahlungen je Jahr**, gezählt wie in der Abrechnung (einschließlich
+    Miet-Korrekturen).
+  - Aufgeklappt zeigt eine Zeile die einzelnen Zahlungen mit Link zur Transaktion.
+  - Darunter, falls vorhanden: **Guthaben** (Zahlungen ohne Monat) und **rückgängig gemachte
+    Zahlungen**.
+  - Weicht die gebuchte Kaltmiete vom Vertrag ab (z. B. rückwirkend erfasste
+    Mieterhöhung), erscheint oben ein Hinweis mit **Differenz buchen**.
 - **Kaution** — die gehaltene Kaution (Saldo des KautionsKontos) und die bisherigen Eingänge
   und Rückzahlungen. Über **Kaution erhalten** und **Kaution zurückzahlen** werden sie mit
   Datum und Betrag gebucht; eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
@@ -214,7 +225,8 @@ Der Abrechnungslauf erstellt die Betriebskostenabrechnung je **Abrechnungsgruppe
 
 1. **Jahr und Gruppe** wählen.
 2. **Vorschau** — rechnet ohne zu buchen und zeigt je Vertrag Kaltmiete, Nebenkosten,
-   Vorauszahlungen, Mietminderung und Saldo sowie Hinweise (Fehler/Warnungen).
+   Vorauszahlungen, Mietminderung und Saldo sowie Hinweise (Fehler/Warnungen). Darüber
+   steht das Mietkonto des Vertrags für das Abrechnungsjahr.
 3. **Buchen** — hält je Vertrag ein Abrechnungsresultat als Buchungssatz fest.
 4. **Drucken** — erzeugt PDF- oder Word-Dokumente (einzeln oder als ZIP für die Gruppe).
 5. Nach dem Versand das Resultat als **Abgesendet** markieren.

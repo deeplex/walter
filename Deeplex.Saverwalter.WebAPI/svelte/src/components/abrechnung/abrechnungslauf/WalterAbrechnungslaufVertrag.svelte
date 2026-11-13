@@ -23,8 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { hkvoKosten } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufEinheit from './WalterAbrechnungslaufEinheit.svelte';
     import WalterAbrechnungslaufResultat from './WalterAbrechnungslaufResultat.svelte';
-    import WalterMietOpos from '$walter/components/lists/WalterMietOpos.svelte';
-    import type { MietOposMonat } from '$walter/components/lists/WalterMietOpos.svelte';
+    import WalterMietkonto from '$walter/components/details/WalterMietkonto.svelte';
     import { convertEuro } from '$walter/services/utils';
     import {
         ClickableTile,
@@ -124,31 +123,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: warmeNk = nkNachEinheit
         .filter((e) => e.warm > 0)
         .map(({ bezeichnung, warm }) => ({ bezeichnung, betrag: warm }));
-
-    $: mietOposRows = (() => {
-        // Zuordnung über das BUCHUNGSJAHR des Satzes (nicht Buchungsdatum/Beschreibung):
-        // migrierte Zahlungen sind oft auf ein späteres Datum gebucht, gehören aber
-        // buchhalterisch ins Abrechnungsjahr. So werden bezahlte Mieten nicht mehr
-        // fälschlich als offen gezeigt.
-        const byJahr = new Map<number, { soll: number; haben: number }>();
-        for (const m of resultat.mieten ?? []) {
-            const cur = byJahr.get(m.buchungsjahr) ?? { soll: 0, haben: 0 };
-            if (m.istSoll) cur.soll += m.betrag;
-            else cur.haben += m.betrag;
-            byJahr.set(m.buchungsjahr, cur);
-        }
-        return [...byJahr.entries()]
-            .sort(([a], [b]) => a - b)
-            .map(
-                ([y, { soll, haben }]): MietOposMonat => ({
-                    jahr: y,
-                    monat: 0, // 0 = Jahres-Summe (kein einzelner Monat)
-                    soll,
-                    ausgeglichen: haben,
-                    offen: soll - haben
-                })
-            );
-    })();
 </script>
 
 <hr />
@@ -232,7 +206,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 
-<WalterMietOpos rows={mietOposRows} title="Mieten {jahr}" />
+<WalterMietkonto
+    vertragId={resultat.vertragId}
+    {fetchImpl}
+    {jahr}
+    title="Mietkonto {jahr}"
+/>
 
 {#each vertragsEinheiten as einheit}
     <Tile style="margin-bottom: 1rem; padding: 0;">

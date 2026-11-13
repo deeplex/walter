@@ -111,3 +111,4 @@ export {
 } from './WalterTransaktion';
 export * from './WalterValidation';
 export * from './WalterZahlungsStatus';
+export * from './WalterMietkonto';

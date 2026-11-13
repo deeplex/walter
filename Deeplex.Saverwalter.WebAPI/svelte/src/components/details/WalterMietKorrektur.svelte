@@ -32,6 +32,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_post
     } from '$walter/services/requests';
     import { addToast } from '$walter/store';
+    import { createEventDispatcher } from 'svelte';
+
+    /** `geaendert`: eine Korrektur wurde gebucht, gelöscht oder storniert. */
+    const dispatch = createEventDispatcher<{ geaendert: void }>();
 
     export let vertragId: number;
     export let fetchImpl: typeof fetch;
@@ -135,6 +139,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 addToast(toast, true, await response.json());
                 grund = '';
                 await refresh();
+                dispatch('geaendert');
             } else {
                 fehler = await response.text();
             }
@@ -148,8 +153,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         fehler = null;
         try {
             const resp = await walter_delete(`/api/buchungssaetze/${k.id}`);
-            if (resp.ok) await refresh();
-            else fehler = await resp.text();
+            if (resp.ok) {
+                await refresh();
+                dispatch('geaendert');
+            } else fehler = await resp.text();
         } finally {
             busy = false;
         }
@@ -164,8 +171,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 `/api/buchungssaetze/${stornoBuchung.id}/storno`,
                 { grund: stornoGrund }
             );
-            if (resp.ok) await refresh();
-            else fehler = await resp.text();
+            if (resp.ok) {
+                await refresh();
+                dispatch('geaendert');
+            } else fehler = await resp.text();
         } finally {
             stornoBuchung = null;
             stornoGrund = '';

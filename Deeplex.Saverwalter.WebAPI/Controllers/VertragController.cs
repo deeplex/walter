@@ -166,6 +166,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly IAuthorizationService _auth;
         private readonly MietKorrekturService _mietKorrekturService;
         private readonly TransaktionBuchungsService _buchungsService;
+        private readonly MietkontoService _mietkontoService;
         protected override VertragDbService DbService { get; }
 
         public VertragController(
@@ -175,6 +176,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             IAuthorizationService auth,
             MietKorrekturService mietKorrekturService,
             TransaktionBuchungsService buchungsService,
+            MietkontoService mietkontoService,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
@@ -182,6 +184,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _auth = auth;
             _mietKorrekturService = mietKorrekturService;
             _buchungsService = buchungsService;
+            _mietkontoService = mietkontoService;
             _logger = logger;
         }
 
@@ -270,21 +273,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result);
         }
 
-        public class MietOposMonat
-        {
-            public int Jahr { get; set; }
-            public int Monat { get; set; }
-            public decimal Soll { get; set; }
-            public decimal Ausgeglichen { get; set; }
-            public decimal Offen => Soll - Ausgeglichen;
-        }
-
         /// <summary>
-        /// Gibt den Miet-OPOS (offene Posten Kaltmiete) pro Monat zurück.
-        /// Soll = gebuchte Mietforderung, Ausgeglichen = per OffenerPostenAusgleich beglichener Anteil.
+        /// Mietkonto des Vertrags: Kaltmiete und Garagen je Monat, NK-Vorauszahlungen je Jahr —
+        /// siehe <see cref="MietkontoService"/>.
         /// </summary>
-        [HttpGet("{id}/miet-opos")]
-        public async Task<ActionResult<IEnumerable<MietOposMonat>>> GetMietOpos(int id)
+        [HttpGet("{id}/mietkonto")]
+        public async Task<ActionResult<MietkontoService.Mietkonto>> GetMietkonto(int id)
         {
             var vertrag = await _ctx.Vertraege.FindAsync(id);
             if (vertrag is null) return NotFound();
@@ -292,29 +286,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
-
-            var sollZeilen = await _ctx.Buchungszeilen
-                .Where(z =>
-                    z.Buchungskonto.BuchungskontoId == mietKontoId &&
-                    z.SollHaben == SollHaben.Soll)
-                .Include(z => z.Buchungssatz)
-                .Include(z => z.AlsSollZeile)
-                    .ThenInclude(a => a.HabenZeile)
-                .ToListAsync();
-
-            var result = sollZeilen
-                .GroupBy(z => new { z.Buchungssatz.Buchungsjahr, z.Buchungssatz.Buchungsdatum.Month })
-                .Select(g => new MietOposMonat
-                {
-                    Jahr = g.Key.Buchungsjahr,
-                    Monat = g.Key.Month,
-                    Soll = g.Sum(z => z.Betrag),
-                    Ausgeglichen = g.Sum(z => z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag))
-                })
-                .OrderBy(m => m.Jahr).ThenBy(m => m.Monat);
-
-            return Ok(result);
+            return Ok(await _mietkontoService.ErmittleAsync(id, DateOnly.FromDateTime(DateTime.Today)));
         }
 
         public class MietKorrekturMonatEntry
