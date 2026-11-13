@@ -23,7 +23,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import {
         WalterBetriebskostenrechnungEntry,
-        validateBetriebskostenrechnung
+        validateBetriebskostenrechnung,
+        ZAHLUNGS_STATUS
     } from '$walter/lib';
     import { convertEuro } from '$walter/services/utils';
     import { navigation } from '$walter/services/navigation';
@@ -53,8 +54,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return {
             ...r,
             bezahltStatus: r.isBezahlt
-                ? { text: 'Bezahlt', tag: 'green' }
-                : { text: 'Offen', tag: 'red' },
+                ? ZAHLUNGS_STATUS.bezahlt
+                : ZAHLUNGS_STATUS.offen,
             nkStatus:
                 nkOffen <= 0.005
                     ? { text: 'Verteilt', tag: 'green' }

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterGrid,
         WalterWohnungen,
         WalterVertraege,
@@ -159,7 +159,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Umlagen"
             rows={data.entry.umlagen}
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         <WalterLinkTile
             bind:fileWrapper
@@ -170,4 +169,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         <!-- TODO besitzer id is guid -->
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

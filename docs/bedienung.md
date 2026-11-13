@@ -63,6 +63,38 @@ Die Seitenleiste gliedert sich in drei Bereiche:
 
 ---
 
+## Begriffe
+
+Die Detailseiten zeigen zuerst, was fachlich wichtig ist (fällig, bezahlt, offen). Wie das
+gebucht ist, steht im eingeklappten Abschnitt **Buchhaltung** ganz unten auf jeder
+Detailseite (Kontakt, Wohnung, Vertrag, Garage, Garagenvertrag, Umlage) und auf den Seiten
+*Buchungskonten* und *Buchungssätze*. Die Begriffe entsprechen sich so:
+
+| Auf den Detailseiten | In der Buchhaltung |
+|----------------------|--------------------|
+| Fällig | Sollstellung |
+| Bezahlt | Ausgeglichen (Offener-Posten-Ausgleich) |
+| Offen | Offener Posten |
+| Guthaben | Haben-Saldo auf einem Personenkonto |
+| Zahlung | Transaktion mit ihren Buchungssätzen |
+| Rückgängig machen | Löschen bzw. Stornobuchung |
+| Rückgängig gemacht | Storniert |
+| Mietkonto | Miet-, NK-Vorauszahlungs- und Garagenkonten des Vertrags |
+| Kaution | Buchungen auf dem Kautionskonto |
+| Nachzahlung / Erstattung | Saldo des Abrechnungskontos |
+
+Der Zahlungsstatus hat überall dieselben Farben:
+
+| Status | Farbe |
+|--------|-------|
+| Offen | rot |
+| Teilweise bezahlt | lila |
+| Bezahlt | grün |
+| Guthaben | blau |
+| Rückgängig gemacht | grau |
+
+---
+
 ## Startseite
 
 Die Startseite ist die tägliche Aufgabenliste für ein gewähltes Jahr. Sie zeigt in
@@ -121,8 +153,8 @@ Die Wohnungs-Detailseite bündelt alles zu einer Einheit:
 - **Zähler** — die Zähler der Wohnung.
 - **Verträge** — die Mietverhältnisse der Wohnung.
 - **Umlagen** — die zugeordneten Betriebskostenpositionen.
-- **Konten** — die Buchungskonten der Wohnung mit ihren Buchungen (u. a. Miet­ertrag und
-  Aufwand wie Erhaltungsaufwendungen und Leerstandskosten).
+- **Buchhaltung** (eingeklappt, ganz unten) — die Buchungskonten der Wohnung mit ihren
+  Buchungen (u. a. Miet­ertrag und Aufwand wie Erhaltungsaufwendungen und Leerstandskosten).
 - **Dateien** — an die Wohnung geheftete Belege.
 
 ---
@@ -143,8 +175,9 @@ Die Vertrags-Detailseite zeigt:
 - **Garagenverträge** — dem Vertrag zugeordnete Stellplätze.
 - **NK-Anteile** — direkte Nebenkosten-Anteile des Vertrags.
 - **Abrechnungsresultate** — die gebuchten Jahresabrechnungen.
-- **Konten** — die Buchungskonten des Vertrags (Miete, NK-Vorauszahlung, Abrechnung,
-  Zahlung, Mietminderung) mit ihren Buchungen und Offenen Posten.
+- **Buchhaltung** (eingeklappt, ganz unten) — die Buchungskonten des Vertrags (Miete,
+  NK-Vorauszahlung, Abrechnung, Zahlung, Mietminderung, Kaution) mit ihren Buchungen und
+  Offenen Posten.
 - **Dateien** — an den Vertrag geheftete Belege.
 
 Neue Verträge werden meist aus der Wohnung heraus angelegt, damit die Wohnung bereits

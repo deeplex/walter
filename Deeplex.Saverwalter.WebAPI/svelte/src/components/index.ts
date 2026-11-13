@@ -93,6 +93,7 @@ export { default as WalterAccounts } from './lists/WalterAccounts.svelte';
 export { default as WalterAdressen } from './lists/WalterAdressen.svelte';
 export { default as WalterBankkontos } from './lists/WalterBankkontos.svelte';
 export { default as WalterBuchungskonten } from './lists/WalterBuchungskonten.svelte';
+export { default as WalterBuchhaltungAbschnitt } from './details/WalterBuchhaltungAbschnitt.svelte';
 export { default as WalterBuchungssaetze } from './lists/WalterBuchungssaetze.svelte';
 export { default as WalterUmlagen } from './lists/WalterUmlagen.svelte';
 export { default as WalterHKVOVersionen } from './lists/WalterHKVOVersionen.svelte';

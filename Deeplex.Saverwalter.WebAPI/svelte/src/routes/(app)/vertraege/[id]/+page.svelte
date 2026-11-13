@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterAbrechnungsresultate,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterGarageVertraege,
         WalterKontakte,
         WalterMietminderungen,
@@ -118,8 +118,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.abrechnungsresultate}
         />
 
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
-
         {#if data.entry.ansprechpartner?.id}
             <WalterLinkTile
                 bind:fileWrapper
@@ -135,4 +133,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

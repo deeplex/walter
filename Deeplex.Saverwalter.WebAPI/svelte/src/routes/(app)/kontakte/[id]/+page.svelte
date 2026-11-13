@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterGrid,
         WalterBankkontos,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterKontaktMitgliedschaft,
         WalterWohnungen,
         WalterVertraege,
@@ -109,10 +109,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.bankkontos}
         />
 
-        {#if data.entry.konten.length > 0}
-            <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
-        {/if}
-
         <WalterTransaktionen
             fetchImpl={data.fetchImpl}
             title="Transaktionen"
@@ -129,4 +125,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         {/if}
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

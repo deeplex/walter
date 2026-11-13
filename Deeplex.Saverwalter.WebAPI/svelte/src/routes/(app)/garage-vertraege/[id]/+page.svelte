@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterGarageVertrag,
         WalterGarageVertragVersionen,
         WalterGrid,
@@ -73,7 +73,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         {#if data.entry.garage?.id}
             <WalterLinkTile
@@ -93,4 +92,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         {/if}
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

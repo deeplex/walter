@@ -40,7 +40,7 @@ export type WalterKontoMonatsSumme = {
 
 export type WalterKontoStatusTag = {
     text: string;
-    tag: 'green' | 'red' | 'teal';
+    tag: 'green' | 'red' | 'blue';
 };
 
 /**
@@ -77,7 +77,7 @@ export function kontoStatusTag(
     if (saldo > 0) {
         return { text: 'Offen', tag: 'red' };
     }
-    return { text: 'Guthaben', tag: 'teal' };
+    return { text: 'Guthaben', tag: 'blue' };
 }
 
 export function kontoVerknuepfungHref(v: WalterKontoVerknuepfung): string {

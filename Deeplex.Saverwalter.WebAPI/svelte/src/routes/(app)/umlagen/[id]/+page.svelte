@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterBetriebskostenrechnungen,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterHeaderDetail,
         WalterGrid,
         WalterWohnungen,
@@ -145,7 +145,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             umlageId={data.entry.id}
             title="Vertragsanteile"
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if `${data.entry?.schluessel?.id}` === '3'}
             <WalterZaehlerList
@@ -173,4 +172,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </Row>
     {/if}
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

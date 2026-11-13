@@ -110,3 +110,4 @@ export {
     emptyTransaktionsInput
 } from './WalterTransaktion';
 export * from './WalterValidation';
+export * from './WalterZahlungsStatus';
