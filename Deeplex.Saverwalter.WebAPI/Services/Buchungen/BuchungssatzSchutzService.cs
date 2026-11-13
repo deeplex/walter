@@ -110,18 +110,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         }
 
         /// <summary>
-        /// Entfernt einen Satz samt der Ausgleiche zwischen seinen eigenen Zeilen. Der
-        /// Aufrufer prüft vorher <see cref="BuchungssatzSchutz.KannLoeschen"/>.
+        /// Nicht stornierte Abrechnungsresultate, in die der Satz eingeflossen ist
+        /// (dieselbe Regel wie <see cref="BuchungssatzSchutz.AbrechnungBetroffen"/>) oder
+        /// deren Abrechnungssatz er selbst ist.
         /// </summary>
-        public void Entfernen(Buchungssatz satz)
+        public async Task<List<Abrechnungsresultat>> BetroffeneResultateAsync(Buchungssatz satz)
         {
-            var zeilen = satz.Buchungszeilen.ToHashSet();
-            var interne = zeilen
-                .SelectMany(z => z.AlsSollZeile)
-                .Where(a => zeilen.Contains(a.HabenZeile))
+            var kontoIds = satz.Buchungszeilen
+                .Select(z => z.Buchungskonto.BuchungskontoId)
+                .Distinct()
                 .ToList();
-            ctx.OffenePostenAusgleiche.RemoveRange(interne);
-            ctx.Buchungssaetze.Remove(satz);
+            return await ctx.Abrechnungsresultate
+                .Include(r => r.Vertrag).ThenInclude(v => v.Wohnung)
+                .Include(r => r.Buchungssatz)
+                .Where(r => r.Buchungssatz.StornoNach == null)
+                .Where(r => r.Buchungssatz.BuchungssatzId == satz.BuchungssatzId
+                    || (r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr
+                        && (kontoIds.Contains(r.Vertrag.NkBuchungskonto.BuchungskontoId)
+                            || r.Vertrag.Wohnung.Umlagen.Any(u =>
+                                kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)))))
+                .ToListAsync();
         }
     }
 }

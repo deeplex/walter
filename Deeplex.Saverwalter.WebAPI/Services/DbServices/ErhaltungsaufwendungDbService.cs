@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         SaverwalterContext ctx,
         IAuthorizationService auth,
         ErhaltungsaufwendungBuchungsService buchungsService,
-        BuchungssatzSchutzService schutzService)
+        RueckgaengigService rueckgaengigService)
     {
         private async Task<(Dictionary<int, Wohnung> AufwandsMap, Dictionary<int, Kontakt> VerbindlichkeitsMap)> BuildMapsAsync()
         {
@@ -204,11 +204,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             var authRx = await auth.AuthorizeAsync(user, wohnung, [Operations.Delete]);
             if (!authRx.Succeeded) return new ForbidResult();
 
-            var schutz = await schutzService.PruefeAsync(satz);
-            if (!schutz.KannLoeschen) return new ConflictObjectResult(schutz.Sperrgrund);
-
-            schutzService.Entfernen(satz);
-            await ctx.SaveChangesAsync();
+            try
+            {
+                await rueckgaengigService.LoeschenAsync([satz]);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ConflictObjectResult(ex.Message);
+            }
             return new OkResult();
         }
 

@@ -29,16 +29,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
     public class TransaktionDbService : WalterDbServiceBase<TransaktionEntry, Guid, Transaktion>
     {
         private readonly BuchungssatzSchutzService _schutzService;
-        private readonly StornoBuchungsService _stornoService;
+        private readonly RueckgaengigService _rueckgaengigService;
 
         public TransaktionDbService(
             SaverwalterContext ctx,
             IAuthorizationService authorizationService,
             BuchungssatzSchutzService schutzService,
-            StornoBuchungsService stornoService) : base(ctx, authorizationService)
+            RueckgaengigService rueckgaengigService) : base(ctx, authorizationService)
         {
             _schutzService = schutzService;
-            _stornoService = stornoService;
+            _rueckgaengigService = rueckgaengigService;
         }
 
         public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
@@ -113,17 +113,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     return new NotFoundResult();
                 }
 
-                foreach (var satz in transaktion.Buchungssaetze)
+                try
                 {
-                    var schutz = await _schutzService.PruefeAsync(satz);
-                    if (!schutz.KannLoeschen)
-                    {
-                        return new ConflictObjectResult(
-                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
-                    }
+                    await _rueckgaengigService.LoeschenAsync(transaktion.Buchungssaetze.ToList());
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return new ConflictObjectResult(ex.Message);
                 }
 
-                Ctx.Buchungssaetze.RemoveRange(transaktion.Buchungssaetze);
                 Ctx.Transaktionen.Remove(transaktion);
                 await Ctx.SaveChangesAsync();
 
@@ -157,22 +155,78 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     return new ConflictObjectResult("Transaktion hat keine Buchungssätze zum Stornieren.");
                 }
 
-                foreach (var satz in transaktion.Buchungssaetze)
+                try
                 {
-                    var schutz = await _schutzService.PruefeAsync(satz);
-                    if (!schutz.KannStornieren)
-                    {
-                        return new ConflictObjectResult(
-                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
-                    }
+                    await _rueckgaengigService.StornierenAsync(transaktion.Buchungssaetze.ToList(), grund);
                 }
-
-                foreach (var satz in transaktion.Buchungssaetze.ToList())
+                catch (InvalidOperationException ex)
                 {
-                    await _stornoService.StornierenAsync(satz.BuchungssatzId, grund);
+                    return new ConflictObjectResult(ex.Message);
                 }
 
                 return new OkResult();
+            });
+        }
+
+        /// <summary>
+        /// Was „Rückgängig“ für die Transaktion bedeuten würde — siehe <see cref="RueckgaengigService"/>.
+        /// </summary>
+        public async Task<ActionResult> RueckgaengigPruefen(ClaimsPrincipal user, Guid id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (_) =>
+            {
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null) return new NotFoundResult();
+                if (transaktion.Buchungssaetze.Count == 0)
+                    return new OkObjectResult(new RueckgaengigService.RueckgaengigPlan { Art = RueckgaengigService.RueckgaengigArt.Loeschen });
+                return new OkObjectResult(await _rueckgaengigService.PruefeAsync(transaktion.Buchungssaetze));
+            });
+        }
+
+        /// <summary>
+        /// Macht die Transaktion rückgängig: löscht sie samt Buchungssätzen, wenn nichts daran
+        /// hängt, sonst Storno mit Grund. Betroffene Abrechnungen werden nach Bestätigung mit
+        /// zurückgenommen; dafür ist Lösch-Recht auf allen Wohnungen der Gruppe nötig.
+        /// </summary>
+        public async Task<ActionResult> Rueckgaengig(
+            ClaimsPrincipal user, Guid id, RueckgaengigService.RueckgaengigRequest request)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (_) =>
+            {
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null) return new NotFoundResult();
+
+                if (transaktion.Buchungssaetze.Count == 0)
+                {
+                    Ctx.Transaktionen.Remove(transaktion);
+                    await Ctx.SaveChangesAsync();
+                    return new OkObjectResult(new RueckgaengigService.RueckgaengigPlan { Art = RueckgaengigService.RueckgaengigArt.Loeschen });
+                }
+
+                var plan = await _rueckgaengigService.PruefeAsync(transaktion.Buchungssaetze);
+                var wohnungIds = plan.Abrechnungen.SelectMany(a => a.WohnungIds).Distinct().ToList();
+                if (wohnungIds.Count > 0
+                    && !await CanAccessAllWohnungen(Auth, Ctx, user, wohnungIds, Operations.Delete))
+                {
+                    return new ForbidResult();
+                }
+
+                try
+                {
+                    plan = await _rueckgaengigService.RueckgaengigAsync(
+                        transaktion.Buchungssaetze, request.Grund, request.AbrechnungenBestaetigt);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return new ConflictObjectResult(ex.Message);
+                }
+
+                if (plan.Art == RueckgaengigService.RueckgaengigArt.Loeschen)
+                {
+                    Ctx.Transaktionen.Remove(transaktion);
+                    await Ctx.SaveChangesAsync();
+                }
+                return new OkObjectResult(plan);
             });
         }
 

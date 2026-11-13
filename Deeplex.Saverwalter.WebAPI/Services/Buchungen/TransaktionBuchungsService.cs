@@ -122,9 +122,99 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public List<AbrechnungsAusgleichInput> AbrechnungsAusgleiche { get; set; } = [];
         }
 
+        // ── Vorschau ─────────────────────────────────────────────────────────────
+
+        public class VorschauZeile
+        {
+            public string Kontonummer { get; init; } = string.Empty;
+            public string Kontobezeichnung { get; init; } = string.Empty;
+            [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+            public SollHaben SollHaben { get; init; }
+            public decimal Betrag { get; init; }
+        }
+
+        public class VorschauSatz
+        {
+            public DateOnly Buchungsdatum { get; init; }
+            public int Buchungsjahr { get; init; }
+            public string Beschreibung { get; init; } = string.Empty;
+            /// <summary>Satz gehört zur Transaktion (Zahlung); sonst entsteht er mit ihr (z. B. Sollstellung, Rechnung).</summary>
+            public bool IstZahlung { get; init; }
+            public List<VorschauZeile> Zeilen { get; init; } = [];
+        }
+
+        public class TransaktionsVorschau
+        {
+            public decimal Betrag { get; init; }
+            public string Verwendungszweck { get; init; } = string.Empty;
+            public List<VorschauSatz> Saetze { get; init; } = [];
+            /// <summary>Anzahl der Ausgleiche (Zahlung ↔ Forderung), die mit der Buchung entstehen.</summary>
+            public int Ausgleiche { get; init; }
+        }
+
+        /// <summary>
+        /// Zeigt, was <see cref="BucheAsync"/> buchen würde, ohne zu speichern: dieselben
+        /// Prüfungen, Konten und Beträge, aber keine Schreibzugriffe (auch keine Buchungsnummer).
+        /// Verwirft danach alle Änderungen des Kontexts — darf daher nur in einem Kontext ohne
+        /// ausstehende Änderungen aufgerufen werden.
+        /// </summary>
+        public async Task<TransaktionsVorschau> VorschauAsync(TransaktionsInput input)
+        {
+            if (_ctx.ChangeTracker.HasChanges())
+                throw new InvalidOperationException("Die Vorschau braucht einen Kontext ohne ausstehende Änderungen.");
+
+            try
+            {
+                var transaktion = await BaueAsync(input);
+                var saetze = _ctx.ChangeTracker.Entries<Buchungssatz>()
+                    .Where(e => e.State == EntityState.Added)
+                    .Select(e => e.Entity)
+                    .OrderBy(s => s.Transaktion == null ? 0 : 1)
+                    .ThenBy(s => s.Buchungsdatum)
+                    .ToList();
+
+                return new TransaktionsVorschau
+                {
+                    Betrag = transaktion.Betrag,
+                    Verwendungszweck = transaktion.Verwendungszweck,
+                    Ausgleiche = _ctx.ChangeTracker.Entries<OffenerPostenAusgleich>()
+                        .Count(e => e.State == EntityState.Added),
+                    Saetze = saetze.Select(s => new VorschauSatz
+                    {
+                        Buchungsdatum = s.Buchungsdatum,
+                        Buchungsjahr = s.Buchungsjahr,
+                        Beschreibung = s.Beschreibung,
+                        IstZahlung = s.Transaktion != null,
+                        Zeilen = s.Buchungszeilen.Select(z => new VorschauZeile
+                        {
+                            Kontonummer = z.Buchungskonto.Kontonummer,
+                            Kontobezeichnung = z.Buchungskonto.Bezeichnung,
+                            SollHaben = z.SollHaben,
+                            Betrag = z.Betrag,
+                        }).ToList(),
+                    }).ToList(),
+                };
+            }
+            finally
+            {
+                _ctx.ChangeTracker.Clear();
+            }
+        }
+
         // ── Hauptmethode ─────────────────────────────────────────────────────────
 
         public async Task<Transaktion> BucheAsync(TransaktionsInput input)
+        {
+            var transaktion = await BaueAsync(input);
+            await _ctx.SaveChangesAsync();
+            return transaktion;
+        }
+
+        /// <summary>
+        /// Baut Transaktion, Buchungssätze und Ausgleiche im Kontext auf, ohne zu speichern.
+        /// Gemeinsame Grundlage von <see cref="BucheAsync"/> und <see cref="VorschauAsync"/>.
+        /// </summary>
+        private async Task<Transaktion> BaueAsync(TransaktionsInput input)
         {
             var totalBetrag =
                 input.Mieten.Sum(m => m.Kaltmiete + m.NkVorauszahlung + m.Garagen.Sum(g => g.Betrag)) +
@@ -213,7 +303,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 _ctx.Buchungssaetze.Add(satz);
             }
 
-            await _ctx.SaveChangesAsync();
             return transaktion;
         }
 
@@ -339,10 +428,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     $"GarageVertrag {gv.GarageVertragId} endete am {gv.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
 
             var vorhandene = gv.MietBuchungskonto.Buchungszeilen
-                .FirstOrDefault(z =>
-                    z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                .FirstOrDefault(z => IstSollstellung(z, monat));
 
             if (vorhandene != null) return vorhandene;
 
@@ -623,11 +709,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 throw new InvalidOperationException(
                     $"Vertrag {vertrag.VertragId} endete am {vertrag.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
 
+            // Sollstellung des Monats: Soll auf dem Mietkonto ohne Transaktion, kein Storno-Paar
+            // und keine Miet-Korrektur (die bebucht auch das NK-Konto und trägt ihr Buchungsdatum).
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
             var vorhandene = vertrag.MietBuchungskonto.Buchungszeilen
                 .FirstOrDefault(z =>
-                    z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                    IstSollstellung(z, monat)
+                    && !z.Buchungssatz.Buchungszeilen.Any(g => g.Buchungskonto.BuchungskontoId == nkKontoId));
 
             if (vorhandene != null) return vorhandene;
 
@@ -637,6 +725,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx.Buchungssaetze.Add(satz);
             return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
         }
+
+        private static bool IstSollstellung(Buchungszeile z, DateOnly monat) =>
+            z.SollHaben == SollHaben.Soll
+            && z.Buchungssatz.Transaktion == null
+            && z.Buchungssatz.StornoVon == null
+            && z.Buchungssatz.StornoNach == null
+            && z.Buchungssatz.Buchungsdatum.Year == monat.Year
+            && z.Buchungssatz.Buchungsdatum.Month == monat.Month;
 
         private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 

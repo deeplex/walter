@@ -134,6 +134,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             => DbService.Storno(User!, id, request.Grund);
 
         /// <summary>
+        /// Was „Rückgängig“ bewirken würde: löschen, stornieren oder gesperrt (mit Grund),
+        /// dazu die Abrechnungen, die mit zurückgenommen würden.
+        /// </summary>
+        [HttpGet("{id}/rueckgaengig")]
+        public Task<ActionResult> RueckgaengigPruefen(Guid id)
+            => DbService.RueckgaengigPruefen(User!, id);
+
+        /// <summary>Macht die Transaktion rückgängig — siehe <see cref="RueckgaengigService"/>.</summary>
+        [HttpPost("{id}/rueckgaengig")]
+        public Task<ActionResult> Rueckgaengig(
+            Guid id, [FromBody] RueckgaengigService.RueckgaengigRequest request)
+            => DbService.Rueckgaengig(User!, id, request);
+
+        /// <summary>
         /// Erstellt eine Transaktion mit Buchungssätzen aus typisierten Positionen.
         /// Die Konten werden anhand des Positionstyps und der referenzierten Entitäten
         /// (z.B. Vertrag) automatisch aufgelöst.
@@ -141,6 +155,58 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpPost("buchen")]
         public async Task<ActionResult<TransaktionEntry>> Buchen(
             [FromBody] TransaktionBuchungsService.TransaktionsInput input)
+        {
+            if (await PruefeBerechtigungAsync(input) is ActionResult verboten) return verboten;
+
+            var nkAnteile = input.NkAnteilEingaenge.ToList();
+            input.NkAnteilEingaenge.Clear();
+
+            try
+            {
+                TransaktionEntry? result = null;
+                if (input.Betrag > 0)
+                {
+                    var transaktion = await _buchungsService.BucheAsync(input);
+                    var permissions = await GetPermissions(User!, transaktion, _auth);
+                    result = new TransaktionEntry(transaktion, permissions);
+                }
+
+                foreach (var nk in nkAnteile)
+                    await _nkAnteilService.BucheVertragsNkAnteilAsync(
+                        nk.VertragId, nk.UmlageId, nk.Betrag, nk.BetreffendesJahr,
+                        input.Zahlungsdatum, nk.Notiz);
+
+                if (result is not null)
+                    return Ok(result);
+
+                return nkAnteile.Count > 0
+                    ? Ok(new { message = $"{nkAnteile.Count} NK-Anteil(e) gebucht." })
+                    : BadRequest("Keine Positionen vorhanden.");
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
+
+        /// <summary>
+        /// Zeigt, was <see cref="Buchen"/> für die Zahlung buchen würde, ohne etwas zu speichern
+        /// (gleiche Prüfungen, Konten und Beträge). NK-Anteile ohne Zahlung sind nicht enthalten.
+        /// </summary>
+        [HttpPost("buchen/vorschau")]
+        public async Task<ActionResult<TransaktionBuchungsService.TransaktionsVorschau>> BuchenVorschau(
+            [FromBody] TransaktionBuchungsService.TransaktionsInput input)
+        {
+            if (await PruefeBerechtigungAsync(input) is ActionResult verboten) return verboten;
+
+            try
+            {
+                return Ok(await _buchungsService.VorschauAsync(input));
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
+
+        /// <summary>Darf der Nutzer alle Positionen der Eingabe buchen?</summary>
+        private async Task<ActionResult?> PruefeBerechtigungAsync(TransaktionBuchungsService.TransaktionsInput input)
         {
             foreach (var miete in input.Mieten)
             {
@@ -177,33 +243,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 if (!authRx.Succeeded) return Forbid();
             }
 
-            var nkAnteile = input.NkAnteilEingaenge.ToList();
-            input.NkAnteilEingaenge.Clear();
-
-            try
-            {
-                TransaktionEntry? result = null;
-                if (input.Betrag > 0)
-                {
-                    var transaktion = await _buchungsService.BucheAsync(input);
-                    var permissions = await GetPermissions(User!, transaktion, _auth);
-                    result = new TransaktionEntry(transaktion, permissions);
-                }
-
-                foreach (var nk in nkAnteile)
-                    await _nkAnteilService.BucheVertragsNkAnteilAsync(
-                        nk.VertragId, nk.UmlageId, nk.Betrag, nk.BetreffendesJahr,
-                        input.Zahlungsdatum, nk.Notiz);
-
-                if (result is not null)
-                    return Ok(result);
-
-                return nkAnteile.Count > 0
-                    ? Ok(new { message = $"{nkAnteile.Count} NK-Anteil(e) gebucht." })
-                    : BadRequest("Keine Positionen vorhanden.");
-            }
-            catch (ArgumentException ex) { return BadRequest(ex.Message); }
-            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+            return null;
         }
     }
 }

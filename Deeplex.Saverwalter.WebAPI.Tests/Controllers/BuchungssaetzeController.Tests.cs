@@ -51,8 +51,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var controller = new BuchungssaetzeController(
                 A.Fake<ILogger<BuchungssaetzeController>>(),
                 new BuchungssatzDbService(ctx, auth),
-                new StornoBuchungsService(ctx),
                 new BuchungssatzSchutzService(ctx),
+                TestServices.Rueckgaengig(ctx),
+                auth,
                 ctx,
                 A.Fake<HttpClient>())
             {
@@ -371,6 +372,30 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             (await controller.Put(satz.BuchungssatzId, JahrPatch(satz, 2025))).Result
                 .Should().BeOfType<ConflictObjectResult>();
             satz.Buchungsjahr.Should().Be(2026);
+        }
+
+        [Fact]
+        public async Task Rueckgaengig_mit_abrechnung_verlangt_bestaetigung()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+            var zahlung = AddNkZahlung(ctx, vertrag, 2025);
+            AddAbrechnung(ctx, vertrag, 2025);
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            var plan = (await controller.RueckgaengigPruefen(zahlung.BuchungssatzId)).Value!;
+            plan.Abrechnungen.Should().ContainSingle(a => a.Jahr == 2025);
+
+            (await controller.Rueckgaengig(zahlung.BuchungssatzId, new RueckgaengigService.RueckgaengigRequest()))
+                .Result.Should().BeOfType<ConflictObjectResult>();
+            ctx.Abrechnungsresultate.Should().ContainSingle();
+
+            (await controller.Rueckgaengig(zahlung.BuchungssatzId,
+                new RueckgaengigService.RueckgaengigRequest { AbrechnungenBestaetigt = true }))
+                .Value!.Art.Should().Be(RueckgaengigService.RueckgaengigArt.Loeschen);
+            ctx.Abrechnungsresultate.Should().BeEmpty();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == zahlung.BuchungssatzId).Should().BeFalse();
         }
 
         [Fact]

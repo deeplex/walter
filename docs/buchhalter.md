@@ -302,11 +302,36 @@ Was dabei mit den Büchern passiert:
 - Wird nach dem Storno eine Rechnung des Jahres selbst storniert, kehrt der Storno nur die
   Rechnung um; ihre Verteilung ist durch die Gegenbuchung bereits aufgehoben.
 
-Einzelne Buchungssätze lassen sich bearbeiten oder löschen, solange sie **frei** sind —
-also nicht in eine Betriebskostenabrechnung eingeflossen und ohne Offene-Posten-Ausgleich.
-Sobald ein Satz mit einer Zahlung ausgeglichen wurde, ist statt Löschen ein **Storno**
-nötig; abrechnungsrelevante Sätze sind gesperrt und nur über die Rückabwicklung/Storno des
-Abrechnungslaufs veränderbar.
+### Rückgängig machen einzelner Buchungen
+
+Für jede Buchung (Transaktion oder einzelner Buchungssatz) gilt dieselbe Regel:
+
+| Lage | Ergebnis |
+|------|----------|
+| Nichts hängt daran | **Löschen** — vollständig, als hätte es die Buchung nie gegeben |
+| Mit einer anderen Buchung ausgeglichen, oder in eine **versendete** Abrechnung eingeflossen | **Storno** mit Pflicht-Grund; Original und Storno bleiben sichtbar |
+| Selbst eine Stornobuchung oder bereits storniert | **Gesperrt** |
+
+Ist die Buchung in Abrechnungen eingeflossen, zeigt „Rückgängig“ die betroffenen
+Abrechnungen vorher an. Nach Bestätigung werden sie als ganze Gruppe mit zurückgenommen —
+nicht versendete per Rückabwicklung, versendete per Storno. Das Jahr ist danach wieder offen
+und wird neu abgerechnet (siehe „Neu abrechnen nach einem Storno“).
+
+Die Expertenansicht der Buchungssätze bietet weiterhin getrennt **Löschen** und
+**Stornieren** an; sie folgen derselben Regel, nehmen aber keine Abrechnungen mit zurück.
+
+**Wann ist eine Buchung endgültig?** Walter kennt keinen eigenen Jahres- oder
+Periodenabschluss. Endgültig wird eine Buchung durch das, was an ihr hängt:
+
+- Buchungen, die in eine **versendete Abrechnung** eingeflossen sind (NK-Vorauszahlungen,
+  BK-Rechnungen samt Verteilung, NK-Anteile, der Abrechnungssatz), lassen sich nur noch
+  stornieren.
+- Zahlungen, die mit einer Forderung ausgeglichen sind (z. B. Miete mit ihrer Sollstellung),
+  ebenso.
+- Buchungen, die in keine Abrechnung eingehen und mit nichts ausgeglichen sind (z. B. ein
+  direkt bezahlter Erhaltungsaufwand, eine Kaution, eine sonstige Buchung), bleiben
+  löschbar — auch in älteren Jahren. Wer sie nach längerer Zeit korrigiert, sollte bewusst
+  stornieren statt löschen; die Expertenansicht bietet das an.
 
 ---
 

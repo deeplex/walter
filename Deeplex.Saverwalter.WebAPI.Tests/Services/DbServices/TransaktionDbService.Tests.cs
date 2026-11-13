@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         private static TransaktionDbService MakeService(SaverwalterContext ctx, IAuthorizationService auth)
-            => new(ctx, auth, new BuchungssatzSchutzService(ctx), new StornoBuchungsService(ctx));
+            => new(ctx, auth, new BuchungssatzSchutzService(ctx), TestServices.Rueckgaengig(ctx));
 
         private static Transaktion NeueTransaktion() => new()
         {
@@ -71,6 +71,32 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await service.Delete(user, transaktion.TransaktionId);
 
             result.Should().BeOfType<OkResult>();
+            ctx.Transaktionen.Any(t => t.TransaktionId == transaktion.TransaktionId).Should().BeFalse();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == satz.BuchungssatzId).Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task RueckgaengigFreieTransaktion_EntferntSieVollstaendig()
+        {
+            var (ctx, auth, user) = Setup();
+            var bank = new Buchungskonto("1000", "Bank", BuchungskontoTyp.Aktiv);
+            var ertrag = new Buchungskonto("4000", "Ertrag", BuchungskontoTyp.Ertrag);
+            var transaktion = NeueTransaktion();
+            var satz = new Buchungssatz(new DateOnly(2024, 1, 5), "Freie Buchung") { Transaktion = transaktion };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m) { Buchungssatz = satz, Buchungskonto = bank });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 100m) { Buchungssatz = satz, Buchungskonto = ertrag });
+            ctx.Transaktionen.Add(transaktion);
+            ctx.Buchungssaetze.Add(satz);
+            await ctx.SaveChangesAsync();
+            var service = MakeService(ctx, auth);
+
+            var plan = (await service.RueckgaengigPruefen(user, transaktion.TransaktionId))
+                .Should().BeOfType<OkObjectResult>().Which.Value.Should().BeOfType<RueckgaengigService.RueckgaengigPlan>().Subject;
+            plan.Art.Should().Be(RueckgaengigService.RueckgaengigArt.Loeschen);
+
+            var result = await service.Rueckgaengig(user, transaktion.TransaktionId, new RueckgaengigService.RueckgaengigRequest());
+
+            result.Should().BeOfType<OkObjectResult>();
             ctx.Transaktionen.Any(t => t.TransaktionId == transaktion.TransaktionId).Should().BeFalse();
             ctx.Buchungssaetze.Any(s => s.BuchungssatzId == satz.BuchungssatzId).Should().BeFalse();
         }

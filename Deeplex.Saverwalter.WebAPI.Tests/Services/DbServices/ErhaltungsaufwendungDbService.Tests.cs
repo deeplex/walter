@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         private static ErhaltungsaufwendungDbService MakeService(SaverwalterContext ctx, IAuthorizationService auth)
-            => new(ctx, auth, new ErhaltungsaufwendungBuchungsService(ctx), new BuchungssatzSchutzService(ctx));
+            => new(ctx, auth, new ErhaltungsaufwendungBuchungsService(ctx), TestServices.Rueckgaengig(ctx));
 
         [Fact]
         public async Task PostErzeugtBuchungssatzUndGibtEintragZurueck()

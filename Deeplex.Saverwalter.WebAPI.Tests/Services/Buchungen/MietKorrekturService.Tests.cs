@@ -296,11 +296,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
 
             var satz = await Service(ctx).BucheDifferenzAsync(vertrag.VertragId, 2024, "Grund");
 
-            var schutzService = new BuchungssatzSchutzService(ctx);
-            var schutz = await schutzService.PruefeAsync(satz);
+            var schutz = await new BuchungssatzSchutzService(ctx).PruefeAsync(satz);
             schutz.KannLoeschen.Should().BeTrue("der Ausgleich innerhalb des Satzes ist keine Abhängigkeit");
-            schutzService.Entfernen(satz);
-            await ctx.SaveChangesAsync();
+            await TestServices.Rueckgaengig(ctx).LoeschenAsync([satz]);
 
             (await ctx.Buchungssaetze.CountAsync()).Should().Be(saetzeVorher);
             (await ctx.OffenePostenAusgleiche.CountAsync()).Should().Be(ausgleicheVorher);

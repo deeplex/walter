@@ -456,5 +456,122 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             (await ctx.Buchungssaetze.CountAsync(s =>
                 s.Beschreibung.Contains("Zahlung BK-Abrechnung"))).Should().Be(1);
         }
+
+        private static TransaktionBuchungsService.TransaktionsInput Miete(Vertrag vertrag, DateOnly monat, decimal kaltmiete, decimal nk) => new()
+        {
+            Betrag = kaltmiete + nk,
+            Zahlungsdatum = monat.AddDays(4),
+            Mieten =
+            {
+                new TransaktionBuchungsService.MietzahlungsInput
+                {
+                    VertragId = vertrag.VertragId,
+                    BetreffenderMonat = monat,
+                    Kaltmiete = kaltmiete,
+                    NkVorauszahlung = nk,
+                }
+            }
+        };
+
+        [Fact]
+        public async Task MietzahlungImMonatEinerMietKorrekturTrifftDieSollstellung()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var service = new TransaktionBuchungsService(ctx);
+
+            // Vorjahr bezahlt, dann Erhöhung nachgetragen und heute korrigiert.
+            var vorjahr = new DateOnly(DateTime.Today.Year - 1, 1, 1);
+            await service.BucheAsync(Miete(vertrag, vorjahr, 500m, 150m));
+            vertrag.Versionen.Add(new VertragVersion(vorjahr, 600m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+            var korrektur = await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx))
+                .BucheDifferenzAsync(vertrag.VertragId, vorjahr.Year, "Erhöhung nachgetragen");
+
+            // Miete des laufenden Monats — im selben Monat wie die Korrektur gebucht.
+            var monat = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var transaktion = await service.BucheAsync(Miete(vertrag, monat, 600m, 0m));
+
+            var zahlung = transaktion.Buchungssaetze.Single();
+            var sollZeile = zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).AlsHabenZeile.Single().SollZeile;
+            sollZeile.Buchungssatz.BuchungssatzId.Should().NotBe(korrektur.BuchungssatzId);
+            sollZeile.Betrag.Should().Be(600m);
+            sollZeile.Buchungssatz.Buchungsdatum.Month.Should().Be(monat.Month);
+        }
+
+        [Fact]
+        public async Task StornierteSollstellungWirdNichtWiederverwendet()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var service = new TransaktionBuchungsService(ctx);
+            var monat = new DateOnly(2024, 3, 1);
+
+            var erste = await service.BucheAsync(Miete(vertrag, monat, 500m, 0m));
+            var zahlung = erste.Buchungssaetze.Single();
+            var sollstellung = zahlung.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben).AlsHabenZeile.Single().SollZeile.Buchungssatz;
+            var storno = new StornoBuchungsService(ctx);
+            await storno.StornierenAsync(zahlung.BuchungssatzId, "falsch");
+            await storno.StornierenAsync(sollstellung.BuchungssatzId, "falsch");
+
+            var zweite = await service.BucheAsync(Miete(vertrag, monat, 500m, 0m));
+
+            var neueSoll = zweite.Buchungssaetze.Single().Buchungszeilen
+                .Single(z => z.SollHaben == SollHaben.Haben).AlsHabenZeile.Single().SollZeile.Buchungssatz;
+            neueSoll.BuchungssatzId.Should().NotBe(sollstellung.BuchungssatzId);
+            neueSoll.StornoNach.Should().BeNull();
+        }
+
+        private static List<string> Zeilen(IEnumerable<(string Beschreibung, IEnumerable<(string Konto, SollHaben Seite, decimal Betrag)> Zeilen)> saetze) =>
+            saetze.SelectMany(s => s.Zeilen.Select(z => $"{s.Beschreibung}|{z.Konto}|{z.Seite}|{z.Betrag:0.00}"))
+                .OrderBy(x => x).ToList();
+
+        [Fact]
+        public async Task VorschauZeigtGenauDieSpaetereBuchungUndSpeichertNichts()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var input = () => Miete(vertrag, new DateOnly(2024, 3, 1), 500m, 150m);
+            var saetzeVorher = ctx.Buchungssaetze.Count();
+
+            var vorschau = await new TransaktionBuchungsService(ctx).VorschauAsync(input());
+
+            ctx.Buchungssaetze.Count().Should().Be(saetzeVorher, "die Vorschau speichert nichts");
+            ctx.Transaktionen.Should().BeEmpty();
+            vorschau.Betrag.Should().Be(650m);
+            vorschau.Ausgleiche.Should().Be(1);
+            vorschau.Saetze.Should().ContainSingle(s => !s.IstZahlung, "die Sollstellung des Monats entsteht mit");
+
+            var transaktion = await new TransaktionBuchungsService(ctx).BucheAsync(input());
+            var gebucht = transaktion.Buchungssaetze
+                .Concat(transaktion.Buchungssaetze
+                    .SelectMany(z => z.Buchungszeilen)
+                    .SelectMany(z => z.AlsHabenZeile)
+                    .Select(a => a.SollZeile.Buchungssatz))
+                .Distinct()
+                .ToList();
+            gebucht.Should().HaveCount(3, "Sollstellung, Kaltmiete und NK-Vorauszahlung");
+            vorschau.Saetze.Should().HaveCount(3);
+
+            Zeilen(vorschau.Saetze.Select(v => (v.Beschreibung, v.Zeilen.Select(z => (z.Kontonummer, z.SollHaben, z.Betrag)))))
+                .Should().Equal(Zeilen(gebucht.Select(g => (g.Beschreibung,
+                    g.Buchungszeilen.Select(z => (z.Buchungskonto.Kontonummer, z.SollHaben, z.Betrag))))));
+        }
+
+        [Fact]
+        public async Task VorschauPrueftWieDieBuchung()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var zuViel = () => new TransaktionBuchungsService(ctx).VorschauAsync(Miete(vertrag, new DateOnly(2024, 3, 1), 900m, 0m));
+
+            await zuViel.Should().ThrowAsync<InvalidOperationException>().WithMessage("*übersteigt*");
+            ctx.ChangeTracker.HasChanges().Should().BeFalse();
+        }
     }
 }

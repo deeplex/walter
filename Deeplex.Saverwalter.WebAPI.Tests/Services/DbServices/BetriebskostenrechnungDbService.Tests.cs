@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var buchungsService = new BetriebskostenrechnungBuchungsService(ctx);
             var rechnung = buchungsService.BucheRechnungAsync(umlage, 300m, new DateOnly(2024, 6, 1), 2024, null).Result;
-            var service = new BetriebskostenrechnungDbService(ctx, auth, buchungsService, new BuchungssatzSchutzService(ctx));
+            var service = new BetriebskostenrechnungDbService(ctx, auth, buchungsService, new BuchungssatzSchutzService(ctx), TestServices.Rueckgaengig(ctx));
             return (ctx, service, user, vertrag, umlage, rechnung);
         }
 

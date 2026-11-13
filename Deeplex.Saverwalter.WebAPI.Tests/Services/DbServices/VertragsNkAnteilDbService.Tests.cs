@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
 
-            var service = new VertragsNkAnteilDbService(ctx, auth, new NkAnteilBuchungsService(ctx), new BuchungssatzSchutzService(ctx));
+            var service = new VertragsNkAnteilDbService(ctx, auth, new NkAnteilBuchungsService(ctx), TestServices.Rueckgaengig(ctx));
             return (service, user, vertrag, umlage);
         }
 
