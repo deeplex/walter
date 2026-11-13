@@ -53,13 +53,6 @@ namespace Deeplex.Saverwalter.Model
         /// <summary>Rückwärtsnavigation: gesetzt wenn dieser Satz bereits storniert wurde.</summary>
         public virtual Buchungssatz? StornoNach { get; private set; }
 
-        /// <summary>
-        /// Gesetzt bei den Buchungssätzen einer Miet-Korrektur: die Sollstellung des
-        /// korrigierten Monats. Ein Monat gilt als korrigiert, solange ein nicht
-        /// stornierter Satz auf seine Sollstellung verweist.
-        /// </summary>
-        public virtual Buchungssatz? KorrigiertSollstellung { get; set; }
-
         /// <summary>Optionaler Verweis auf den importierten Kontoauszugseintrag.</summary>
         public virtual Transaktion? Transaktion { get; set; }
 

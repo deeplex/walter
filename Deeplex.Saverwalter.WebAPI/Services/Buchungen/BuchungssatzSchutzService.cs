@@ -28,7 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   (NK-Vorauszahlungen/NK-Anteile des abgerechneten Jahres, Rechnungen
     ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert.
     /// - Löschen ist nur für "freie" Sätze erlaubt: zusätzlich keine
-    ///   OPOS-Verknüpfung und kein Storno(-Partner) — sonst stornieren.
+    ///   OPOS-Verknüpfung mit einem anderen Satz und kein Storno(-Partner) — sonst
+    ///   stornieren. Ausgleiche zwischen Zeilen desselben Satzes zählen nicht.
     /// </summary>
     public class BuchungssatzSchutz
     {
@@ -59,8 +60,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
     public class BuchungssatzSchutzService(SaverwalterContext ctx)
     {
-        public async Task<BuchungssatzSchutz> PruefeAsync(Buchungssatz satz)
+        /// <param name="jahr">
+        /// Buchungsjahr, für das geprüft wird — Standard ist das des Satzes. Wer das
+        /// Buchungsjahr ändert, prüft zusätzlich das Zieljahr.
+        /// </param>
+        public async Task<BuchungssatzSchutz> PruefeAsync(Buchungssatz satz, int? jahr = null)
         {
+            var pruefJahr = jahr ?? satz.Buchungsjahr;
             var zeileIds = satz.Buchungszeilen.Select(z => z.BuchungszeileId).ToList();
             var kontoIds = satz.Buchungszeilen
                 .Select(z => z.Buchungskonto.BuchungskontoId)
@@ -74,20 +80,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             // NK-Anteile des abgerechneten Jahres) ...
             var vertragBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
-                    r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr &&
+                    r.Buchungssatz.Buchungsjahr == pruefJahr &&
                     kontoIds.Contains(r.Vertrag.NkBuchungskonto.BuchungskontoId));
 
             // ... oder über das NK-Verrechnungskonto einer Umlage, deren Wohnungen
             // für das Jahr abgerechnet wurden (BK-Rechnungen, Umbuchungen).
             var umlageBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
-                    r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr &&
+                    r.Buchungssatz.Buchungsjahr == pruefJahr &&
                     r.Vertrag.Wohnung.Umlagen.Any(u =>
                         kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)));
 
             var hatOpos = await ctx.OffenePostenAusgleiche
                 .AnyAsync(a =>
-                    zeileIds.Contains(a.SollZeile.BuchungszeileId) ||
+                    zeileIds.Contains(a.SollZeile.BuchungszeileId) !=
                     zeileIds.Contains(a.HabenZeile.BuchungszeileId));
 
             return new BuchungssatzSchutz
@@ -98,6 +104,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 IstStorno = satz.StornoVon != null,
                 IstStorniert = satz.StornoNach != null
             };
+        }
+
+        /// <summary>
+        /// Entfernt einen Satz samt der Ausgleiche zwischen seinen eigenen Zeilen. Der
+        /// Aufrufer prüft vorher <see cref="BuchungssatzSchutz.KannLoeschen"/>.
+        /// </summary>
+        public void Entfernen(Buchungssatz satz)
+        {
+            var zeilen = satz.Buchungszeilen.ToHashSet();
+            var interne = zeilen
+                .SelectMany(z => z.AlsSollZeile)
+                .Where(a => zeilen.Contains(a.HabenZeile))
+                .ToList();
+            ctx.OffenePostenAusgleiche.RemoveRange(interne);
+            ctx.Buchungssaetze.Remove(satz);
         }
     }
 }

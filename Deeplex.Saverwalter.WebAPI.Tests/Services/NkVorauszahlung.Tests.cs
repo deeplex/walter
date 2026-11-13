@@ -85,8 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await ZahleAsync(ctx, vertrag, monat, 150m);
             vertrag.Versionen.Add(new VertragVersion(monat, 600m, 1) { Vertrag = vertrag });
             await ctx.SaveChangesAsync();
-            await new MietKorrekturService(ctx).AnwendenAsync(
-                vertrag.VertragId, new HashSet<(int, int)> { (2024, 1) }, "Grund");
+            await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)).BucheDifferenzAsync(vertrag.VertragId, 2024, "Grund");
 
             (await SummeAsync(ctx, vertrag, 2024)).Should().Be(50m);
         }
@@ -103,8 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await ZahleAsync(ctx, vertrag, new DateOnly(2024, 2, 1), 150m);
             vertrag.Versionen.Add(new VertragVersion(monat, 600m, 1) { Vertrag = vertrag });
             await ctx.SaveChangesAsync();
-            await new MietKorrekturService(ctx).AnwendenAsync(
-                vertrag.VertragId, new HashSet<(int, int)> { (2024, 1) }, "Grund");
+            await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)).BucheDifferenzAsync(vertrag.VertragId, 2024, "Grund");
 
             var resultat = new Abrechnungsresultat { Vertrag = vertrag };
             ctx.Abrechnungsresultate.Add(resultat);
@@ -112,9 +110,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await ctx.SaveChangesAsync();
 
             var entry = new AbrechnungsresultatEntry(resultat, new Permissions());
-            entry.Vorauszahlung.Should().Be(200m, "300 gezahlt, davon 100 zur Kaltmiete umgebucht");
+            entry.Vorauszahlung.Should().Be(100m, "300 gezahlt, davon 200 (zwei Monate je 100) zur Kaltmiete umgebucht");
             entry.Saldo.Should().Be(120m);
-            entry.Rechnungsbetrag.Should().Be(320m);
+            entry.Rechnungsbetrag.Should().Be(220m);
             (await SummeAsync(ctx, vertrag, 2024)).Should().Be(entry.Vorauszahlung,
                 "das Abrechnungsergebnis selbst ist keine Vorauszahlung");
         }

@@ -160,12 +160,6 @@ namespace Deeplex.Saverwalter.Model
                 .HasForeignKey<Buchungssatz>("StornoVonId")
                 .IsRequired(false);
             modelBuilder.Entity<Buchungssatz>()
-                .HasOne(b => b.KorrigiertSollstellung)
-                .WithMany()
-                .HasForeignKey("KorrigiertSollstellungId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Buchungssatz>()
                 .HasIndex(b => new { b.Buchungsjahr, b.Buchungsnummer })
                 .IsUnique();
 

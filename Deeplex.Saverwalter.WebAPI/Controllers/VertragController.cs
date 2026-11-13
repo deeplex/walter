@@ -292,33 +292,71 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class MietKorrekturMonatEntry
         {
-            public int Jahr { get; set; }
             public int Monat { get; set; }
             public decimal IstKaltmiete { get; set; }
             public decimal SollKaltmiete { get; set; }
             public decimal Delta { get; set; }
+        }
+
+        public class MietKorrekturBuchungEntry
+        {
+            public Guid Id { get; set; }
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public string? Notiz { get; set; }
+            public bool KannLoeschen { get; set; }
+            public bool KannStornieren { get; set; }
+            public string? Sperrgrund { get; set; }
+        }
+
+        public class MietKorrekturJahrEntry
+        {
+            public int Jahr { get; set; }
+            public List<MietKorrekturMonatEntry> Monate { get; set; } = [];
+            public List<MietKorrekturBuchungEntry> Korrekturen { get; set; } = [];
+            public decimal Abweichung { get; set; }
+            public decimal Korrigiert { get; set; }
+            public decimal Differenz { get; set; }
+            public decimal NkVorauszahlung { get; set; }
             public string Status { get; set; } = string.Empty;
 
-            public MietKorrekturMonatEntry() { }
-            public MietKorrekturMonatEntry(MietKorrekturService.MietKorrekturMonat m)
+            public MietKorrekturJahrEntry() { }
+            public MietKorrekturJahrEntry(MietKorrekturService.MietKorrekturJahr j)
             {
-                Jahr = m.Jahr;
-                Monat = m.Monat;
-                IstKaltmiete = m.IstKaltmiete;
-                SollKaltmiete = m.SollKaltmiete;
-                Delta = m.Delta;
-                Status = m.Status.ToString();
+                Jahr = j.Jahr;
+                Monate = j.Monate.Select(m => new MietKorrekturMonatEntry
+                {
+                    Monat = m.Monat,
+                    IstKaltmiete = m.IstKaltmiete,
+                    SollKaltmiete = m.SollKaltmiete,
+                    Delta = m.Delta,
+                }).ToList();
+                Korrekturen = j.Korrekturen.Select(k => new MietKorrekturBuchungEntry
+                {
+                    Id = k.BuchungssatzId,
+                    Datum = k.Buchungsdatum,
+                    Betrag = k.Betrag,
+                    Beschreibung = k.Beschreibung,
+                    Notiz = k.Notiz,
+                    KannLoeschen = k.KannLoeschen,
+                    KannStornieren = k.KannStornieren,
+                    Sperrgrund = k.Sperrgrund,
+                }).ToList();
+                Abweichung = j.Abweichung;
+                Korrigiert = j.Korrigiert;
+                Differenz = j.Differenz;
+                NkVorauszahlung = j.NkVorauszahlung;
+                Status = j.Status.ToString();
             }
         }
 
         /// <summary>
-        /// Ermittelt bereits bezahlte Monate, deren gebuchte Kaltmiete von der zum Monat
-        /// gültigen <see cref="VertragVersion.Grundmiete"/> abweicht (z. B. weil eine
-        /// Mieterhöhung rückwirkend nachgetragen wurde) — siehe
-        /// <see cref="MietKorrekturService"/>.
+        /// Jahre, deren gebuchte Kaltmiete von den <see cref="VertragVersion"/>en abweicht
+        /// oder die schon Korrekturen haben — siehe <see cref="MietKorrekturService"/>.
         /// </summary>
         [HttpGet("{id}/miet-korrektur")]
-        public async Task<ActionResult<IEnumerable<MietKorrekturMonatEntry>>> GetMietKorrektur(int id)
+        public async Task<ActionResult<IEnumerable<MietKorrekturJahrEntry>>> GetMietKorrektur(int id)
         {
             var vertrag = await _ctx.Vertraege.FindAsync(id);
             if (vertrag is null) return NotFound();
@@ -326,41 +364,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var monate = await _mietKorrekturService.ErmittleAsync(id);
-            return Ok(monate.Select(m => new MietKorrekturMonatEntry(m)));
+            var jahre = await _mietKorrekturService.ErmittleAsync(id);
+            return Ok(jahre.Select(j => new MietKorrekturJahrEntry(j)));
         }
 
         public class MietKorrekturRequest
         {
-            public List<MietKorrekturMonatRequest> Monate { get; set; } = [];
-            public string Grund { get; set; } = string.Empty;
-        }
-
-        public class MietKorrekturMonatRequest
-        {
             public int Jahr { get; set; }
-            public int Monat { get; set; }
-        }
-
-        public class MietKorrekturErgebnisEntry
-        {
-            public List<MietKorrekturMonatRequest> Korrigiert { get; set; } = [];
-            public List<MietKorrekturUebersprungenEntry> Uebersprungen { get; set; } = [];
-        }
-
-        public class MietKorrekturUebersprungenEntry
-        {
-            public int Jahr { get; set; }
-            public int Monat { get; set; }
             public string Grund { get; set; } = string.Empty;
         }
 
         /// <summary>
-        /// Bucht die Miet-Korrektur für die ausgewählten Monate — siehe
-        /// <see cref="MietKorrekturService.AnwendenAsync"/>.
+        /// Bucht die offene Differenz eines Jahres als Korrektur-Satz — siehe
+        /// <see cref="MietKorrekturService.BucheDifferenzAsync"/>. Rückgängig machen oder
+        /// stornieren läuft über die gewöhnlichen Buchungssatz-Endpunkte.
         /// </summary>
         [HttpPost("{id}/miet-korrektur")]
-        public async Task<ActionResult<MietKorrekturErgebnisEntry>> PostMietKorrektur(
+        public async Task<ActionResult<MietKorrekturJahrEntry>> PostMietKorrektur(
             int id, [FromBody] MietKorrekturRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Grund))
@@ -374,23 +394,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Update]);
             if (!authRx.Succeeded) return Forbid();
 
-            var monate = request.Monate.Select(m => (m.Jahr, m.Monat)).ToHashSet();
-
             try
             {
-                var ergebnis = await _mietKorrekturService.AnwendenAsync(id, monate, request.Grund);
-                return Ok(new MietKorrekturErgebnisEntry
-                {
-                    Korrigiert = ergebnis.Korrigiert.Select(k => new MietKorrekturMonatRequest { Jahr = k.Jahr, Monat = k.Monat }).ToList(),
-                    Uebersprungen = ergebnis.Uebersprungen.Select(u => new MietKorrekturUebersprungenEntry
-                    {
-                        Jahr = u.Jahr,
-                        Monat = u.Monat,
-                        Grund = u.Grund
-                    }).ToList()
-                });
+                await _mietKorrekturService.BucheDifferenzAsync(id, request.Jahr, request.Grund);
             }
-            catch (ArgumentException ex) { return NotFound(ex.Message); }
+            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+
+            var jahr = (await _mietKorrekturService.ErmittleAsync(id)).Single(j => j.Jahr == request.Jahr);
+            return Ok(new MietKorrekturJahrEntry(jahr));
         }
     }
 }

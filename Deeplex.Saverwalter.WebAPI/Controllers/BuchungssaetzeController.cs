@@ -462,11 +462,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Aktualisiert einen Buchungssatz — Buchungsjahr, Beschreibung, Notiz sind
-        /// frei pflegbar (analog zum Speichern-Button im Frontend). Die Beträge der
-        /// Buchungszeilen lassen sich nur ändern, wenn der Satz auch löschbar wäre
-        /// (<see cref="BuchungssatzSchutz.KannLoeschen"/>) — sonst führt eine
-        /// Korrektur über die Stornobuchung, damit sie nachvollziehbar bleibt.
+        /// Aktualisiert einen Buchungssatz — Beschreibung und Notiz sind frei pflegbar
+        /// (analog zum Speichern-Button im Frontend). Beträge und Buchungsjahr lassen
+        /// sich nur ändern, wenn der Satz auch löschbar wäre
+        /// (<see cref="BuchungssatzSchutz.KannLoeschen"/>), beim Buchungsjahr auch im
+        /// Zieljahr — sonst führt eine Korrektur über die Stornobuchung, damit sie
+        /// nachvollziehbar bleibt.
         /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<BuchungssatzEntry>> Put(Guid id, [FromBody] BuchungssatzPatchEntry patch)
@@ -490,6 +491,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return Conflict(schutz.Sperrgrund ??
                     "Beträge dieses Buchungssatzes können nicht mehr direkt geändert werden — bitte stornieren.");
+            }
+
+            if (patch.Buchungsjahr != satz.Buchungsjahr)
+            {
+                var schutzZiel = await schutzService.PruefeAsync(satz, patch.Buchungsjahr);
+                if (!schutz.KannLoeschen || !schutzZiel.KannLoeschen)
+                {
+                    return Conflict(schutz.Sperrgrund ?? schutzZiel.Sperrgrund);
+                }
             }
 
             satz.Buchungsjahr = patch.Buchungsjahr;
@@ -534,7 +544,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return Conflict(schutz.Sperrgrund);
             }
 
-            ctx.Buchungssaetze.Remove(satz);
+            schutzService.Entfernen(satz);
             await ctx.SaveChangesAsync();
 
             return Ok();

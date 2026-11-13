@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 new AbrechnungsresultatBuchungsService(ctx),
                 new AbrechnungsgruppenService(ctx),
                 new StornoBuchungsService(ctx),
-                new MietKorrekturService(ctx));
+                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)));
 
         private static void AddRechnung(SaverwalterContext ctx, Umlage umlage, decimal betrag)
         {

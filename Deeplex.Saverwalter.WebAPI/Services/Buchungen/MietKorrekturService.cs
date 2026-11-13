@@ -21,221 +21,218 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 {
     /// <summary>
-    /// Korrigiert bereits bezahlte Miet-Monate, wenn eine <see cref="VertragVersion"/>
-    /// rückwirkend mit einer anderen Grundmiete angelegt wurde (z. B. eine Mieterhöhung,
-    /// die erst nachträglich im System erfasst wurde). Rein additiv: kein bestehender
-    /// Buchungssatz (Sollstellung, Kaltmiete-Zahlung, NK-VZ-Zahlung) wird jemals mutiert
-    /// oder storniert.
+    /// Gleicht die gebuchte Kaltmiete eines Jahres an die <see cref="VertragVersion"/>en an,
+    /// wenn eine Version rückwirkend mit einer anderen Grundmiete angelegt wurde (z. B. eine
+    /// Mieterhöhung, die erst nachträglich im System erfasst wurde). Was über die Kaltmiete
+    /// hinaus gezahlt wurde, ist NK-Vorauszahlung; die Korrektur stellt diese Aufteilung her.
     ///
-    /// Für einen betroffenen, bereits bezahlten Monat werden zwei neue Buchungssätze und
-    /// ein neuer OPOS-Ausgleich angelegt, deren Soll-/Haben-Richtung vom Vorzeichen des
-    /// Deltas (neue Grundmiete − gebuchte Kaltmiete) abhängt:
+    /// Eine Korrektur ist ein gewöhnlicher Buchungssatz ohne Transaktion, der Miet- und
+    /// NK-Konto des Vertrags bebucht — daran wird er erkannt. Mit d = Differenz der Kaltmiete:
     ///
-    ///   delta &gt; 0 (Miete erhöht sich):
-    ///     1. Zusatz-Forderung: Soll MietBuchungskonto(delta) / Haben MietErtragskonto(delta)
-    ///     2. Umbuchung:        Soll NkBuchungskonto(delta)   / Haben MietBuchungskonto(delta)
-    ///     3. OPOS: SollZeile = Zusatz-Forderung, HabenZeile = Umbuchung
+    ///   d &gt; 0 (Miete erhöht sich):
+    ///     Soll MietBuchungskonto d / Haben MietErtragskonto d   (Nachtrag)
+    ///     Soll NkBuchungskonto d   / Haben MietBuchungskonto d  (Umbuchung)
+    ///   d &lt; 0 (Miete sinkt), Seiten jeweils getauscht.
     ///
-    ///   delta &lt; 0 (Miete sinkt rückwirkend), mit d = |delta|:
-    ///     1. Gutschrift:       Haben MietBuchungskonto(d) / Soll MietErtragskonto(d)
-    ///     2. Umbuchung:        Haben NkBuchungskonto(d)   / Soll MietBuchungskonto(d)
-    ///     3. OPOS: SollZeile = Umbuchung, HabenZeile = Gutschrift
+    /// Die beiden Zeilen auf dem MietBuchungskonto sind miteinander ausgeglichen. Die
+    /// Kaltmiete-Wirkung einer Korrektur ist ihr Saldo auf dem MietErtragskonto (Haben
+    /// positiv); ältere Korrekturen ohne Ertragszeile ändern die Kaltmiete nicht.
     ///
-    /// In beiden Fällen liegen SollZeile und HabenZeile des neuen OPOS-Eintrags auf
-    /// demselben Konto (MietBuchungskonto) — die OPOS-Invariante bleibt gewahrt — und das
-    /// Mietforderungskonto ist für den Monat danach wieder voll ausgeglichen.
+    /// Gerechnet wird je Buchungsjahr über die bezahlten Monate: Soll ist die Grundmiete laut
+    /// Version, Ist die Sollstellung des Monats; dazu kommen die Korrekturen des Jahres.
+    /// Unbezahlte Monate fehlen bewusst — ihre Sollstellung ist noch frei und lässt sich
+    /// direkt ändern. Bleibt eine Differenz, wird genau diese gebucht; mehrere Korrekturen
+    /// eines Jahres addieren sich. Eine Erhöhung muss durch die NK-Vorauszahlungen des
+    /// Jahres gedeckt sein (siehe <see cref="NkVorauszahlung"/>). Abgerechnete Jahre werden
+    /// nicht korrigiert.
     ///
-    /// Unbezahlte Monate (nur Sollstellung, kein OPOS) sind hier bewusst ausgeschlossen:
-    /// die Sollstellung ist dort noch frei (<see cref="BuchungssatzSchutz.KannLoeschen"/>)
-    /// und lässt sich direkt über den bestehenden Buchungssatz-Bearbeiten-Endpunkt
-    /// korrigieren.
-    ///
-    /// Alle Sätze einer Korrektur verweisen über <see cref="Buchungssatz.KorrigiertSollstellung"/>
-    /// auf die Sollstellung des korrigierten Monats. Ein Monat gilt als korrigiert, solange
-    /// einer dieser Sätze nicht storniert ist.
-    ///
-    /// Eine Erhöhung wird aus den NK-Vorauszahlungen des Jahres gedeckt (siehe
-    /// <see cref="NkVorauszahlung"/>). Mehrere Monate eines Jahres teilen sich diesen Betrag.
+    /// Rückgängig und Storno laufen wie bei jedem Buchungssatz (<see cref="BuchungssatzSchutzService"/>).
     /// </summary>
-    public class MietKorrekturService(SaverwalterContext ctx)
+    public class MietKorrekturService(SaverwalterContext ctx, BuchungssatzSchutzService schutzService)
     {
         public enum MietKorrekturStatus
         {
+            /// <summary>Gebuchte Kaltmiete entspricht den Vertragsversionen.</summary>
+            Stimmt,
             Anwendbar,
             Abgerechnet,
             NkReichtNichtAus,
-            BereitsKorrigiert,
         }
 
         public class MietKorrekturMonat
         {
-            public int Jahr { get; set; }
             public int Monat { get; set; }
+            /// <summary>Kaltmiete der Sollstellung des Monats.</summary>
             public decimal IstKaltmiete { get; set; }
             public decimal SollKaltmiete { get; set; }
             public decimal Delta => SollKaltmiete - IstKaltmiete;
+        }
+
+        public class MietKorrekturBuchung
+        {
+            public Guid BuchungssatzId { get; set; }
+            public DateOnly Buchungsdatum { get; set; }
+            /// <summary>Änderung der Kaltmiete (Erhöhung positiv).</summary>
+            public decimal Betrag { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public string? Notiz { get; set; }
+            public bool KannLoeschen { get; set; }
+            public bool KannStornieren { get; set; }
+            public string? Sperrgrund { get; set; }
+        }
+
+        public class MietKorrekturJahr
+        {
+            public int Jahr { get; set; }
+            /// <summary>Monate, deren Sollstellung von der Version abweicht.</summary>
+            public List<MietKorrekturMonat> Monate { get; set; } = [];
+            public List<MietKorrekturBuchung> Korrekturen { get; set; } = [];
+            public decimal Abweichung => Monate.Sum(m => m.Delta);
+            public decimal Korrigiert => Korrekturen.Sum(k => k.Betrag);
+            /// <summary>Noch zu buchende Änderung der Kaltmiete.</summary>
+            public decimal Differenz => Abweichung - Korrigiert;
+            public decimal NkVorauszahlung { get; set; }
             public MietKorrekturStatus Status { get; set; }
         }
 
-        public class MietKorrekturErgebnis
-        {
-            public List<(int Jahr, int Monat)> Korrigiert { get; set; } = [];
-            public List<(int Jahr, int Monat, string Grund)> Uebersprungen { get; set; } = [];
-        }
+        private record Sollstellung(int Jahr, int Monat, decimal Betrag);
 
-        private class MonatsDaten
-        {
-            public int Jahr { get; set; }
-            public int Monat { get; set; }
-            public required Buchungssatz Sollstellung { get; set; }
-            public decimal SollstellungsBetrag { get; set; }
-        }
-
-        private record Kandidat(MietKorrekturMonat Monat, Buchungssatz Sollstellung);
-
-        public async Task<IReadOnlyList<MietKorrekturMonat>> ErmittleAsync(int vertragId)
+        /// <summary>Jahre mit abweichenden Monaten oder bestehenden Korrekturen.</summary>
+        public async Task<IReadOnlyList<MietKorrekturJahr>> ErmittleAsync(int vertragId)
         {
             var vertrag = await LadeVertragAsync(vertragId);
             var nkVorauszahlungen = await LadeNkVorauszahlungenAsync(vertrag);
-            var kandidaten = await ErmittleKandidatenAsync(vertrag, nkVorauszahlungen);
-            return kandidaten.Select(k => k.Monat).ToList();
-        }
-
-        private async Task<List<Kandidat>> ErmittleKandidatenAsync(
-            Vertrag vertrag, IReadOnlyDictionary<int, decimal> nkVorauszahlungen)
-        {
-            var monate = await LadeBezahlteMonateAsync(vertrag);
-            var sollstellungIds = monate.Select(m => m.Sollstellung.BuchungssatzId).ToList();
-            var korrigiert = (await ctx.Buchungssaetze
-                .Where(s => s.KorrigiertSollstellung != null
-                    && sollstellungIds.Contains(s.KorrigiertSollstellung.BuchungssatzId)
-                    && s.StornoNach == null)
-                .Select(s => s.KorrigiertSollstellung!.BuchungssatzId)
-                .ToListAsync())
-                .ToHashSet();
             var abgerechnet = await AbrechnungsschutzService.AbgerechneteJahreVertrag(ctx, vertrag.VertragId);
+            var korrekturen = await LadeKorrekturenAsync(vertrag);
 
-            var result = new List<Kandidat>();
-            foreach (var m in monate)
+            var monate = new Dictionary<int, List<MietKorrekturMonat>>();
+            foreach (var s in await LadeBezahlteSollstellungenAsync(vertrag))
             {
                 var version = vertrag.Versionen
-                    .Where(v => v.Beginn <= new DateOnly(m.Jahr, m.Monat, 1))
+                    .Where(v => v.Beginn <= new DateOnly(s.Jahr, s.Monat, 1))
                     .MaxBy(v => v.Beginn);
-                if (version is null) continue;
+                if (version is null || Math.Abs(version.Grundmiete - s.Betrag) < 0.005m) continue;
 
-                var delta = version.Grundmiete - m.SollstellungsBetrag;
-                if (Math.Abs(delta) <= 0.005m) continue;
-
-                var status =
-                    korrigiert.Contains(m.Sollstellung.BuchungssatzId) ? MietKorrekturStatus.BereitsKorrigiert
-                    : abgerechnet.Contains(m.Jahr) ? MietKorrekturStatus.Abgerechnet
-                    : !NkReichtAus(nkVorauszahlungen.GetValueOrDefault(m.Jahr), delta) ? MietKorrekturStatus.NkReichtNichtAus
-                    : MietKorrekturStatus.Anwendbar;
-
-                result.Add(new Kandidat(new MietKorrekturMonat
-                {
-                    Jahr = m.Jahr,
-                    Monat = m.Monat,
-                    IstKaltmiete = m.SollstellungsBetrag,
-                    SollKaltmiete = version.Grundmiete,
-                    Status = status
-                }, m.Sollstellung));
+                if (!monate.TryGetValue(s.Jahr, out var liste)) monate[s.Jahr] = liste = [];
+                liste.Add(new MietKorrekturMonat { Monat = s.Monat, IstKaltmiete = s.Betrag, SollKaltmiete = version.Grundmiete });
             }
 
+            var jahre = monate.Keys.Union(korrekturen.Keys).Order();
+            var result = new List<MietKorrekturJahr>();
+            foreach (var jahr in jahre)
+            {
+                var eintrag = new MietKorrekturJahr
+                {
+                    Jahr = jahr,
+                    Monate = monate.GetValueOrDefault(jahr)?.OrderBy(m => m.Monat).ToList() ?? [],
+                    Korrekturen = korrekturen.GetValueOrDefault(jahr) ?? [],
+                    NkVorauszahlung = nkVorauszahlungen.GetValueOrDefault(jahr),
+                };
+                eintrag.Status =
+                    Math.Abs(eintrag.Differenz) < 0.005m ? MietKorrekturStatus.Stimmt
+                    : abgerechnet.Contains(jahr) ? MietKorrekturStatus.Abgerechnet
+                    : eintrag.Differenz > 0 && eintrag.NkVorauszahlung < eintrag.Differenz - 0.005m
+                        ? MietKorrekturStatus.NkReichtNichtAus
+                    : MietKorrekturStatus.Anwendbar;
+                result.Add(eintrag);
+            }
             return result;
         }
 
-        private static bool NkReichtAus(decimal nkVorauszahlung, decimal delta) =>
-            delta <= 0 || nkVorauszahlung >= delta - 0.005m;
-
-        public async Task<MietKorrekturErgebnis> AnwendenAsync(
-            int vertragId, IReadOnlySet<(int Jahr, int Monat)> monate, string grund)
+        /// <summary>
+        /// Bucht die offene Differenz des Jahres als einen Korrektur-Satz. Wirft
+        /// <see cref="InvalidOperationException"/>, wenn das Jahr nicht korrigierbar ist.
+        /// </summary>
+        public async Task<Buchungssatz> BucheDifferenzAsync(int vertragId, int jahr, string grund)
         {
             if (string.IsNullOrWhiteSpace(grund))
                 throw new ArgumentException("Für eine Miet-Korrektur muss ein Grund angegeben werden.");
 
+            var eintrag = (await ErmittleAsync(vertragId)).FirstOrDefault(j => j.Jahr == jahr);
+            switch (eintrag?.Status)
+            {
+                case null or MietKorrekturStatus.Stimmt:
+                    throw new InvalidOperationException($"Die Kaltmiete {jahr} entspricht bereits dem Vertrag.");
+                case MietKorrekturStatus.Abgerechnet:
+                    throw new InvalidOperationException($"Das Jahr {jahr} ist für diesen Vertrag abgerechnet.");
+                case MietKorrekturStatus.NkReichtNichtAus:
+                    throw new InvalidOperationException(
+                        $"Die NK-Vorauszahlungen {jahr} ({eintrag.NkVorauszahlung:C}) decken die Erhöhung ({eintrag.Differenz:C}) nicht.");
+            }
+
             var vertrag = await LadeVertragAsync(vertragId);
-            var nkVorauszahlungen = await LadeNkVorauszahlungenAsync(vertrag);
-            var kandidaten = await ErmittleKandidatenAsync(vertrag, nkVorauszahlungen);
-            var verbleibend = new Dictionary<int, decimal>(nkVorauszahlungen);
+            var d = eintrag.Differenz;
+            var betrag = Math.Abs(d);
+            var erhoehung = d > 0;
+            var hin = erhoehung ? SollHaben.Soll : SollHaben.Haben;
+            var zurueck = erhoehung ? SollHaben.Haben : SollHaben.Soll;
 
-            var ergebnis = new MietKorrekturErgebnis();
-            foreach (var (monat, sollstellung) in kandidaten
-                .Where(k => monate.Contains((k.Monat.Jahr, k.Monat.Monat)))
-                .OrderBy(k => k.Monat.Jahr).ThenBy(k => k.Monat.Monat))
+            var satz = new Buchungssatz(
+                DateOnly.FromDateTime(DateTime.Today),
+                $"Miet-Korrektur {jahr}: Kaltmiete {(erhoehung ? "+" : "−")}{betrag:N2} €")
             {
-                var status = monat.Status == MietKorrekturStatus.Anwendbar
-                    && !NkReichtAus(verbleibend.GetValueOrDefault(monat.Jahr), monat.Delta)
-                    ? MietKorrekturStatus.NkReichtNichtAus
-                    : monat.Status;
-                if (status != MietKorrekturStatus.Anwendbar)
-                {
-                    ergebnis.Uebersprungen.Add((monat.Jahr, monat.Monat, status.ToString()));
-                    continue;
-                }
+                Buchungsjahr = jahr,
+                Notiz = grund.Trim(),
+            };
+            var forderung = AddZeile(satz, hin, betrag, vertrag.MietBuchungskonto);
+            AddZeile(satz, zurueck, betrag, vertrag.Wohnung.MietErtragskonto);
+            AddZeile(satz, hin, betrag, vertrag.NkBuchungskonto);
+            var umbuchung = AddZeile(satz, zurueck, betrag, vertrag.MietBuchungskonto);
 
-                BucheKorrektur(vertrag, monat, sollstellung, grund);
-                verbleibend[monat.Jahr] = verbleibend.GetValueOrDefault(monat.Jahr) - monat.Delta;
-                ergebnis.Korrigiert.Add((monat.Jahr, monat.Monat));
-            }
-
+            ctx.Buchungssaetze.Add(satz);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+            {
+                SollZeile = erhoehung ? forderung : umbuchung,
+                HabenZeile = erhoehung ? umbuchung : forderung,
+            });
             await ctx.SaveChangesAsync();
-            return ergebnis;
+            return satz;
         }
 
-        private void BucheKorrektur(Vertrag vertrag, MietKorrekturMonat monat, Buchungssatz sollstellung, string grund)
+        /// <summary>
+        /// Korrektur-Sätze je Buchungsjahr: ohne Transaktion, nicht storniert und kein Storno,
+        /// mit Zeilen auf Miet- und NK-Konto des Vertrags.
+        /// </summary>
+        private async Task<Dictionary<int, List<MietKorrekturBuchung>>> LadeKorrekturenAsync(Vertrag vertrag)
         {
-            var monatsDatum = new DateOnly(monat.Jahr, monat.Monat, 1);
-            var heute = DateOnly.FromDateTime(DateTime.Today);
-            // Buchungsdatum ist der Tag der Korrektur, Buchungsjahr das Jahr des korrigierten Monats.
-            Buchungssatz NeuerSatz(string beschreibung) =>
-                new(heute, beschreibung) { Buchungsjahr = monat.Jahr, KorrigiertSollstellung = sollstellung };
+            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+            var ertragKontoId = vertrag.Wohnung.MietErtragskonto.BuchungskontoId;
 
-            if (monat.Delta > 0)
+            var saetze = await ctx.Buchungssaetze
+                .Where(IstKorrektur(mietKontoId, nkKontoId))
+                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .OrderBy(s => s.Buchungsdatum)
+                .ToListAsync();
+
+            var result = new Dictionary<int, List<MietKorrekturBuchung>>();
+            foreach (var satz in saetze)
             {
-                var delta = monat.Delta;
-
-                var forderungsSatz = NeuerSatz(
-                    $"Umbuchung Mietsoll-Nachtrag {monatsDatum:MM/yyyy} (rückwirkende Erhöhung, {grund})");
-                AddZeile(forderungsSatz, SollHaben.Soll, delta, vertrag.MietBuchungskonto);
-                AddZeile(forderungsSatz, SollHaben.Haben, delta, vertrag.Wohnung.MietErtragskonto);
-                ctx.Buchungssaetze.Add(forderungsSatz);
-
-                var umbuchungsSatz = NeuerSatz(
-                    $"Umbuchung NK-Vorauszahlung → Kaltmiete {monatsDatum:MM/yyyy} ({grund})");
-                AddZeile(umbuchungsSatz, SollHaben.Soll, delta, vertrag.NkBuchungskonto);
-                AddZeile(umbuchungsSatz, SollHaben.Haben, delta, vertrag.MietBuchungskonto);
-                ctx.Buchungssaetze.Add(umbuchungsSatz);
-
-                ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
+                var schutz = await schutzService.PruefeAsync(satz);
+                if (!result.TryGetValue(satz.Buchungsjahr, out var liste)) result[satz.Buchungsjahr] = liste = [];
+                liste.Add(new MietKorrekturBuchung
                 {
-                    SollZeile = forderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
-                    HabenZeile = umbuchungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
+                    BuchungssatzId = satz.BuchungssatzId,
+                    Buchungsdatum = satz.Buchungsdatum,
+                    Betrag = satz.Buchungszeilen
+                        .Where(z => z.Buchungskonto.BuchungskontoId == ertragKontoId)
+                        .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag),
+                    Beschreibung = satz.Beschreibung,
+                    Notiz = satz.Notiz,
+                    KannLoeschen = schutz.KannLoeschen,
+                    KannStornieren = schutz.KannStornieren,
+                    Sperrgrund = schutz.Sperrgrund,
                 });
             }
-            else
-            {
-                var d = -monat.Delta;
-
-                var gutschriftSatz = NeuerSatz(
-                    $"Umbuchung Mietsoll-Gutschrift {monatsDatum:MM/yyyy} (rückwirkende Reduzierung, {grund})");
-                AddZeile(gutschriftSatz, SollHaben.Haben, d, vertrag.MietBuchungskonto);
-                AddZeile(gutschriftSatz, SollHaben.Soll, d, vertrag.Wohnung.MietErtragskonto);
-                ctx.Buchungssaetze.Add(gutschriftSatz);
-
-                var umbuchungsSatz = NeuerSatz(
-                    $"Umbuchung Kaltmiete → NK-Vorauszahlung {monatsDatum:MM/yyyy} ({grund})");
-                AddZeile(umbuchungsSatz, SollHaben.Haben, d, vertrag.NkBuchungskonto);
-                AddZeile(umbuchungsSatz, SollHaben.Soll, d, vertrag.MietBuchungskonto);
-                ctx.Buchungssaetze.Add(umbuchungsSatz);
-
-                ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = umbuchungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
-                    HabenZeile = gutschriftSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
-                });
-            }
+            return result;
         }
+
+        private static System.Linq.Expressions.Expression<Func<Buchungssatz, bool>> IstKorrektur(int mietKontoId, int nkKontoId) =>
+            s => s.Transaktion == null
+                && s.StornoVon == null
+                && s.StornoNach == null
+                && s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == mietKontoId)
+                && s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == nkKontoId);
 
         /// <summary>NK-Vorauszahlungen je Buchungsjahr, berechnet wie in der Abrechnung.</summary>
         private async Task<Dictionary<int, decimal>> LadeNkVorauszahlungenAsync(Vertrag vertrag)
@@ -263,54 +260,44 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 ?? throw new ArgumentException($"Vertrag {vertragId} nicht gefunden.");
 
         /// <summary>
-        /// Findet je Monat die ursprüngliche Sollstellung (nicht transaktionsgebunden) mit
-        /// einer bereits erfolgten Kaltmiete-Zahlung (transaktionsgebundene OPOS-Gegenzeile).
-        /// Unbezahlte Monate tauchen hier bewusst nicht auf (siehe Klassendokumentation).
+        /// Je Monat die Sollstellung (Soll auf dem MietBuchungskonto, ohne Transaktion, kein
+        /// Satz mit NK-Zeile) mit einer bereits erfolgten Kaltmiete-Zahlung
+        /// (transaktionsgebundene OPOS-Gegenzeile).
         /// </summary>
-        private async Task<List<MonatsDaten>> LadeBezahlteMonateAsync(Vertrag vertrag)
+        private async Task<List<Sollstellung>> LadeBezahlteSollstellungenAsync(Vertrag vertrag)
         {
             var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
 
             var sollZeilen = await ctx.Buchungszeilen
                 .Where(z =>
                     z.Buchungskonto.BuchungskontoId == mietKontoId &&
                     z.SollHaben == SollHaben.Soll &&
-                    z.Buchungssatz.Transaktion == null)
+                    z.Buchungssatz.Transaktion == null &&
+                    !z.Buchungssatz.Buchungszeilen.Any(g => g.Buchungskonto.BuchungskontoId == nkKontoId))
                 .Include(z => z.Buchungssatz)
                 .Include(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile).ThenInclude(h => h.Buchungssatz)
                     .ThenInclude(s => s.Transaktion)
                 .ToListAsync();
 
-            var monate = new List<MonatsDaten>();
+            var result = new List<Sollstellung>();
             foreach (var gruppe in sollZeilen.GroupBy(z => new
             { z.Buchungssatz.Buchungsjahr, z.Buchungssatz.Buchungsdatum.Month }))
             {
                 var sollZeile = gruppe.OrderBy(z => z.Buchungssatz.Buchungsdatum).First();
+                var bezahlt = sollZeile.AlsSollZeile.Any(a => a.HabenZeile.Buchungssatz.Transaktion != null);
+                if (!bezahlt) continue;
 
-                var kaltmieteHabenZeile = sollZeile.AlsSollZeile
-                    .Select(a => a.HabenZeile)
-                    .FirstOrDefault(h => h.Buchungssatz.Transaktion != null);
-                if (kaltmieteHabenZeile is null) continue; // unbezahlt: anderer Weg (siehe oben)
-
-                monate.Add(new MonatsDaten
-                {
-                    Jahr = gruppe.Key.Buchungsjahr,
-                    Monat = gruppe.Key.Month,
-                    Sollstellung = sollZeile.Buchungssatz,
-                    SollstellungsBetrag = sollZeile.Betrag
-                });
+                result.Add(new Sollstellung(gruppe.Key.Buchungsjahr, gruppe.Key.Month, sollZeile.Betrag));
             }
-
-            return monate;
+            return result;
         }
 
-        private static void AddZeile(Buchungssatz satz, SollHaben sollHaben, decimal betrag, Buchungskonto konto)
+        private static Buchungszeile AddZeile(Buchungssatz satz, SollHaben sollHaben, decimal betrag, Buchungskonto konto)
         {
-            satz.Buchungszeilen.Add(new Buchungszeile(sollHaben, betrag)
-            {
-                Buchungssatz = satz,
-                Buchungskonto = konto
-            });
+            var zeile = new Buchungszeile(sollHaben, betrag) { Buchungssatz = satz, Buchungskonto = konto };
+            satz.Buchungszeilen.Add(zeile);
+            return zeile;
         }
     }
 }

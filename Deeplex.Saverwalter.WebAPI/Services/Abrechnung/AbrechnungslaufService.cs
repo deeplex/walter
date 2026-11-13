@@ -139,11 +139,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         }
 
         /// <summary>
-        /// Prüft für jeden an der Abrechnung beteiligten Vertrag, ob die gebuchte Miet-Forderung
-        /// noch zur aktuellen <see cref="VertragVersion"/> passt (siehe <see cref="MietKorrekturService"/>).
-        /// Weicht ein Monat des Abrechnungsjahres ab und ist die Abweichung nicht bereits korrigiert,
-        /// wird ein sperrender Hinweis ergänzt — das verhindert <see cref="BookAsync"/>, bis die Miet-Korrektur (oder ein manueller Eingriff bei
-        /// <c>NkReichtNichtAus</c>) durchgeführt wurde.
+        /// Prüft für jeden an der Abrechnung beteiligten Vertrag, ob die gebuchte Kaltmiete des
+        /// Jahres zu den <see cref="VertragVersion"/>en passt (siehe <see cref="MietKorrekturService"/>).
+        /// Bleibt eine Differenz, wird ein sperrender Hinweis ergänzt — das verhindert
+        /// <see cref="BookAsync"/>, bis die Differenz gebucht ist (oder bei
+        /// <c>NkReichtNichtAus</c> manuell eingegriffen wurde).
         /// </summary>
         private async Task PruefeMietForderungenAsync(
             List<NkEinheit> einheiten, int jahr, List<Hinweis> warnungen, HashSet<int> verzichtVertragIds)
@@ -156,18 +156,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
             foreach (var vertragId in vertragIds)
             {
-                var monate = await _mietKorrekturService.ErmittleAsync(vertragId);
-                foreach (var monat in monate.Where(m => m.Jahr == jahr
-                    && (m.Status == MietKorrekturService.MietKorrekturStatus.Anwendbar
-                        || m.Status == MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus)))
+                var eintrag = (await _mietKorrekturService.ErmittleAsync(vertragId))
+                    .FirstOrDefault(j => j.Jahr == jahr);
+                if (eintrag is null || eintrag.Status is not
+                    (MietKorrekturService.MietKorrekturStatus.Anwendbar or MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus))
                 {
-                    warnungen.Add(new Hinweis(
-                        HinweisArt.Miete,
-                        $"Miet-Forderung weicht ab: Vertrag {vertragId}: {monat.Monat:00}/{monat.Jahr} " +
-                        $"gebuchte Kaltmiete {monat.IstKaltmiete:C} ≠ Soll-Kaltmiete {monat.SollKaltmiete:C} " +
-                        "— bitte zuerst Miet-Korrektur durchführen.",
-                        SperrtBuchung: true));
+                    continue;
                 }
+
+                var hinweis = eintrag.Status == MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus
+                    ? "die NK-Vorauszahlungen decken die Erhöhung nicht — bitte manuell prüfen."
+                    : "bitte zuerst die Differenz über die Miet-Korrektur am Vertrag buchen.";
+                warnungen.Add(new Hinweis(
+                    HinweisArt.Miete,
+                    $"Kaltmiete weicht ab: Vertrag {vertragId}, {jahr}: Differenz zum Vertrag {eintrag.Differenz:C} — {hinweis}",
+                    SperrtBuchung: true));
             }
         }
 

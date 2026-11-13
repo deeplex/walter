@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -103,7 +103,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
 
             var result = await controller.Get(entity.VertragId);
 
@@ -120,7 +120,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
 
             var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
@@ -141,7 +141,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
 
             var id = entity.VertragId;
 
@@ -150,6 +150,89 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             result.Should().BeOfType<OkResult>();
             ctx.Vertraege.Find(id).Should().BeNull();
 
+        }
+
+        private static VertragController MietKorrekturController(SaverwalterContext ctx)
+        {
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(A<ClaimsPrincipal>._, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            return new VertragController(
+                A.Fake<ILogger<VertragController>>(), new VertragDbService(ctx, auth), ctx, auth,
+                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+        }
+
+        /// <summary>Bezahlter Monat 01/2024 (500 Kaltmiete, 150 NK-VZ) mit nachgetragener Erhöhung auf 600.</summary>
+        private static async Task<Vertrag> VertragMitErhoehungAsync(SaverwalterContext ctx)
+        {
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var monat = new DateOnly(2024, 1, 1);
+            await new TransaktionBuchungsService(ctx).BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = 650m,
+                Zahlungsdatum = new DateOnly(2024, 1, 5),
+                Mieten =
+                {
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId,
+                        BetreffenderMonat = monat,
+                        Kaltmiete = 500m,
+                        NkVorauszahlung = 150m,
+                    }
+                }
+            });
+            vertrag.Versionen.Add(new VertragVersion(monat, 600m, 1) { Vertrag = vertrag });
+            await ctx.SaveChangesAsync();
+            return vertrag;
+        }
+
+        [Fact]
+        public async Task PostMietKorrektur_BuchtDieDifferenz()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragMitErhoehungAsync(ctx);
+
+            var result = await MietKorrekturController(ctx).PostMietKorrektur(
+                vertrag.VertragId, new MietKorrekturRequest { Jahr = 2024, Grund = "Mieterhöhung nachgetragen" });
+
+            var jahr = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeOfType<MietKorrekturJahrEntry>().Subject;
+            jahr.Status.Should().Be("Stimmt");
+            jahr.Korrigiert.Should().Be(100m);
+            jahr.Korrekturen.Should().ContainSingle().Which.KannLoeschen.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task PostMietKorrektur_OhneGrundIstBadRequest()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragMitErhoehungAsync(ctx);
+
+            var result = await MietKorrekturController(ctx).PostMietKorrektur(
+                vertrag.VertragId, new MietKorrekturRequest { Jahr = 2024, Grund = " " });
+
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task PostMietKorrektur_ImAbgerechnetenJahrMeldetKonflikt()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragMitErhoehungAsync(ctx);
+            var resultat = new Abrechnungsresultat { Vertrag = vertrag };
+            new AbrechnungsresultatBuchungsService(ctx).BucheAbrechnung(resultat, 2024, 0m);
+            ctx.Abrechnungsresultate.Add(resultat);
+            await ctx.SaveChangesAsync();
+            var saetze = ctx.Buchungssaetze.Count();
+
+            var result = await MietKorrekturController(ctx).PostMietKorrektur(
+                vertrag.VertragId, new MietKorrekturRequest { Jahr = 2024, Grund = "Grund" });
+
+            result.Result.Should().BeOfType<ConflictObjectResult>()
+                .Which.Value.Should().BeOfType<string>().Which.Should().Contain("abgerechnet");
+            ctx.Buchungssaetze.Count().Should().Be(saetze);
         }
     }
 }
