@@ -83,7 +83,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: rueckgaengig = konto ? imJahr(konto.rueckgaengigGemacht) : [];
 </script>
 
-<Tile style="margin-bottom: 1rem">
+<Tile id="mietkonto" style="margin-bottom: 1rem">
     <h4 style="margin-bottom: 0.75rem">
         {title}
         {#if konto}
@@ -161,9 +161,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {#if bearbeitbar && erfassenZeile?.erfassenFuer}
     <WalterZahlungErfassen
         {fetchImpl}
-        {vertragId}
-        monat={erfassenZeile.erfassenFuer}
-        periode={erfassenZeile.periode}
+        ziel={{ art: 'miete', vertragId, monat: erfassenZeile.erfassenFuer }}
+        titel={erfassenZeile.periode}
         vorschlag={Math.max(0, erfassenZeile.offen)}
         bind:open={erfassenOffen}
         on:gebucht={refresh}

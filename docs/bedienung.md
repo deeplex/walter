@@ -97,19 +97,23 @@ Der Zahlungsstatus hat überall dieselben Farben:
 
 ## Startseite
 
-Die Startseite ist die tägliche Aufgabenliste für ein gewähltes Jahr. Sie zeigt in
-klickbaren Kacheln:
+Die Startseite ist die tägliche Aufgabenliste für ein gewähltes Jahr:
 
-- **Offene Kaltmiete-Forderungen** — fehlende monatliche Sollstellungen werden beim
-  Öffnen automatisch erzeugt (bis einschließlich des laufenden Monats, nie in die
-  Zukunft). Ein Klick auf eine Zeile öffnet die Erfassung der zugehörigen Zahlung.
-- **Offene Betriebskosten** — Umlagen ohne vollständige Rechnung/Verteilung.
-- **Offene Garagenmieten**.
-- **Guthaben**.
-- **Fällige Zählerstände** — Zähler, die im Jahr noch keinen Stand haben.
+- **Offene Mieten** — Monate mit offener Kaltmiete (und Garagenmiete) je Vertrag. Fehlende
+  monatliche Sollstellungen werden beim Öffnen automatisch erzeugt (bis einschließlich des
+  laufenden Monats, nie in die Zukunft). Die Zeile führt zum **Mietkonto** des Vertrags.
+- **Offene Garagenmieten** — Garagenverträge ohne Wohnungsvertrag; die Zeile führt zum
+  Garagenvertrag.
+- **Fehlende Betriebskostenrechnungen** — Umlagen ohne Rechnung im Jahr.
+- **Offene Betriebskostenrechnungen** — erfasste, noch nicht (ganz) bezahlte Rechnungen.
+- **Guthaben** — Monate, in denen mehr gezahlt wurde als fällig war; die Zeile führt zum
+  Mietkonto.
+- **Zählerstände fällig** — Zähler, die im Jahr noch keinen Stand haben.
 
-Alle Kacheln sind direkt bebuchbar: Ein Klick auf eine Zeile öffnet die passende
-Schnellerfassung.
+Der Button **+** an einer Zeile öffnet **Zahlung erfassen** (wie im Mietkonto): Datum,
+Betrag (vorbelegt mit dem offenen Rest), optional das Bankkonto, dazu die Vorschau.
+**Erweitert …** öffnet das volle Transaktionsformular. Bei Rechnungen genügt ein Klick auf
+die Zeile.
 
 ---
 

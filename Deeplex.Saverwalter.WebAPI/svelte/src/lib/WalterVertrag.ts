@@ -18,7 +18,6 @@ import { WalterApiHandler } from './WalterApiHandler';
 import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterKontaktEntry } from './WalterKontakt';
-import { WalterMietzahlungListEntry } from './WalterMietzahlung';
 import { WalterMietminderungEntry } from './WalterMietminderung';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
@@ -48,7 +47,6 @@ export class WalterVertragEntry extends WalterApiHandler {
         public selectedMieter: WalterSelectionEntry[],
         public versionen: WalterVertragVersionEntry[],
         public mieter: WalterKontaktEntry[],
-        public mietzahlungen: WalterMietzahlungListEntry[],
         public mietminderungen: WalterMietminderungEntry[],
         public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public garageVertraege: WalterGarageVertragEntry[],
@@ -75,9 +73,6 @@ export class WalterVertragEntry extends WalterApiHandler {
             WalterVertragVersionEntry.fromJson
         );
         const mieter = json.mieter?.map(WalterKontaktEntry.fromJson);
-        const mietzahlungen = (json.mietzahlungen ?? []).map(
-            WalterMietzahlungListEntry.fromJson
-        );
         const mietminderungen = json.mietminderungen?.map(
             WalterMietminderungEntry.fromJson
         );
@@ -102,7 +97,6 @@ export class WalterVertragEntry extends WalterApiHandler {
             selectedMieter,
             versionen,
             mieter,
-            mietzahlungen,
             mietminderungen,
             abrechnungsresultate,
             garageVertraege,

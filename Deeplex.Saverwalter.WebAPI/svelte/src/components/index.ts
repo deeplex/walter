@@ -52,7 +52,6 @@ export { default as WalterWohnung } from './details/WalterWohnung.svelte';
 export { default as WalterWohnungVersion } from './details/WalterWohnungVersion.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 export { default as WalterZaehlerstand } from './details/WalterZaehlerstand.svelte';
-export { default as WalterMiettabelle } from './details/WalterMiettabelle.svelte';
 export { default as WalterMiettabelleWrapper } from './details/WalterMiettabelleWrapper.svelte';
 
 export { default as WalterError } from './elements/WalterError.svelte';

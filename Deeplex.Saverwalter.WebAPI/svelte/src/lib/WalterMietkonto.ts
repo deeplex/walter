@@ -220,3 +220,14 @@ export function mietkontoZeilen(
         return [...monate, ...nk];
     });
 }
+
+/** Wofür eine Zahlung im schlanken Erfassen gebucht wird. */
+export type WalterZahlungsZiel =
+    /** Miete eines Monats (`yyyy-mm-01`); der Server teilt auf. */
+    | { art: 'miete'; vertragId: number; monat: string }
+    /** Miete eines Garagenvertrags ohne Wohnungsvertrag. */
+    | { art: 'garage'; garageVertragId: number; monat: string }
+    /** Zahlung einer erfassten Betriebskostenrechnung. */
+    | { art: 'bkRechnung'; buchungssatzId: string }
+    /** Neue Betriebskostenrechnung, gleich bezahlt. */
+    | { art: 'bkNeu'; umlageId: number; jahr: number };

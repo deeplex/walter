@@ -16,6 +16,7 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,26 +34,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public decimal Rechnungsbetrag { get; set; }
             public decimal SchonGezahlt { get; set; }
             public decimal VerbleibenderBetrag { get; set; }
-        }
-
-        /// <summary>Kaltmiete-Zahlung eines Vertrags (Miettabelle der Startseite).</summary>
-        public class MietzahlungListEntry
-        {
-            public Guid Id { get; set; }
-            public DateOnly Buchungsdatum { get; set; }
-            public string BetreffenderMonat { get; set; } = string.Empty;
-            public decimal KaltmieteZahlung { get; set; }
-            public Permissions Permissions { get; set; } = new Permissions();
-
-            public MietzahlungListEntry() { }
-            public MietzahlungListEntry(Buchungssatz satz, decimal betrag, Permissions permissions)
-            {
-                Id = satz.BuchungssatzId;
-                Buchungsdatum = satz.Buchungsdatum;
-                BetreffenderMonat = new DateOnly(satz.Buchungsdatum.Year, satz.Buchungsdatum.Month, 1).ToString("yyyy-MM-01");
-                KaltmieteZahlung = betrag;
-                Permissions = permissions;
-            }
         }
 
         /// <summary>
@@ -258,7 +239,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             var vertrag = await ctx.Vertraege
                 .Include(v => v.Versionen)
+                .Include(v => v.NkBuchungskonto)
                 .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen).ThenInclude(g => g.Buchungskonto)
+                .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
                 .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Versionen)
                 .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Garage)
                 .Include(v => v.GarageVertraege).ThenInclude(gv => gv.MietBuchungskonto)
@@ -271,17 +256,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             var ersterDesMonats = new DateOnly(monat.Year, monat.Month, 1);
 
-            var sollSumme = vertrag.MietBuchungskonto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                .Sum(z => z.Betrag);
-
-            var habenSumme = vertrag.MietBuchungskonto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben
-                    && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                .Sum(z => z.Betrag);
+            // Bezahlt ist, was per Ausgleich an der Sollstellung des Monats hängt — nicht,
+            // was im Monat gezahlt wurde.
+            var sollstellungen = vertrag.MietBuchungskonto.Buchungszeilen
+                .Where(z => Sollstellung.IstImMonat(z, ersterDesMonats, vertrag.NkBuchungskonto.BuchungskontoId))
+                .ToList();
+            var sollSumme = sollstellungen.Sum(z => z.Betrag);
+            var habenSumme = sollstellungen.Sum(Sollstellung.Bezahlt);
 
             var version = vertrag.Versionen
                 .Where(v => v.Beginn <= ersterDesMonats)
@@ -296,16 +277,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         .MaxBy(v => v.Beginn);
                     if (gvVersion == null) return null;
 
-                    var gvSoll = gv.MietBuchungskonto.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Soll
-                            && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                            && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                        .Sum(z => z.Betrag);
-                    var gvHaben = gv.MietBuchungskonto.Buchungszeilen
-                        .Where(z => z.SollHaben == SollHaben.Haben
-                            && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                            && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                        .Sum(z => z.Betrag);
+                    var gvSollstellungen = gv.MietBuchungskonto.Buchungszeilen
+                        .Where(z => Sollstellung.IstImMonat(z, ersterDesMonats))
+                        .ToList();
+                    var gvSoll = gvSollstellungen.Sum(z => z.Betrag);
+                    var gvHaben = gvSollstellungen.Sum(Sollstellung.Bezahlt);
 
                     return new GarageForderungsstatusEntry
                     {

@@ -15,6 +15,7 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,9 +72,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Include(v => v.Wohnung).ThenInclude(w => w.MietErtragskonto)
                 .Include(v => v.Mieter)
                 .Include(v => v.ZahlungsKonto)
+                .Include(v => v.NkBuchungskonto)
                 .Include(v => v.MietBuchungskonto)
                     .ThenInclude(k => k.Buchungszeilen)
                         .ThenInclude(z => z.Buchungssatz)
+                            .ThenInclude(s => s.Buchungszeilen).ThenInclude(g => g.Buchungskonto)
+                .Include(v => v.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungssatz).ThenInclude(s => s.Transaktion)
+                .Include(v => v.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungssatz).ThenInclude(s => s.StornoVon)
+                .Include(v => v.MietBuchungskonto)
+                    .ThenInclude(k => k.Buchungszeilen)
+                        .ThenInclude(z => z.Buchungssatz).ThenInclude(s => s.StornoNach)
                 .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Versionen)
                 .Include(v => v.GarageVertraege).ThenInclude(gv => gv.Garage).ThenInclude(g => g.Ertragskonto)
                 .Include(v => v.GarageVertraege)
@@ -142,10 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     if (version != null)
                     {
                         var sollZeile = vertrag.MietBuchungskonto.Buchungszeilen
-                            .FirstOrDefault(z =>
-                                z.SollHaben == SollHaben.Soll
-                                && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                                && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                            .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat, vertrag.NkBuchungskonto.BuchungskontoId));
 
                         if (sollZeile == null)
                             sollZeile = ErstelleSollstellung(vertrag, monat, version.Grundmiete);
@@ -161,10 +170,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             if (gvVersion == null) continue;
 
                             var gvSollZeile = gv.MietBuchungskonto.Buchungszeilen
-                                .FirstOrDefault(z =>
-                                    z.SollHaben == SollHaben.Soll
-                                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                                .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
                             if (gvSollZeile == null)
                                 gvSollZeile = ErstelleGarageSollstellung(gv, monat, gvVersion.GaragenMiete);
@@ -229,9 +235,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .AsSplitQuery()
                 .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.NkBuchungskonto)
                 .Include(v => v.MietBuchungskonto)
                     .ThenInclude(k => k.Buchungszeilen)
                         .ThenInclude(z => z.Buchungssatz)
+                            .ThenInclude(s => s.Buchungszeilen).ThenInclude(g => g.Buchungskonto)
                 .Where(v => v.Versionen.Any(ver => ver.Beginn <= endOfYear)
                          && (v.Ende == null || v.Ende >= startOfYear))
                 .ToListAsync();
@@ -256,7 +264,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             foreach (var vertrag in vertraege)
             {
                 var sollZeilenImJahr = vertrag.MietBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungsjahr == jahr)
+                    .Where(z => z.Buchungssatz.Buchungsjahr == jahr
+                        && Sollstellung.Ist(z, vertrag.NkBuchungskonto.BuchungskontoId))
                     .ToList();
 
                 foreach (var sollZeile in sollZeilenImJahr)
@@ -412,10 +421,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     if (version != null)
                     {
                         var sollZeile = gv.MietBuchungskonto.Buchungszeilen
-                            .FirstOrDefault(z =>
-                                z.SollHaben == SollHaben.Soll
-                                && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                                && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                            .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
                         if (sollZeile == null)
                             sollZeile = ErstelleGarageSollstellung(gv, monat, version.GaragenMiete);

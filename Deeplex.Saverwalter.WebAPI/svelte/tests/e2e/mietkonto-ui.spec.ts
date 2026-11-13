@@ -101,6 +101,9 @@ async function findeOffenenMonat(): Promise<
     });
 }
 
+// Beide Tests buchen auf den Dev-Daten; nacheinander, damit sie nicht denselben Monat wählen.
+test.describe.configure({ mode: 'serial' });
+
 test('Miete im Mietkonto erfassen und rückgängig machen', async ({ page }) => {
     const gefunden = await findeOffenenMonat();
     expect(
@@ -172,4 +175,67 @@ test('Miete im Mietkonto erfassen und rückgängig machen', async ({ page }) => 
         )
         .toEqual({ offen: monat.offen, rueckgaengig: true });
     await expect(page.getByText('Rückgängig gemachte Zahlungen')).toBeVisible();
+});
+
+type OffeneMiete = {
+    vertragId: number;
+    vertragBezeichnung: string;
+    monat: string;
+    offen: number;
+    garagen: unknown[];
+};
+
+async function offeneMieten(jahr: number): Promise<OffeneMiete[]> {
+    return withFreshApiContext(async (api) => {
+        const login = await signInApi(api, 'admin.dev');
+        const r = await api.get(`/api/offene-forderungen/${jahr}`, {
+            headers: authHeader(login.token)
+        });
+        expect(r.ok()).toBeTruthy();
+        return (await r.json()) as OffeneMiete[];
+    });
+}
+
+test('Miete von der Startseite aus erfassen', async ({ page }) => {
+    const jahr = new Date().getFullYear();
+    const forderung = (await offeneMieten(jahr)).find(
+        (f) => f.garagen.length === 0
+    );
+    expect(
+        forderung,
+        'erwartet eine offene Miete ohne Garage im Dev-Seed'
+    ).toBeDefined();
+    const { vertragId, vertragBezeichnung, monat } = forderung!;
+    const [j, m] = monat.split('-').map(Number);
+    const monatLang = `${LANG[m - 1]} ${j}`;
+
+    await authenticatePage(page, 'admin.dev');
+    await page.goto(`/?jahr=${jahr}`);
+
+    const zeile = page
+        .getByRole('row')
+        .filter({ hasText: monatLang })
+        .filter({ hasText: vertragBezeichnung })
+        .first();
+    // Die Zeile verlinkt auf das Mietkonto des Vertrags.
+    await expect(zeile.getByRole('link').first()).toHaveAttribute(
+        'href',
+        `/vertraege/${vertragId}#mietkonto`
+    );
+    await zeile.getByRole('button', { name: 'Zahlung erfassen' }).click();
+
+    const dialog = page.locator('.bx--modal.is-visible');
+    await expect(dialog.getByText(`Kaltmiete ${monatLang}`)).toBeVisible();
+    const buchen = dialog.getByRole('button', { name: 'Buchen' });
+    await expect(buchen).toBeEnabled();
+    await buchen.click();
+    await expect(page.locator('.bx--modal.is-visible')).toHaveCount(0);
+
+    await expect
+        .poll(async () =>
+            (await offeneMieten(jahr)).some(
+                (f) => f.vertragId === vertragId && f.monat === monat
+            )
+        )
+        .toBe(false);
 });

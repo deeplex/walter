@@ -483,7 +483,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     $"GarageVertrag {gv.GarageVertragId} endete am {gv.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
 
             var vorhandene = gv.MietBuchungskonto.Buchungszeilen
-                .FirstOrDefault(z => IstSollstellung(z, monat));
+                .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
             if (vorhandene != null) return vorhandene;
 
@@ -813,8 +813,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
             var vorhandene = vertrag.MietBuchungskonto.Buchungszeilen
                 .FirstOrDefault(z =>
-                    IstSollstellung(z, monat)
-                    && !z.Buchungssatz.Buchungszeilen.Any(g => g.Buchungskonto.BuchungskontoId == nkKontoId));
+                    Sollstellung.IstImMonat(z, monat, nkKontoId));
 
             if (vorhandene != null) return vorhandene;
 
@@ -824,14 +823,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx.Buchungssaetze.Add(satz);
             return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
         }
-
-        private static bool IstSollstellung(Buchungszeile z, DateOnly monat) =>
-            z.SollHaben == SollHaben.Soll
-            && z.Buchungssatz.Transaktion == null
-            && z.Buchungssatz.StornoVon == null
-            && z.Buchungssatz.StornoNach == null
-            && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-            && z.Buchungssatz.Buchungsdatum.Month == monat.Month;
 
         private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 
@@ -884,8 +875,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             var rest = gesamt;
             var kaltmieteOffen = Offen(
                 vertrag.MietBuchungskonto.Buchungszeilen.Where(z =>
-                    IstSollstellung(z, monat)
-                    && !z.Buchungssatz.Buchungszeilen.Any(g => g.Buchungskonto.BuchungskontoId == nkKontoId)),
+                    Sollstellung.IstImMonat(z, monat, nkKontoId)),
                 vertrag.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn)?.Grundmiete);
             miete.Kaltmiete = Math.Min(rest, Math.Max(0m, kaltmieteOffen));
             rest -= miete.Kaltmiete;
@@ -898,7 +888,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
                 if (version is null) continue;
 
-                var offen = Offen(gv.MietBuchungskonto.Buchungszeilen.Where(z => IstSollstellung(z, monat)), version.GaragenMiete);
+                var offen = Offen(gv.MietBuchungskonto.Buchungszeilen.Where(z => Sollstellung.IstImMonat(z, monat)), version.GaragenMiete);
                 var betrag = Math.Min(rest, Math.Max(0m, offen));
                 if (betrag <= 0m) continue;
                 miete.Garagen.Add(new GaragenmietInput { GarageVertragId = gv.GarageVertragId, Betrag = betrag });

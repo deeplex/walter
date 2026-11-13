@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             // Kaltmiete
             var mietZeilen = zeilen.Where(z => z.Buchungskonto.BuchungskontoId == mietKontoId).ToList();
             var kaltmiete = Monatsposten(
-                mietZeilen.Where(z => IstSollstellung(z) && !BeruehrtKonto(z.Buchungssatz, nkKontoId)),
+                mietZeilen.Where(z => Sollstellung.Ist(z, nkKontoId)),
                 VertragsMonate(vertrag.Beginn(), vertrag.Ende, aktuellerMonat),
                 m => vertrag.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.Grundmiete);
             foreach (var (monat, posten) in kaltmiete)
@@ -158,7 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             {
                 var gvKontoId = gv.MietBuchungskonto.BuchungskontoId;
                 var garage = Monatsposten(
-                    zeilen.Where(z => z.Buchungskonto.BuchungskontoId == gvKontoId && IstSollstellung(z)),
+                    zeilen.Where(z => z.Buchungskonto.BuchungskontoId == gvKontoId && Sollstellung.Ist(z)),
                     VertragsMonate(gv.Beginn(), gv.Ende, aktuellerMonat),
                     m => gv.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.GaragenMiete);
                 foreach (var (monat, posten) in garage)
@@ -300,15 +300,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 yield return m;
         }
 
-        private static bool IstSollstellung(Buchungszeile z) =>
-            z.SollHaben == SollHaben.Soll
-            && z.Buchungssatz.Transaktion == null
-            && !IstStornoBeteiligt(z.Buchungssatz);
-
         private static bool IstStornoBeteiligt(Buchungssatz s) => s.StornoVon != null || s.StornoNach != null;
-
-        private static bool BeruehrtKonto(Buchungssatz s, int kontoId) =>
-            s.Buchungszeilen.Any(z => z.Buchungskonto.BuchungskontoId == kontoId);
 
         private static DateOnly ErsterDesMonats(DateOnly d) => new(d.Year, d.Month, 1);
 

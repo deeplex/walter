@@ -46,8 +46,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Wohnung { get; set; }
             public string? MieterAuflistung { get; set; }
 
-            // For Tabelle
-            public IEnumerable<MietzahlungListEntry>? Mietzahlungen { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -71,9 +69,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Wohnung = new(0, "Unbekannte Wohnung");
                 }
 
-                Mietzahlungen = entity.MietBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben)
-                    .Select(z => new MietzahlungListEntry(z.Buchungssatz, z.Betrag, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
                 MieterAuflistung = string.Join(", ", entity.Mieter.Select(a => a.Bezeichnung));
 

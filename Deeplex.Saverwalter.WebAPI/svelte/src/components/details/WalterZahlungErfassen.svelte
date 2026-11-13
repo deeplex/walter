@@ -15,11 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <!--
-    Schlankes Erfassen einer Mietzahlung für einen Monat: Datum, Betrag, optional das
-    Bankkonto des Zahlers und ein Verwendungszweck. Wie der Betrag auf Kaltmiete,
-    Garagen und NK-Vorauszahlung verteilt wird, entscheidet der Server; die Vorschau
-    zeigt es vor dem Speichern. „Erweitert …“ öffnet das volle Transaktionsformular
-    mit denselben Werten. Event `gebucht` nach dem Speichern.
+    Schlankes Erfassen einer Zahlung für ein Ziel aus dem Kontext — Miete eines Monats,
+    Garagenmiete, Zahlung einer erfassten oder neuen Betriebskostenrechnung: Datum,
+    Betrag, optional das Bankkonto des Zahlers und ein Verwendungszweck. Wie eine
+    Mietzahlung auf Kaltmiete, Garagen und NK-Vorauszahlung verteilt wird, entscheidet
+    der Server; die Vorschau zeigt es vor dem Speichern. „Erweitert …“ öffnet das volle
+    Transaktionsformular mit denselben Werten. Event `gebucht` nach dem Speichern.
 -->
 <script lang="ts">
     import {
@@ -38,7 +39,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
-        type WalterSelectionEntry
+        type WalterSelectionEntry,
+        type WalterZahlungsZiel
     } from '$walter/lib';
     import { convertDateCanadian } from '$walter/services/utils';
     import { walter_post, walter_selection } from '$walter/services/requests';
@@ -47,13 +49,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { get } from 'svelte/store';
 
     export let fetchImpl: typeof fetch;
-    export let vertragId: number;
-    /** Betreffender Monat, `yyyy-mm-01`. */
-    export let monat: string;
-    /** Anzeige des Monats, z. B. „Mär 2026“. */
-    export let periode: string;
-    /** Vorbelegter Betrag (offener Rest des Monats). */
+    export let ziel: WalterZahlungsZiel;
+    /** Wofür, für die Überschrift, z. B. „Mär 2026“ oder der Name der Rechnung. */
+    export let titel: string;
+    /** Vorbelegter Betrag (offener Rest). */
     export let vorschlag = 0;
+    /** Bankkonto des Empfängers, falls bekannt (z. B. Konto des Vermieters). */
+    export let zahlungsempfaengerId: number | undefined = undefined;
     export let open = false;
 
     const dispatch = createEventDispatcher<{ gebucht: void }>();
@@ -88,50 +90,85 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         changeTracker.set(tracker);
     }
 
-    function basis(): TransaktionsInput {
+    /** Positionen zum Ziel; `aufteilen`: der Server teilt eine Mietzahlung auf. */
+    function positionen(
+        betrag: number,
+        datum: string,
+        aufteilen: boolean
+    ): Partial<TransaktionsInput> {
+        switch (ziel.art) {
+            case 'miete':
+                return {
+                    mieten: [
+                        {
+                            vertragId: ziel.vertragId,
+                            betreffenderMonat: ziel.monat,
+                            kaltmiete: 0,
+                            garagen: [],
+                            nkVorauszahlung: 0,
+                            ...(aufteilen ? { gesamtbetrag: betrag } : {})
+                        }
+                    ]
+                };
+            case 'garage':
+                return {
+                    garagenEingaenge: [
+                        {
+                            garageVertragId: ziel.garageVertragId,
+                            garageKennung: titel,
+                            betreffenderMonat: ziel.monat,
+                            betrag
+                        }
+                    ]
+                };
+            case 'bkRechnung':
+                return {
+                    betriebskostenEingaenge: [
+                        { existingBuchungssatzId: ziel.buchungssatzId, betrag }
+                    ]
+                };
+            case 'bkNeu':
+                return {
+                    betriebskostenEingaenge: [
+                        {
+                            umlageId: ziel.umlageId,
+                            betreffendesJahr: ziel.jahr,
+                            rechnungsDatum: datum,
+                            betrag
+                        }
+                    ]
+                };
+        }
+    }
+
+    function eingabeFuer(aufteilen: boolean): TransaktionsInput {
         return {
             ...emptyTransaktionsInput(),
             betrag: betrag ?? 0,
             zahlungsdatum: datum ?? '',
             zahlerId: zahler?.id as number | undefined,
-            verwendungszweck
+            zahlungsempfaengerId,
+            verwendungszweck,
+            ...positionen(betrag ?? 0, datum ?? '', aufteilen)
         };
     }
 
-    $: einfacheEingabe =
-        datum && betrag && betrag > 0
-            ? ({
-                  ...emptyTransaktionsInput(),
-                  betrag,
-                  zahlungsdatum: datum,
-                  zahlerId: zahler?.id as number | undefined,
-                  verwendungszweck,
-                  mieten: [
-                      {
-                          vertragId,
-                          betreffenderMonat: monat,
-                          kaltmiete: 0,
-                          garagen: [],
-                          nkVorauszahlung: 0,
-                          gesamtbetrag: betrag
-                      }
-                  ]
-              } satisfies TransaktionsInput)
-            : undefined;
+    // Alle Felder, die eingabeFuer() liest, als Abhängigkeiten nennen.
+    $: einfacheEingabe = neuBerechnen(
+        datum,
+        betrag,
+        zahler,
+        verwendungszweck,
+        zahlungsempfaengerId,
+        ziel
+    );
+    function neuBerechnen(...felder: unknown[]): TransaktionsInput | undefined {
+        void felder;
+        return datum && betrag && betrag > 0 ? eingabeFuer(true) : undefined;
+    }
 
     function erweitern() {
-        erweitertInput = {
-            ...basis(),
-            mieten: [
-                {
-                    vertragId,
-                    betreffenderMonat: monat,
-                    kaltmiete: 0,
-                    garagen: [],
-                    nkVorauszahlung: 0
-                }
-            ]
-        };
+        erweitertInput = eingabeFuer(false);
         erweitert = true;
     }
 
@@ -166,7 +203,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <Modal
     bind:open
     size={erweitert ? 'lg' : 'sm'}
-    modalHeading={`Zahlung erfassen – ${periode}`}
+    modalHeading={`Zahlung erfassen – ${titel}`}
     primaryButtonText="Buchen"
     secondaryButtonText="Abbrechen"
     primaryButtonDisabled={!buchbar}

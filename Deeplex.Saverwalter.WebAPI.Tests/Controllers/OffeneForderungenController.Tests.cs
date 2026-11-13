@@ -1,0 +1,113 @@
+// Copyright (c) 2023-2026 Kai Lawrence
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ModelTests;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using FakeItEasy;
+using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Xunit;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MietzahlungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.OffeneForderungenController;
+
+namespace Deeplex.Saverwalter.WebAPI.Tests
+{
+    /// <summary>
+    /// Startseite und Forderungsstatus erkennen die Sollstellung eines Monats nach derselben
+    /// Regel wie Buchen und Mietkonto (<see cref="Sollstellung"/>).
+    /// </summary>
+    public class OffeneForderungenControllerTests
+    {
+        private static Task ZahleAsync(SaverwalterContext ctx, Vertrag vertrag, DateOnly monat, DateOnly datum) =>
+            new TransaktionBuchungsService(ctx).BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = 650m,
+                Zahlungsdatum = datum,
+                Mieten =
+                {
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId,
+                        BetreffenderMonat = monat,
+                        Kaltmiete = 500m,
+                        NkVorauszahlung = 150m,
+                    }
+                }
+            });
+
+        private static async Task<Vertrag> VertragAbAsync(SaverwalterContext ctx, DateOnly beginn)
+        {
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var version = vertrag.Versionen.Single();
+            version.Beginn = beginn;
+            version.Nebenkostenvorauszahlung = 150m;
+            await ctx.SaveChangesAsync();
+            return vertrag;
+        }
+
+        [Fact]
+        public async Task MietKorrekturImLaufendenMonatVerdecktNichtDieOffeneMiete()
+        {
+            var ctx = TestUtils.GetContext();
+            var heute = DateOnly.FromDateTime(DateTime.Today);
+            var dieserMonat = new DateOnly(heute.Year, heute.Month, 1);
+            var vormonat = dieserMonat.AddMonths(-1);
+            var vertrag = await VertragAbAsync(ctx, vormonat);
+            await ZahleAsync(ctx, vertrag, vormonat, vormonat.AddDays(4));
+            vertrag.Versionen.Single().Grundmiete = 600m;
+            await ctx.SaveChangesAsync();
+            // Die Korrektur trägt das heutige Datum, liegt also im laufenden Monat.
+            await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx))
+                .BucheDifferenzAsync(vertrag.VertragId, vormonat.Year, "Mieterhöhung nachgetragen");
+
+            var result = await new OffeneForderungenController(ctx).GetOffeneForderungen(heute.Year);
+
+            var eintraege = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneForderungEntry>>().Subject;
+            eintraege.Should().ContainSingle(e => e.Monat == dieserMonat.ToString("yyyy-MM-dd"))
+                .Which.KaltmieteOffen.Should().Be(600m);
+        }
+
+        [Fact]
+        public async Task ForderungsstatusZaehltDieZahlungFuerDenZugeordnetenMonat()
+        {
+            var ctx = TestUtils.GetContext();
+            var januar = new DateOnly(2024, 1, 1);
+            var februar = new DateOnly(2024, 2, 1);
+            var vertrag = await VertragAbAsync(ctx, januar);
+            // Januarmiete, gezahlt im Februar.
+            await ZahleAsync(ctx, vertrag, januar, new DateOnly(2024, 2, 3));
+
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(A<ClaimsPrincipal>._, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var controller = new MietzahlungController(ctx, auth);
+
+            var jan = (await controller.GetForderungsstatus(vertrag.VertragId, januar)).Result
+                .Should().BeOfType<OkObjectResult>().Which.Value.Should().BeOfType<ForderungsstatusEntry>().Subject;
+            var feb = (await controller.GetForderungsstatus(vertrag.VertragId, februar)).Result
+                .Should().BeOfType<OkObjectResult>().Which.Value.Should().BeOfType<ForderungsstatusEntry>().Subject;
+
+            jan.SchonGezahlt.Should().Be(500m);
+            jan.VerbleibendeForderung.Should().Be(0m);
+            feb.SchonGezahlt.Should().Be(0m);
+        }
+    }
+}
