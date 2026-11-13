@@ -300,6 +300,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Union(vertraege.Select(v => v.BkAbrechnungsKonto.BuchungskontoId))
                 .Union(vertraege.Select(v => v.ZahlungsKonto.BuchungskontoId))
                 .Union(vertraege.Select(v => v.MietminderungsKonto.BuchungskontoId))
+                .Union(vertraege.Select(v => v.KautionsKonto.BuchungskontoId))
                 .Union(garageVertraege.Select(gv => gv.MietBuchungskonto.BuchungskontoId))
                 .Union(garageVertraege.Select(gv => gv.ZahlungsKonto.BuchungskontoId))
                 .Union(garageVertraege.Select(gv => gv.Garage.Ertragskonto.BuchungskontoId))

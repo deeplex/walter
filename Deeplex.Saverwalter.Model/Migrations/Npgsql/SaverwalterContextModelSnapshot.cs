@@ -1201,21 +1201,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("date")
                         .HasColumnName("ende");
 
-                    b.Property<string>("KautionArt")
-                        .HasColumnType("text")
-                        .HasColumnName("kaution_art");
-
-                    b.Property<decimal?>("KautionBetrag")
-                        .HasColumnType("numeric")
-                        .HasColumnName("kaution_betrag");
-
-                    b.Property<DateOnly?>("KautionEingangsdatum")
-                        .HasColumnType("date")
-                        .HasColumnName("kaution_eingangsdatum");
-
-                    b.Property<DateOnly?>("KautionRueckgabedatum")
-                        .HasColumnType("date")
-                        .HasColumnName("kaution_rueckgabedatum");
+                    b.Property<int>("KautionsKontoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kautions_konto_id");
 
                     b.Property<DateTime>("LastModified")
                         .ValueGeneratedOnAdd()
@@ -1255,6 +1243,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.HasIndex("BkAbrechnungsKontoId")
                         .HasDatabaseName("ix_vertraege_bk_abrechnungs_konto_id");
+
+                    b.HasIndex("KautionsKontoId")
+                        .HasDatabaseName("ix_vertraege_kautions_konto_id");
 
                     b.HasIndex("MietBuchungskontoId")
                         .HasDatabaseName("ix_vertraege_miet_buchungskonto_id");
@@ -2121,6 +2112,13 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .IsRequired()
                         .HasConstraintName("fk_vertraege_buchungskonten_bk_abrechnungs_konto_id");
 
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "KautionsKonto")
+                        .WithMany()
+                        .HasForeignKey("KautionsKontoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_vertraege_buchungskonten_kautions_konto_id");
+
                     b.HasOne("Deeplex.Saverwalter.Model.Buchungskonto", "MietBuchungskonto")
                         .WithMany()
                         .HasForeignKey("MietBuchungskontoId")
@@ -2159,6 +2157,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                     b.Navigation("Ansprechpartner");
 
                     b.Navigation("BkAbrechnungsKonto");
+
+                    b.Navigation("KautionsKonto");
 
                     b.Navigation("MietBuchungskonto");
 

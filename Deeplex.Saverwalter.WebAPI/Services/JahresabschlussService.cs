@@ -225,7 +225,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                     v.NkBuchungskonto.BuchungskontoId,
                     v.BkAbrechnungsKonto.BuchungskontoId,
                     v.ZahlungsKonto.BuchungskontoId,
-                    v.MietminderungsKonto.BuchungskontoId
+                    v.MietminderungsKonto.BuchungskontoId,
+                    v.KautionsKonto.BuchungskontoId
                 })
                 .ToHashSet();
 

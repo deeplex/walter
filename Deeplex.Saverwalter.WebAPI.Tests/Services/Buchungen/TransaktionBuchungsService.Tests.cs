@@ -573,5 +573,48 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             await zuViel.Should().ThrowAsync<InvalidOperationException>().WithMessage("*übersteigt*");
             ctx.ChangeTracker.HasChanges().Should().BeFalse();
         }
+
+        private static TransaktionBuchungsService.TransaktionsInput Kaution(Vertrag vertrag, decimal betrag, bool rueckzahlung) => new()
+        {
+            Betrag = betrag,
+            Zahlungsdatum = new DateOnly(2024, 2, 1),
+            Kautionen = { new TransaktionBuchungsService.KautionInput { VertragId = vertrag.VertragId, Betrag = betrag, Rueckzahlung = rueckzahlung } },
+        };
+
+        private static decimal HabenSaldo(Buchungskonto konto) =>
+            konto.Buchungszeilen.Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+
+        [Fact]
+        public async Task KautionEingangUndRueckzahlungBuchenAufDasKautionsKonto()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var service = new TransaktionBuchungsService(ctx);
+
+            var eingang = await service.BucheAsync(Kaution(vertrag, 1500m, rueckzahlung: false));
+            var satz = eingang.Buchungssaetze.Single();
+            satz.Buchungszeilen.Should().Contain(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto == vertrag.KautionsKonto && z.Betrag == 1500m);
+            satz.Buchungszeilen.Should().Contain(z => z.SollHaben == SollHaben.Soll && z.Buchungskonto == vertrag.ZahlungsKonto);
+            HabenSaldo(vertrag.KautionsKonto).Should().Be(1500m);
+
+            await service.BucheAsync(Kaution(vertrag, 1500m, rueckzahlung: true));
+            HabenSaldo(vertrag.KautionsKonto).Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task KautionRueckzahlungDarfDieGehalteneKautionNichtUebersteigen()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var service = new TransaktionBuchungsService(ctx);
+            await service.BucheAsync(Kaution(vertrag, 1000m, rueckzahlung: false));
+
+            var zuViel = () => service.BucheAsync(Kaution(vertrag, 1200m, rueckzahlung: true));
+
+            await zuViel.Should().ThrowAsync<InvalidOperationException>().WithMessage("*gehaltene Kaution*");
+            HabenSaldo(vertrag.KautionsKonto).Should().Be(1000m);
+        }
     }
 }

@@ -82,7 +82,10 @@ export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlageVersionEntry } from './WalterUmlageVersion';
 export { WalterUmlagetypEntry, BETRK_V_NUMMERN } from './WalterUmlagetyp';
-export { WalterVertragEntry } from './WalterVertrag';
+export {
+    WalterVertragEntry,
+    type WalterKautionsBuchung
+} from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';
 export {

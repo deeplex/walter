@@ -100,17 +100,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
         private async Task<GarageVertragEntry> Add(GarageVertragEntry entry, Garage garage)
         {
-            var idx = $"GV{entry.Id:D5}";
+            // Die Kontonummern enthalten die Id; die steht erst nach dem Speichern fest.
             var entity = new GarageVertrag
             {
                 Garage = garage,
-                MietBuchungskonto = new Buchungskonto($"{idx}-MB", "Garagenmiete", BuchungskontoTyp.Aktiv),
-                ZahlungsKonto = new Buchungskonto($"{idx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietBuchungskonto = new Buchungskonto("", "Garagenmiete", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("", "Zahlung", BuchungskontoTyp.Aktiv),
             };
 
+            await using var tx = await Ctx.Database.BeginTransactionAsync();
             await SetOptionalValues(entity, entry);
             Ctx.GarageVertraege.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
+
+            var idx = $"GV{entity.GarageVertragId:D5}";
+            entity.MietBuchungskonto.Kontonummer = $"{idx}-MB";
+            entity.ZahlungsKonto.Kontonummer = $"{idx}-ZK";
+            await Ctx.SaveChangesAsync();
+            await tx.CommitAsync();
 
             return new GarageVertragEntry(entity, entry.Permissions);
         }

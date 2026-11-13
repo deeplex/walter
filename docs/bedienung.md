@@ -131,8 +131,11 @@ Die Wohnungs-Detailseite bündelt alles zu einer Einheit:
 
 Die Vertrags-Detailseite zeigt:
 
-- **Stammdaten & Kaution** — Vertragsdaten samt Kautionsbetrag, Eingangs-/Rückgabedatum
-  und Art (in einem aufklappbaren Abschnitt).
+- **Stammdaten** — Vertragsdaten.
+- **Kaution** — die gehaltene Kaution (Saldo des KautionsKontos) und die bisherigen Eingänge
+  und Rückzahlungen. Über **Kaution erhalten** und **Kaution zurückzahlen** werden sie mit
+  Datum und Betrag gebucht; eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
+  Jede Buchung ist eine eigene Transaktion und wird über deren Seite rückgängig gemacht.
 - **Mieter** — die zugeordneten Kontakte.
 - **Nachträge** — die Vertragsversionen (Grundmiete/Kaltmiete und Personenzahl, zeitlich
   gültig).

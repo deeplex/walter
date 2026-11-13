@@ -512,6 +512,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         BkAbrechnungsKonto = new Buchungskonto($"V{vIdx:D5}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                         ZahlungsKonto = new Buchungskonto($"V{vIdx:D5}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
                         MietminderungsKonto = new Buchungskonto($"V{vIdx:D5}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
+                        KautionsKonto = new Buchungskonto($"V{vIdx:D5}-KA", "Kaution", BuchungskontoTyp.Passiv),
                     };
 
                     vertraege.Add(vertrag);

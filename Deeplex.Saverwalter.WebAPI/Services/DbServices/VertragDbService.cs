@@ -117,20 +117,32 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 throw new ArgumentException("entry has no Wohnung");
             }
             var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
-            var idx = $"V{entry.Id:D5}";
+            // Die Kontonummern enthalten die Vertrags-Id; die steht erst nach dem Speichern fest.
             var entity = new Vertrag()
             {
                 Wohnung = wohnung!,
-                MietBuchungskonto = new Buchungskonto($"{idx}-MB", "Mietforderungen", BuchungskontoTyp.Aktiv),
-                NkBuchungskonto = new Buchungskonto($"{idx}-NK", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
-                BkAbrechnungsKonto = new Buchungskonto($"{idx}-BK", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
-                ZahlungsKonto = new Buchungskonto($"{idx}-ZK", "Zahlung", BuchungskontoTyp.Aktiv),
-                MietminderungsKonto = new Buchungskonto($"{idx}-MM", "Mietminderung", BuchungskontoTyp.Aufwand),
+                MietBuchungskonto = new Buchungskonto("", "Mietforderungen", BuchungskontoTyp.Aktiv),
+                NkBuchungskonto = new Buchungskonto("", "NK-Vorauszahlungen", BuchungskontoTyp.Passiv),
+                BkAbrechnungsKonto = new Buchungskonto("", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("", "Zahlung", BuchungskontoTyp.Aktiv),
+                MietminderungsKonto = new Buchungskonto("", "Mietminderung", BuchungskontoTyp.Aufwand),
+                KautionsKonto = new Buchungskonto("", "Kaution", BuchungskontoTyp.Passiv),
             };
 
+            await using var tx = await Ctx.Database.BeginTransactionAsync();
             await SetOptionalValues(entity, entry);
             Ctx.Vertraege.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
+
+            var idx = $"V{entity.VertragId:D5}";
+            entity.MietBuchungskonto.Kontonummer = $"{idx}-MB";
+            entity.NkBuchungskonto.Kontonummer = $"{idx}-NK";
+            entity.BkAbrechnungsKonto.Kontonummer = $"{idx}-BK";
+            entity.ZahlungsKonto.Kontonummer = $"{idx}-ZK";
+            entity.MietminderungsKonto.Kontonummer = $"{idx}-MM";
+            entity.KautionsKonto.Kontonummer = $"{idx}-KA";
+            await Ctx.SaveChangesAsync();
+            await tx.CommitAsync();
 
             return new VertragEntry(entity, entry.Permissions);
         }
@@ -224,10 +236,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 ? await Ctx.Kontakte.FindAsync(apId)
                 : null;
             entity.Notiz = entry.Notiz;
-            entity.KautionBetrag = entry.KautionBetrag;
-            entity.KautionEingangsdatum = entry.KautionEingangsdatum;
-            entity.KautionRueckgabedatum = entry.KautionRueckgabedatum;
-            entity.KautionArt = entry.KautionArt;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
             {

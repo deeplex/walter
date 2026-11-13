@@ -24,6 +24,14 @@ import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragVersionEntry } from './WalterVertragVersion';
 
+/** Eingang (positiv) oder Rückzahlung (negativ) auf dem KautionsKonto. */
+export interface WalterKautionsBuchung {
+    datum: string;
+    betrag: number;
+    beschreibung: string;
+    transaktionId?: string;
+}
+
 export class WalterVertragEntry extends WalterApiHandler {
     public static ApiURL = `/api/vertraege`;
 
@@ -45,11 +53,11 @@ export class WalterVertragEntry extends WalterApiHandler {
         public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public garageVertraege: WalterGarageVertragEntry[],
         public permissions: WalterPermissions,
-        public kautionBetrag: number | undefined,
-        public kautionEingangsdatum: string | undefined,
-        public kautionRueckgabedatum: string | undefined,
-        public kautionArt: string | undefined,
-        public konten: Partial<WalterBuchungskontoEntry>[]
+        public konten: Partial<WalterBuchungskontoEntry>[],
+        /** Gehaltene Kaution: Saldo des KautionsKontos. */
+        public kaution: number = 0,
+        public kautionsKontoId?: number,
+        public kautionsBuchungen: WalterKautionsBuchung[] = []
     ) {
         super();
     }
@@ -99,11 +107,10 @@ export class WalterVertragEntry extends WalterApiHandler {
             abrechnungsresultate,
             garageVertraege,
             permissions,
-            json.kautionBetrag,
-            json.kautionEingangsdatum,
-            json.kautionRueckgabedatum,
-            json.kautionArt,
-            json.konten ?? []
+            json.konten ?? [],
+            json.kaution ?? 0,
+            json.kautionsKontoId ?? undefined,
+            json.kautionsBuchungen ?? []
         );
     }
 }

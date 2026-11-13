@@ -55,6 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 BkAbrechnungsKonto = new Buchungskonto("1003", "NK-Abr", BuchungskontoTyp.Ertrag),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Minderung", BuchungskontoTyp.Aufwand),
+                KautionsKonto = new Buchungskonto("1006", "Kaution", BuchungskontoTyp.Passiv),
             };
             if (end.HasValue) vertrag.Ende = end.Value;
             var version = new VertragVersion(start ?? new DateOnly(2000, 1, 1), 1000, personenzahl);

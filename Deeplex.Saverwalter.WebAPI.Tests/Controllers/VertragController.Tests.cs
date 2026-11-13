@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -85,6 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 BkAbrechnungsKonto = new Buchungskonto("1003", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
+                KautionsKonto = new Buchungskonto("1006", "Kaution", BuchungskontoTyp.Passiv),
             };
             var entry = new VertragEntry(entity, new());
 
@@ -103,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
 
             var result = await controller.Get(entity.VertragId);
 
@@ -120,7 +121,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
 
             var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
@@ -141,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragDbService(ctx, auth);
-            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+            var controller = new VertragController(logger, dbService, ctx, auth, new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
 
             var id = entity.VertragId;
 
@@ -152,6 +153,57 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
         }
 
+        [Fact]
+        public async Task PostKaution_BuchtEingangUndRueckzahlungAlsTransaktion()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var controller = MietKorrekturController(ctx);
+
+            var eingang = await controller.PostKaution(vertrag.VertragId, new KautionRequest
+            {
+                Datum = new DateOnly(2024, 1, 2),
+                Betrag = 1500m,
+            });
+            var entry = eingang.Value ?? eingang.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeOfType<VertragEntry>().Subject;
+            entry.Kaution.Should().Be(1500m);
+            entry.KautionsBuchungen.Should().ContainSingle()
+                .Which.TransaktionId.Should().NotBeNull();
+
+            var rueckzahlung = await controller.PostKaution(vertrag.VertragId, new KautionRequest
+            {
+                Datum = new DateOnly(2025, 6, 30),
+                Betrag = 1500m,
+                Rueckzahlung = true,
+            });
+            entry = rueckzahlung.Value ?? rueckzahlung.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeOfType<VertragEntry>().Subject;
+            entry.Kaution.Should().Be(0m);
+            entry.KautionsBuchungen.Select(b => b.Betrag).Should().Equal(1500m, -1500m);
+            ctx.Transaktionen.Count().Should().Be(2);
+        }
+
+        [Fact]
+        public async Task PostKaution_RueckzahlungUeberDerGehaltenenKautionIstBadRequest()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+
+            var result = await MietKorrekturController(ctx).PostKaution(vertrag.VertragId, new KautionRequest
+            {
+                Datum = new DateOnly(2024, 1, 2),
+                Betrag = 100m,
+                Rueckzahlung = true,
+            });
+
+            result.Result.Should().BeOfType<BadRequestObjectResult>()
+                .Which.Value.Should().BeOfType<string>().Which.Should().Contain("gehaltene Kaution");
+            ctx.Transaktionen.Count().Should().Be(0);
+        }
+
         private static VertragController MietKorrekturController(SaverwalterContext ctx)
         {
             var auth = A.Fake<IAuthorizationService>();
@@ -159,7 +211,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             return new VertragController(
                 A.Fake<ILogger<VertragController>>(), new VertragDbService(ctx, auth), ctx, auth,
-                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), A.Fake<HttpClient>());
+                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)), new TransaktionBuchungsService(ctx), A.Fake<HttpClient>());
         }
 
         /// <summary>Bezahlter Monat 01/2024 (500 Kaltmiete, 150 NK-VZ) mit nachgetragener Erhöhung auf 600.</summary>

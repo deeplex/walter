@@ -153,6 +153,18 @@ Unterstützte Positionsarten:
 Die Summe aller Positionen muss dem Transaktionsbetrag entsprechen — sonst wird die
 Transaktion abgelehnt.
 
+### Kaution
+
+Eingang und Rückzahlung der Kaution werden auf der Vertrags-Detailseite gebucht
+(**Kaution erhalten** / **Kaution zurückzahlen**), nicht im Transaktionsdialog. Walter legt
+dafür je eine Transaktion an:
+
+- **Eingang:** Soll `ZahlungsKonto` / Haben `KautionsKonto` des Vertrags.
+- **Rückzahlung:** Soll `KautionsKonto` / Haben `ZahlungsKonto`; sie darf die gehaltene
+  Kaution (Saldo des `KautionsKontos`) nicht übersteigen.
+
+Rückgängig gemacht wird über die Seite der Transaktion.
+
 ### Offene Forderungen (Startseite)
 
 Die **Startseite** listet die offenen Kaltmiete-Forderungen des gewählten Jahres.

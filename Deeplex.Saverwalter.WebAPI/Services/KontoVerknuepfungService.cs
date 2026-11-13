@@ -32,6 +32,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         public static readonly KontoFunktion BkAbrechnung = new("BK-Abrechnung", true);
         public static readonly KontoFunktion Zahlungseingaenge = new("Zahlungseingänge", false);
         public static readonly KontoFunktion Mietminderungen = new("Mietminderungen", false);
+        // Nicht ausgleichbar: eine Kaution wird über Jahre gehalten und ist kein offener
+        // Punkt des Jahresabschlusses.
+        public static readonly KontoFunktion Kaution = new("Kaution", false);
         public static readonly KontoFunktion Mietertraege = new("Mieterträge", false);
         public static readonly KontoFunktion Aufwendungen = new("Aufwendungen", false);
         // Bewusst NICHT ausgleichbar: die NK-Verrechnung gleicht sich erst mit den
@@ -93,7 +96,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                     kontoIds.Contains(v.NkBuchungskonto.BuchungskontoId) ||
                     kontoIds.Contains(v.BkAbrechnungsKonto.BuchungskontoId) ||
                     kontoIds.Contains(v.ZahlungsKonto.BuchungskontoId) ||
-                    kontoIds.Contains(v.MietminderungsKonto.BuchungskontoId))
+                    kontoIds.Contains(v.MietminderungsKonto.BuchungskontoId) ||
+                    kontoIds.Contains(v.KautionsKonto.BuchungskontoId))
                 .ToListAsync();
             foreach (var v in vertraege)
             {
@@ -104,6 +108,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 Add(v.BkAbrechnungsKonto, "Vertrag", id, text, KontoFunktion.BkAbrechnung);
                 Add(v.ZahlungsKonto, "Vertrag", id, text, KontoFunktion.Zahlungseingaenge);
                 Add(v.MietminderungsKonto, "Vertrag", id, text, KontoFunktion.Mietminderungen);
+                Add(v.KautionsKonto, "Vertrag", id, text, KontoFunktion.Kaution);
             }
 
             var wohnungen = await ctx.Wohnungen

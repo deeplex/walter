@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   BetriebskostenEingang — legt Rechnung + Forderungs- und Zahlungs-Buchungssatz an
     ///   Erhaltungsaufwendungen — Aufwands-Buchungssatz gegen Zahlungskonto
     ///   Sonstige             — direkter Buchungssatz mit expliziten Soll/Haben-Konten
+    ///   Kautionen            — Eingang oder Rückzahlung auf dem KautionsKonto (gebucht über VertragController.PostKaution)
     /// </summary>
     public class TransaktionBuchungsService
     {
@@ -105,6 +106,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public decimal Betrag { get; set; }
         }
 
+        /// <summary>
+        /// Kaution des Mieters: Eingang (Soll ZahlungsKonto / Haben KautionsKonto) oder
+        /// Rückzahlung (Soll KautionsKonto / Haben Zahler-Bankkonto bzw. ZahlungsKonto).
+        /// Eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
+        /// </summary>
+        public class KautionInput
+        {
+            public int VertragId { get; set; }
+            public decimal Betrag { get; set; }
+            public bool Rueckzahlung { get; set; }
+        }
+
         public class TransaktionsInput
         {
             public decimal Betrag { get; set; }
@@ -120,6 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public List<SonstigerBuchungssatzInput> Sonstige { get; set; } = [];
             public List<NkAnteilEingangInput> NkAnteilEingaenge { get; set; } = [];
             public List<AbrechnungsAusgleichInput> AbrechnungsAusgleiche { get; set; } = [];
+            public List<KautionInput> Kautionen { get; set; } = [];
         }
 
         // ── Vorschau ─────────────────────────────────────────────────────────────
@@ -222,7 +236,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 input.BetriebskostenEingaenge.Sum(b => b.Betrag) +
                 input.Erhaltungsaufwendungen.Sum(e => e.Betrag) +
                 input.Sonstige.Sum(s => s.Betrag) +
-                input.AbrechnungsAusgleiche.Sum(a => a.Betrag);
+                input.AbrechnungsAusgleiche.Sum(a => a.Betrag) +
+                input.Kautionen.Sum(k => k.Betrag);
 
             if (totalBetrag <= 0)
                 throw new ArgumentException("Mindestens eine Position mit Betrag > 0 erforderlich.");
@@ -290,6 +305,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             foreach (var ausgleich in input.AbrechnungsAusgleiche)
             {
                 var satz = await ErstelleAbrechnungsAusgleichAsync(ausgleich, input.Zahlungsdatum, transaktion);
+                satz.Notiz = input.Notiz;
+                satz.Transaktion = transaktion;
+                _ctx.Buchungssaetze.Add(satz);
+            }
+
+            foreach (var kaution in input.Kautionen)
+            {
+                var satz = await ErstelleKautionAsync(kaution, input.Zahlungsdatum, transaktion);
                 satz.Notiz = input.Notiz;
                 satz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(satz);
@@ -660,6 +683,41 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(satz, SollHaben.Soll, ea.Betrag, wohnung.AufwandsKonto);
             AddZeile(satz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
             return satz;
+        }
+
+        private async Task<Buchungssatz> ErstelleKautionAsync(
+            KautionInput kaution, DateOnly zahlungsdatum, Transaktion transaktion)
+        {
+            if (kaution.Betrag <= 0)
+                throw new ArgumentException($"Betrag muss größer als 0 sein (aktuell: {kaution.Betrag:C}).");
+
+            var vertrag = await _ctx.Vertraege
+                .Include(v => v.KautionsKonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.ZahlungsKonto)
+                .FirstOrDefaultAsync(v => v.VertragId == kaution.VertragId)
+                ?? throw new ArgumentException($"Vertrag {kaution.VertragId} nicht gefunden.");
+
+            if (!kaution.Rueckzahlung)
+            {
+                var eingang = new Buchungssatz(zahlungsdatum, "Kaution Eingang");
+                AddZeile(eingang, SollHaben.Soll, kaution.Betrag, vertrag.ZahlungsKonto);
+                AddZeile(eingang, SollHaben.Haben, kaution.Betrag, vertrag.KautionsKonto);
+                return eingang;
+            }
+
+            // Gehaltene Kaution: Saldo des KautionsKontos (Haben positiv), einschließlich der
+            // in dieser Transaktion schon erfassten Kautionszeilen.
+            var gehalten = vertrag.KautionsKonto.Buchungszeilen
+                .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+            if (kaution.Betrag > gehalten + 0.005m)
+                throw new InvalidOperationException(
+                    $"Rückzahlung ({kaution.Betrag:C}) übersteigt die gehaltene Kaution ({gehalten:C}).");
+
+            var rueckzahlung = new Buchungssatz(zahlungsdatum, "Kaution Rückzahlung");
+            AddZeile(rueckzahlung, SollHaben.Soll, kaution.Betrag, vertrag.KautionsKonto);
+            AddZeile(rueckzahlung, SollHaben.Haben, kaution.Betrag,
+                transaktion.Zahler?.BuchungsKonto ?? vertrag.ZahlungsKonto);
+            return rueckzahlung;
         }
 
         private static Buchungssatz ErstelleSonstigerBuchungssatz(

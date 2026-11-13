@@ -97,11 +97,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
+            /// <summary>Gehaltene Kaution: Saldo des KautionsKontos (Haben positiv).</summary>
+            public decimal Kaution { get; set; }
+            public int? KautionsKontoId { get; set; }
+            /// <summary>Eingänge (positiv) und Rückzahlungen (negativ) auf dem KautionsKonto.</summary>
+            public IEnumerable<KautionsBuchungEntry> KautionsBuchungen { get; set; } = [];
 
-            public decimal? KautionBetrag { get; set; }
-            public DateOnly? KautionEingangsdatum { get; set; }
-            public DateOnly? KautionRueckgabedatum { get; set; }
-            public string? KautionArt { get; set; }
 
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
@@ -113,10 +114,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
                 }
                 Notiz = entity.Notiz;
-                KautionBetrag = entity.KautionBetrag;
-                KautionEingangsdatum = entity.KautionEingangsdatum;
-                KautionRueckgabedatum = entity.KautionRueckgabedatum;
-                KautionArt = entity.KautionArt;
 
                 SelectedMieter = entity.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
@@ -132,17 +129,43 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     (entity.NkBuchungskonto, KontoFunktion.NkVorauszahlungen),
                     (entity.BkAbrechnungsKonto, KontoFunktion.BkAbrechnung),
                     (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge),
-                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen));
+                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen),
+                    (entity.KautionsKonto, KontoFunktion.Kaution));
+                if (entity.KautionsKonto is Buchungskonto kautionsKonto)
+                {
+                    KautionsKontoId = kautionsKonto.BuchungskontoId;
+                    Kaution = kautionsKonto.Buchungszeilen
+                        .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+                    KautionsBuchungen = kautionsKonto.Buchungszeilen
+                        .OrderBy(z => z.Buchungssatz.Buchungsdatum)
+                        .Select(z => new KautionsBuchungEntry
+                        {
+                            Datum = z.Buchungssatz.Buchungsdatum,
+                            Betrag = z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag,
+                            Beschreibung = z.Buchungssatz.Beschreibung,
+                            TransaktionId = z.Buchungssatz.Transaktion?.TransaktionId,
+                        })
+                        .ToList();
+                }
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
             }
         }
 
+        public class KautionsBuchungEntry
+        {
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public Guid? TransaktionId { get; set; }
+        }
+
         private readonly ILogger<VertragController> _logger;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
         private readonly MietKorrekturService _mietKorrekturService;
+        private readonly TransaktionBuchungsService _buchungsService;
         protected override VertragDbService DbService { get; }
 
         public VertragController(
@@ -151,12 +174,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             SaverwalterContext ctx,
             IAuthorizationService auth,
             MietKorrekturService mietKorrekturService,
+            TransaktionBuchungsService buchungsService,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _ctx = ctx;
             _auth = auth;
             _mietKorrekturService = mietKorrekturService;
+            _buchungsService = buchungsService;
             _logger = logger;
         }
 
@@ -210,7 +235,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         /// <summary>
         /// Returns all Transaktionen that have Buchungssätze touching this Vertrag's
-        /// MietBuchungskonto or NkBuchungskonto.
+        /// MietBuchungskonto, NkBuchungskonto or KautionsKonto.
         /// </summary>
         [HttpGet("{id}/transaktionen")]
         public async Task<ActionResult<IEnumerable<TransaktionEntry>>> GetTransaktionen(int id)
@@ -225,6 +250,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
             var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+            var kautionsKontoId = vertrag.KautionsKonto.BuchungskontoId;
 
             var transaktionen = await _ctx.Transaktionen
                 .Include(t => t.Zahler)
@@ -235,7 +261,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(t => t.Buchungssaetze.Any(s =>
                     s.Buchungszeilen.Any(z =>
                         z.Buchungskonto.BuchungskontoId == mietKontoId ||
-                        z.Buchungskonto.BuchungskontoId == nkKontoId)))
+                        z.Buchungskonto.BuchungskontoId == nkKontoId ||
+                        z.Buchungskonto.BuchungskontoId == kautionsKontoId)))
                 .OrderByDescending(t => t.Zahlungsdatum)
                 .ToListAsync();
 
@@ -402,6 +429,53 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             var jahr = (await _mietKorrekturService.ErmittleAsync(id)).Single(j => j.Jahr == request.Jahr);
             return Ok(new MietKorrekturJahrEntry(jahr));
+        }
+
+        public class KautionRequest
+        {
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public bool Rueckzahlung { get; set; }
+            public string? Notiz { get; set; }
+        }
+
+        /// <summary>
+        /// Bucht Eingang oder Rückzahlung der Kaution als Transaktion mit einer
+        /// Kautions-Position — siehe <see cref="TransaktionBuchungsService"/>. Rückgängig
+        /// machen läuft über die gewöhnlichen Transaktions-Endpunkte.
+        /// </summary>
+        [HttpPost("{id}/kaution")]
+        public async Task<ActionResult<VertragEntry>> PostKaution(int id, [FromBody] KautionRequest request)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+            if (!authRx.Succeeded) return Forbid();
+
+            try
+            {
+                await _buchungsService.BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+                {
+                    Betrag = request.Betrag,
+                    Zahlungsdatum = request.Datum,
+                    Verwendungszweck = request.Rueckzahlung ? "Kaution Rückzahlung" : "Kaution Eingang",
+                    Notiz = request.Notiz,
+                    Kautionen =
+                    {
+                        new TransaktionBuchungsService.KautionInput
+                        {
+                            VertragId = id,
+                            Betrag = request.Betrag,
+                            Rueckzahlung = request.Rueckzahlung,
+                        }
+                    }
+                });
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+
+            return await DbService.Get(User!, id);
         }
     }
 }

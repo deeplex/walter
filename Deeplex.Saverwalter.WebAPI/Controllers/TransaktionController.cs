@@ -232,6 +232,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 if (!authRx.Succeeded) return Forbid();
             }
 
+            foreach (var kaution in input.Kautionen)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(kaution.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {kaution.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
             foreach (var ausgleich in input.AbrechnungsAusgleiche)
             {
                 var resultat = await _ctx.Abrechnungsresultate

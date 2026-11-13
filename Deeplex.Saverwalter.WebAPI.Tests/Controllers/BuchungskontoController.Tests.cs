@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             new(new ClaimsIdentity(user.AssembleClaims(), "mock"));
 
         /// <summary>
-        /// Zwei Wohnungen mit je 7 Konten (2 Wohnung + 5 Vertrag). Der Verwalter verwaltet
+        /// Zwei Wohnungen mit je 8 Konten (2 Wohnung + 6 Vertrag). Der Verwalter verwaltet
         /// nur die erste. Liefert den Verwalter, einen Konto-Id der ersten und einen der
         /// zweiten (nicht verwalteten) Wohnung zurück.
         /// </summary>
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = (await controller.GetAll()).Result as OkObjectResult;
             var konten = (result!.Value as IEnumerable<BuchungskontoEntry>)!.ToList();
 
-            konten.Should().HaveCount(7);
+            konten.Should().HaveCount(8);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = (await controller.GetAll()).Result as OkObjectResult;
             var konten = (result!.Value as IEnumerable<BuchungskontoEntry>)!.ToList();
 
-            konten.Should().HaveCount(14);
+            konten.Should().HaveCount(16);
         }
 
         [Fact]

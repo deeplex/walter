@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterNumberInput
     } from '$walter/components';
     import WalterMietKorrektur from './WalterMietKorrektur.svelte';
+    import WalterVertragKaution from './WalterVertragKaution.svelte';
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
@@ -294,31 +295,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Accordion style="margin-bottom: 1rem;">
     <AccordionItem title="Kaution">
-        <Row>
-            <WalterNumberInput
-                {readonly}
-                hideSteppers
-                bind:value={entry.kautionBetrag}
-                label="Betrag (€)"
-            />
-            <TextInput
-                disabled={readonly}
-                labelText="Art"
-                placeholder="z.B. Sparbuch, Überweisung, Bürgschaft"
-                bind:value={entry.kautionArt}
-            />
-        </Row>
-        <Row>
-            <WalterDatePicker
-                disabled={readonly}
-                bind:value={entry.kautionEingangsdatum}
-                labelText="Eingang"
-            />
-            <WalterDatePicker
-                disabled={readonly}
-                bind:value={entry.kautionRueckgabedatum}
-                labelText="Rückgabe"
-            />
-        </Row>
+        <WalterVertragKaution bind:entry {readonly} />
     </AccordionItem>
 </Accordion>
