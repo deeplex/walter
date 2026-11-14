@@ -41,7 +41,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         time,
         zahlen
     } from './WalterDataTable';
-    import { formatZahl } from '$walter/services/format';
+    import { formatNumber } from '$walter/services/format';
     import { Add } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
@@ -93,7 +93,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     ) => Promise<void> | void = () => {};
     /**
      * Aufklappbare Zeilen: Inhalt im Slot `expanded-row` (let:row), am besten mit
-     * WalterEintraege. Ein Klick auf die Zeile klappt auf, außer die Zeile hat einen Link.
+     * WalterItemList. Ein Klick auf die Zeile klappt auf, außer die Zeile hat einen Link.
      */
     export let expandable = false;
     export let nonExpandableRowIds: (string | number)[] = [];
@@ -442,7 +442,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             return convertEuro(cell.value as number | undefined) || '---';
         }
         if (zahlen(cell.key)) {
-            return formatZahl(cell.value as number);
+            return formatNumber(cell.value as number);
         }
         if (cell.key === 'anteil') {
             return convertPercent(cell.value as number | undefined) || '---';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { zuordnungAlsEintraege, zuordnungAlsTeile } from './WalterEintrag';
+import { zuordnungAsItems, zuordnungAsParts } from './WalterListItem';
 import type { WalterZuordnungEintrag } from './WalterTransaktion';
 
 const zuordnung: WalterZuordnungEintrag[] = [
@@ -18,9 +18,9 @@ const zuordnung: WalterZuordnungEintrag[] = [
     }
 ];
 
-describe('zuordnungAlsEintraege', () => {
+describe('zuordnungAsItems', () => {
     it('macht je Teil einen Eintrag, rückgängig gemachte mit grauem Tag', () => {
-        expect(zuordnungAlsEintraege(zuordnung)).toEqual([
+        expect(zuordnungAsItems(zuordnung)).toEqual([
             {
                 id: 'zuordnung-0',
                 betrag: 500,
@@ -39,9 +39,9 @@ describe('zuordnungAlsEintraege', () => {
     });
 });
 
-describe('zuordnungAlsTeile', () => {
+describe('zuordnungAsParts', () => {
     it('dimmt rückgängig gemachte Teile', () => {
-        expect(zuordnungAlsTeile(zuordnung).map((t) => t.gedimmt)).toEqual([
+        expect(zuordnungAsParts(zuordnung).map((t) => t.dimmed)).toEqual([
             false,
             true
         ]);

@@ -15,7 +15,7 @@
 
 import { goto } from '$app/navigation';
 import {
-    formatDatum,
+    formatDate,
     formatEuro,
     formatProzent,
     formatQuadratmeter
@@ -37,7 +37,7 @@ export function convertDateCanadian(
 }
 
 export function convertDateGerman(date: Date | undefined): string | undefined {
-    return date ? formatDatum(date) : undefined;
+    return date ? formatDate(date) : undefined;
 }
 
 export function convertTime(

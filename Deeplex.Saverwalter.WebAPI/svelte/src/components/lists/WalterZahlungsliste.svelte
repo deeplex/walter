@@ -16,18 +16,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <!--
     Liste von Zahlungen unter einer Überschrift, z. B. Guthaben oder rückgängig gemachte
-    Zahlungen — in derselben Form wie aufgeklappte Tabellenzeilen (WalterEintraege). Mit
+    Zahlungen — in derselben Form wie aufgeklappte Tabellenzeilen (WalterItemList). Mit
     `bearbeitbar` je Zahlung „Rückgängig machen“, mit `rueckgaengigGemacht` stattdessen
     der Tag „Rückgängig gemacht“.
 -->
 <script lang="ts">
-    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
     import WalterRueckgaengig from '../details/WalterRueckgaengig.svelte';
     import { ZAHLUNGS_STATUS, type WalterZahlungsEintrag } from '$walter/lib';
     import { createEventDispatcher } from 'svelte';
 
     export let titel: string;
-    export let eintraege: WalterZahlungsEintrag[];
+    export let items: WalterZahlungsEintrag[];
     export let bearbeitbar = false;
     export let rueckgaengigGemacht = false;
     export let fetchImpl: typeof fetch = fetch;
@@ -36,30 +36,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const dispatch = createEventDispatcher<{ erledigt: void }>();
 
     $: angezeigt = rueckgaengigGemacht
-        ? eintraege.map((e) => ({
+        ? items.map((e) => ({
               ...e,
               tag: {
                   text: ZAHLUNGS_STATUS.rueckgaengig.text,
                   tag: ZAHLUNGS_STATUS.rueckgaengig.tag
               }
           }))
-        : eintraege;
+        : items;
 </script>
 
-{#if eintraege.length > 0}
+{#if items.length > 0}
     <h5 class="titel">{titel}</h5>
-    <WalterEintraege eintraege={angezeigt}>
-        <svelte:fragment slot="aktion" let:eintrag>
+    <WalterItemList items={angezeigt}>
+        <svelte:fragment slot="aktion" let:item>
             {#if bearbeitbar && !rueckgaengigGemacht}
                 <WalterRueckgaengig
                     {fetchImpl}
-                    transaktionId={eintrag.transaktionId}
-                    buchungssatzId={eintrag.buchungssatzId}
+                    transaktionId={item.transaktionId}
+                    buchungssatzId={item.buchungssatzId}
                     on:erledigt={() => dispatch('erledigt')}
                 />
             {/if}
         </svelte:fragment>
-    </WalterEintraege>
+    </WalterItemList>
 {/if}
 
 <style>

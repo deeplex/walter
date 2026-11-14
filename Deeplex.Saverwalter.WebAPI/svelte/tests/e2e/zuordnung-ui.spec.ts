@@ -37,13 +37,13 @@ test('Zuordnung auf der Transaktion und in der Liste', async ({ page }) => {
         transaktion,
         'erwartet eine zugeordnete Transaktion im Dev-Seed'
     ).toBeDefined();
-    const eintrag = transaktion!.zuordnung.find((w) => w.ref)!;
+    const item = transaktion!.zuordnung.find((w) => w.ref)!;
 
     await authenticatePage(page, 'admin.dev');
     await page.goto(`/transaktionen/${transaktion!.id}`);
     const link = page.locator('#zuordnung').getByRole('link').first();
-    await expect(link).toHaveAttribute('href', entityRefHref(eintrag.ref)!);
-    await expect(link).toContainText(eintrag.text);
+    await expect(link).toHaveAttribute('href', entityRefHref(item.ref)!);
+    await expect(link).toContainText(item.text);
 
     await page.goto('/transaktionen');
     await expect(
@@ -72,12 +72,12 @@ test('Kontakt eines Mieters zeigt, was offen ist', async ({ page }) => {
 
     await authenticatePage(page, 'admin.dev');
     await page.goto(`/kontakte/${kontaktId}`);
-    const abschnitt = page.locator('#offen-als-mieter');
-    await expect(abschnitt.getByText('Offen als Mieter')).toBeVisible();
+    const section = page.locator('#offen-als-mieter');
+    await expect(section.getByText('Offen als Mieter')).toBeVisible();
     // Summen-Tag: „… offen“ oder „Nichts offen“, sobald die Mietkonten geladen sind.
-    await expect(abschnitt.locator('.bx--tag').first()).toBeVisible();
+    await expect(section.locator('.bx--tag').first()).toBeVisible();
     await expect(
-        abschnitt.locator('a[href*="#mietkonto"]').first()
+        section.locator('a[href*="#mietkonto"]').first()
     ).toBeVisible();
 });
 

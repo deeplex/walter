@@ -53,7 +53,7 @@ export function formatEuroOderStrich(v: number | null | undefined): string {
  * `02.01.2026`. Ein reines Datum (`yyyy-mm-dd`) gilt als Kalendertag, nicht als
  * Mitternacht UTC — sonst könnte es in einer anderen Zeitzone auf den Vortag rutschen.
  */
-export function formatDatum(d: string | Date): string {
+export function formatDate(d: string | Date): string {
     const tag =
         typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)
             ? new Date(
@@ -70,12 +70,12 @@ export function formatDatum(d: string | Date): string {
 }
 
 /** `Jan 2026` (Monat 1–12). */
-export function formatMonat(jahr: number, monat: number): string {
+export function formatMonth(jahr: number, monat: number): string {
     return `${MONATE[monat - 1]} ${jahr}`;
 }
 
 /** `1.234,5` — bis zu `nachkomma` Stellen, ohne überflüssige Nullen. */
-export function formatZahl(
+export function formatNumber(
     v: number | null | undefined,
     nachkomma = 3
 ): string {

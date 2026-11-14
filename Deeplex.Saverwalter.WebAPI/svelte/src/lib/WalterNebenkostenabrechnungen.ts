@@ -92,7 +92,7 @@ export function abrechnungsZeilen(
         faellig: a.betrag,
         bezahlt: a.bezahlt,
         offen: a.offen,
-        aufschluesselung: [],
+        breakdown: [],
         zahlungen: a.zahlungen.map(abrechnungsZahlungsEintrag),
         erfassenFuer: a.kannAusgleichen ? a.abrechnungsresultatId : undefined,
         status:

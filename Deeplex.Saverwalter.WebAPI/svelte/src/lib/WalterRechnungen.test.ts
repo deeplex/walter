@@ -10,7 +10,7 @@ import {
 import { ZAHLUNGS_STATUS } from './WalterZahlungsStatus';
 
 const ea = (
-    teil: Partial<WalterErhaltungsaufwandRechnung>
+    part: Partial<WalterErhaltungsaufwandRechnung>
 ): WalterErhaltungsaufwandRechnung => ({
     buchungssatzId: 's1',
     datum: '2024-03-01',
@@ -24,10 +24,10 @@ const ea = (
     direktBezahlt: false,
     kannBezahlen: true,
     zahlungen: [],
-    ...teil
+    ...part
 });
 
-const bk = (teil: Partial<WalterUmlageRechnung>): WalterUmlageRechnung => ({
+const bk = (part: Partial<WalterUmlageRechnung>): WalterUmlageRechnung => ({
     buchungssatzId: 'b1',
     jahr: 2024,
     datum: '2024-11-01',
@@ -39,7 +39,7 @@ const bk = (teil: Partial<WalterUmlageRechnung>): WalterUmlageRechnung => ({
     kannBezahlen: true,
     zahlungen: [],
     verteilung: [],
-    ...teil
+    ...part
 });
 
 describe('erhaltungsaufwandZeilen', () => {
@@ -93,10 +93,10 @@ describe('umlageRechnungZeilen', () => {
             ],
             rueckgaengigGemacht: []
         });
-        expect(verteilt.abschnitte).toEqual([
+        expect(verteilt.sections).toEqual([
             {
-                titel: 'Verteilung',
-                eintraege: [
+                title: 'Verteilung',
+                items: [
                     {
                         id: 'verteilung-0',
                         betrag: 700,
@@ -112,7 +112,7 @@ describe('umlageRechnungZeilen', () => {
                 ]
             }
         ]);
-        expect(offen.abschnitte).toBeUndefined();
+        expect(offen.sections).toBeUndefined();
     });
 
     it('zeigt, wie viel verteilt ist', () => {

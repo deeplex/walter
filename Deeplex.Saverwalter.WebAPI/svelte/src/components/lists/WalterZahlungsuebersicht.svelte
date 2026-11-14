@@ -17,17 +17,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <!--
     Zahlungsübersicht: was war fällig, was kam, was ist offen. Eine Zeile je Periode
     bzw. Forderung in einer aufklappbaren WalterDataTable; aufgeklappt die Aufschlüsselung
-    und die einzelnen Zahlungen als WalterEintraege.
+    und die einzelnen Zahlungen als WalterItemList.
 -->
 <script lang="ts">
     import { formatEuro, formatEuroOderStrich } from '$walter/services/format';
     import { Add } from 'carbon-icons-svelte';
     import WalterDataTable from '../elements/WalterDataTable.svelte';
-    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
     import WalterRueckgaengig from '../details/WalterRueckgaengig.svelte';
     import {
         zahlungsStatus,
-        type WalterEintrag,
+        type WalterListItem,
         type WalterZahlungsZeile
     } from '$walter/lib';
     import { createEventDispatcher } from 'svelte';
@@ -103,15 +103,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         .filter(
             (r) =>
                 r.zahlungen.length === 0 &&
-                r.aufschluesselung.length === 0 &&
-                !r.abschnitte?.length
+                r.breakdown.length === 0 &&
+                !r.sections?.length
         )
         .map((r) => r.id);
 
-    function aufschluesselung(z: WalterZahlungsZeile): WalterEintrag[] {
-        return z.aufschluesselung.map((teil, i) => ({
-            id: `teil-${i}`,
-            text: `${teil.text}: fällig ${formatEuro(teil.faellig)}, bezahlt ${formatEuro(teil.bezahlt)}`
+    function breakdown(z: WalterZahlungsZeile): WalterListItem[] {
+        return z.breakdown.map((part, i) => ({
+            id: `part-${i}`,
+            text: `${part.text}: fällig ${formatEuro(part.faellig)}, bezahlt ${formatEuro(part.bezahlt)}`
         }));
     }
 </script>
@@ -132,40 +132,40 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <svelte:fragment slot="expanded-row" let:row>
             {@const zeile = zeilen.get(`${row.id}`)}
             {#if zeile}
-                <WalterEintraege eintraege={aufschluesselung(zeile)} />
-                {#each zeile.abschnitte ?? [] as abschnitt}
-                    <h6 class="abschnitt">{abschnitt.titel}</h6>
-                    <WalterEintraege eintraege={abschnitt.eintraege} />
+                <WalterItemList items={breakdown(zeile)} />
+                {#each zeile.sections ?? [] as section}
+                    <h6 class="section">{section.title}</h6>
+                    <WalterItemList items={section.items} />
                 {/each}
-                {#if zeile.abschnitte?.length}
-                    <h6 class="abschnitt">Zahlungen</h6>
+                {#if zeile.sections?.length}
+                    <h6 class="section">Zahlungen</h6>
                 {/if}
-                <WalterEintraege
-                    eintraege={zeile.zahlungen}
+                <WalterItemList
+                    items={zeile.zahlungen}
                     leerText="Noch keine Zahlung."
                 >
-                    <svelte:fragment slot="aktion" let:eintrag>
+                    <svelte:fragment slot="aktion" let:item>
                         {#if bearbeitbar}
                             <WalterRueckgaengig
                                 {fetchImpl}
-                                transaktionId={eintrag.transaktionId}
-                                buchungssatzId={eintrag.buchungssatzId}
+                                transaktionId={item.transaktionId}
+                                buchungssatzId={item.buchungssatzId}
                                 on:erledigt={() => dispatch('geaendert')}
                             />
                         {/if}
                     </svelte:fragment>
-                </WalterEintraege>
+                </WalterItemList>
             {/if}
         </svelte:fragment>
     </WalterDataTable>
 {/if}
 
 <style>
-    .abschnitt {
+    .section {
         margin: 0.75rem 0 0.25rem 0;
         color: var(--cds-text-02);
     }
-    .abschnitt:first-child {
+    .section:first-child {
         margin-top: 0.25rem;
     }
 </style>

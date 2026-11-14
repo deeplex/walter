@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    formatDatum,
+    formatDate,
     formatEuro,
     formatEuroOderStrich,
-    formatMonat,
+    formatMonth,
     formatProzent,
     formatQuadratmeter,
-    formatZahl
+    formatNumber
 } from './format';
 
 // toLocaleString trennt Zahl und Einheit mit einem geschützten Leerzeichen.
@@ -28,14 +28,14 @@ describe('format', () => {
     });
 
     it('formatiert Daten zweistellig und ohne Zeitzonen-Verschiebung', () => {
-        expect(formatDatum('2026-01-02')).toBe('02.01.2026');
-        expect(formatDatum(new Date(2023, 4, 24))).toBe('24.05.2023');
+        expect(formatDate('2026-01-02')).toBe('02.01.2026');
+        expect(formatDate(new Date(2023, 4, 24))).toBe('24.05.2023');
     });
 
     it('formatiert Monate, Zahlen, Prozent und Fläche', () => {
-        expect(formatMonat(2026, 3)).toBe('Mär 2026');
-        expect(formatZahl(1234.5)).toBe('1.234,5');
-        expect(formatZahl(812)).toBe('812');
+        expect(formatMonth(2026, 3)).toBe('Mär 2026');
+        expect(formatNumber(1234.5)).toBe('1.234,5');
+        expect(formatNumber(812)).toBe('812');
         expect(nb(formatProzent(0.1234))).toBe('12,34 %');
         expect(nb(formatQuadratmeter(42))).toBe('42,00 m²');
     });

@@ -18,44 +18,44 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     Die eine Form für Einträge unter einer Tabellenzeile oder unter einer Überschrift:
     Datum, Betrag bzw. Wert, Text (verlinkt), Tag und Aktion in festen Spalten, darunter eingerückt
     die Teile. Datum und Betrag dürfen fehlen; die Spalten bleiben trotzdem bündig.
-    Aktionen je Eintrag über den Slot `aktion` (let:eintrag). Optional darüber eine Notiz
+    Aktionen je Eintrag über den Slot `aktion` (let:item). Optional darüber eine Notiz
     und darunter der Link zur eigenen Seite mit der Zahl der Anhänge, die beim Anzeigen
     (also beim Aufklappen) geladen wird.
 -->
 <script lang="ts">
-    import { formatEuro, formatDatum } from '$walter/services/format';
+    import { formatEuro, formatDate } from '$walter/services/format';
     import { Tag } from 'carbon-components-svelte';
     import { Attachment } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
     import { walter_fetch } from '$walter/services/requests';
-    import type { WalterEintrag } from '$walter/lib';
+    import type { WalterListItem } from '$walter/lib';
 
-    type E = $$Generic<WalterEintrag>;
+    type E = $$Generic<WalterListItem>;
 
-    export let eintraege: E[];
+    export let items: E[];
     /** Text, wenn es keine Einträge gibt; ohne Text erscheint dann nichts. */
     export let leerText: string | undefined = undefined;
     /** Link unter der Liste, z. B. „Zähler öffnen →“ zur eigenen Seite. */
-    export let mehrHref: string | undefined = undefined;
-    export let mehrText = 'Öffnen →';
+    export let moreHref: string | undefined = undefined;
+    export let moreText = 'Öffnen →';
     /** Notiz des Objekts (z. B. der Transaktion), sonst nur auf der eigenen Seite sichtbar. */
     export let notiz: string | null | undefined = undefined;
     /** Datei-Endpunkt des Objekts (`…/{id}/files`): zeigt die Zahl der Anhänge am Link. */
-    export let anhaengeUrl: string | undefined = undefined;
+    export let attachmentsUrl: string | undefined = undefined;
     export let fetchImpl: typeof fetch = fetch;
 
     // Ohne Antwort (z. B. Dateiablage nicht erreichbar) erscheint einfach keine Zahl.
-    let anhaenge = 0;
+    let attachments = 0;
     onMount(async () => {
-        if (!anhaengeUrl) return;
+        if (!attachmentsUrl) return;
         try {
-            const response = await walter_fetch(fetchImpl, anhaengeUrl);
+            const response = await walter_fetch(fetchImpl, attachmentsUrl);
             if (response.ok) {
                 const dateien = (await response.json()) as unknown[];
-                anhaenge = Array.isArray(dateien) ? dateien.length : 0;
+                attachments = Array.isArray(dateien) ? dateien.length : 0;
             }
         } catch {
-            anhaenge = 0;
+            attachments = 0;
         }
     });
 </script>
@@ -64,54 +64,54 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <p class="notiz"><span class="notiz-titel">Notiz:</span> {notiz}</p>
 {/if}
 
-{#if eintraege.length === 0}
+{#if items.length === 0}
     {#if leerText}
         <p class="leer">{leerText}</p>
     {/if}
 {:else}
-    <ul class="eintraege">
-        {#each eintraege as eintrag (eintrag.id)}
-            <li class="eintrag">
+    <ul class="items">
+        {#each items as item (item.id)}
+            <li class="item">
                 <div class="zeile">
                     <span class="datum">
-                        {eintrag.datum ? formatDatum(eintrag.datum) : ''}
+                        {item.datum ? formatDate(item.datum) : ''}
                     </span>
                     <span class="betrag">
-                        {eintrag.betrag !== undefined
-                            ? formatEuro(eintrag.betrag)
-                            : (eintrag.wert ?? '')}
+                        {item.betrag !== undefined
+                            ? formatEuro(item.betrag)
+                            : (item.wert ?? '')}
                     </span>
                     <span class="text">
-                        {#if eintrag.href}
-                            <a href={eintrag.href}>{eintrag.text}</a>
+                        {#if item.href}
+                            <a href={item.href}>{item.text}</a>
                         {:else}
-                            {eintrag.text}
+                            {item.text}
                         {/if}
                     </span>
                     <span class="tag">
-                        {#if eintrag.tag}
-                            <Tag size="sm" type={eintrag.tag.tag}
-                                >{eintrag.tag.text}</Tag
+                        {#if item.tag}
+                            <Tag size="sm" type={item.tag.tag}
+                                >{item.tag.text}</Tag
                             >
                         {/if}
                     </span>
-                    <span class="aktion"><slot name="aktion" {eintrag} /></span>
+                    <span class="aktion"><slot name="aktion" {item} /></span>
                 </div>
-                {#if eintrag.teile && eintrag.teile.length > 0}
-                    <ul class="teile">
-                        {#each eintrag.teile as teil}
-                            <li class="zeile teil" class:gedimmt={teil.gedimmt}>
+                {#if item.parts && item.parts.length > 0}
+                    <ul class="parts">
+                        {#each item.parts as part}
+                            <li class="zeile part" class:dimmed={part.dimmed}>
                                 <span class="datum" />
                                 <span class="betrag">
-                                    {teil.betrag !== undefined
-                                        ? formatEuro(teil.betrag)
+                                    {part.betrag !== undefined
+                                        ? formatEuro(part.betrag)
                                         : ''}
                                 </span>
                                 <span class="text">
-                                    {#if teil.href}
-                                        <a href={teil.href}>{teil.text}</a>
+                                    {#if part.href}
+                                        <a href={part.href}>{part.text}</a>
                                     {:else}
-                                        {teil.text}
+                                        {part.text}
                                     {/if}
                                 </span>
                             </li>
@@ -122,13 +122,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/each}
     </ul>
 {/if}
-{#if mehrHref}
+{#if moreHref}
     <div class="mehr">
-        <a href={mehrHref}>{mehrText}</a>
-        {#if anhaenge > 0}
-            <a class="anhaenge" href={mehrHref}>
+        <a href={moreHref}>{moreText}</a>
+        {#if attachments > 0}
+            <a class="attachments" href={moreHref}>
                 <Attachment size={16} />
-                {anhaenge === 1 ? '1 Anhang' : `${anhaenge} Anhänge`}
+                {attachments === 1 ? '1 Anhang' : `${attachments} Anhänge`}
             </a>
         {/if}
     </div>
@@ -140,14 +140,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         margin: 0;
         padding: 0;
     }
-    .eintraege {
+    .items {
         width: 100%;
     }
-    .eintrag {
+    .item {
         padding: 0.375rem 0;
         border-bottom: 1px solid var(--cds-ui-03);
     }
-    .eintrag:last-child {
+    .item:last-child {
         border-bottom: none;
     }
     .zeile {
@@ -178,16 +178,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     .text {
         overflow-wrap: anywhere;
     }
-    .teil {
+    .part {
         min-height: 1.5rem;
         font-size: 0.875rem;
         color: var(--cds-text-02);
     }
-    .teil .text {
+    .part .text {
         padding-left: 1rem;
         border-left: 2px solid var(--cds-ui-03);
     }
-    .gedimmt {
+    .dimmed {
         opacity: 0.6;
     }
     a {
@@ -203,7 +203,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         align-items: center;
         margin-top: 0.5rem;
     }
-    .anhaenge {
+    .attachments {
         display: inline-flex;
         gap: 0.25rem;
         align-items: center;
@@ -234,11 +234,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 'text text text text';
             row-gap: 0.125rem;
         }
-        .teil {
+        .part {
             grid-template-columns: 5.5rem minmax(0, 1fr);
             grid-template-areas: 'betrag text';
         }
-        .teil .datum {
+        .part .datum {
             display: none;
         }
     }

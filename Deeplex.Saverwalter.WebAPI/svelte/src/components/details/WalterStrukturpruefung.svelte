@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 <script lang="ts">
     import type { WalterEntityRef } from '$walter/lib/WalterEntityRef';
-    import { formatEuro, formatDatum } from '$walter/services/format';
+    import { formatEuro, formatDate } from '$walter/services/format';
     import {
         InlineLoading,
         InlineNotification,
@@ -125,7 +125,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <ul class="liste">
                 {#each offen as z (z.transaktionId + z.text)}
                     <li>
-                        <span>{formatDatum(z.datum)}</span>
+                        <span>{formatDate(z.datum)}</span>
                         <span>{formatEuro(z.betrag)}</span>
                         <a href={`/transaktionen/${z.transaktionId}`}
                             >{z.text}</a
@@ -142,7 +142,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <ul class="liste">
                 {#each storniert as z (z.transaktionId + z.text)}
                     <li>
-                        <span>{formatDatum(z.datum)}</span>
+                        <span>{formatDate(z.datum)}</span>
                         <span>{formatEuro(z.betrag)}</span>
                         <a href={`/transaktionen/${z.transaktionId}`}
                             >{z.text}</a

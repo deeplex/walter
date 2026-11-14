@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { formatDatum } from '$walter/services/format';
+import { formatDate } from '$walter/services/format';
 
 export function dates(key: string) {
     switch (key) {
@@ -68,5 +68,5 @@ export function euro(key: string) {
 }
 
 export function formatToTableDate(date: string) {
-    return formatDatum(date);
+    return formatDate(date);
 }

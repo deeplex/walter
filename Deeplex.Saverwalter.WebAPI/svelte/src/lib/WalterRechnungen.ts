@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import { formatEuro, formatDatum } from '../services/format';
+import { formatEuro, formatDate } from '../services/format';
 import type {
     WalterZahlungsEintrag,
     WalterZahlungsZeile
@@ -98,7 +98,7 @@ export interface WalterUmlageRechnungen {
 export function rechnungsZahlungsEintrag(
     z: WalterRechnungsZahlung
 ): WalterZahlungsEintrag {
-    const teile = [
+    const parts = [
         z.zahler ? `von ${z.zahler}` : undefined,
         z.empfaenger ? `an ${z.empfaenger}` : undefined
     ].filter(Boolean);
@@ -106,7 +106,7 @@ export function rechnungsZahlungsEintrag(
         id: z.buchungssatzId,
         datum: z.datum,
         betrag: z.betrag,
-        text: teile.length > 0 ? `Zahlung ${teile.join(' ')}` : 'Zahlung',
+        text: parts.length > 0 ? `Zahlung ${parts.join(' ')}` : 'Zahlung',
         href: z.transaktionId
             ? `/transaktionen/${z.transaktionId}`
             : `/buchungssaetze/${z.buchungssatzId}`,
@@ -121,14 +121,14 @@ export function erhaltungsaufwandZeilen(
 ): WalterZahlungsZeile[] {
     return daten.rechnungen.map((r) => ({
         id: r.buchungssatzId,
-        periode: [formatDatum(r.datum), r.bezeichnung, r.aussteller]
+        periode: [formatDate(r.datum), r.bezeichnung, r.aussteller]
             .filter(Boolean)
             .join(' – '),
         href: `/buchungssaetze/${r.buchungssatzId}`,
         faellig: r.betrag,
         bezahlt: r.bezahlt,
         offen: r.offen,
-        aufschluesselung: [],
+        breakdown: [],
         zahlungen: r.zahlungen.map(rechnungsZahlungsEintrag),
         erfassenFuer: r.kannBezahlen ? r.buchungssatzId : undefined,
         status: r.storniert ? ZAHLUNGS_STATUS.storniert : undefined
@@ -146,19 +146,19 @@ export function umlageRechnungZeilen(
         const nichtVerteilt = r.betrag - r.verteilt;
         return {
             id: r.buchungssatzId,
-            periode: `${r.jahr} – Rechnung vom ${formatDatum(r.datum)}`,
+            periode: `${r.jahr} – Rechnung vom ${formatDate(r.datum)}`,
             href: `/buchungssaetze/${r.buchungssatzId}`,
             faellig: r.betrag,
             bezahlt: r.bezahlt,
             offen: r.offen,
-            aufschluesselung: [],
+            breakdown: [],
             zahlungen: r.zahlungen.map(rechnungsZahlungsEintrag),
-            abschnitte:
+            sections:
                 r.verteilung.length > 0
                     ? [
                           {
-                              titel: 'Verteilung',
-                              eintraege: r.verteilung.map((v, i) => ({
+                              title: 'Verteilung',
+                              items: r.verteilung.map((v, i) => ({
                                   id: `verteilung-${i}`,
                                   betrag: v.betrag,
                                   text: v.text,

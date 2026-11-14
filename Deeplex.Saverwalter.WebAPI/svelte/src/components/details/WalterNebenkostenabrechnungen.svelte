@@ -127,9 +127,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <WalterZahlungsliste
             titel="Rückgängig gemachte Zahlungen"
-            eintraege={daten.rueckgaengigGemacht.map(
-                abrechnungsZahlungsEintrag
-            )}
+            items={daten.rueckgaengigGemacht.map(abrechnungsZahlungsEintrag)}
             rueckgaengigGemacht
         />
     {/if}

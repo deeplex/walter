@@ -92,7 +92,7 @@ export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export {
     WalterZaehlerstandEntry,
-    zaehlerstandEintraege
+    zaehlerstandItems
 } from './WalterZaehlerstand';
 export {
     type GaragenmietInput,
@@ -119,7 +119,7 @@ export {
 export * from './WalterValidation';
 export * from './WalterZahlungsStatus';
 export * from './WalterMietkonto';
-export * from './WalterEintrag';
+export * from './WalterListItem';
 export * from './WalterEntityRef';
 export * from './WalterNebenkostenabrechnungen';
 export * from './WalterRechnungen';

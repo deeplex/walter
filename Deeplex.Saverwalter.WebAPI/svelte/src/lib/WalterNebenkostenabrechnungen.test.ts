@@ -8,7 +8,7 @@ import {
 import { ZAHLUNGS_STATUS } from './WalterZahlungsStatus';
 
 const abrechnung = (
-    teil: Partial<WalterNebenkostenabrechnung>
+    part: Partial<WalterNebenkostenabrechnung>
 ): WalterNebenkostenabrechnung => ({
     abrechnungsresultatId: 'r1',
     jahr: 2024,
@@ -19,7 +19,7 @@ const abrechnung = (
     offen: 120,
     kannAusgleichen: true,
     zahlungen: [],
-    ...teil
+    ...part
 });
 
 const daten = (

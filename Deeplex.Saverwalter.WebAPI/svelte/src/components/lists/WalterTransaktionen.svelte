@@ -22,11 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
-    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
     import { fileURL } from '$walter/services/files';
     import {
         WalterTransaktionEntry,
-        zuordnungAlsEintraege,
+        zuordnungAsItems,
         zuordnungZelle
     } from '$walter/lib';
 
@@ -93,13 +93,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterTransaktion {fetchImpl} bind:isValid={transaktionIsValid} />
     {/if}
     <svelte:fragment slot="expanded-row" let:row>
-        <WalterEintraege
-            eintraege={zuordnungAlsEintraege(zuordnungVon(row))}
+        <WalterItemList
+            items={zuordnungAsItems(zuordnungVon(row))}
             leerText="Nicht zugeordnet."
-            mehrHref={`/transaktionen/${row.id}`}
-            mehrText="Transaktion öffnen →"
+            moreHref={`/transaktionen/${row.id}`}
+            moreText="Transaktion öffnen →"
             notiz={notizVon(row)}
-            anhaengeUrl={fileURL.transaktion(`${row.id}`)}
+            attachmentsUrl={fileURL.transaktion(`${row.id}`)}
             {fetchImpl}
         />
     </svelte:fragment>

@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { formatEuro, formatDatum } from '$walter/services/format';
+    import { formatEuro, formatDate } from '$walter/services/format';
     import {
         Row,
         Column,
@@ -263,7 +263,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <tr>
                             <td style="padding-left: 2rem;">
                                 <a href={`/buchungssaetze/${k.id}`}
-                                    >Korrektur vom {formatDatum(k.datum)}</a
+                                    >Korrektur vom {formatDate(k.datum)}</a
                                 >
                                 {#if k.notiz}<br /><small>{k.notiz}</small>{/if}
                             </td>

@@ -9,7 +9,7 @@ import {
 } from './WalterMietkonto';
 
 const zahlung = (
-    teil: Partial<WalterMietkontoZahlung>
+    part: Partial<WalterMietkontoZahlung>
 ): WalterMietkontoZahlung => ({
     buchungssatzId: 's1',
     transaktionId: 't1',
@@ -17,7 +17,7 @@ const zahlung = (
     betrag: 500,
     zahler: 'Müller',
     art: 'Kaltmiete',
-    ...teil
+    ...part
 });
 
 const ohneTransaktionen: Pick<
@@ -121,20 +121,20 @@ describe('mietkontoZeilen', () => {
             href: '/transaktionen/t1',
             transaktionId: 't1'
         });
-        expect(januar.zahlungen[0].teile).toEqual([
+        expect(januar.zahlungen[0].parts).toEqual([
             {
                 text: 'Kaltmiete Jan 2024',
                 betrag: 500,
                 href: undefined,
-                gedimmt: false
+                dimmed: false
             },
             {
                 text: 'NK-Vorauszahlung 2024',
                 betrag: 150,
                 href: undefined,
-                gedimmt: false
+                dimmed: false
             },
-            { text: 'Kaution', betrag: 50, href: undefined, gedimmt: false }
+            { text: 'Kaution', betrag: 50, href: undefined, dimmed: false }
         ]);
     });
 
@@ -142,7 +142,7 @@ describe('mietkontoZeilen', () => {
         const januar = mietkontoZeilen(konto).find(
             (z) => z.periode === 'Jan 2024'
         )!;
-        expect(januar.aufschluesselung).toEqual([
+        expect(januar.breakdown).toEqual([
             { text: 'Kaltmiete', faellig: 500, bezahlt: 500 },
             { text: 'Garage G1', faellig: 50, bezahlt: 0 }
         ]);
@@ -152,7 +152,7 @@ describe('mietkontoZeilen', () => {
         const februar = mietkontoZeilen(konto).find(
             (z) => z.periode === 'Feb 2024'
         )!;
-        expect(februar.aufschluesselung).toEqual([]);
+        expect(februar.breakdown).toEqual([]);
     });
 
     it('schlüsselt Monate des Garagenmietkontos nicht auf', () => {
@@ -185,7 +185,7 @@ describe('mietkontoZeilen', () => {
         expect(januar).toMatchObject({
             periode: 'Jan 2024',
             offen: 30,
-            aufschluesselung: [],
+            breakdown: [],
             erfassenFuer: '2024-01-01'
         });
     });

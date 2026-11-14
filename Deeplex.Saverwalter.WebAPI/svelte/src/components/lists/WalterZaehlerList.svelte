@@ -27,7 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     import { WalterDataTable, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
     import { fileURL } from '$walter/services/files';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
@@ -35,7 +35,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterZaehlerEntry,
         WalterZaehlerstandEntry,
         validateZaehler,
-        zaehlerstandEintraege
+        zaehlerstandItems
     } from '$walter/lib';
 
     const headers = [
@@ -172,13 +172,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 subtitle={zaehler.fehler}
             />
         {:else}
-            <WalterEintraege
-                eintraege={zaehlerstandEintraege(zaehler.staende ?? [])}
+            <WalterItemList
+                items={zaehlerstandItems(zaehler.staende ?? [])}
                 leerText="Noch kein Zählerstand."
-                mehrHref={`/zaehler/${row.id}`}
-                mehrText="Zähler öffnen →"
+                moreHref={`/zaehler/${row.id}`}
+                moreText="Zähler öffnen →"
                 notiz={zaehler.notiz}
-                anhaengeUrl={fileURL.zaehler(`${row.id}`)}
+                attachmentsUrl={fileURL.zaehler(`${row.id}`)}
                 {fetchImpl}
             />
         {/if}

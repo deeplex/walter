@@ -37,9 +37,9 @@ async function zahlungBuchen(page: Page) {
 }
 
 /** Erste Zahlung im aufgeklappten Abschnitt rückgängig machen (Löschen oder Storno). */
-async function zahlungZuruecknehmen(page: Page, abschnitt: string) {
+async function zahlungZuruecknehmen(page: Page, section: string) {
     await page
-        .locator(`${abschnitt} [data-child-row]`)
+        .locator(`${section} [data-child-row]`)
         .getByRole('button', { name: 'Rückgängig machen' })
         .first()
         .click();
@@ -176,9 +176,9 @@ test('Betriebskostenrechnung erfassen, bezahlen und rückgängig machen', async 
     try {
         await authenticatePage(page, 'admin.dev');
         await page.goto(`/umlagen/${umlageId}#rechnungen`);
-        const abschnitt = page.locator('#rechnungen');
+        const section = page.locator('#rechnungen');
 
-        await abschnitt
+        await section
             .getByRole('button', { name: 'Rechnung', exact: true })
             .click();
         const dialog = page.locator('.bx--modal.is-visible');
@@ -189,7 +189,7 @@ test('Betriebskostenrechnung erfassen, bezahlen und rückgängig machen', async 
         await expect(page.locator('.bx--modal.is-visible')).toHaveCount(0);
         await expect.poll(async () => (await rechnung())?.offen).toBe(betrag);
 
-        const zeile = abschnitt
+        const zeile = section
             .getByRole('row')
             .filter({ hasText: `${jahr} – Rechnung vom` })
             .first();

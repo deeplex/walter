@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     aufklappen. `gueltig` ist true, sobald der Server die Eingabe akzeptiert.
 -->
 <script lang="ts">
-    import { formatEuro, formatDatum } from '$walter/services/format';
+    import { formatEuro, formatDate } from '$walter/services/format';
     import {
         Accordion,
         AccordionItem,
@@ -97,7 +97,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     {:else if vorschau && input}
         <p>
-            Zahlung <strong>{formatEuro(vorschau.betrag)}</strong> am {formatDatum(
+            Zahlung <strong>{formatEuro(vorschau.betrag)}</strong> am {formatDate(
                 input.zahlungsdatum
             )}
             {#if vorschau.zahler}von {vorschau.zahler}{/if}
@@ -119,7 +119,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <AccordionItem title="Buchungssätze anzeigen">
                 {#each vorschau.saetze as satz}
                     <p class="satz">
-                        {formatDatum(satz.buchungsdatum)} · {satz.beschreibung}
+                        {formatDate(satz.buchungsdatum)} · {satz.beschreibung}
                         {#if !satz.istZahlung}
                             <span class="hinweis">(entsteht mit)</span>
                         {/if}

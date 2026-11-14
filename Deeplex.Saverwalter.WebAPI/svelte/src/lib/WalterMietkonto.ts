@@ -14,13 +14,13 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import type { WalterZahlungsStatus } from './WalterZahlungsStatus';
-import { formatMonat } from '../services/format';
+import { formatMonth } from '../services/format';
 import type { WalterZuordnungEintrag } from './WalterTransaktion';
 import {
-    zuordnungAlsTeile,
-    type WalterEintrag,
-    type WalterEintragTagFarbe
-} from './WalterEintrag';
+    zuordnungAsParts,
+    type WalterListItem,
+    type WalterListItemTagColor
+} from './WalterListItem';
 
 // ── Antwort von GET /api/vertraege/{id}/mietkonto ───────────────────────────
 // und GET /api/garage-vertraege/{id}/mietkonto (nur Garagenmiete, keine NK-VZ)
@@ -90,7 +90,7 @@ export interface WalterMietkonto {
  * Transaktion, sonst zum Buchungssatz; bei einer ganzen Transaktion sind die Teile
  * ihre Zuordnung.
  */
-export interface WalterZahlungsEintrag extends WalterEintrag {
+export interface WalterZahlungsEintrag extends WalterListItem {
     datum: string;
     betrag: number;
     href: string;
@@ -115,10 +115,10 @@ export interface WalterZahlungsZeile {
     faellig: number;
     bezahlt: number;
     offen: number;
-    aufschluesselung: WalterZahlungsTeil[];
+    breakdown: WalterZahlungsTeil[];
     zahlungen: WalterZahlungsEintrag[];
     /** Weitere Abschnitte im aufgeklappten Teil vor den Zahlungen, z. B. die Verteilung. */
-    abschnitte?: { titel: string; eintraege: WalterEintrag[] }[];
+    sections?: { title: string; items: WalterListItem[] }[];
     /**
      * Wofür sich hier eine Zahlung erfassen lässt: Monat (`yyyy-mm-01`) im Mietkonto,
      * Id der Abrechnung bei Nebenkostenabrechnungen, Id des Buchungssatzes bei Rechnungen.
@@ -137,7 +137,7 @@ export interface WalterZahlungsZeile {
 /** Tag in der Zusatzspalte der Zahlungsübersicht. */
 export interface WalterZahlungsZusatz {
     text: string;
-    tag: WalterEintragTagFarbe;
+    tag: WalterListItemTagColor;
 }
 
 /** Wofür die Zahlung war — aus Art und Bezug, nie aus Freitext. */
@@ -163,7 +163,7 @@ export function transaktionsEintrag(
         text: t.zahler ? `Zahlung von ${t.zahler}` : 'Zahlung',
         href: `/transaktionen/${t.transaktionId}`,
         transaktionId: t.transaktionId,
-        teile: zuordnungAlsTeile(t.zuordnung)
+        parts: zuordnungAsParts(t.zuordnung)
     };
 }
 
@@ -193,7 +193,7 @@ function monatsZeile(m: WalterMietkontoMonat): WalterZahlungsZeile {
     const kaltmieteBezahlt =
         m.bezahlt - garagen.reduce((s, g) => s + g.bezahlt, 0);
     // Garagenmietkonto: keine Kaltmiete.
-    const teile = [
+    const parts = [
         ...(m.kaltmiete !== 0 || Math.abs(kaltmieteBezahlt) > 0.005
             ? [
                   {
@@ -206,14 +206,14 @@ function monatsZeile(m: WalterMietkontoMonat): WalterZahlungsZeile {
         ...garagen
     ];
     // Aufgeschlüsselt nur, wenn der Monat aus mehreren Teilen besteht.
-    const aufschluesselung = teile.length > 1 ? teile : [];
+    const breakdown = parts.length > 1 ? parts : [];
     return {
         id: `monat-${m.jahr}-${m.monat}`,
-        periode: formatMonat(m.jahr, m.monat),
+        periode: formatMonth(m.jahr, m.monat),
         faellig: m.faellig,
         bezahlt: m.bezahlt,
         offen: m.offen,
-        aufschluesselung,
+        breakdown,
         // Ganze Transaktionen; Ausgleiche ohne Transaktion einzeln.
         zahlungen: [
             ...m.transaktionen.map(transaktionsEintrag),

@@ -16,8 +16,8 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
-import type { WalterEintrag } from './WalterEintrag';
-import { formatDatum, formatZahl } from '../services/format';
+import type { WalterListItem } from './WalterListItem';
+import { formatDate, formatNumber } from '../services/format';
 
 export class WalterZaehlerstandEntry extends WalterApiHandler {
     public static ApiURL = `/api/zaehlerstaende`;
@@ -62,10 +62,10 @@ type WalterStand = Pick<
 >;
 
 /**
- * Zählerstände als Einträge (WalterEintraege), neuester zuerst: Datum, Stand mit Einheit,
+ * Zählerstände als Einträge (WalterItemList), neuester zuerst: Datum, Stand mit Einheit,
  * dazu der Verbrauch seit dem vorigen Stand und die Notiz.
  */
-export function zaehlerstandEintraege(staende: WalterStand[]): WalterEintrag[] {
+export function zaehlerstandItems(staende: WalterStand[]): WalterListItem[] {
     const aufsteigend = [...staende].sort((a, b) =>
         a.datum.localeCompare(b.datum)
     );
@@ -74,12 +74,12 @@ export function zaehlerstandEintraege(staende: WalterStand[]): WalterEintrag[] {
             const vorher = aufsteigend[i - 1];
             const einheit = s.einheit ? ` ${s.einheit}` : '';
             const verbrauch = vorher
-                ? `${s.stand - vorher.stand >= 0 ? '+' : '−'}${formatZahl(Math.abs(s.stand - vorher.stand))}${einheit} seit ${formatDatum(vorher.datum)}`
+                ? `${s.stand - vorher.stand >= 0 ? '+' : '−'}${formatNumber(Math.abs(s.stand - vorher.stand))}${einheit} seit ${formatDate(vorher.datum)}`
                 : 'Erster Stand';
             return {
                 id: `${s.id}`,
                 datum: s.datum,
-                wert: `${formatZahl(s.stand)}${einheit}`,
+                wert: `${formatNumber(s.stand)}${einheit}`,
                 text: s.notiz ? `${verbrauch} – ${s.notiz}` : verbrauch,
                 href: `/zaehlerstaende/${s.id}`
             };

@@ -18,7 +18,7 @@ import { zuordnungText } from './WalterTransaktion';
 import { entityRefHref } from './WalterEntityRef';
 
 /** Farbe eines Tags an einem Eintrag. */
-export type WalterEintragTagFarbe =
+export type WalterListItemTagColor =
     | 'green'
     | 'warm-gray'
     | 'red'
@@ -28,19 +28,19 @@ export type WalterEintragTagFarbe =
     | 'teal';
 
 /** Teil eines Eintrags, eingerückt darunter — z. B. wofür eine Zahlung gebucht wurde. */
-export interface WalterEintragTeil {
+export interface WalterListItemPart {
     text: string;
     betrag?: number;
     href?: string | null;
     /** Abgeschwächt, z. B. ein rückgängig gemachter Teil. */
-    gedimmt?: boolean;
+    dimmed?: boolean;
 }
 
 /**
- * Ein Eintrag der einheitlichen Liste (WalterEintraege), z. B. in einer aufgeklappten
+ * Ein Eintrag der einheitlichen Liste (WalterItemList), z. B. in einer aufgeklappten
  * Tabellenzeile: Datum, Betrag, Text mit Link, optional ein Tag und Teile darunter.
  */
-export interface WalterEintrag {
+export interface WalterListItem {
     id: string;
     datum?: string;
     betrag?: number;
@@ -48,19 +48,19 @@ export interface WalterEintrag {
     wert?: string;
     text: string;
     href?: string;
-    tag?: { text: string; tag: WalterEintragTagFarbe };
-    teile?: WalterEintragTeil[];
+    tag?: { text: string; tag: WalterListItemTagColor };
+    parts?: WalterListItemPart[];
 }
 
 /** Zuordnung einer Transaktion als Teile eines Eintrags. */
-export function zuordnungAlsTeile(
+export function zuordnungAsParts(
     zuordnung: WalterZuordnungEintrag[]
-): WalterEintragTeil[] {
+): WalterListItemPart[] {
     return zuordnung.map((z) => ({
         text: zuordnungText(z),
         betrag: z.betrag,
         href: entityRefHref(z.ref),
-        gedimmt: z.storniert
+        dimmed: z.storniert
     }));
 }
 
@@ -68,9 +68,9 @@ export function zuordnungAlsTeile(
  * Zuordnung einer Transaktion als eigene Einträge (z. B. aufgeklappt in der
  * Transaktionsliste): Betrag und wofür, rückgängig gemachte Teile mit grauem Tag.
  */
-export function zuordnungAlsEintraege(
+export function zuordnungAsItems(
     zuordnung: WalterZuordnungEintrag[]
-): WalterEintrag[] {
+): WalterListItem[] {
     return zuordnung.map((z, i) => ({
         id: `zuordnung-${i}`,
         betrag: z.betrag,

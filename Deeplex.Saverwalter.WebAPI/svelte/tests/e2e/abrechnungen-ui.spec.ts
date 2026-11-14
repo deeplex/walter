@@ -136,8 +136,8 @@ test('Ausgleich einer Nebenkostenabrechnung erfassen und rückgängig machen', a
         await authenticatePage(page, 'admin.dev');
         await page.goto(`/vertraege/${vertragId}#abrechnungen`);
 
-        const abschnitt = page.locator('#abrechnungen');
-        const zeile = abschnitt
+        const section = page.locator('#abrechnungen');
+        const zeile = section
             .getByRole('row')
             .filter({ hasText: `Abrechnung ${jahr} – ${art}` })
             .first();
@@ -161,7 +161,7 @@ test('Ausgleich einer Nebenkostenabrechnung erfassen und rückgängig machen', a
         await expect(zeile.getByText('Bezahlt', { exact: true })).toBeVisible();
 
         await zeile.getByRole('button', { name: /expand/i }).click();
-        await abschnitt
+        await section
             .locator('[data-child-row]')
             .getByRole('button', { name: 'Rückgängig machen' })
             .first()
@@ -174,7 +174,7 @@ test('Ausgleich einer Nebenkostenabrechnung erfassen und rückgängig machen', a
 
         await expect.poll(offen).toBe(abrechnung.offen);
         await expect(
-            abschnitt.getByText('Rückgängig gemachte Zahlungen')
+            section.getByText('Rückgängig gemachte Zahlungen')
         ).toBeVisible();
     } finally {
         await withFreshApiContext(async (api) => {

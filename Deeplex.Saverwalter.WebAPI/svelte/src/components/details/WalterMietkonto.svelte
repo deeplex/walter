@@ -100,7 +100,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: rueckgaengig = konto ? imJahr(konto.rueckgaengigGemacht) : [];
 
     /** Auf der Vertrags- bzw. Garagenseite ein aufklappbarer Abschnitt, im Abrechnungslauf eine Kachel. */
-    $: alsAbschnitt = jahr === undefined;
+    $: asSection = jahr === undefined;
     $: status = !konto
         ? undefined
         : gesamt > 0.005
@@ -111,10 +111,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterDataTableContainer
-    layout={alsAbschnitt ? 'accordion' : 'inline'}
+    layout={asSection ? 'accordion' : 'inline'}
     accordionTitle={title}
     count={zeilen.length}
-    id={alsAbschnitt ? 'mietkonto' : undefined}
+    id={asSection ? 'mietkonto' : undefined}
 >
     <svelte:fragment slot="titel">
         {#if status}
@@ -122,11 +122,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     </svelte:fragment>
     <div
-        id={alsAbschnitt ? undefined : 'mietkonto'}
-        class:bx--tile={!alsAbschnitt}
-        class:kachel={!alsAbschnitt}
+        id={asSection ? undefined : 'mietkonto'}
+        class:bx--tile={!asSection}
+        class:kachel={!asSection}
     >
-        {#if !alsAbschnitt}
+        {#if !asSection}
             <h4 style="margin-bottom: 0.75rem">
                 {title}
                 {#if status}
@@ -169,14 +169,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
             <WalterZahlungsliste
                 titel="Guthaben (keinem Monat zugeordnet)"
-                eintraege={nichtZugeordnet.map(zahlungsEintrag)}
+                items={nichtZugeordnet.map(zahlungsEintrag)}
                 {bearbeitbar}
                 {fetchImpl}
                 on:erledigt={refresh}
             />
             <WalterZahlungsliste
                 titel="Rückgängig gemachte Zahlungen"
-                eintraege={rueckgaengig.map(zahlungsEintrag)}
+                items={rueckgaengig.map(zahlungsEintrag)}
                 rueckgaengigGemacht
             />
         {/if}

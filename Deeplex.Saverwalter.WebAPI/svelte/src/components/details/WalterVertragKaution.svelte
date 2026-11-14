@@ -29,7 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import { walter_get, walter_post } from '$walter/services/requests';
     import WalterRueckgaengig from './WalterRueckgaengig.svelte';
-    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
     import { addToast, changeTracker } from '$walter/store';
     import { get } from 'svelte/store';
 
@@ -51,12 +51,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: gehalten = entry.kaution ?? 0;
     $: buchungen = entry.kautionsBuchungen ?? [];
-    $: kautionsEintraege = buchungen.map((b, i) => ({
+    $: kautionItems = buchungen.map((b, i) => ({
         id: `kaution-${i}`,
         datum: b.datum,
         betrag: b.betrag,
         text: b.beschreibung,
-        teile: b.notiz ? [{ text: b.notiz, gedimmt: true }] : undefined,
+        parts: b.notiz ? [{ text: b.notiz, dimmed: true }] : undefined,
         href: b.transaktionId ? `/transaktionen/${b.transaktionId}` : undefined,
         transaktionId: b.transaktionId ?? undefined
     }));
@@ -161,17 +161,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Row>
     {#if buchungen.length > 0}
         <div class="buchungen">
-            <WalterEintraege eintraege={kautionsEintraege}>
-                <svelte:fragment slot="aktion" let:eintrag>
-                    {#if !readonly && eintrag.transaktionId}
+            <WalterItemList items={kautionItems}>
+                <svelte:fragment slot="aktion" let:item>
+                    {#if !readonly && item.transaktionId}
                         <WalterRueckgaengig
                             {fetchImpl}
-                            transaktionId={eintrag.transaktionId}
+                            transaktionId={item.transaktionId}
                             on:erledigt={neuLaden}
                         />
                     {/if}
                 </svelte:fragment>
-            </WalterEintraege>
+            </WalterItemList>
         </div>
     {/if}
 </div>
