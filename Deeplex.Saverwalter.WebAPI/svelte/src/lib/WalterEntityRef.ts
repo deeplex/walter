@@ -53,11 +53,15 @@ const ROUTES: Record<WalterEntityRefType, string> = {
     Buchungskonto: 'buchungskonten'
 };
 
-/** Die URL einer Referenz, z. B. `/vertraege/3#mietkonto`; ohne Referenz `undefined`. */
+/** Die URL einer Referenz, z. B. `/vertraege/3#mietkonto` oder `/vertraege/3/kaution`; ohne Referenz `undefined`. */
 export function entityRefHref(
     ref: WalterEntityRef | null | undefined
 ): string | undefined {
     if (!ref) return undefined;
     const path = `/${ROUTES[ref.type]}/${ref.id}`;
+    // Die Kaution hat eine eigene Seite statt eines Abschnitts.
+    if (ref.type === 'Vertrag' && ref.section === 'kaution') {
+        return `${path}/kaution`;
+    }
     return ref.section ? `${path}#${ref.section}` : path;
 }

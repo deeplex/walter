@@ -134,6 +134,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             Datum = z.Buchungssatz.Buchungsdatum,
                             Betrag = z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag,
                             Beschreibung = z.Buchungssatz.Beschreibung,
+                            Notiz = z.Buchungssatz.Notiz,
                             TransaktionId = z.Buchungssatz.Transaktion?.TransaktionId,
                         })
                         .ToList();
@@ -149,6 +150,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateOnly Datum { get; set; }
             public decimal Betrag { get; set; }
             public string Beschreibung { get; set; } = string.Empty;
+            /// <summary>Notiz des Buchungssatzes, z. B. aus dem Dialog „Kaution erhalten“.</summary>
+            public string? Notiz { get; set; }
             public Guid? TransaktionId { get; set; }
         }
 

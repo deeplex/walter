@@ -27,6 +27,8 @@ export interface WalterKautionsBuchung {
     datum: string;
     betrag: number;
     beschreibung: string;
+    /** Notiz des Buchungssatzes. */
+    notiz?: string;
     transaktionId?: string;
 }
 

@@ -7,6 +7,9 @@ describe('entityRefHref', () => {
         expect(
             entityRefHref({ type: 'Vertrag', id: 3, section: 'mietkonto' })
         ).toBe('/vertraege/3#mietkonto');
+        expect(
+            entityRefHref({ type: 'Vertrag', id: 3, section: 'kaution' })
+        ).toBe('/vertraege/3/kaution');
         expect(entityRefHref({ type: 'GarageVertrag', id: '7' })).toBe(
             '/garage-vertraege/7'
         );

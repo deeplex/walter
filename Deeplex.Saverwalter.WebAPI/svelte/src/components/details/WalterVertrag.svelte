@@ -26,10 +26,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
+        Button,
         Row,
         TextInput,
         InlineNotification
     } from 'carbon-components-svelte';
+    import { formatEuro } from '$walter/services/format';
     import { convertDateGerman } from '$walter/services/utils';
     import { walter_fetch, walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
@@ -232,6 +234,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:value={displayVersion.personenzahl}
         label="Personenzahl"
     />
+    {#if entry.id}
+        <div class="bx--form-item">
+            <span class="bx--label">Kaution</span>
+            <Button
+                class="kaution-knopf"
+                kind="tertiary"
+                size="field"
+                href="/vertraege/{entry.id}/kaution"
+            >
+                {formatEuro(entry.kaution ?? 0)}
+            </Button>
+        </div>
+    {/if}
 </Row>
 {#if hasVersionChanges}
     <Row>
@@ -259,3 +274,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>
+
+<style>
+    /* Gleiche Breite und Höhe wie die Eingabefelder daneben */
+    :global(.kaution-knopf) {
+        width: 100%;
+        max-width: none;
+    }
+</style>

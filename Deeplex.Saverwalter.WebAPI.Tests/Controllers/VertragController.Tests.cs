@@ -165,12 +165,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Datum = new DateOnly(2024, 1, 2),
                 Betrag = 1500m,
+                Notiz = "Sparbuch bei der Sparkasse",
             });
             var entry = eingang.Value ?? eingang.Result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeOfType<VertragEntry>().Subject;
             entry.Kaution.Should().Be(1500m);
-            entry.KautionsBuchungen.Should().ContainSingle()
-                .Which.TransaktionId.Should().NotBeNull();
+            var buchung = entry.KautionsBuchungen.Should().ContainSingle().Subject;
+            buchung.TransaktionId.Should().NotBeNull();
+            buchung.Notiz.Should().Be("Sparbuch bei der Sparkasse");
 
             var rueckzahlung = await controller.PostKaution(vertrag.VertragId, new KautionRequest
             {

@@ -56,6 +56,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         datum: b.datum,
         betrag: b.betrag,
         text: b.beschreibung,
+        teile: b.notiz ? [{ text: b.notiz, gedimmt: true }] : undefined,
         href: b.transaktionId ? `/transaktionen/${b.transaktionId}` : undefined,
         transaktionId: b.transaktionId ?? undefined
     }));
@@ -128,8 +129,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<!-- Teil der Vertragsdetails: gehaltene Kaution, „erhalten“/„zurückzahlen“, darunter die Buchungen. -->
-<div id="kaution">
+<!-- Kautionsseite eines Vertrags: gehaltene Kaution, „erhalten“/„zurückzahlen“, darunter die Buchungen. -->
+<div>
     <Row>
         <TextInput
             readonly

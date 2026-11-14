@@ -29,7 +29,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterMietkonto,
         WalterNebenkostenabrechnungen,
-        WalterVertragKaution,
         WalterVertragsNkAnteile
     } from '$walter/components';
     import { getMietminderungEntry, getVertragversionEntry } from './utils';
@@ -84,12 +83,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:entry={data.entry}
         bind:blockSave
         bind:commitVersionIfPending
-    />
-
-    <WalterVertragKaution
-        bind:entry={data.entry}
-        fetchImpl={data.fetchImpl}
-        readonly={data.entry.permissions?.update === false}
     />
 
     <WalterMietkonto
