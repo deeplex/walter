@@ -86,6 +86,39 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
+        public async Task LesenLegtKeineSollstellungAnUndZeigtDenMonatTrotzdemAlsFaellig()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAbAsync(ctx, new DateOnly(2024, 1, 1));
+            var garage = new GarageVertrag
+            {
+                Garage = new Garage("G1")
+                {
+                    Besitzer = vertrag.Ansprechpartner!,
+                    Ertragskonto = new Buchungskonto("4100", "Garagenmiete", BuchungskontoTyp.Ertrag),
+                },
+                MietBuchungskonto = new Buchungskonto("1100", "Garage", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1101", "Garage Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            garage.Versionen.Add(new GarageVertragVersion(new DateOnly(2024, 1, 1), 50m) { GarageVertrag = garage });
+            ctx.GarageVertraege.Add(garage);
+            await ctx.SaveChangesAsync();
+            var vorher = ctx.Buchungssaetze.Count();
+            var controller = new OffeneForderungenController(ctx);
+
+            var miete = (await controller.GetOffeneForderungen(2024)).Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneForderungEntry>>().Subject.ToList();
+            var garagen = (await controller.GetOffeneGarageForderungen(2024)).Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneGarageForderungEntry>>().Subject.ToList();
+
+            miete.Should().HaveCount(12);
+            miete.Should().OnlyContain(e => e.KaltmieteOffen == 500m);
+            garagen.Should().HaveCount(12);
+            garagen.Should().OnlyContain(e => e.Offen == 50m);
+            ctx.Buchungssaetze.Count().Should().Be(vorher);
+        }
+
+        [Fact]
         public async Task ForderungsstatusZaehltDieZahlungFuerDenZugeordnetenMonat()
         {
             var ctx = TestUtils.GetContext();

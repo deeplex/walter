@@ -130,6 +130,8 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddHttpClient();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<IHostedService>(sp =>
+                new SollstellungHintergrunddienst(container, sp.GetRequiredService<ILogger<SollstellungHintergrunddienst>>()));
             builder.Services.AddSimpleInjector(container, options =>
             {
                 options.AddAspNetCore().AddControllerActivation();
@@ -219,6 +221,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<RueckgaengigService>(Lifestyle.Scoped);
             container.Register<MietKorrekturService>(Lifestyle.Scoped);
             container.Register<MietkontoService>(Lifestyle.Scoped);
+            container.Register<SollstellungService>(Lifestyle.Scoped);
             container.Register<NebenkostenabrechnungenService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwandService>(Lifestyle.Scoped);
             container.Register<UmlageRechnungenService>(Lifestyle.Scoped);

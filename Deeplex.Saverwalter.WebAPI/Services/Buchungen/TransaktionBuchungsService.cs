@@ -481,11 +481,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (vorhandene != null) return vorhandene;
 
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
-            AddZeile(satz, SollHaben.Soll, version.GaragenMiete, gv.MietBuchungskonto);
-            AddZeile(satz, SollHaben.Haben, version.GaragenMiete, gv.Garage.Ertragskonto);
+            var satz = Sollstellung.ErstelleGarage(gv, monat, version.GaragenMiete);
             _ctx.Buchungssaetze.Add(satz);
-            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
+            return Sollstellung.SollZeile(satz);
         }
 
         /// <summary>
@@ -792,14 +790,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (vorhandene != null) return vorhandene;
 
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");
-            AddZeile(satz, SollHaben.Soll, version.Grundmiete, vertrag.MietBuchungskonto);
-            AddZeile(satz, SollHaben.Haben, version.Grundmiete, vertrag.Wohnung.MietErtragskonto);
+            var satz = Sollstellung.ErstelleMiete(vertrag, monat, version.Grundmiete);
             _ctx.Buchungssaetze.Add(satz);
-            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
+            return Sollstellung.SollZeile(satz);
         }
-
-        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 
         private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 

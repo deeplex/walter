@@ -22,8 +22,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     /// <summary>
-    /// Gibt alle offenen Kaltmiete-Forderungen für ein Jahr zurück und erstellt
-    /// fehlende Sollstellungen dabei lazy (bis einschließlich laufendem Monat).
+    /// Gibt die offenen Forderungen für ein Jahr zurück. Strikt lesend: Ein Monat ohne
+    /// Sollstellung gilt als fällig mit der Miete der Vertragsversion und nichts bezahlt.
+    /// Angelegt werden die Sollstellungen vom <see cref="SollstellungService"/>.
     /// </summary>
     [ApiController]
     [Route("api/offene-forderungen")]
@@ -49,33 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet("{jahr}")]
         public Task<ActionResult<IEnumerable<OffeneForderungEntry>>> GetOffeneForderungen(int jahr) =>
-            MitSollstellungenAsync(() => ErmittleOffeneForderungenAsync(jahr));
-
-        /// <summary>
-        /// Ermittelt erst ohne Sperre; fehlt dabei eine Sollstellung, bricht der Lauf ab und
-        /// wiederholt sich unter der Sperre (<see cref="Sollstellung.GesperrtAsync{T}"/>), die
-        /// Sollstellungen dann anlegt. Nur das Anlegen wartet also aufeinander.
-        /// </summary>
-        private async Task<T> MitSollstellungenAsync<T>(Func<Task<T>> ermittle)
-        {
-            try
-            {
-                return await ermittle();
-            }
-            catch (SollstellungFehlt)
-            {
-                return await Sollstellung.GesperrtAsync(ctx, async () =>
-                {
-                    _anlegen = true;
-                    try { return await ermittle(); }
-                    finally { _anlegen = false; }
-                });
-            }
-        }
-
-        private bool _anlegen;
-
-        private sealed class SollstellungFehlt : Exception { }
+            ErmittleOffeneForderungenAsync(jahr);
 
         private async Task<ActionResult<IEnumerable<OffeneForderungEntry>>> ErmittleOffeneForderungenAsync(int jahr)
         {
@@ -83,15 +58,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var endOfYear = new DateOnly(jahr, 12, 31);
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            // Never create Sollstellungen for future months.
-            // For past years: check all 12 months. For current year: up to today's month.
-            var bisMonat = today.Year == jahr
-                ? new DateOnly(today.Year, today.Month, 1)
-                : today.Year > jahr
-                    ? endOfYear
-                    : startOfYear.AddMonths(-1); // future year → empty
-
-            if (bisMonat < startOfYear)
+            // Künftige Monate sind nicht fällig: ein künftiges Jahr hat keine.
+            if (jahr > today.Year)
                 return Ok(Array.Empty<OffeneForderungEntry>());
 
             var vertraege = await ctx.Vertraege
@@ -163,18 +131,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             foreach (var vertrag in vertraege)
             {
-                var vertragBeginn = vertrag.Beginn();
-                var vonMonat = new DateOnly(
-                    jahr,
-                    vertragBeginn.Year < jahr ? 1 : vertragBeginn.Month,
-                    1);
-
-                var bisMonatFuerVertrag = vertrag.Ende.HasValue && vertrag.Ende.Value < bisMonat
-                    ? new DateOnly(vertrag.Ende.Value.Year, vertrag.Ende.Value.Month, 1)
-                    : bisMonat;
-
-                var monat = vonMonat;
-                while (monat <= bisMonatFuerVertrag)
+                foreach (var monat in Sollstellung.Monate(jahr, today, vertrag.Beginn(), vertrag.Ende))
                 {
                     var version = vertrag.Versionen
                         .Where(v => v.Beginn <= monat)
@@ -185,11 +142,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         var sollZeile = vertrag.MietBuchungskonto.Buchungszeilen
                             .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat, vertrag.NkBuchungskonto.BuchungskontoId));
 
-                        if (sollZeile == null)
-                            sollZeile = ErstelleSollstellung(vertrag, monat, version.Grundmiete);
-
-                        var gezahlt = oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
-                        var kaltmieteOffen = sollZeile.Betrag - gezahlt;
+                        // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
+                        var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                        var kaltmieteOffen = (sollZeile?.Betrag ?? version.Grundmiete) - gezahlt;
 
                         // Collect open garage forderungen for this month
                         var offeneGaragen = new List<OffeneGarageInfo>();
@@ -201,11 +156,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             var gvSollZeile = gv.MietBuchungskonto.Buchungszeilen
                                 .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
-                            if (gvSollZeile == null)
-                                gvSollZeile = ErstelleGarageSollstellung(gv, monat, gvVersion.GaragenMiete);
-
-                            var gvGezahlt = oposBySollZeile.TryGetValue(gvSollZeile.BuchungszeileId, out var gg) ? gg : 0m;
-                            var gvOffen = gvSollZeile.Betrag - gvGezahlt;
+                            var gvGezahlt = gvSollZeile != null && oposBySollZeile.TryGetValue(gvSollZeile.BuchungszeileId, out var gg) ? gg : 0m;
+                            var gvOffen = (gvSollZeile?.Betrag ?? gvVersion.GaragenMiete) - gvGezahlt;
 
                             if (gvOffen > 0.005m)
                                 offeneGaragen.Add(new OffeneGarageInfo
@@ -233,12 +185,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             });
                         }
                     }
-
-                    monat = monat.AddMonths(1);
                 }
             }
 
-            await ctx.SaveChangesAsync();
             return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.VertragBezeichnung));
         }
 
@@ -383,7 +332,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet("garagen/{jahr}")]
         public Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> GetOffeneGarageForderungen(int jahr) =>
-            MitSollstellungenAsync(() => ErmittleOffeneGarageForderungenAsync(jahr));
+            ErmittleOffeneGarageForderungenAsync(jahr);
 
         private async Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> ErmittleOffeneGarageForderungenAsync(int jahr)
         {
@@ -391,11 +340,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var endOfYear = new DateOnly(jahr, 12, 31);
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            var bisMonat = today.Year == jahr
-                ? new DateOnly(today.Year, today.Month, 1)
-                : today.Year > jahr ? endOfYear : startOfYear.AddMonths(-1);
-
-            if (bisMonat < startOfYear)
+            if (jahr > today.Year)
                 return Ok(Array.Empty<OffeneGarageForderungEntry>());
 
             var garageVertraege = await ctx.GarageVertraege
@@ -440,14 +385,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             foreach (var gv in garageVertraege)
             {
-                var beginn = gv.Beginn();
-                var vonMonat = new DateOnly(jahr, beginn.Year < jahr ? 1 : beginn.Month, 1);
-                var bisMonatFuerGv = gv.Ende.HasValue && gv.Ende.Value < bisMonat
-                    ? new DateOnly(gv.Ende.Value.Year, gv.Ende.Value.Month, 1)
-                    : bisMonat;
-
-                var monat = vonMonat;
-                while (monat <= bisMonatFuerGv)
+                foreach (var monat in Sollstellung.Monate(jahr, today, gv.Beginn(), gv.Ende))
                 {
                     var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
                     if (version != null)
@@ -455,11 +393,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         var sollZeile = gv.MietBuchungskonto.Buchungszeilen
                             .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
-                        if (sollZeile == null)
-                            sollZeile = ErstelleGarageSollstellung(gv, monat, version.GaragenMiete);
-
-                        var gezahlt = oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
-                        var offen = sollZeile.Betrag - gezahlt;
+                        // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
+                        var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                        var offen = (sollZeile?.Betrag ?? version.GaragenMiete) - gezahlt;
 
                         if (offen > 0.005m)
                         {
@@ -477,50 +413,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                             });
                         }
                     }
-                    monat = monat.AddMonths(1);
                 }
             }
 
-            await ctx.SaveChangesAsync();
             return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.Bezeichnung));
-        }
-
-        private Buchungszeile ErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, decimal garagenMiete)
-        {
-            if (!_anlegen) throw new SollstellungFehlt();
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
-            var sollZeile = new Buchungszeile(SollHaben.Soll, garagenMiete)
-            {
-                Buchungssatz = satz,
-                Buchungskonto = gv.MietBuchungskonto
-            };
-            satz.Buchungszeilen.Add(sollZeile);
-            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, garagenMiete)
-            {
-                Buchungssatz = satz,
-                Buchungskonto = gv.Garage.Ertragskonto
-            });
-            ctx.Buchungssaetze.Add(satz);
-            return sollZeile;
-        }
-
-        private Buchungszeile ErstelleSollstellung(Vertrag vertrag, DateOnly monat, decimal grundmiete)
-        {
-            if (!_anlegen) throw new SollstellungFehlt();
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");
-            var sollZeile = new Buchungszeile(SollHaben.Soll, grundmiete)
-            {
-                Buchungssatz = satz,
-                Buchungskonto = vertrag.MietBuchungskonto
-            };
-            satz.Buchungszeilen.Add(sollZeile);
-            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, grundmiete)
-            {
-                Buchungssatz = satz,
-                Buchungskonto = vertrag.Wohnung.MietErtragskonto
-            });
-            ctx.Buchungssaetze.Add(satz);
-            return sollZeile;
         }
 
         private static string BuildBezeichnung(Vertrag vertrag)
@@ -531,8 +427,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 : "Leerstand";
             return $"{wohnung} | {mieter}";
         }
-
-        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
 
         public class ZaehlerstandFaelligEntry
         {

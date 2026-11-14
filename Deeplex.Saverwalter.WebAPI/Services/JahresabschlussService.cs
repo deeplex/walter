@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     /// Jahresabschlusskontrolle: Prüft pro Abrechnungszeitraum (Buchungsjahr), ob
     /// alle ausgleichbaren Konten ausgeglichen sind und alle Betriebskosten-
     /// abrechnungen erstellt und abgesendet wurden. Strikt lesend — anders als
-    /// der OffeneForderungenController werden keine Sollstellungen erzeugt.
+    /// der SollstellungService werden keine Sollstellungen erzeugt.
     /// </summary>
     public static class JahresabschlussService
     {

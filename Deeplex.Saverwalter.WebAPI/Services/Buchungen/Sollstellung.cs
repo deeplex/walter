@@ -77,6 +77,50 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             && z.Buchungssatz.Buchungsdatum.Year == monat.Year
             && z.Buchungssatz.Buchungsdatum.Month == monat.Month;
 
+        /// <summary>
+        /// Die Monate eines Jahres, für die eine Sollstellung fällig ist: ab Vertragsbeginn
+        /// (bzw. Januar), bis zum Vertragsende und höchstens bis zum laufenden Monat. Künftige
+        /// Jahre haben keine. Jeweils der Erste des Monats.
+        /// </summary>
+        public static IEnumerable<DateOnly> Monate(int jahr, DateOnly heute, DateOnly beginn, DateOnly? ende)
+        {
+            var jahresanfang = new DateOnly(jahr, 1, 1);
+            var bis = heute.Year == jahr
+                ? new DateOnly(heute.Year, heute.Month, 1)
+                : heute.Year > jahr
+                    ? new DateOnly(jahr, 12, 31)
+                    : jahresanfang.AddMonths(-1);
+            if (bis < jahresanfang) yield break;
+
+            if (ende is DateOnly e && e < bis)
+                bis = new DateOnly(e.Year, e.Month, 1);
+
+            for (var monat = new DateOnly(jahr, beginn.Year < jahr ? 1 : beginn.Month, 1); monat <= bis; monat = monat.AddMonths(1))
+                yield return monat;
+        }
+
+        /// <summary>Die Sollstellung der Kaltmiete eines Monats: Soll Mietkonto, Haben Mietertragskonto der Wohnung.</summary>
+        public static Buchungssatz ErstelleMiete(Vertrag vertrag, DateOnly monat, decimal grundmiete) =>
+            Erstelle($"Mietsoll {monat:MM/yyyy}", monat, grundmiete,
+                vertrag.MietBuchungskonto, vertrag.Wohnung.MietErtragskonto);
+
+        /// <summary>Die Sollstellung der Garagenmiete eines Monats: Soll Garagen-Mietkonto, Haben Ertragskonto der Garage.</summary>
+        public static Buchungssatz ErstelleGarage(GarageVertrag gv, DateOnly monat, decimal garagenMiete) =>
+            Erstelle($"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}", monat, garagenMiete,
+                gv.MietBuchungskonto, gv.Garage.Ertragskonto);
+
+        private static Buchungssatz Erstelle(string beschreibung, DateOnly monat, decimal betrag, Buchungskonto soll, Buchungskonto haben)
+        {
+            var satz = new Buchungssatz(DateUtils.DritterWerktag(monat), beschreibung);
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag) { Buchungssatz = satz, Buchungskonto = soll });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag) { Buchungssatz = satz, Buchungskonto = haben });
+            return satz;
+        }
+
+        /// <summary>Die Soll-Zeile eines mit <see cref="ErstelleMiete"/> bzw. <see cref="ErstelleGarage"/> erzeugten Satzes.</summary>
+        public static Buchungszeile SollZeile(Buchungssatz satz) =>
+            satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
+
         /// <summary>Per Ausgleich an der Sollstellung bezahlter Betrag.</summary>
         public static decimal Bezahlt(Buchungszeile sollstellung) =>
             sollstellung.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
