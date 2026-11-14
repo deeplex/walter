@@ -17,7 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterHeader,
-        WalterJahresabschlussKontrolle
+        WalterJahresabschlussKontrolle,
+        WalterStrukturpruefung
     } from '$walter/components';
     import type { PageData } from './$types';
 
@@ -25,4 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader title="Jahresabschluss" />
+<div style="padding: 1rem 1rem 0">
+    <WalterStrukturpruefung fetchImpl={data.fetchImpl} />
+</div>
 <WalterJahresabschlussKontrolle fetchImpl={data.fetchImpl} />

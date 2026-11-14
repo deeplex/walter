@@ -107,17 +107,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     .Select(b => new BankkontoEntryBase(b, new Permissions { Read = true, Update = true, Remove = true }))
                     .ToList();
 
-                entry.Transaktionen = myBankkontoIds.Count == 0 ? [] : Ctx.Transaktionen
-                    .Where(t =>
-                        (t.Zahler != null && myBankkontoIds.Contains(t.Zahler.BankkontoId)) ||
-                        (t.Zahlungsempfaenger != null && myBankkontoIds.Contains(t.Zahlungsempfaenger.BankkontoId)))
-                    .Include(t => t.Zahler).ThenInclude(b => b!.Besitzer)
-                    .Include(t => t.Zahlungsempfaenger).ThenInclude(b => b!.Besitzer)
-                    .AsEnumerable()
-                    .Select(e => new TransaktionEntryBase(e, new(true)))
-                    .ToList();
-                await Zuordnung.ZuordnenAsync(Ctx, entry.Transaktionen);
-
                 return entry;
             });
         }

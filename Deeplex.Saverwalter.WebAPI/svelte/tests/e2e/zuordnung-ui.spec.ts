@@ -76,3 +76,27 @@ test('Kontakt eines Mieters zeigt, was offen ist', async ({ page }) => {
         abschnitt.locator('a[href*="#mietkonto"]').first()
     ).toBeVisible();
 });
+
+test('Strukturprüfung: Dev-Daten ohne Auffälligkeiten', async ({ page }) => {
+    // Der Seed bucht Zahlungen über Buchungszeile.Zuordnen — keine Zahlung ohne Zuordnung,
+    // jedes Konto mit genau einem Besitzer.
+    const ergebnis = await withFreshApiContext(async (api) => {
+        const { token } = await signInApi(api, 'admin.dev');
+        const r = await api.get('/api/jahresabschluss/struktur', {
+            headers: authHeader(token)
+        });
+        expect(r.ok()).toBeTruthy();
+        return (await r.json()) as {
+            mehrdeutigeKonten: unknown[];
+            zahlungenOhneZuordnung: unknown[];
+        };
+    });
+    expect(ergebnis.mehrdeutigeKonten).toEqual([]);
+    expect(ergebnis.zahlungenOhneZuordnung).toEqual([]);
+
+    await authenticatePage(page, 'admin.dev');
+    await page.goto('/jahresabschlusskontrolle');
+    await expect(
+        page.locator('#strukturpruefung').getByText('Keine Auffälligkeiten')
+    ).toBeVisible();
+});

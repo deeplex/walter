@@ -402,5 +402,84 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 && x.Zahlung.ZugeordnetZu != null
                 && x.Zahlung.ZugeordnetZu.BuchungszeileId == x.Posten.BuchungszeileId);
         }
+
+        // ── Mehrdeutige Konten und Strukturprüfung ────────────────────────────
+
+        [Fact]
+        public async Task KontoMitZweiBesitzernIstMehrdeutigUndWirdNichtGeraten()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var (wohnung, _) = EgLinks(ctx);
+            wohnung.AufwandsKonto = vertrag.MietBuchungskonto; // Fehler in den Daten: ein Konto, zwei Besitzer
+            var bank = Bank(ctx, "100");
+            var t = new Transaktion { Zahlungsdatum = new DateOnly(2024, 3, 5), Betrag = 10m };
+            var satz = new Buchungssatz(new DateOnly(2024, 3, 5), "Zahlung") { Transaktion = t };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 10m) { Buchungssatz = satz, Buchungskonto = bank.BuchungsKonto });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 10m) { Buchungssatz = satz, Buchungskonto = vertrag.MietBuchungskonto });
+            ctx.Buchungssaetze.Add(satz);
+            await ctx.SaveChangesAsync();
+
+            var rollen = await Kontorollen.ErmittleAsync(ctx);
+            rollen.Mehrdeutig.Should().ContainKey(vertrag.MietBuchungskonto.BuchungskontoId);
+            rollen.Eindeutig.Should().NotContainKey(vertrag.MietBuchungskonto.BuchungskontoId);
+
+            var z = (await ZuordnungAsync(ctx, t)).Should().ContainSingle().Subject;
+            z.Text.Should().StartWith("Buchungskonto ");
+
+            var pruefung = await Strukturpruefung.ErmittleAsync(ctx, null);
+            pruefung.MehrdeutigeKonten.Should().ContainSingle()
+                .Which.Besitzer.Should().HaveCount(2);
+            pruefung.Auffaellig.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task BankkontoHinterDemZahlungskontoIstKeinKonflikt()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            ctx.Bankkontos.Add(new Bankkonto { Iban = "DE1", BuchungsKonto = vertrag.ZahlungsKonto });
+            await ctx.SaveChangesAsync();
+
+            var rollen = await Kontorollen.ErmittleAsync(ctx);
+
+            rollen.Mehrdeutig.Should().BeEmpty();
+            rollen.Eindeutig[vertrag.ZahlungsKonto.BuchungskontoId].Rolle.Should().Be(KontoRolle.Geld);
+        }
+
+        [Fact]
+        public async Task StrukturpruefungListetZahlungenOhneZuordnung()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            // Gebuchte Zahlung: zugeordnet, nicht gelistet.
+            await MieteAsync(ctx, vertrag, new DateOnly(2024, 3, 1), new DateOnly(2024, 3, 5));
+            // Bestand ohne Zuordnung, einmal offen, einmal storniert.
+            Transaktion OhneZuordnung(decimal betrag)
+            {
+                var t = new Transaktion { Zahlungsdatum = new DateOnly(2024, 5, 5), Betrag = betrag };
+                var satz = new Buchungssatz(new DateOnly(2024, 5, 5), "Miete") { Transaktion = t };
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, betrag) { Buchungssatz = satz, Buchungskonto = vertrag.ZahlungsKonto });
+                satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, betrag) { Buchungssatz = satz, Buchungskonto = vertrag.MietBuchungskonto });
+                ctx.Buchungssaetze.Add(satz);
+                return t;
+            }
+            var offen = OhneZuordnung(500m);
+            var spaeterStorniert = OhneZuordnung(300m);
+            await ctx.SaveChangesAsync();
+            await StornoAsync(ctx, spaeterStorniert);
+            ctx.ChangeTracker.Clear();
+
+            var pruefung = await Strukturpruefung.ErmittleAsync(ctx, null);
+
+            pruefung.ZahlungenOhneZuordnung.Select(z => (z.TransaktionId, z.Betrag, z.Storniert)).Should()
+                .Equal((offen.TransaktionId, 500m, false), (spaeterStorniert.TransaktionId, 300m, true));
+            pruefung.ZahlungenOhneZuordnung.Should().OnlyContain(z => z.Text.StartsWith("Kaltmiete – "));
+            pruefung.Auffaellig.Should().BeTrue();
+
+            var nurSichtbar = await Strukturpruefung.ErmittleAsync(ctx, new HashSet<int>());
+            nurSichtbar.ZahlungenOhneZuordnung.Should().BeEmpty();
+        }
     }
 }

@@ -55,7 +55,6 @@ describe('lib entity mappers batch', () => {
             vertraege: [],
             selectedMitglieder: [],
             mitglieder: [],
-            transaktionen: [],
             permissions: { read: true, update: false, remove: false }
         } as never);
 

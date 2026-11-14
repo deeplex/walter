@@ -19,7 +19,6 @@ import { WalterBankkontoEntry } from './WalterBankkonto';
 import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
-import { WalterTransaktionEntry } from './WalterTransaktion';
 import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungEntry } from './WalterWohnung';
 
@@ -56,7 +55,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public vertraege: WalterVertragEntry[],
         public selectedMitglieder: WalterSelectionEntry[],
         public mitglieder: WalterKontaktEntry[],
-        public transaktionen: WalterTransaktionEntry[] = [],
         public bankkontos: WalterBankkontoEntry[] = [],
         public mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] = [],
         public mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] = [],
@@ -81,9 +79,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
         const mitglieder = json.mitglieder?.map(WalterKontaktEntry.fromJson);
-        const transaktionen = json.transaktionen?.map(
-            WalterTransaktionEntry.fromJson
-        );
         const bankkontos =
             json.bankkontos?.map(WalterBankkontoEntry.fromJson) ?? [];
         const permissions =
@@ -138,7 +133,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
             vertraege,
             selectedMitglieder,
             mitglieder,
-            transaktionen,
             bankkontos,
             mitgliedschaftenAlsMitglied,
             mitgliedschaftenAlsJuristischePerson,

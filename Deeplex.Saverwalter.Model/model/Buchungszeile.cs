@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.Model
         /// Storno entfällt. Der Ausgleich sagt, ob der Posten bezahlt ist; die Zuordnung,
         /// wofür die Zahlung war.
         /// </summary>
-        public virtual Buchungszeile? ZugeordnetZu { get; set; }
+        public virtual Buchungszeile? ZugeordnetZu { get; private set; }
 
         public virtual List<OffenerPostenAusgleich> AlsSollZeile { get; private set; } = [];
         public virtual List<OffenerPostenAusgleich> AlsHabenZeile { get; private set; } = [];
@@ -47,6 +47,30 @@ namespace Deeplex.Saverwalter.Model
         {
             SollHaben = sollHaben;
             Betrag = betrag;
+        }
+
+        /// <summary>
+        /// Ordnet diese Zahlungszeile dem offenen Posten zu, für den sie gebucht wird, und
+        /// gleicht ihn aus — die einzige Stelle, die <see cref="ZugeordnetZu"/> setzt. Zahlung
+        /// und Posten stehen auf demselben Konto und auf verschiedenen Seiten.
+        /// </summary>
+        public OffenerPostenAusgleich Zuordnen(Buchungszeile posten)
+        {
+            if (!ReferenceEquals(posten.Buchungskonto, Buchungskonto)
+                && posten.Buchungskonto.BuchungskontoId != Buchungskonto.BuchungskontoId)
+                throw new InvalidOperationException("Zahlung und Posten müssen auf demselben Konto stehen.");
+            if (posten.SollHaben == SollHaben)
+                throw new InvalidOperationException("Zahlung und Posten müssen auf verschiedenen Seiten stehen.");
+            if (ZugeordnetZu != null)
+                throw new InvalidOperationException("Die Zahlungszeile ist bereits zugeordnet.");
+
+            ZugeordnetZu = posten;
+            var ausgleich = SollHaben == SollHaben.Soll
+                ? new OffenerPostenAusgleich { SollZeile = this, HabenZeile = posten }
+                : new OffenerPostenAusgleich { SollZeile = posten, HabenZeile = this };
+            ausgleich.SollZeile.AlsSollZeile.Add(ausgleich);
+            ausgleich.HabenZeile.AlsHabenZeile.Add(ausgleich);
+            return ausgleich;
         }
     }
 

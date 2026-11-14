@@ -163,7 +163,8 @@ zurückgenommen. Die Buchungssätze stehen eingeklappt im Abschnitt **Buchhaltun
 - Die Kontakt-Detailseite eines Mieters zeigt oben **Offen als Mieter**: je Vertrag die
   offene Miete und offene Nachzahlungen aus versendeten Nebenkostenabrechnungen, mit
   Summe. Die Zeile führt zum Mietkonto bzw. zu den Abrechnungen.
-- Kontakt und Bankkonto listen ihre **Transaktionen** mit der Spalte **Zuordnung**.
+- Kontakt und Bankkonto listen ihre **Transaktionen** mit der Spalte **Zuordnung**
+  (seitenweise vom Server, wie die Transaktionsliste).
 
 ---
 
@@ -315,6 +316,16 @@ Buchungsjahr:
 Ein Jahr gilt als **abgeschlossen**, wenn keine Konten mehr offen sind und alle
 Abrechnungen fertig (abgesendet oder verzichtet) sind. Die Seite ist rein informativ und
 erzeugt keine Buchungen.
+
+Oben steht die **Strukturprüfung** (unabhängig vom Jahr). Sie listet, was die Zuordnung
+von Zahlungen unmöglich macht, statt es zu überspielen:
+
+- **Konten mit mehreren Besitzern** — ein Buchungskonto, das zu mehr als einem Vertrag,
+  einer Umlage, Wohnung o. ä. gehört. Buchungen darauf erscheinen nur mit dem Konto.
+- **Zahlungen ohne Zuordnung** — Bestand, bei dem nicht festgehalten wurde, für welchen
+  Monat, welche Abrechnung bzw. Rechnung gezahlt wurde; die Zahlung gleicht nichts aus.
+  Prüfen und gegebenenfalls rückgängig machen und neu erfassen. Bereits rückgängig
+  gemachte Zahlungen ohne Zuordnung stehen nur zur Information da.
 
 ---
 

@@ -42,6 +42,8 @@ export abstract class WalterApiHandler {
             sortDir?: 'asc' | 'desc';
             skip?: number;
             take?: number;
+            /** Zusätzliche Filter des Endpunkts, z. B. `{ bankkontoId: 3 }`. */
+            filter?: Record<string, string | number>;
         } = {}
     ): Promise<{ items: T[]; totalCount: number }> {
         const qs = new URLSearchParams();
@@ -50,6 +52,8 @@ export abstract class WalterApiHandler {
         if (params.sortDir) qs.set('sortDir', params.sortDir);
         if (params.skip !== undefined) qs.set('skip', `${params.skip}`);
         if (params.take !== undefined) qs.set('take', `${params.take}`);
+        for (const [key, value] of Object.entries(params.filter ?? {}))
+            qs.set(key, `${value}`);
 
         const url = qs.size ? `${this.ApiURL}?${qs.toString()}` : this.ApiURL;
         const response = await walter_get(url, fetchImpl);

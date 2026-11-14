@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 {
@@ -31,19 +32,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// </summary>
     public static class Sollstellung
     {
-        private static readonly SemaphoreSlim Sperre = new(1, 1);
+        /// <summary>Schlüssel der Datenbank-Sperre für das Anlegen von Sollstellungen.</summary>
+        private const long SperrSchluessel = 0x57414C5445520001; // "WALTER" + 1
+
+        private static readonly SemaphoreSlim ProzessSperre = new(1, 1);
 
         /// <summary>
         /// Führt aus, was fehlende Sollstellungen anlegt (prüfen, anlegen, speichern), ohne
         /// dass ein anderer Vorgang gleichzeitig dasselbe tut — sonst legen zwei Anfragen
-        /// denselben Monat beide an. Die WebAPI läuft als ein Prozess; die Sperre gilt
-        /// prozessweit. Innerhalb der Aktion nicht erneut aufrufen.
+        /// denselben Monat beide an. Auf PostgreSQL ist es eine Transaktions-Sperre in der
+        /// Datenbank (<c>pg_advisory_xact_lock</c>): sie gilt über Prozesse und Instanzen
+        /// hinweg und endet mit der Transaktion. Läuft schon eine Transaktion, gilt die Sperre
+        /// bis zu deren Ende. Ohne PostgreSQL (Tests) eine prozessweite Sperre.
         /// </summary>
-        public static async Task<T> GesperrtAsync<T>(Func<Task<T>> aktion)
+        public static async Task<T> GesperrtAsync<T>(SaverwalterContext ctx, Func<Task<T>> aktion)
         {
-            await Sperre.WaitAsync();
-            try { return await aktion(); }
-            finally { Sperre.Release(); }
+            if (!ctx.Database.IsNpgsql())
+            {
+                await ProzessSperre.WaitAsync();
+                try { return await aktion(); }
+                finally { ProzessSperre.Release(); }
+            }
+
+            await using var eigene = ctx.Database.CurrentTransaction == null
+                ? await ctx.Database.BeginTransactionAsync()
+                : null;
+            await ctx.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({SperrSchluessel})");
+            var ergebnis = await aktion();
+            if (eigene != null) await eigene.CommitAsync();
+            return ergebnis;
         }
 
         /// <param name="nkKontoId">NK-Konto des Vertrags; bei Garagenkonten <c>null</c>.</param>

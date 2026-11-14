@@ -14,96 +14,93 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Text.RegularExpressions;
+using Deeplex.Saverwalter.Model;
 using FluentAssertions;
 using Xunit;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests.Architektur
 {
     /// <summary>
-    /// Eine Zahlung wird nur über <c>TransaktionBuchungsService.Zuordnen</c> mit ihrem Posten
-    /// ausgeglichen: dort entstehen Ausgleich und <c>Buchungszeile.ZugeordnetZu</c> zusammen.
-    /// Ausgleiche ohne Zahlung gibt es nur an zwei Stellen: die Gegenbuchung der Verteilung
-    /// beim Storno einer Abrechnung (Abrechnungslauf) und die Umbuchung einer Miet-Korrektur
-    /// innerhalb ihres Satzes. Jede weitere Stelle muss hier bewusst eingeordnet werden.
+    /// Eine Zahlung wird nur über <see cref="Buchungszeile.Zuordnen"/> mit ihrem Posten
+    /// ausgeglichen: dort entstehen Ausgleich und <see cref="Buchungszeile.ZugeordnetZu"/>
+    /// zusammen, und nur dort lässt sich die Zuordnung setzen (privater Setter). Ausgleiche
+    /// ohne Zahlung gibt es nur an zwei Stellen: die Gegenbuchung der Verteilung beim Storno
+    /// einer Abrechnung (Abrechnungslauf) und die Umbuchung einer Miet-Korrektur innerhalb
+    /// ihres Satzes. Geprüft werden alle Projekte außer Tests und Migrationen, auch
+    /// SQL-Text — jede weitere Stelle muss hier bewusst eingeordnet werden.
     /// </summary>
     public class ZahlungZuordnenTests
     {
-        private const string Buchen = "Services/Buchungen/TransaktionBuchungsService.cs";
+        private static readonly Regex AusgleichAnlegen =
+            new(@"OffenePostenAusgleiche\.Add(Range)?\(|new OffenerPostenAusgleich\b");
+        private static readonly Regex SqlAufAusgleichOderZuordnung =
+            new(@"offene_posten_ausgleiche|zugeordnet_zu_id", RegexOptions.IgnoreCase);
 
-        private static readonly Regex AusgleichAnlegen = new(@"OffenePostenAusgleiche\.Add(Range)?\(|new OffenerPostenAusgleich\b");
-        private static readonly Regex ZuordnungSetzen = new(@"\.ZugeordnetZu\s*=(?!=)");
-
-        /// <summary>Ausgleiche, die keine Zahlung betreffen.</summary>
-        private static readonly string[] AusgleichOhneZahlung =
+        private static readonly string[] Erlaubt =
         [
-            "Services/Abrechnung/AbrechnungslaufService.cs",
-            "Services/Buchungen/MietKorrekturService.cs",
+            "Deeplex.Saverwalter.Model/model/Buchungszeile.cs",
+            "Deeplex.Saverwalter.WebAPI/Services/Abrechnung/AbrechnungslaufService.cs",
+            "Deeplex.Saverwalter.WebAPI/Services/Buchungen/MietKorrekturService.cs",
         ];
 
-        private static string WebApi()
+        private static string Wurzel()
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Deeplex.Saverwalter.sln")))
                 dir = dir.Parent;
-            return Path.Combine(dir?.FullName ?? throw new InvalidOperationException("Repository-Wurzel nicht gefunden."),
-                "Deeplex.Saverwalter.WebAPI");
+            return dir?.FullName ?? throw new InvalidOperationException("Repository-Wurzel nicht gefunden.");
         }
 
+        /// <summary>Alle C#-Quellen außer Tests, Migrationen, bin/obj und versteckten Ordnern.</summary>
         private static IEnumerable<(string Datei, string[] Zeilen)> Quellen()
         {
-            var root = WebApi();
+            var root = Wurzel();
             var optionen = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
             foreach (var datei in Directory.EnumerateFiles(root, "*.cs", optionen))
             {
                 var relativ = Path.GetRelativePath(root, datei).Replace('\\', '/');
-                if (relativ.Split('/').Any(t => t is "bin" or "obj" || t.StartsWith('.'))) continue;
+                var teile = relativ.Split('/');
+                if (!teile[0].StartsWith("Deeplex.Saverwalter.") || teile[0].EndsWith(".Tests")) continue;
+                if (teile.Any(t => t is "bin" or "obj" or "Migrations" or "node_modules" || t.StartsWith('.'))) continue;
                 yield return (relativ, File.ReadAllLines(datei));
             }
         }
 
-        private static IEnumerable<(string Datei, int Nr, string Zeile)> Treffer(Regex muster) =>
-            Quellen().SelectMany(q => q.Zeilen
-                .Select((z, i) => (q.Datei, Nr: i + 1, Zeile: z))
-                .Where(x => !x.Zeile.TrimStart().StartsWith("//") && muster.IsMatch(x.Zeile)));
+        private static IEnumerable<string> Treffer(Regex muster, IEnumerable<string> ausgenommen) =>
+            Quellen()
+                .Where(q => !ausgenommen.Contains(q.Datei))
+                .SelectMany(q => q.Zeilen
+                    .Select((z, i) => (z, i))
+                    .Where(x => !x.z.TrimStart().StartsWith("//") && muster.IsMatch(x.z))
+                    .Select(x => $"{q.Datei}:{x.i + 1}: {x.z.Trim()}"));
 
-        /// <summary>Zeilennummern (1-basiert) des Rumpfs von <c>Zuordnen</c>.</summary>
-        private static (int Von, int Bis) ZuordnenRumpf()
+        [Fact]
+        public void QuellenWerdenGefunden()
         {
-            var zeilen = File.ReadAllLines(Path.Combine(WebApi(), Buchen));
-            var start = Array.FindIndex(zeilen, z => Regex.IsMatch(z, @"\bvoid Zuordnen\(Buchungszeile zahlung, Buchungszeile posten\)"));
-            start.Should().BeGreaterThanOrEqualTo(0, "TransaktionBuchungsService.Zuordnen muss existieren");
-            var tiefe = 0;
-            for (var i = start; i < zeilen.Length; i++)
-            {
-                tiefe += zeilen[i].Count(c => c == '{') - zeilen[i].Count(c => c == '}');
-                if (i > start && tiefe == 0) return (start + 1, i + 1);
-            }
-            throw new InvalidOperationException("Ende von Zuordnen nicht gefunden.");
+            Quellen().Select(q => q.Datei).Should()
+                .Contain(Erlaubt)
+                .And.Contain(d => d.StartsWith("Deeplex.Saverwalter.InitiateTestDbs/"));
         }
-
-        private static bool InZuordnen((string Datei, int Nr, string Zeile) t, (int Von, int Bis) rumpf) =>
-            t.Datei == Buchen && t.Nr >= rumpf.Von && t.Nr <= rumpf.Bis;
 
         [Fact]
         public void ZahlungenWerdenNurUeberZuordnenAusgeglichen()
         {
-            var rumpf = ZuordnenRumpf();
-            var verboten = Treffer(AusgleichAnlegen)
-                .Where(t => !InZuordnen(t, rumpf) && !AusgleichOhneZahlung.Contains(t.Datei))
-                .Select(t => $"{t.Datei}:{t.Nr}: {t.Zeile.Trim()}");
-
-            string.Join("\n", verboten).Should().BeEmpty();
+            string.Join("\n", Treffer(AusgleichAnlegen, Erlaubt)).Should().BeEmpty();
         }
 
         [Fact]
-        public void ZuordnungWirdNurInZuordnenGesetzt()
+        public void KeinSqlAufAusgleicheOderZuordnung()
         {
-            var rumpf = ZuordnenRumpf();
-            var verboten = Treffer(ZuordnungSetzen)
-                .Where(t => !InZuordnen(t, rumpf))
-                .Select(t => $"{t.Datei}:{t.Nr}: {t.Zeile.Trim()}");
+            string.Join("\n", Treffer(SqlAufAusgleichOderZuordnung, [])).Should().BeEmpty();
+        }
 
-            string.Join("\n", verboten).Should().BeEmpty();
+        [Fact]
+        public void ZuordnungLaesstSichNurUeberZuordnenSetzen()
+        {
+            var setter = typeof(Buchungszeile).GetProperty(nameof(Buchungszeile.ZugeordnetZu))!.SetMethod;
+            setter.Should().NotBeNull("EF Core braucht den Setter");
+            setter!.IsPublic.Should().BeFalse();
+            setter.IsAssembly.Should().BeFalse();
         }
     }
 }

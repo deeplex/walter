@@ -123,7 +123,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Transaktionen"
             entry={transaktion}
-            rows={data.entry.transaktionen}
+            filter={{ kontaktId: data.entry.id }}
         />
 
         {#if data.entry.adresse}

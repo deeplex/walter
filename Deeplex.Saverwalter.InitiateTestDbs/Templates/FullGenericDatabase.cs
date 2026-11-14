@@ -308,11 +308,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         zahlSatz.Buchungszeilen.Add(zahlHaben);
                         ctx.Buchungssaetze.Add(zahlSatz);
 
-                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                        {
-                            SollZeile = sollZeile,
-                            HabenZeile = zahlHaben
-                        });
+                        zahlHaben.Zuordnen(sollZeile);
 
                         count++;
                     }

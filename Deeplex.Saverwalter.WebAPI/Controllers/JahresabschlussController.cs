@@ -52,6 +52,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(await UebersichtAsync(ctx, scopedKontoIds));
         }
 
+        /// <summary>
+        /// Strukturprüfung (nicht an ein Jahr gebunden): mehrdeutige Konten und Zahlungen ohne
+        /// Zuordnung — siehe <see cref="Strukturpruefung"/>.
+        /// </summary>
+        [HttpGet("struktur")]
+        public async Task<ActionResult<Strukturpruefung.Ergebnis>> GetStruktur()
+        {
+            var scopedKontoIds = await ScopedKontoIds();
+            return Ok(await Strukturpruefung.ErmittleAsync(ctx, scopedKontoIds));
+        }
+
         [HttpGet("{jahr}")]
         public async Task<ActionResult<JahresabschlussEntry>> Get(int jahr)
         {

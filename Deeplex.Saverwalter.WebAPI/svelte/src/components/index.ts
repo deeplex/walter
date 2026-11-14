@@ -117,6 +117,7 @@ export { default as WalterZahlungsuebersicht } from './lists/WalterZahlungsueber
 export { default as WalterMietkonto } from './details/WalterMietkonto.svelte';
 export { default as WalterErhaltungsaufwand } from './details/WalterErhaltungsaufwand.svelte';
 export { default as WalterUmlageRechnungen } from './details/WalterUmlageRechnungen.svelte';
+export { default as WalterStrukturpruefung } from './details/WalterStrukturpruefung.svelte';
 export { default as WalterOffenAlsMieter } from './details/WalterOffenAlsMieter.svelte';
 export { default as WalterNebenkostenabrechnungen } from './details/WalterNebenkostenabrechnungen.svelte';
 export { default as WalterZahlungsliste } from './lists/WalterZahlungsliste.svelte';

@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         /// <summary>
         /// Ermittelt erst ohne Sperre; fehlt dabei eine Sollstellung, bricht der Lauf ab und
-        /// wiederholt sich unter der Sperre (<see cref="Sollstellung.GesperrtAsync"/>), die
+        /// wiederholt sich unter der Sperre (<see cref="Sollstellung.GesperrtAsync{T}"/>), die
         /// Sollstellungen dann anlegt. Nur das Anlegen wartet also aufeinander.
         /// </summary>
         private async Task<T> MitSollstellungenAsync<T>(Func<Task<T>> ermittle)
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
             catch (SollstellungFehlt)
             {
-                return await Sollstellung.GesperrtAsync(async () =>
+                return await Sollstellung.GesperrtAsync(ctx, async () =>
                 {
                     _anlegen = true;
                     try { return await ermittle(); }

@@ -33,9 +33,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     /// Ermittelt die Zuordnung von Transaktionen allein aus der Struktur der Buchungen — nie
     /// aus Verwendungszweck oder Beschreibung.
     ///
-    /// Jedes Konto hat genau eine Rolle bei genau einem Besitzer (Vertrag, Garagenvertrag,
-    /// Umlage, Wohnung, Kontakt, Bankkonto). Geld-Konten sind die Buchungskonten der
-    /// Bankkonten und die Zahlungskonten von Vertrag, Garagenvertrag und Umlage.
+    /// Die Rollen der Konten kommen aus <see cref="Kontorollen"/>. Geld-Konten sind die
+    /// Buchungskonten der Bankkonten und die Zahlungskonten von Vertrag, Garagenvertrag und
+    /// Umlage. Ein Konto mit mehreren Besitzern hat keine Rolle und erscheint als Konto.
     ///
     /// Jeder Satz einer Transaktion ist genau eins von beiden:
     /// - <b>Zahlung</b> (hat eine Geld-Zeile): jede andere Zeile ist ein Eintrag. Was sie
@@ -56,21 +56,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     /// </summary>
     public static class Zuordnung
     {
-        private enum Rolle
-        {
-            Geld, Kaltmiete, NkVorauszahlung, BkAbrechnung, Kaution, Mietminderung,
-            Garagenmiete, Betriebskosten, Aufwand, Mietertrag, Garagenertrag, Verbindlichkeit
-        }
-
-        private record Bezug(Rolle Rolle, string Kontext, string? Href);
-
         private static readonly string[] Monate =
             ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
         private static string MonatText(DateOnly d) => $"{Monate[d.Month - 1]} {d.Year}";
-
-        private static string WohnungText(Wohnung w) =>
-            w.Adresse is Adresse a ? $"{w.Bezeichnung}, {a.Strasse} {a.Hausnummer}" : w.Bezeichnung;
 
         /// <summary>Setzt <c>Zuordnung</c> an den Einträgen.</summary>
         public static async Task ZuordnenAsync(SaverwalterContext ctx, IEnumerable<TransaktionEntryBase> eintraege)
@@ -105,7 +94,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .SelectMany(z => (z.ZugeordnetZu?.Buchungssatz.Buchungszeilen ?? []).Append(z))
                 .Select(z => z.Buchungskonto.BuchungskontoId)
                 .ToHashSet();
-            var bezuege = await BezuegeAsync(ctx, kontoIds);
+            // Mehrdeutige Konten (mehrere Besitzer) bekommen keine Rolle: sie erscheinen als Konto.
+            var bezuege = (await Kontorollen.ErmittleAsync(ctx, kontoIds)).Eindeutig;
 
             foreach (var satz in saetze)
             {
@@ -113,7 +103,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 var storniert = satz.StornoNach != null;
                 var eintraege = IstZahlung(satz, bezuege)
                     ? satz.Buchungszeilen
-                        .Where(z => RolleVon(z, bezuege) != Rolle.Geld)
+                        .Where(z => RolleVon(z, bezuege) != KontoRolle.Geld)
                         .Select(z => ZahlungsEintrag(z, satz, bezuege))
                     : [Entstehung(satz, bezuege)];
                 foreach (var (text, href, betrag) in eintraege)
@@ -127,14 +117,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return ergebnis;
         }
 
-        private static Rolle? RolleVon(Buchungszeile z, Dictionary<int, Bezug> bezuege) =>
+        private static KontoRolle? RolleVon(Buchungszeile z, Dictionary<int, KontoBesitz> bezuege) =>
             bezuege.TryGetValue(z.Buchungskonto.BuchungskontoId, out var b) ? b.Rolle : null;
 
-        private static bool IstZahlung(Buchungssatz satz, Dictionary<int, Bezug> bezuege) =>
-            satz.Buchungszeilen.Any(z => RolleVon(z, bezuege) == Rolle.Geld);
+        private static bool IstZahlung(Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege) =>
+            satz.Buchungszeilen.Any(z => RolleVon(z, bezuege) == KontoRolle.Geld);
 
         private static (string Text, string? Href, decimal Betrag) ZahlungsEintrag(
-            Buchungszeile zeile, Buchungssatz satz, Dictionary<int, Bezug> bezuege)
+            Buchungszeile zeile, Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege)
         {
             if (!bezuege.TryGetValue(zeile.Buchungskonto.BuchungskontoId, out var bezug))
                 return (KontoText(zeile.Buchungskonto), KontoHref(zeile.Buchungskonto), zeile.Betrag);
@@ -143,20 +133,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             string Mit(string art) => $"{art} – {bezug.Kontext}";
             var text = bezug.Rolle switch
             {
-                Rolle.Kaltmiete or Rolle.Garagenmiete =>
+                KontoRolle.Kaltmiete or KontoRolle.Garagenmiete =>
                     Mit(posten is null
                         ? Art(bezug.Rolle)
                         : $"{Art(bezug.Rolle)} {MonatText(posten.Buchungssatz.Buchungsdatum)}"),
-                Rolle.NkVorauszahlung => Mit($"NK-Vorauszahlung {satz.Buchungsjahr}"),
-                Rolle.BkAbrechnung =>
+                KontoRolle.NkVorauszahlung => Mit($"NK-Vorauszahlung {satz.Buchungsjahr}"),
+                KontoRolle.BkAbrechnung =>
                     Mit((zeile.SollHaben == SollHaben.Haben ? "Nachzahlung NK-Abrechnung" : "Erstattung NK-Abrechnung")
                         + (posten is null ? "" : $" {posten.Buchungssatz.Buchungsjahr}")),
-                Rolle.Kaution => Mit(zeile.SollHaben == SollHaben.Haben ? "Kaution" : "Kaution Rückzahlung"),
+                KontoRolle.Kaution => Mit(zeile.SollHaben == SollHaben.Haben ? "Kaution" : "Kaution Rückzahlung"),
                 // Zahlung einer Rechnung: was die Rechnung war.
-                Rolle.Betriebskosten or Rolle.Verbindlichkeit when posten is not null =>
+                KontoRolle.Betriebskosten or KontoRolle.Verbindlichkeit when posten is not null =>
                     null,
-                Rolle.Betriebskosten => $"Betriebskosten {bezug.Kontext}",
-                Rolle.Verbindlichkeit => Mit("Rechnung"),
+                KontoRolle.Betriebskosten => $"Betriebskosten {bezug.Kontext}",
+                KontoRolle.Verbindlichkeit => Mit("Rechnung"),
                 _ => Mit(Art(bezug.Rolle)),
             };
             if (text is null)
@@ -169,14 +159,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         /// <summary>Der eine Posten eines Satzes ohne Geld-Zeile (Rechnung).</summary>
         private static (string Text, string? Href, decimal Betrag) Entstehung(
-            Buchungssatz satz, Dictionary<int, Bezug> bezuege)
+            Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege)
         {
-            Buchungszeile? Erste(Rolle rolle, SollHaben? seite = null) =>
+            Buchungszeile? Erste(KontoRolle rolle, SollHaben? seite = null) =>
                 satz.Buchungszeilen.FirstOrDefault(z =>
                     RolleVon(z, bezuege) == rolle && (seite is null || z.SollHaben == seite));
-            Bezug BezugVon(Buchungszeile z) => bezuege[z.Buchungskonto.BuchungskontoId];
+            KontoBesitz BezugVon(Buchungszeile z) => bezuege[z.Buchungskonto.BuchungskontoId];
 
-            if ((Erste(Rolle.Betriebskosten, SollHaben.Haben) ?? Erste(Rolle.Betriebskosten)) is Buchungszeile bkZeile)
+            if ((Erste(KontoRolle.Betriebskosten, SollHaben.Haben) ?? Erste(KontoRolle.Betriebskosten)) is Buchungszeile bkZeile)
             {
                 var bk = BezugVon(bkZeile);
                 var betrag = satz.Buchungszeilen
@@ -185,147 +175,42 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 return ($"Betriebskosten {bk.Kontext} {satz.Buchungsjahr}", bk.Href, betrag);
             }
 
-            if (Erste(Rolle.Aufwand, SollHaben.Soll) is Buchungszeile aufwandZeile)
+            if (Erste(KontoRolle.Aufwand, SollHaben.Soll) is Buchungszeile aufwandZeile)
             {
                 var aufwand = BezugVon(aufwandZeile);
                 var betrag = satz.Buchungszeilen
-                    .Where(z => RolleVon(z, bezuege) == Rolle.Aufwand && z.SollHaben == SollHaben.Soll)
+                    .Where(z => RolleVon(z, bezuege) == KontoRolle.Aufwand && z.SollHaben == SollHaben.Soll)
                     .Sum(z => z.Betrag);
                 return ($"Erhaltungsaufwand – {aufwand.Kontext}", aufwand.Href, betrag);
             }
 
             // Sonst: erste Zeile mit Besitzer außer dem Gläubiger, dann der Gläubiger, dann ein Konto.
-            var zeile = satz.Buchungszeilen.FirstOrDefault(z => RolleVon(z, bezuege) is Rolle r && r != Rolle.Verbindlichkeit)
-                ?? satz.Buchungszeilen.FirstOrDefault(z => RolleVon(z, bezuege) == Rolle.Verbindlichkeit)
+            var zeile = satz.Buchungszeilen.FirstOrDefault(z => RolleVon(z, bezuege) is KontoRolle r && r != KontoRolle.Verbindlichkeit)
+                ?? satz.Buchungszeilen.FirstOrDefault(z => RolleVon(z, bezuege) == KontoRolle.Verbindlichkeit)
                 ?? satz.Buchungszeilen.First();
             if (!bezuege.TryGetValue(zeile.Buchungskonto.BuchungskontoId, out var b))
                 return (KontoText(zeile.Buchungskonto), KontoHref(zeile.Buchungskonto), zeile.Betrag);
-            var art = b.Rolle == Rolle.Verbindlichkeit ? "Rechnung" : Art(b.Rolle);
+            var art = b.Rolle == KontoRolle.Verbindlichkeit ? "Rechnung" : Art(b.Rolle);
             return ($"{art} – {b.Kontext}", b.Href, zeile.Betrag);
         }
 
-        private static string Art(Rolle rolle) => rolle switch
+        private static string Art(KontoRolle rolle) => rolle switch
         {
-            Rolle.Kaltmiete => "Kaltmiete",
-            Rolle.NkVorauszahlung => "NK-Vorauszahlung",
-            Rolle.BkAbrechnung => "NK-Abrechnung",
-            Rolle.Kaution => "Kaution",
-            Rolle.Mietminderung => "Mietminderung",
-            Rolle.Garagenmiete => "Garagenmiete",
-            Rolle.Betriebskosten => "Betriebskosten",
-            Rolle.Aufwand => "Erhaltungsaufwand",
-            Rolle.Mietertrag => "Mietertrag",
-            Rolle.Garagenertrag => "Garagenertrag",
-            Rolle.Verbindlichkeit => "Verbindlichkeit",
+            KontoRolle.Kaltmiete => "Kaltmiete",
+            KontoRolle.NkVorauszahlung => "NK-Vorauszahlung",
+            KontoRolle.BkAbrechnung => "NK-Abrechnung",
+            KontoRolle.Kaution => "Kaution",
+            KontoRolle.Mietminderung => "Mietminderung",
+            KontoRolle.Garagenmiete => "Garagenmiete",
+            KontoRolle.Betriebskosten => "Betriebskosten",
+            KontoRolle.Aufwand => "Erhaltungsaufwand",
+            KontoRolle.Mietertrag => "Mietertrag",
+            KontoRolle.Garagenertrag => "Garagenertrag",
+            KontoRolle.Verbindlichkeit => "Verbindlichkeit",
             _ => "Zahlung",
         };
 
         private static string KontoText(Buchungskonto k) => $"Buchungskonto {k.Kontonummer} {k.Bezeichnung}";
         private static string KontoHref(Buchungskonto k) => $"/buchungskonten/{k.BuchungskontoId}";
-
-        private static async Task<Dictionary<int, Bezug>> BezuegeAsync(SaverwalterContext ctx, HashSet<int> kontoIds)
-        {
-            var bezuege = new Dictionary<int, Bezug>();
-            void Add(Buchungskonto? konto, Rolle rolle, string kontext, string? href)
-            {
-                if (konto != null && kontoIds.Contains(konto.BuchungskontoId))
-                    bezuege[konto.BuchungskontoId] = new Bezug(rolle, kontext, href);
-            }
-
-            var vertraege = await ctx.Vertraege
-                .Where(v => kontoIds.Contains(v.MietBuchungskonto.BuchungskontoId)
-                    || kontoIds.Contains(v.NkBuchungskonto.BuchungskontoId)
-                    || kontoIds.Contains(v.BkAbrechnungsKonto.BuchungskontoId)
-                    || kontoIds.Contains(v.KautionsKonto.BuchungskontoId)
-                    || kontoIds.Contains(v.MietminderungsKonto.BuchungskontoId)
-                    || kontoIds.Contains(v.ZahlungsKonto.BuchungskontoId))
-                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
-                .Include(v => v.MietBuchungskonto)
-                .Include(v => v.NkBuchungskonto)
-                .Include(v => v.BkAbrechnungsKonto)
-                .Include(v => v.KautionsKonto)
-                .Include(v => v.MietminderungsKonto)
-                .Include(v => v.ZahlungsKonto)
-                .ToListAsync();
-            foreach (var v in vertraege)
-            {
-                var kontext = WohnungText(v.Wohnung);
-                var href = $"/vertraege/{v.VertragId}";
-                Add(v.MietBuchungskonto, Rolle.Kaltmiete, kontext, href + "#mietkonto");
-                Add(v.NkBuchungskonto, Rolle.NkVorauszahlung, kontext, href + "#mietkonto");
-                Add(v.BkAbrechnungsKonto, Rolle.BkAbrechnung, kontext, href + "#abrechnungen");
-                Add(v.KautionsKonto, Rolle.Kaution, kontext, href + "#kaution");
-                Add(v.MietminderungsKonto, Rolle.Mietminderung, kontext, href);
-                Add(v.ZahlungsKonto, Rolle.Geld, kontext, href);
-            }
-
-            var garageVertraege = await ctx.GarageVertraege
-                .Where(gv => kontoIds.Contains(gv.MietBuchungskonto.BuchungskontoId)
-                    || kontoIds.Contains(gv.ZahlungsKonto.BuchungskontoId))
-                .Include(gv => gv.Garage)
-                .Include(gv => gv.MietBuchungskonto)
-                .Include(gv => gv.ZahlungsKonto)
-                .ToListAsync();
-            foreach (var gv in garageVertraege)
-            {
-                var kontext = $"Garage {gv.Garage.Kennung}";
-                var href = $"/garage-vertraege/{gv.GarageVertragId}";
-                Add(gv.MietBuchungskonto, Rolle.Garagenmiete, kontext, href);
-                Add(gv.ZahlungsKonto, Rolle.Geld, kontext, href);
-            }
-
-            var umlagen = await ctx.Umlagen
-                .Where(u => kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)
-                    || kontoIds.Contains(u.ZahlungsKonto.BuchungskontoId)
-                    || (u.NkSonderVerrechnungsKonto != null && kontoIds.Contains(u.NkSonderVerrechnungsKonto.BuchungskontoId)))
-                .Include(u => u.Typ)
-                .Include(u => u.NkVerrechnungsKonto)
-                .Include(u => u.NkSonderVerrechnungsKonto)
-                .Include(u => u.ZahlungsKonto)
-                .ToListAsync();
-            foreach (var u in umlagen)
-            {
-                var href = $"/umlagen/{u.UmlageId}#rechnungen";
-                Add(u.NkVerrechnungsKonto, Rolle.Betriebskosten, u.Typ.Bezeichnung, href);
-                Add(u.NkSonderVerrechnungsKonto, Rolle.Betriebskosten, u.Typ.Bezeichnung, href);
-                Add(u.ZahlungsKonto, Rolle.Geld, u.Typ.Bezeichnung, href);
-            }
-
-            var wohnungen = await ctx.Wohnungen
-                .Where(w => kontoIds.Contains(w.AufwandsKonto.BuchungskontoId)
-                    || kontoIds.Contains(w.MietErtragskonto.BuchungskontoId))
-                .Include(w => w.Adresse)
-                .Include(w => w.AufwandsKonto)
-                .Include(w => w.MietErtragskonto)
-                .ToListAsync();
-            foreach (var w in wohnungen)
-            {
-                Add(w.AufwandsKonto, Rolle.Aufwand, WohnungText(w), $"/wohnungen/{w.WohnungId}#erhaltungsaufwand");
-                Add(w.MietErtragskonto, Rolle.Mietertrag, WohnungText(w), $"/wohnungen/{w.WohnungId}");
-            }
-
-            var garagen = await ctx.Garagen
-                .Where(g => kontoIds.Contains(g.Ertragskonto.BuchungskontoId))
-                .Include(g => g.Ertragskonto)
-                .ToListAsync();
-            foreach (var g in garagen)
-                Add(g.Ertragskonto, Rolle.Garagenertrag, $"Garage {g.Kennung}", $"/garagen/{g.GarageId}");
-
-            var kontakte = await ctx.Kontakte
-                .Where(k => k.VerbindlichkeitsKonto != null && kontoIds.Contains(k.VerbindlichkeitsKonto.BuchungskontoId))
-                .Include(k => k.VerbindlichkeitsKonto)
-                .ToListAsync();
-            foreach (var k in kontakte)
-                Add(k.VerbindlichkeitsKonto, Rolle.Verbindlichkeit, k.Bezeichnung, $"/kontakte/{k.KontaktId}");
-
-            var bankkonten = await ctx.Bankkontos
-                .Where(b => kontoIds.Contains(b.BuchungsKonto.BuchungskontoId))
-                .Include(b => b.BuchungsKonto)
-                .ToListAsync();
-            foreach (var b in bankkonten)
-                Add(b.BuchungsKonto, Rolle.Geld, b.Iban ?? "", $"/bankkontos/{b.BankkontoId}");
-
-            return bezuege;
-        }
     }
 }

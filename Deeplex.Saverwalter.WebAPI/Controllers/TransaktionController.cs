@@ -112,9 +112,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _logger = logger;
         }
 
+        /// <param name="bankkontoId">Nur Transaktionen von oder an dieses Bankkonto.</param>
+        /// <param name="kontaktId">Nur Transaktionen von oder an ein Bankkonto dieses Kontakts.</param>
         [HttpGet]
-        public Task<PagedResult<TransaktionEntryBase>> Get([FromQuery] PagedQuery query)
-            => DbService.GetList(User!, query);
+        public Task<PagedResult<TransaktionEntryBase>> Get(
+            [FromQuery] PagedQuery query, [FromQuery] int? bankkontoId = null, [FromQuery] int? kontaktId = null)
+            => DbService.GetList(User!, query, bankkontoId, kontaktId);
 
         [HttpPost]
         public Task<ActionResult<TransaktionEntry>> Post([FromBody] TransaktionEntry entry) => DbService.Post(User!, entry);

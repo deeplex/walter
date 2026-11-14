@@ -243,7 +243,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         /// <remarks>Mietzahlungen legen fehlende Sollstellungen an, daher unter der Sperre.</remarks>
         public Task<Transaktion> BucheAsync(TransaktionsInput input) =>
-            Sollstellung.GesperrtAsync(async () =>
+            Sollstellung.GesperrtAsync(_ctx, async () =>
             {
                 var transaktion = await BaueAsync(input);
                 await _ctx.SaveChangesAsync();
@@ -410,7 +410,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 _ctx.Buchungssaetze.Add(kaltmieteSatz);
 
                 var habenZeile = kaltmieteSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
-                Zuordnen(habenZeile, sollZeile);
+                habenZeile.Zuordnen(sollZeile);
             }
 
             foreach (var garage in miete.Garagen)
@@ -467,7 +467,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx.Buchungssaetze.Add(satz);
 
             var habenZeile = satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
-            Zuordnen(habenZeile, sollZeile);
+            habenZeile.Zuordnen(sollZeile);
         }
 
         private Buchungszeile FindeOderErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, GarageVertragVersion version)
@@ -527,7 +527,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 AddZeile(zahlungsSatz, SollHaben.Soll, bk.Betrag, nkVk);
                 AddZeile(zahlungsSatz, SollHaben.Haben, bk.Betrag, umlageForZahlung.ZahlungsKonto);
 
-                Zuordnen(zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll), forderungsHabenZeile);
+                zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(forderungsHabenZeile);
 
                 return zahlungsSatz;
             }
@@ -556,7 +556,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(neuerZahlungsSatz, SollHaben.Soll, bk.Betrag, umlage.NkVerrechnungsKonto);
             AddZeile(neuerZahlungsSatz, SollHaben.Haben, bk.Betrag, umlage.ZahlungsKonto);
 
-            Zuordnen(neuerZahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll), neuerForderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben));
+            neuerZahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(neuerForderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben));
 
             return neuerZahlungsSatz;
         }
@@ -615,7 +615,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 var satz = new Buchungssatz(zahlungsdatum, $"Zahlung BK-Abrechnung {jahr}");
                 AddZeile(satz, SollHaben.Soll, input.Betrag, vertrag.ZahlungsKonto);
                 AddZeile(satz, SollHaben.Haben, input.Betrag, vertrag.BkAbrechnungsKonto);
-                Zuordnen(satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben), nachzahlungsZeile);
+                satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben).Zuordnen(nachzahlungsZeile);
                 return satz;
             }
 
@@ -642,7 +642,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 // Vertrags-ZahlungsKonto (dort mindert die Auszahlung den Bestand).
                 AddZeile(satz, SollHaben.Haben, input.Betrag,
                     transaktion.Zahler?.BuchungsKonto ?? vertrag.ZahlungsKonto);
-                Zuordnen(sollZeile, erstattungsZeile);
+                sollZeile.Zuordnen(erstattungsZeile);
                 return satz;
             }
 
@@ -677,7 +677,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 AddZeile(zahlungsSatz, SollHaben.Soll, ea.Betrag, verbindlichkeitsKonto);
                 AddZeile(zahlungsSatz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
 
-                Zuordnen(zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll), habenZeile);
+                zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(habenZeile);
 
                 return zahlungsSatz;
             }
@@ -746,18 +746,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
         // ── Hilfsfunktionen ───────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Gleicht den offenen Posten mit der Zahlungszeile aus und hält fest, wofür die
-        /// Zahlung gebucht wurde (<see cref="Buchungszeile.ZugeordnetZu"/>; bleibt bei einem
-        /// Storno erhalten, der Ausgleich nicht).
-        /// </summary>
-        private void Zuordnen(Buchungszeile zahlung, Buchungszeile posten)
-        {
-            zahlung.ZugeordnetZu = posten;
-            _ctx.OffenePostenAusgleiche.Add(zahlung.SollHaben == SollHaben.Soll
-                ? new OffenerPostenAusgleich { SollZeile = zahlung, HabenZeile = posten }
-                : new OffenerPostenAusgleich { SollZeile = posten, HabenZeile = zahlung });
-        }
 
         private async Task<Bankkonto?> ResolveZahlerFromBkAsync(BetriebskostenEingangInput bk)
         {

@@ -722,11 +722,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         kaltmieteSatz.Buchungszeilen.Add(kaltmieteHaben);
                         ctx.Buchungssaetze.Add(kaltmieteSatz);
 
-                        ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                        {
-                            SollZeile = sollZeile,
-                            HabenZeile = kaltmieteHaben
-                        });
+                        kaltmieteHaben.Zuordnen(sollZeile);
 
                         // NK-Vorauszahlung payment: Soll ZahlungsKonto / Haben NkBuchungskonto
                         if (nkVz > 0)
@@ -789,11 +785,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                             gvZahlSatz.Buchungszeilen.Add(gvHabenZeile);
                             ctx.Buchungssaetze.Add(gvZahlSatz);
 
-                            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                            {
-                                SollZeile = gvSollZeile,
-                                HabenZeile = gvHabenZeile
-                            });
+                            gvHabenZeile.Zuordnen(gvSollZeile);
                         }
 
                         ctx.Transaktionen.Add(transaktion);
@@ -1206,7 +1198,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 });
                 zahlSatz.Buchungszeilen.Add(zahlHaben);
 
-                ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich { SollZeile = sollZeile, HabenZeile = zahlHaben });
+                zahlHaben.Zuordnen(sollZeile);
                 ctx.Buchungssaetze.Add(zahlSatz);
                 ctx.Transaktionen.Add(transaktion);
             }
@@ -1488,11 +1480,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Buchungskonto = umlage.ZahlungsKonto
                     });
 
-                    ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                    {
-                        SollZeile = zahlungsSoll,
-                        HabenZeile = forderungsHaben
-                    });
+                    zahlungsSoll.Zuordnen(forderungsHaben);
 
                     ctx.Buchungssaetze.Add(forderungsSatz);
                     ctx.Buchungssaetze.Add(zahlungsSatz);

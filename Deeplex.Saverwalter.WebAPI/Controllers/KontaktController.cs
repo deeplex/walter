@@ -96,7 +96,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<KontaktMitgliedschaftEntry> MitgliedschaftenAlsJuristischePerson { get; set; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
-            public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
             public IEnumerable<BankkontoEntryBase> Bankkontos { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
             /// <summary>Verträge, in denen der Kontakt Mieter ist.</summary>

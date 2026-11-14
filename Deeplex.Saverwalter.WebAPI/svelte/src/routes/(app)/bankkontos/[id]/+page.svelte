@@ -50,7 +50,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Transaktionen"
             entry={transaktion}
-            rows={data.entry.transaktionen}
+            filter={{ bankkontoId: data.entry.id }}
         />
     </WalterLinks>
 </WalterGrid>

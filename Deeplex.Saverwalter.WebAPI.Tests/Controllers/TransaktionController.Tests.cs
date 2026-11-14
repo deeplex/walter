@@ -155,5 +155,44 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             result.Result.Should().BeOfType<ForbidResult>();
         }
+
+        [Fact]
+        public async Task ListeLaesstSichAufBankkontoUndKontaktEinschraenken()
+        {
+            var ctx = TestUtils.GetContext();
+            var kontakt = new Kontakt("Mieter", Rechtsform.natuerlich);
+            Bankkonto Konto(string nr, Kontakt? besitzer = null)
+            {
+                var b = new Bankkonto { Iban = nr, BuchungsKonto = new Buchungskonto(nr, "Bank", BuchungskontoTyp.Aktiv) };
+                if (besitzer != null) b.Besitzer.Add(besitzer);
+                ctx.Bankkontos.Add(b);
+                return b;
+            }
+            var a = Konto("A", kontakt);
+            var b = Konto("B");
+            var c = Konto("C");
+            Transaktion T(Bankkonto von, Bankkonto an)
+            {
+                var t = new Transaktion { Zahler = von, Zahlungsempfaenger = an, Zahlungsdatum = new DateOnly(2024, 1, 1), Betrag = 1m };
+                ctx.Transaktionen.Add(t);
+                return t;
+            }
+            var ab = T(a, b);
+            var ba = T(b, a);
+            var bc = T(b, c);
+            await ctx.SaveChangesAsync();
+
+            var auth = Auth(_ => true);
+            var dbService = new TransaktionDbService(ctx, auth, new BuchungssatzSchutzService(ctx), TestServices.Rueckgaengig(ctx));
+            var admin = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => admin.IsInRole("Admin")).Returns(true);
+
+            var proBank = await dbService.GetList(admin, new PagedQuery(), bankkontoId: c.BankkontoId);
+            var proKontakt = await dbService.GetList(admin, new PagedQuery(), kontaktId: kontakt.KontaktId);
+
+            proBank.Items.Select(t => t.Id).Should().BeEquivalentTo([bc.TransaktionId]);
+            proKontakt.Items.Select(t => t.Id).Should().BeEquivalentTo([ab.TransaktionId, ba.TransaktionId]);
+            proKontakt.TotalCount.Should().Be(2);
+        }
     }
 }

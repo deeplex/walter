@@ -41,9 +41,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             _rueckgaengigService = rueckgaengigService;
         }
 
-        public async Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query)
+        public async Task<PagedResult<TransaktionEntryBase>> GetList(
+            ClaimsPrincipal user, PagedQuery query, int? bankkontoId = null, int? kontaktId = null)
         {
-            var seite = await TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+            var quelle = TransaktionPermissionHandler.GetQueryable(Ctx, user);
+            if (bankkontoId is int b)
+                quelle = quelle.Where(t =>
+                    (t.Zahler != null && t.Zahler.BankkontoId == b) ||
+                    (t.Zahlungsempfaenger != null && t.Zahlungsempfaenger.BankkontoId == b));
+            if (kontaktId is int k)
+                quelle = quelle.Where(t =>
+                    (t.Zahler != null && t.Zahler.Besitzer.Any(x => x.KontaktId == k)) ||
+                    (t.Zahlungsempfaenger != null && t.Zahlungsempfaenger.Besitzer.Any(x => x.KontaktId == k)));
+            var seite = await quelle.PagedAsync(query,
                 searchPredicate: t => e =>
                     e.Verwendungszweck.ToLower().Contains(t) ||
                     (e.Zahler != null && (

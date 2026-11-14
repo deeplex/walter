@@ -26,6 +26,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterTransaktionEntry> | undefined = {};
     export let rows: WalterTransaktionEntry[] | undefined = undefined;
+    /** Ohne `rows`: seitenweise vom Server, eingeschränkt z. B. auf `{ kontaktId }`. */
+    export let filter: Record<string, string | number> | undefined = undefined;
 
     let transaktionIsValid = false;
 
@@ -56,7 +58,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ? (p: Parameters<typeof WalterTransaktionEntry.GetPaged>[1]) =>
                   WalterTransaktionEntry.GetPaged<WalterTransaktionEntry>(
                       fetchImpl,
-                      p
+                      { ...p, filter }
                   )
             : undefined;
 </script>
