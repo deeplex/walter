@@ -21,28 +21,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterTextArea
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
+    import type { WalterZaehlerstandEntry } from '$walter/lib';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
-    import { onMount } from 'svelte';
-    import { convertDateGerman } from '$walter/services/utils';
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
-    export let fetchImpl: typeof fetch | undefined = undefined;
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Wird von den Formularen übergeben, hier aber nicht gebraucht
     export let readonly = false;
     $: {
         readonly = entry?.permissions?.update === false;
     }
-
-    let maxDate: string | undefined;
-    onMount(async () => {
-        if (entry.zaehler?.id && fetchImpl) {
-            const date = await WalterZaehlerEntry.GetOne<WalterZaehlerEntry>(
-                `${entry.zaehler?.id}`,
-                fetchImpl
-            ).then((zaehler) => zaehler.ende);
-            maxDate = convertDateGerman(new Date(date));
-        }
-    });
 </script>
 
 <Row>

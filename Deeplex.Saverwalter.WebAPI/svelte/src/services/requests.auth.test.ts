@@ -130,7 +130,7 @@ describe('requests auth behavior', () => {
             ['userrole', '/api/selection/userrole']
         ];
 
-        for (const [method, path] of expectations) {
+        for (const [method] of expectations) {
             await walter_selection[method](fetchMock);
         }
 

@@ -479,13 +479,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {:else if row.istFehlend}
                 <button
                     title="Keine Buchungen für diese Umlage – klicken um Betriebskostenrechnung einzutragen"
-                    style="color: var(--cds-support-warning); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    style="color: var(--cds-support-warning); background: none; border: none; cursor: pointer; padding: 0; font: inherit; font-weight: 600;"
                     on:click={() => openBKModal(row.umlageId)}
                     >⚠ {cell.value}</button
                 >
             {:else}
                 <button
-                    style="color: var(--cds-support-error); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    style="color: var(--cds-support-error); background: none; border: none; cursor: pointer; padding: 0; font: inherit; font-weight: 600;"
                     on:click={() => openBKModal(row.umlageId)}
                     >{cell.value}</button
                 >
@@ -522,8 +522,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {vertragId}
         nutzungVon={vonInJahr}
         nutzungBis={bisInJahr}
-        {nutzungstage}
-        {abrechnungstage}
         strompauschalen={einheit.strompauschalen}
     />
 {/if}

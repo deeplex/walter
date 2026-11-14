@@ -11,7 +11,7 @@ import {
 } from './format';
 
 // toLocaleString trennt Zahl und Einheit mit einem geschützten Leerzeichen.
-const nb = (s: string) => s.replace(/ /g, ' ');
+const nb = (s: string) => s.replace(/\u00a0/g, ' ');
 
 describe('format', () => {
     it('formatiert Beträge deutsch', () => {

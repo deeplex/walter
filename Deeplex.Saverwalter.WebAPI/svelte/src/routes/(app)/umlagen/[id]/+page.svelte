@@ -27,7 +27,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterZaehlerList,
         WalterLinks,
         WalterLinkTile,
-        WalterZaehler,
         WalterVertragsNkAnteile,
         WalterUmlageRechnungen
     } from '$walter/components';

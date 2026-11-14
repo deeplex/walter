@@ -15,7 +15,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { formatEuro } from '$walter/services/format';
     import {
         WalterDatePicker,
         WalterTextArea,
@@ -129,27 +128,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             displayVersion.personenzahl !== latestVersion?.personenzahl);
 
     $: blockSave = hasVersionChanges && !seitWann;
-
-    const eur = (v: number | undefined) => (v != null ? formatEuro(v) : '?');
-
-    $: versionChanges = [
-        displayVersion.grundmiete !== latestVersion?.grundmiete && {
-            label: 'Grundmiete',
-            from: eur(latestVersion?.grundmiete),
-            to: eur(displayVersion.grundmiete)
-        },
-        displayVersion.nebenkostenvorauszahlung !==
-            latestVersion?.nebenkostenvorauszahlung && {
-            label: 'Nebenkostenvorauszahlung',
-            from: eur(latestVersion?.nebenkostenvorauszahlung),
-            to: eur(displayVersion.nebenkostenvorauszahlung)
-        },
-        displayVersion.personenzahl !== latestVersion?.personenzahl && {
-            label: 'Personenzahl',
-            from: String(latestVersion?.personenzahl ?? '?'),
-            to: String(displayVersion.personenzahl ?? '?')
-        }
-    ].filter(Boolean) as { label: string; from: string; to: string }[];
 
     export let commitVersionIfPending: () => Promise<void> = async () => {};
     $: commitVersionIfPending = async () => {

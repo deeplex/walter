@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { formatEuro, formatDatum } from '$walter/services/format';
+    import { formatEuro } from '$walter/services/format';
     import {
         Button,
         InlineNotification,

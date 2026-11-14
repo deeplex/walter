@@ -29,7 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { addToast } from '$walter/store';
 
     export let entry: Partial<WalterWohnungEntry> = {};
-    export let fetchImpl: typeof fetch;
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Wird von den Formularen übergeben, hier aber nicht gebraucht
     export let readonly = false;
     export let blockSave = false;
 

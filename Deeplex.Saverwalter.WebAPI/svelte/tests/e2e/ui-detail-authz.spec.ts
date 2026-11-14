@@ -4,12 +4,7 @@ import {
     type APIRequestContext,
     type Page
 } from '@playwright/test';
-import {
-    authHeader,
-    authenticatePage,
-    signInApi,
-    withFreshApiContext
-} from './auth';
+import { authenticatePage, signInApi, withFreshApiContext } from './auth';
 import { getList } from './api';
 
 type WohnungListEntry = {

@@ -28,7 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterTextInput from '../elements/WalterTextInput.svelte';
     import WalterMultiSelect from '../elements/WalterMultiSelect.svelte';
     import { walter_selection } from '$walter/services/requests';
-    import type { WalterAccountEntry } from '$walter/lib';
+    import type { WalterAccountEntry, WalterVerwalterEntry } from '$walter/lib';
     import WalterDropdown from '../elements/WalterDropdown.svelte';
 
     export let entry: Partial<WalterAccountEntry> = {};
@@ -49,7 +49,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 wohnung,
                 rolle: { id, text: 'hi' }
             };
-        }) as any;
+        }) as unknown as WalterVerwalterEntry[];
     }
 </script>
 

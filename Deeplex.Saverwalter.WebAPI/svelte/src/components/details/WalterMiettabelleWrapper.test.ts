@@ -13,8 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type {
+    WalterBetriebskostenrechnungEntry,
+    WalterSelectionEntry,
     WalterUmlageEntry,
     WalterZaehlerEntry,
     WalterZaehlerstandEntry
@@ -37,14 +39,25 @@ const createMockZaehler = (
         typ: {
             id: 1,
             text: 'Strom'
-        } as any,
+        } as WalterSelectionEntry,
         lastZaehlerstand: staende[staende.length - 1]
     }) as WalterZaehlerEntry;
+
+const createMockRechnung = (
+    id: number,
+    betreffendesJahr: number,
+    datum: string
+): WalterBetriebskostenrechnungEntry =>
+    ({
+        id,
+        betreffendesJahr,
+        datum
+    }) as unknown as WalterBetriebskostenrechnungEntry;
 
 const createMockUmlage = (
     id: number,
     typ: string = 'Nebenkosten',
-    betriebskostenrechnungen: any[] = [],
+    betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[] = [],
     permissions = defaultPermissions
 ): WalterUmlageEntry =>
     ({
@@ -55,7 +68,7 @@ const createMockUmlage = (
         typ: {
             id: 1,
             text: typ
-        } as any,
+        } as WalterSelectionEntry,
         beschreibung: `Umlage ${id}`,
         wohnungenBezeichnung: 'Alle Wohnungen'
     }) as unknown as WalterUmlageEntry;
@@ -117,7 +130,7 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
                     datum: '2024-03-15',
                     stand: 12345,
                     einheit: 'kWh'
-                } as any
+                } as WalterZaehlerstandEntry
             ];
             const zaehler: WalterZaehlerEntry = createMockZaehler(
                 1,
@@ -175,13 +188,7 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
         });
 
         it('should exclude umlagen with existing rechnung for year', () => {
-            const rechnungen = [
-                {
-                    id: 1,
-                    betreffendesJahr: 2024,
-                    datum: '2024-06-01'
-                }
-            ];
+            const rechnungen = [createMockRechnung(1, 2024, '2024-06-01')];
             const umlagen = [createMockUmlage(1, 'Nebenkosten', rechnungen)];
 
             const result = buildInvoiceTasks(umlagen, 2024);
@@ -190,13 +197,7 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
         });
 
         it('should include umlagen without rechnung for year', () => {
-            const rechnungen = [
-                {
-                    id: 1,
-                    betreffendesJahr: 2023,
-                    datum: '2023-06-01'
-                }
-            ];
+            const rechnungen = [createMockRechnung(1, 2023, '2023-06-01')];
             const umlagen = [createMockUmlage(1, 'Nebenkosten', rechnungen)];
 
             const result = buildInvoiceTasks(umlagen, 2024);

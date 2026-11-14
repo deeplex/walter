@@ -36,10 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { download_file_blob } from '$walter/services/files';
     import { walter_fetch, walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
-    import type {
-        AbrechnungsresultatInfo,
-        AbrechnungslaufGruppeResult
-    } from '$walter/components/abrechnung/abrechnungslauf/AbrechnungslaufTypes';
+    import type { AbrechnungslaufGruppeResult } from '$walter/components/abrechnung/abrechnungslauf/AbrechnungslaufTypes';
 
     export let data: PageData;
 
