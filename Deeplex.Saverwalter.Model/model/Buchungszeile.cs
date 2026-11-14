@@ -31,6 +31,15 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
+        /// <summary>
+        /// Bei einer Zahlungszeile: der offene Posten, für den sie gebucht wurde (Sollstellung,
+        /// Rechnung, Abrechnung). Wird beim Buchen gesetzt und bleibt unverändert — auch wenn
+        /// der Ausgleich (<see cref="AlsSollZeile"/>/<see cref="AlsHabenZeile"/>) durch ein
+        /// Storno entfällt. Der Ausgleich sagt, ob der Posten bezahlt ist; die Zuordnung,
+        /// wofür die Zahlung war.
+        /// </summary>
+        public virtual Buchungszeile? ZugeordnetZu { get; set; }
+
         public virtual List<OffenerPostenAusgleich> AlsSollZeile { get; private set; } = [];
         public virtual List<OffenerPostenAusgleich> AlsHabenZeile { get; private set; } = [];
 

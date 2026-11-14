@@ -117,5 +117,43 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             result.Result.Should().BeOfType<ForbidResult>();
         }
+
+        [Fact]
+        public async Task GaragenmieteBrauchtRechteAmGaragenvertrag()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            var gv = new GarageVertrag
+            {
+                Garage = new Garage("G1")
+                {
+                    Besitzer = vertrag.Ansprechpartner!,
+                    Ertragskonto = new Buchungskonto("4100", "Garagenmiete", BuchungskontoTyp.Ertrag),
+                },
+                MietBuchungskonto = new Buchungskonto("1100", "Garage", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1101", "Garage Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            gv.Versionen.Add(new GarageVertragVersion(new DateOnly(2024, 1, 1), 50m) { GarageVertrag = gv });
+            ctx.GarageVertraege.Add(gv);
+            await ctx.SaveChangesAsync();
+
+            var result = await Controller(ctx, Auth(r => r is not GarageVertrag))
+                .BuchenVorschau(new TransaktionsInput
+                {
+                    Betrag = 50m,
+                    Zahlungsdatum = new DateOnly(2024, 1, 5),
+                    GaragenEingaenge =
+                    {
+                        new StandaloneGaragenmietInput
+                        {
+                            GarageVertragId = gv.GarageVertragId,
+                            BetreffenderMonat = new DateOnly(2024, 1, 1),
+                            Betrag = 50m,
+                        }
+                    },
+                });
+
+            result.Result.Should().BeOfType<ForbidResult>();
+        }
     }
 }

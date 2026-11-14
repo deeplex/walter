@@ -518,6 +518,10 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("integer")
                         .HasColumnName("soll_haben");
 
+                    b.Property<Guid?>("ZugeordnetZuId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("zugeordnet_zu_id");
+
                     b.HasKey("BuchungszeileId")
                         .HasName("pk_buchungszeilen");
 
@@ -526,6 +530,9 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     b.HasIndex("BuchungssatzId")
                         .HasDatabaseName("ix_buchungszeilen_buchungssatz_id");
+
+                    b.HasIndex("ZugeordnetZuId")
+                        .HasDatabaseName("ix_buchungszeilen_zugeordnet_zu_id");
 
                     b.ToTable("buchungszeilen", (string)null);
                 });
@@ -1858,9 +1865,17 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .IsRequired()
                         .HasConstraintName("fk_buchungszeilen_buchungssaetze_buchungssatz_id");
 
+                    b.HasOne("Deeplex.Saverwalter.Model.Buchungszeile", "ZugeordnetZu")
+                        .WithMany()
+                        .HasForeignKey("ZugeordnetZuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_buchungszeilen_buchungszeilen_zugeordnet_zu_id");
+
                     b.Navigation("Buchungskonto");
 
                     b.Navigation("Buchungssatz");
+
+                    b.Navigation("ZugeordnetZu");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Garage", b =>

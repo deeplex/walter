@@ -136,7 +136,7 @@ Forderungen bei Bedarf glatt.
 
 Unterstützte Positionsarten:
 
-| Position | Wofür | Was Walter bucht |
+| Position | Bedeutung | Was Walter bucht |
 |----------|-------|------------------|
 | **Miete** | Monatliche Mietzahlung des Mieters | Trennt Kaltmiete und NK-Vorauszahlung; legt die Sollstellung an, falls sie fehlte, und gleicht sie aus |
 | **Garagenmiete** | Stellplatz-/Garagenmiete | Buchung auf das Garagenvertrag-Konto |

@@ -123,7 +123,7 @@ Eine **Transaktion** entspricht einem Kontoauszugseintrag und ist der zentrale
 Erfassungsweg für Geldbewegungen. Beim Anlegen wählt man Zahlungsdatum, ggf. Zahler/
 Empfänger (Bankkonto) und fügt eine oder mehrere **Positionen** hinzu:
 
-| Position | Wofür |
+| Position | Bedeutung |
 |----------|-------|
 | **Miete** | Monatliche Mietzahlung (Kaltmiete + NK-Vorauszahlung + evtl. Garagen) |
 | **Garagenmiete** | Stellplatz-/Garagenmiete |
@@ -134,15 +134,36 @@ Empfänger (Bankkonto) und fügt eine oder mehrere **Positionen** hinzu:
 | **Sonstige** | Freie Buchung mit gewählten Soll-/Haben-Konten |
 
 Die Summe der Positionen muss dem Transaktionsbetrag entsprechen. Walter erzeugt daraus
-automatisch die Buchungssätze und legt fehlende Forderungen an. Die entstehenden
+automatisch die Buchungssätze und legt fehlende Forderungen an. Unter dem Formular zeigt
+die **Vorschau**, was gebucht würde (in Klartext, aufklappbar die Buchungssätze);
+gespeichert werden kann erst, wenn die Vorschau die Eingabe akzeptiert. Die entstehenden
 Buchungssätze sind über die Transaktions-Detailseite und die jeweilige Fachentität
 einsehbar.
+
+**Zuordnung** — in Transaktionslisten (Transaktionen, Kontakt, Bankkonto) als Spalte und
+auf der Detailseite oben (dort mit Betrag): wofür eine Zahlung war, z. B. „Kaltmiete Mär
+2026 – 3 OG, Hauptstr. 5“, mit Link zum Mietkonto, zur Umlage oder zur Wohnung. Walter
+leitet das allein aus den Buchungen ab, nicht aus dem Verwendungszweck: aus den bebuchten
+Konten und dem Posten, für den eine Zahlung gebucht wurde (Sollstellung, Rechnung,
+Abrechnung). Diese Zuordnung bleibt auch nach dem Rückgängigmachen erhalten; die Zahlung
+steht dann mit dem Zusatz „(rückgängig gemacht)“. Hängt die Transaktion an einer Rechnung
+(ohne eigene Zahlungsbuchung), ist die Zuordnung die Rechnung. Zahlungen ohne Bezug (z. B.
+Umbuchung zwischen eigenen Konten) sind **nicht zugeordnet**.
 
 Auf der Detailseite macht **Rückgängig machen** die ganze Transaktion rückgängig. Was dabei
 passiert, entscheidet Walter: Hängt nichts daran, wird sie vollständig entfernt; sonst wird
 sie mit einer Gegenbuchung storniert (mit Pflicht-Grund, beides bleibt sichtbar). Sind
 Abrechnungen betroffen, zeigt der Dialog sie vorher an; sie werden nach Bestätigung mit
 zurückgenommen. Die Buchungssätze stehen eingeklappt im Abschnitt **Buchhaltung**.
+
+---
+
+## Kontakte und Bankkonten
+
+- Die Kontakt-Detailseite eines Mieters zeigt oben **Offen als Mieter**: je Vertrag die
+  offene Miete und offene Nachzahlungen aus versendeten Nebenkostenabrechnungen, mit
+  Summe. Die Zeile führt zum Mietkonto bzw. zu den Abrechnungen.
+- Kontakt und Bankkonto listen ihre **Transaktionen** mit der Spalte **Zuordnung**.
 
 ---
 

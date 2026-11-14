@@ -25,8 +25,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import WalterRueckgaengig from '$walter/components/details/WalterRueckgaengig.svelte';
     import type { PageData } from './$types';
-    import { WalterFileWrapper, type RueckgaengigPlan } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
+    import {
+        WalterFileWrapper,
+        zuordnungText,
+        type RueckgaengigPlan
+    } from '$walter/lib';
+    import { Tag, Tile } from 'carbon-components-svelte';
     import { walter_goto } from '$walter/services/utils';
 
     export let data: PageData;
@@ -36,6 +40,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    const eur = (v: number) =>
+        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     async function erledigt(e: CustomEvent<RueckgaengigPlan>) {
         if (e.detail.art === 'Loeschen') await walter_goto('/transaktionen');
@@ -51,6 +58,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 />
 
 <WalterGrid>
+    <Tile id="zuordnung" style="margin-bottom: 1rem">
+        <h4 style="margin-bottom: 0.5rem">Zuordnung</h4>
+        {#if data.entry.zuordnung.length === 0}
+            <Tag type="warm-gray">Nicht zugeordnet</Tag>
+        {:else}
+            <ul class="zuordnung">
+                {#each data.entry.zuordnung as w}
+                    <li>
+                        {#if w.href}
+                            <a href={w.href}>{zuordnungText(w)}</a>
+                        {:else}
+                            {zuordnungText(w)}
+                        {/if}
+                        <span class="betrag">{eur(w.betrag)}</span>
+                    </li>
+                {/each}
+            </ul>
+        {/if}
+    </Tile>
+
     <WalterTransaktionRaw fetchImpl={data.fetchImpl} entry={data.entry} />
 
     {#if data.entry.permissions?.remove !== false}
@@ -67,19 +94,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     {#if data.entry.zahler}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.zahler.id}`)}
+            fileref=""
             name={`Zahler: ${data.entry.zahler.text}`}
-            href={`/kontakte/${data.entry.zahler.id}`}
+            href={`/bankkontos/${data.entry.zahler.id}`}
         />
     {/if}
 
     {#if data.entry.zahlungsempfaenger}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.zahlungsempfaenger.id}`)}
+            fileref=""
             name={`Zahlungsempfänger: ${data.entry.zahlungsempfaenger.text}`}
-            href={`/kontakte/${data.entry.zahlungsempfaenger.id}`}
+            href={`/bankkontos/${data.entry.zahlungsempfaenger.id}`}
         />
     {/if}
 
@@ -92,6 +117,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </WalterGrid>
 
 <style>
+    .zuordnung li {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        max-width: 40rem;
+    }
+    .zuordnung {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
     .korrektur-aktionen {
         align-items: center;
         display: flex;

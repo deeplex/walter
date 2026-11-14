@@ -29,21 +29,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert
     ///   und nicht storniert ist.
     /// - Löschen ist nur für "freie" Sätze erlaubt: zusätzlich keine
-    ///   OPOS-Verknüpfung mit einem anderen Satz und kein Storno(-Partner) — sonst
-    ///   stornieren. Ausgleiche zwischen Zeilen desselben Satzes zählen nicht.
+    ///   OPOS-Verknüpfung mit einem anderen Satz, keine ihm zugeordnete Zahlung (auch
+    ///   keine stornierte, siehe <see cref="Buchungszeile.ZugeordnetZu"/>) und kein
+    ///   Storno(-Partner) — sonst stornieren. Ausgleiche zwischen Zeilen desselben
+    ///   Satzes zählen nicht.
     /// </summary>
     public class BuchungssatzSchutz
     {
         public bool IstAbrechnungssatz { get; init; }
         public bool AbrechnungBetroffen { get; init; }
         public bool HatOposVerknuepfung { get; init; }
+        public bool HatZugeordneteZahlungen { get; init; }
         public bool IstStorno { get; init; }
         public bool IstStorniert { get; init; }
 
         public bool KannStornieren =>
             !IstAbrechnungssatz && !AbrechnungBetroffen && !IstStorno && !IstStorniert;
 
-        public bool KannLoeschen => KannStornieren && !HatOposVerknuepfung;
+        public bool KannLoeschen => KannStornieren && !HatOposVerknuepfung && !HatZugeordneteZahlungen;
 
         public string? Sperrgrund =>
             IstAbrechnungssatz
@@ -56,7 +59,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                             ? "Stornobuchung — kann nicht selbst storniert oder gelöscht werden."
                             : HatOposVerknuepfung
                                 ? "Mit anderen Buchungssätzen ausgeglichen — bitte stornieren statt löschen."
-                                : null;
+                                : HatZugeordneteZahlungen
+                                    ? "Zahlungen sind diesem Buchungssatz zugeordnet — bitte stornieren statt löschen."
+                                    : null;
     }
 
     public class BuchungssatzSchutzService(SaverwalterContext ctx)
@@ -99,8 +104,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     zeileIds.Contains(a.SollZeile.BuchungszeileId) !=
                     zeileIds.Contains(a.HabenZeile.BuchungszeileId));
 
+            var hatZugeordnete = await ctx.Buchungszeilen
+                .AnyAsync(z => z.ZugeordnetZu != null
+                    && zeileIds.Contains(z.ZugeordnetZu.BuchungszeileId)
+                    && !zeileIds.Contains(z.BuchungszeileId));
+
             return new BuchungssatzSchutz
             {
+                HatZugeordneteZahlungen = hatZugeordnete,
                 IstAbrechnungssatz = istAbrechnungssatz,
                 AbrechnungBetroffen = !istAbrechnungssatz && (vertragBetroffen || umlageBetroffen),
                 HatOposVerknuepfung = hatOpos,

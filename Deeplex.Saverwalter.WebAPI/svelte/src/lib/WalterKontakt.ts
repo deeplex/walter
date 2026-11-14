@@ -61,7 +61,9 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public mitgliedschaftenAlsMitglied: WalterMitgliedschaftEntry[] = [],
         public mitgliedschaftenAlsJuristischePerson: WalterMitgliedschaftEntry[] = [],
         public permissions: WalterPermissions,
-        public konten: Partial<WalterBuchungskontoEntry>[] = []
+        public konten: Partial<WalterBuchungskontoEntry>[] = [],
+        /** Verträge, in denen der Kontakt Mieter ist. */
+        public mietvertragIds: number[] = []
     ) {
         super();
     }
@@ -141,7 +143,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
             mitgliedschaftenAlsMitglied,
             mitgliedschaftenAlsJuristischePerson,
             permissions,
-            json.konten ?? []
+            json.konten ?? [],
+            json.mietvertragIds ?? []
         );
     }
 }

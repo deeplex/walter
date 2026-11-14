@@ -48,7 +48,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet("{jahr}")]
-        public async Task<ActionResult<IEnumerable<OffeneForderungEntry>>> GetOffeneForderungen(int jahr)
+        public Task<ActionResult<IEnumerable<OffeneForderungEntry>>> GetOffeneForderungen(int jahr) =>
+            MitSollstellungenAsync(() => ErmittleOffeneForderungenAsync(jahr));
+
+        /// <summary>
+        /// Ermittelt erst ohne Sperre; fehlt dabei eine Sollstellung, bricht der Lauf ab und
+        /// wiederholt sich unter der Sperre (<see cref="Sollstellung.GesperrtAsync"/>), die
+        /// Sollstellungen dann anlegt. Nur das Anlegen wartet also aufeinander.
+        /// </summary>
+        private async Task<T> MitSollstellungenAsync<T>(Func<Task<T>> ermittle)
+        {
+            try
+            {
+                return await ermittle();
+            }
+            catch (SollstellungFehlt)
+            {
+                return await Sollstellung.GesperrtAsync(async () =>
+                {
+                    _anlegen = true;
+                    try { return await ermittle(); }
+                    finally { _anlegen = false; }
+                });
+            }
+        }
+
+        private bool _anlegen;
+
+        private sealed class SollstellungFehlt : Exception { }
+
+        private async Task<ActionResult<IEnumerable<OffeneForderungEntry>>> ErmittleOffeneForderungenAsync(int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
@@ -353,7 +382,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet("garagen/{jahr}")]
-        public async Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> GetOffeneGarageForderungen(int jahr)
+        public Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> GetOffeneGarageForderungen(int jahr) =>
+            MitSollstellungenAsync(() => ErmittleOffeneGarageForderungenAsync(jahr));
+
+        private async Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> ErmittleOffeneGarageForderungenAsync(int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
@@ -455,6 +487,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         private Buchungszeile ErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, decimal garagenMiete)
         {
+            if (!_anlegen) throw new SollstellungFehlt();
             var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
             var sollZeile = new Buchungszeile(SollHaben.Soll, garagenMiete)
             {
@@ -473,6 +506,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         private Buchungszeile ErstelleSollstellung(Vertrag vertrag, DateOnly monat, decimal grundmiete)
         {
+            if (!_anlegen) throw new SollstellungFehlt();
             var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");
             var sollZeile = new Buchungszeile(SollHaben.Soll, grundmiete)
             {

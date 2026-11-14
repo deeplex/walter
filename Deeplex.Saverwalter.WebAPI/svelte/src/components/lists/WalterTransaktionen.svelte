@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
-    import { WalterTransaktionEntry } from '$walter/lib';
+    import { WalterTransaktionEntry, zuordnungZelle } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
 
     export let fetchImpl: typeof fetch;
@@ -34,8 +34,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'betrag', value: 'Betrag' },
         { key: 'zahlungsempfaenger.text', value: 'Zahlungsempfänger' },
         { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
+        { key: 'zuordnungZelle', value: 'Zuordnung', sort: false as const },
         { key: 'verwendungszweck', value: 'Memo' }
     ];
+
+    // „Zuordnung“ kommt vom Server (bebuchte Konten und Ausgleiche).
+    const transformRow = (row: DataTableRow) => ({
+        ...row,
+        zuordnungZelle: zuordnungZelle(
+            (row as WalterTransaktionEntry).zuordnung
+        )
+    });
+    $: tableRows = rows?.map((r) => transformRow(r as unknown as DataTableRow));
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.transaktion(e.detail.id);
@@ -60,8 +70,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
-    {rows}
+    rows={tableRows}
     {fetchData}
+    {transformRow}
     initialSortBy="zahlungsdatum"
     initialSortDir="desc"
     {headers}

@@ -18,6 +18,29 @@ import { WalterBuchungssatzEntry } from './WalterBuchungssatz';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
+/** Zuordnung einer Zahlung: wofür sie war (aus den Buchungen, nie aus Freitext). */
+export interface WalterZuordnungEintrag {
+    text: string;
+    href?: string | null;
+    betrag: number;
+    /** Der Satz dieser Zahlung wurde storniert. */
+    storniert: boolean;
+}
+
+/** Klartext eines Eintrags der Zuordnung; stornierte Zahlungen als rückgängig gemacht. */
+export function zuordnungText(w: WalterZuordnungEintrag): string {
+    return w.storniert ? `${w.text} (rückgängig gemacht)` : w.text;
+}
+
+/** Zelle „Zuordnung“ einer Transaktionsliste: Klartext oder der Tag „Nicht zugeordnet“. */
+export function zuordnungZelle(
+    zuordnung: WalterZuordnungEintrag[] | undefined
+): string | { text: string; tag: 'warm-gray' } {
+    if (!zuordnung || zuordnung.length === 0)
+        return { text: 'Nicht zugeordnet', tag: 'warm-gray' };
+    return zuordnung.map(zuordnungText).join('; ');
+}
+
 export class WalterTransaktionEntry extends WalterApiHandler {
     public static ApiURL = `/api/transaktionen`;
 
@@ -35,7 +58,9 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         public buchungssaetze: WalterBuchungssatzEntry[],
         public kannLoeschen: boolean = false,
         public kannStornieren: boolean = false,
-        public sperrgrund: string | null = null
+        public sperrgrund: string | null = null,
+        /** Leer: nicht zugeordnet. */
+        public zuordnung: WalterZuordnungEintrag[] = []
     ) {
         super();
     }
@@ -65,7 +90,8 @@ export class WalterTransaktionEntry extends WalterApiHandler {
             buchungssaetze,
             json.kannLoeschen ?? false,
             json.kannStornieren ?? false,
-            json.sperrgrund ?? null
+            json.sperrgrund ?? null,
+            json.zuordnung ?? []
         );
     }
 }

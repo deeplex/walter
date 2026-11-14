@@ -42,6 +42,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Verwendungszweck { get; set; } = string.Empty;
             public string? Notiz { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
+            /// <summary>Zuordnung der Zahlung (<see cref="Services.Zuordnung"/>); leer: nicht zugeordnet.</summary>
+            public List<ZuordnungEintrag> Zuordnung { get; set; } = [];
 
             public TransaktionEntryBase() { }
             public TransaktionEntryBase(Transaktion entity, Permissions permissions)
@@ -213,6 +215,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 var vertrag = await _ctx.Vertraege.FindAsync(miete.VertragId);
                 if (vertrag is null) return NotFound($"Vertrag {miete.VertragId} nicht gefunden.");
                 var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            var garageVertragIds = input.GaragenEingaenge.Select(g => g.GarageVertragId)
+                .Concat(input.Mieten.SelectMany(m => m.Garagen).Select(g => g.GarageVertragId))
+                .Distinct();
+            foreach (var garageVertragId in garageVertragIds)
+            {
+                var garageVertrag = await _ctx.GarageVertraege.FindAsync(garageVertragId);
+                if (garageVertrag is null) return NotFound($"Garagenvertrag {garageVertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, garageVertrag, [Operations.SubCreate]);
                 if (!authRx.Succeeded) return Forbid();
             }
 

@@ -111,6 +111,9 @@ export {
     type VorschauSatz,
     type VorschauZeile,
     type RueckgaengigPlan,
+    type WalterZuordnungEintrag,
+    zuordnungText,
+    zuordnungZelle,
     type BetroffeneAbrechnung,
     emptyMietzahlungsInput,
     emptyTransaktionsInput

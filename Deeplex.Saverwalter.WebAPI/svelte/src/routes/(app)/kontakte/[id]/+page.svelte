@@ -26,7 +26,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeaderDetail,
         WalterLinks,
         WalterLinkTile,
-        WalterKontakt
+        WalterKontakt,
+        WalterOffenAlsMieter
     } from '$walter/components';
     import {
         WalterFileWrapper,
@@ -59,6 +60,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         juristischePerson: { id: data.entry.id, text: data.entry.bezeichnung }
     };
 
+    $: mietvertraege = (data.entry.vertraege ?? [])
+        .filter((v) => data.entry.mietvertragIds.includes(v.id))
+        .map((v) => ({ id: v.id, text: v.wohnung?.text ?? `Vertrag ${v.id}` }));
+
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
@@ -74,6 +79,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterGrid>
     <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
+
+    <WalterOffenAlsMieter
+        vertraege={mietvertraege}
+        fetchImpl={data.fetchImpl}
+    />
 
     <WalterLinks>
         <WalterKontaktMitgliedschaft

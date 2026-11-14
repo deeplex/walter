@@ -28,8 +28,8 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
@@ -116,6 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     .AsEnumerable()
                     .Select(e => new TransaktionEntryBase(e, new(true)))
                     .ToList();
+                await Zuordnung.ZuordnenAsync(Ctx, entry.Transaktionen);
 
                 return entry;
             });

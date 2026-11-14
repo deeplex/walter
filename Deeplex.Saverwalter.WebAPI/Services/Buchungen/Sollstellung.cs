@@ -31,6 +31,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// </summary>
     public static class Sollstellung
     {
+        private static readonly SemaphoreSlim Sperre = new(1, 1);
+
+        /// <summary>
+        /// Führt aus, was fehlende Sollstellungen anlegt (prüfen, anlegen, speichern), ohne
+        /// dass ein anderer Vorgang gleichzeitig dasselbe tut — sonst legen zwei Anfragen
+        /// denselben Monat beide an. Die WebAPI läuft als ein Prozess; die Sperre gilt
+        /// prozessweit. Innerhalb der Aktion nicht erneut aufrufen.
+        /// </summary>
+        public static async Task<T> GesperrtAsync<T>(Func<Task<T>> aktion)
+        {
+            await Sperre.WaitAsync();
+            try { return await aktion(); }
+            finally { Sperre.Release(); }
+        }
+
         /// <param name="nkKontoId">NK-Konto des Vertrags; bei Garagenkonten <c>null</c>.</param>
         public static bool Ist(Buchungszeile z, int? nkKontoId = null) =>
             z.SollHaben == SollHaben.Soll

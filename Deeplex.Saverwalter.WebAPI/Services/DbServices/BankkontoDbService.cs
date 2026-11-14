@@ -77,6 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 .AsEnumerable()
                 .Select(t => new TransaktionEntryBase(t, AllowAll))
                 .ToList();
+            await Zuordnung.ZuordnenAsync(Ctx, entry.Transaktionen);
 
             return entry;
         }

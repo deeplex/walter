@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     return Gesperrt($"Buchungssatz Nr. {satz.Buchungsnummer} ist bereits storniert.");
                 if (schutz.IstStorno)
                     return Gesperrt($"Buchungssatz Nr. {satz.Buchungsnummer} ist eine Stornobuchung.");
-                hatAbhaengigkeit |= schutz.HatOposVerknuepfung;
+                hatAbhaengigkeit |= schutz.HatOposVerknuepfung || schutz.HatZugeordneteZahlungen;
                 resultate.AddRange(await schutzService.BetroffeneResultateAsync(satz));
             }
 

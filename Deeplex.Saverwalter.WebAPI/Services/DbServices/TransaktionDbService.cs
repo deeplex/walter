@@ -41,8 +41,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             _rueckgaengigService = rueckgaengigService;
         }
 
-        public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
-            TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+        public async Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query)
+        {
+            var seite = await TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
                 searchPredicate: t => e =>
                     e.Verwendungszweck.ToLower().Contains(t) ||
                     (e.Zahler != null && (
@@ -60,6 +61,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     _ => q.SortBy(e => e.Zahlungsdatum, "desc")
                 },
                 toEntry: async e => new TransaktionEntryBase(e, await GetPermissions(user, e, Auth)));
+            var eintraege = seite.Items.ToList();
+            await Zuordnung.ZuordnenAsync(Ctx, eintraege);
+            return seite with { Items = eintraege };
+        }
 
         public override async Task<ActionResult<Transaktion>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {
@@ -92,6 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 entry.KannLoeschen = kannLoeschen;
                 entry.KannStornieren = kannStornieren;
                 entry.Sperrgrund = sperrgrund;
+                await Zuordnung.ZuordnenAsync(Ctx, [entry]);
 
                 return entry;
             });
