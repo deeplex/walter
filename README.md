@@ -24,13 +24,13 @@ ihre Konten, sodass der Kontenrahmen im Alltag nicht stört.
   abgesendet (oder verzichtet) ist.
 - **Zugriffssteuerung** — Rollen je Wohnung (Eigentümer, Vollmacht, Ableser),
   API-weit durchgesetzt.
-- **Dateiablage** — Belege an Entitäten und Buchungen, gespeichert in S3/MinIO.
+- **Dateiablage** — Belege an Entitäten und Buchungen, gespeichert in einem S3-kompatiblen Speicher.
 
 ## Technologie
 
 .NET 8 / ASP.NET Core (REST API), Entity Framework Core auf PostgreSQL, ein SvelteKit-
 Frontend mit Carbon Design System (in die API eingebettet), Word-/PDF-Erzeugung über
-OOXML / MigraDoc sowie eine S3-kompatible Dateiablage (MinIO im Entwicklungs-Stack).
+OOXML / MigraDoc sowie eine S3-kompatible Dateiablage (SeaweedFS im Entwicklungs-Stack).
 
 ## Dokumentation
 
@@ -81,29 +81,32 @@ Geseedete Entwicklungs-Nutzer (Standardpasswort = `DATABASE_PASS`):
 - `viewer.dev`
 - `limited.dev`
 
-Ist MinIO unter `s3:9000` erreichbar (Devcontainer-Standard), lädt das Bootstrap zusätzlich
+Ist der S3-Server unter `s3:9000` erreichbar (Devcontainer-Standard), lädt das Bootstrap zusätzlich
 realistische Platzhalter-PDFs zu einer Auswahl von `vertraege`, `wohnungen`,
 `erhaltungsaufwendungen`, `adressen` und `kontakte` hoch, damit die Datei-Panels in der
 Oberfläche nicht leer sind. Das Ziel lässt sich über `S3_PROVIDER=...` überschreiben oder
 das Datei-Seeding mit `WALTER_DEV_SKIP_FILE_SEED=1` ganz überspringen.
 
-## Dateiablage (S3 / MinIO)
+## Dateiablage (S3)
 
-Der Entwicklungs-Compose-Stack betreibt MinIO als S3-kompatibles Datei-Backend. Sowohl
-Walter als auch MinIO stehen unter AGPL-3.0, das Bündeln erzeugt also keinen
-Lizenzkonflikt.
+Der Entwicklungs-Compose-Stack betreibt SeaweedFS (Apache-2.0) als S3-kompatibles
+Datei-Backend. MinIO wird nicht mehr verwendet: sein Community-Projekt ist archiviert und
+seine Images werden nicht mehr veröffentlicht.
 
 - API-Endpunkt: `http://s3:9000` (im Devcontainer) /
   `http://localhost:9000` (vom Host)
 - Standard-Bucket: `saverwalter`
 - Walter-API-Basis-URL: `http://s3:9000/saverwalter`
   (als `S3_PROVIDER` für das Backend gesetzt)
-- Konsole: `http://localhost:9001` (Login `minioadmin` / `minioadmin`)
 
-Der Bucket wird vom `s3-init`-Sidecar-Dienst angelegt und auf eine öffentliche, anonyme
-Policy geschaltet. Das ist ausschließlich für die Entwicklung akzeptabel;
-Produktionsumgebungen müssen MinIO (oder einen anderen S3-Anbieter) hinter echte
-Zugangsdaten stellen.
+Der Bucket wird vom `s3-init`-Dienst angelegt. Walter sendet seine Anfragen an den
+Speicher ohne Signatur, SeaweedFS nimmt sie ohne konfigurierte Zugangsdaten an. Das ist
+ausschließlich für die Entwicklung akzeptabel; Produktionsumgebungen müssen den
+S3-Speicher hinter echte Zugangsdaten stellen.
+
+Die Dateiablage lässt sich gegen jeden S3-Server prüfen: mit
+`WALTER_TEST_S3=http://s3:9000/saverwalter dotnet test Deeplex.Saverwalter.WebAPI.Tests --filter "FullyQualifiedName~EntityFileServiceS3Tests"`
+laufen die Tests der Dateiablage gegen den echten Speicher statt gegen den Fake.
 
 ## Vollständigen Dev-Watch-Stack starten (im Devcontainer)
 
@@ -154,7 +157,7 @@ Die Suite enthält Browser- und API-Tests und prüft u. a.:
 - UI-Zugriff auf dynamische Detail-/Anlege-Routen wie `/wohnungen/:id`, `/wohnungen/new`,
   `/accounts/:id` und `/accounts/new`
 - Änderungsbeschränkungen auf Entitätsebene anhand der Backend-Berechtigungsflags
-- Datei-Roundtrip (Upload/List/Download/Trash) an einer Wohnung gegen MinIO
+- Datei-Roundtrip (Upload/List/Download/Trash) an einer Wohnung gegen den S3-Server
 - Sichtbarkeit geseedeter Beispieldateien, Viewer-Schreibschutz und den Ablagestapel-Endpunkt
 - Erzeugung einer Betriebskostenabrechnungs-PDF über die API
 - UI-Download-Fluss im Abrechnungslauf (PDF-Erzeugung, Override-Modal, S3-Persistenz)

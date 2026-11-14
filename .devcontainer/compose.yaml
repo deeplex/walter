@@ -19,46 +19,38 @@ services:
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data
 
-  # MinIO is licensed under AGPL-3.0 (same license as Walter), so bundling it
-  # into the development setup does not create any licensing conflict.
+  # SeaweedFS (Apache-2.0) is the S3-compatible file backend for development.
+  # Walter talks to it without signing requests, so the bucket must accept
+  # anonymous access: SeaweedFS does that as long as no identities are configured.
   s3:
-    image: minio/minio:RELEASE.2023-02-17T17-52-43Z
+    image: chrislusf/seaweedfs:4.53
     container_name: walter_dev_s3
     restart: unless-stopped
+    command: server -s3 -dir=/data -s3.port=9000
     volumes:
-      - s3-data:/data
-    environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
-    command: server --console-address ":9001" /data
+      - s3-data-seaweedfs:/data
     ports:
       - 9000:9000
-      - 9001:9001
 
-  # One-shot helper that creates the saverwalter bucket and switches it to a
-  # public anonymous policy. The Walter file API talks to MinIO without
-  # signing requests, so the bucket needs to allow unauthenticated PUT/GET.
-  # This is acceptable for development only; production deployments must put
-  # MinIO (or another S3 provider) behind proper credentials.
+  # One-shot helper that creates the saverwalter bucket (an existing bucket
+  # answers 409, which is fine). Anonymous access for development only;
+  # production deployments must put the S3 server behind proper credentials.
   s3-init:
-    image: minio/mc:RELEASE.2023-02-16T19-20-11Z
+    image: curlimages/curl:8.23.0
     container_name: walter_dev_s3_init
     depends_on:
       - s3
     restart: "no"
     entrypoint: >
       /bin/sh -c "
-      until /usr/bin/mc alias set walter http://s3:9000 minioadmin minioadmin >/dev/null 2>&1; do
-        echo 'Waiting for MinIO at s3:9000...';
+      until curl -s -o /dev/null http://s3:9000/; do
+        echo 'Waiting for S3 at s3:9000...';
         sleep 1;
       done;
-      /usr/bin/mc mb -p walter/saverwalter >/dev/null 2>&1 || true;
-      /usr/bin/mc anonymous set public walter/saverwalter >/dev/null 2>&1 \
-        || /usr/bin/mc policy set public walter/saverwalter >/dev/null 2>&1 \
-        || true;
-      echo 'MinIO bucket walter/saverwalter ready (public anonymous access for development).';
+      curl -s -o /dev/null -X PUT http://s3:9000/saverwalter;
+      echo 'S3 bucket saverwalter ready (anonymous access for development).';
       "
 
 volumes:
   postgres-data:
-  s3-data:
+  s3-data-seaweedfs:

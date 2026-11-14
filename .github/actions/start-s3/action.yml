@@ -1,0 +1,34 @@
+name: Start S3 server
+description: >-
+  Starts SeaweedFS as the S3-compatible file backend on 127.0.0.1:9000 and creates the
+  bucket `saverwalter`. SeaweedFS takes unsigned requests as long as no identities are
+  configured, which is how Walter's file API sends them. A plain docker step is used because
+  the `services:` block cannot pass a command to the container.
+
+runs:
+  using: composite
+  steps:
+    - name: Start SeaweedFS and create the bucket
+      shell: bash
+      run: |
+        docker run -d --name s3 -p 9000:9000 \
+          chrislusf/seaweedfs:4.53 \
+          server -s3 -dir=/data -s3.port=9000
+
+        # "localhost" can resolve to ::1 first on the runner while the container's
+        # published port is only reachable over IPv4 — use 127.0.0.1 explicitly.
+        ready=false
+        for _ in $(seq 1 60); do
+          if curl --silent --output /dev/null http://127.0.0.1:9000/; then
+            ready=true
+            break
+          fi
+          sleep 1
+        done
+        if [ "$ready" != "true" ]; then
+          echo "The S3 server did not become reachable at 127.0.0.1:9000 within 60s."
+          docker logs s3 || true
+          exit 1
+        fi
+
+        curl --fail --silent --show-error -X PUT http://127.0.0.1:9000/saverwalter

@@ -13,7 +13,7 @@ Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietver
 | Datenbank     | PostgreSQL                               |
 | DI-Container  | Simple Injector                          |
 | Frontend      | SvelteKit, Carbon Design System, D3.js   |
-| Dateiablage   | S3-kompatibel (MinIO im Entwicklungs-Stack) |
+| Dateiablage   | S3-kompatibel (SeaweedFS im Entwicklungs-Stack) |
 | Observability | OpenTelemetry (optional, via `OTEL_ENDPOINT`) |
 | Tests         | xUnit (Backend), Vitest + Playwright (Frontend) |
 | CI            | GitHub Actions                           |
@@ -105,7 +105,7 @@ Eine importierte oder erfasste **Transaktion** (Kontoauszugseintrag) wird über 
 | `DATABASE_USER`     | Datenbankbenutzer                               |
 | `DATABASE_PASS`     | Datenbankpasswort                               |
 | `DATABASE_NAME`     | Datenbankname                                   |
-| `S3_*`              | S3/MinIO-Verbindungsparameter (Endpoint, Bucket, Keys) |
+| `S3_*`              | S3-Verbindungsparameter (Endpoint, Bucket, Keys) |
 | `OTEL_ENDPOINT`     | OpenTelemetry Collector Endpoint (optional)     |
 
 ---

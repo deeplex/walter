@@ -349,7 +349,7 @@ die Seitenleiste ein Hinweissymbol.
 An vielen Detailseiten (Wohnung, Vertrag, Umlage, Adresse, Kontakt, Buchungssatz …) gibt
 es ein **Datei-Panel**. Belege werden dort hochgeladen, aufgelistet, heruntergeladen und
 in den Papierkorb verschoben. Die Ablage erfolgt in einem S3-kompatiblen Speicher
-(im Entwicklungs-Stack MinIO).
+(im Entwicklungs-Stack SeaweedFS).
 
 ---
 

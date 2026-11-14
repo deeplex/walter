@@ -181,7 +181,7 @@ test.describe('S3-backed file storage flow', () => {
         expect(
             foundFile,
             'expected the dev seed to have uploaded sample files; ' +
-                'is MinIO running and was bootstrap-dev.sh executed with S3 reachable?'
+                'is the S3 server running and was bootstrap-dev.sh executed with S3 reachable?'
         ).toBeTruthy();
     });
 

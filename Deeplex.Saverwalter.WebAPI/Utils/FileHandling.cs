@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
         {
             var content = new StreamContent(request.Body);
 
-            // S3-compatible servers (MinIO etc.) reject PUT without an explicit
+            // S3-compatible servers (MinIO, SeaweedFS etc.) reject PUT without an explicit
             // Content-Length unless they understand the AWS chunked signing
             // protocol. Default missing lengths to zero so we never end up
             // trying to chunk-encode a forwarded request.
@@ -114,7 +114,7 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             // to hide trashed files from regular results. We deliberately do
             // not forward the original request body here (DELETE requests
             // typically don't have one) and we always send Content-Length: 0
-            // so MinIO accepts the PUT.
+            // so the S3 server accepts the PUT.
             var splits = path.Split('/');
             var trashPath = $"{string.Join('/', splits.Reverse().Skip(1).Reverse())}/trash/{splits.Last()}";
             var trashRequest = new HttpRequestMessage(HttpMethod.Put, trashPath)
