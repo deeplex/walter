@@ -18,7 +18,6 @@ import { describe, expect, it } from 'vitest';
 import {
     walter_data_aufwendungen,
     walter_data_mea,
-    walter_data_mieten,
     walter_data_ne,
     walter_data_nf,
     walter_data_rechnungen_year,
@@ -78,26 +77,6 @@ describe('WalterData helpers', () => {
         expect(walter_data_nf('NF', wohnungen).data[1].value).toBe(40);
         expect(walter_data_mea('MEA', wohnungen).data[0].value).toBe(120);
         expect(walter_data_ne('NE', wohnungen).data[1].value).toBe(1);
-    });
-
-    it('builds mieten chart with sorted min/max domain', () => {
-        const config = walter_data_mieten('Mieten', [
-            { kaltmieteZahlung: 900, betreffenderMonat: '2026-03-01' },
-            { kaltmieteZahlung: 700, betreffenderMonat: '2026-01-01' },
-            { kaltmieteZahlung: 800, betreffenderMonat: '2026-02-01' }
-        ] as never);
-
-        expect(config.options.axes?.left).toMatchObject({
-            domain: [700, 900]
-        });
-        expect(config.data).toContainEqual({
-            value: 900,
-            date: '2026-03-01'
-        });
-        expect(config.data).toContainEqual({
-            value: 700,
-            date: '2026-01-01'
-        });
     });
 
     it('builds rechnungentabelle heatmap and normalizes non-positive values', () => {

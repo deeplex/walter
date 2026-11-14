@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .ToListAsync();
 
             var kontoIds = konten.Select(k => k.BuchungskontoId).ToList();
-            var verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+            var verknuepfungen = await Kontorollen.VerknuepfungenAsync(ctx, kontoIds);
 
             // OPOS-Ausgleiche für beide Richtungen: eine Soll-Forderung (z.B. Miete,
             // Nachzahlung) wird von einer Haben-Zeile gedeckt, eine Haben-Forderung
@@ -383,7 +383,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                     return new AbrechnungsstatusEntry
                     {
                         VertragId = v.VertragId,
-                        Bezeichnung = KontoVerknuepfungService.GetVertragName(v),
+                        Bezeichnung = Kontorollen.VertragText(v),
                         ResultatVorhanden = resultat != null,
                         Abgesendet = resultat?.Abgesendet ?? false,
                         Ausgeglichen = resultat != null && SaldoAusgeglichen(resultat, v),

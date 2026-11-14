@@ -23,7 +23,7 @@ Wird eine Zeile oder ein Feld ohne Änderungsrecht geöffnet, ist es schreibgesc
 
 ## Navigation (Seitenleiste)
 
-Die Seitenleiste gliedert sich in drei Bereiche:
+Die Seitenleiste trennt die Fachsicht von der Buchhaltung:
 
 **Hauptbereich**
 
@@ -32,25 +32,31 @@ Die Seitenleiste gliedert sich in drei Bereiche:
 | **Startseite** | Offene Forderungen und fällige Aufgaben des Jahres |
 | **Abrechnungslauf** | Betriebskostenabrechnung berechnen, buchen, drucken |
 
-**Stammdaten**
+**Vermietung**
 
 | Eintrag | Zweck |
 |---------|-------|
 | **Kontakte** | Adressbuch aller Personen (Mieter, Eigentümer, Handwerker …) |
-| **Wohnungen** | Wohneinheiten mit Versionen, Eigentümern, Zählern, Aufwandsposten |
-| **Verträge** | Mietverhältnisse mit Versionen, Kaution, Mietminderungen |
+| **Wohnungen** | Wohneinheiten mit Versionen, Eigentümern, Zählern, Erhaltungsaufwand |
+| **Verträge** | Mietverhältnisse mit Mietkonto, Kaution, Nebenkostenabrechnungen |
 | **Garagen** | Stellplätze und Garagenverträge |
 
-**Erweitert** (aufklappbares Menü)
+**Stammdaten** (aufklappbares Menü)
 
 | Eintrag | Zweck |
 |---------|-------|
-| **Transaktionen** | Zahlungsvorgänge erfassen; erzeugt die Buchungssätze |
-| **Jahresabschluss** | Jahresabschlusskontrolle: Bilanz + Abrechnungsstatus je Jahr |
-| **Umlagen** | Betriebskostenpositionen mit Verteilungsschlüssel |
+| **Umlagen** | Betriebskostenpositionen mit Verteilungsschlüssel und Rechnungen |
 | **Umlagetypen** | Klassifikation der Umlagen (z. B. „Heizkosten") |
 | **Zähler** | Zähler und Zählerstände |
 | **Adressen** | Adressen von Wohnungen und Kontakten |
+
+**Buchhaltung** (aufklappbares Menü) — die Ebene unter der Fachsicht
+
+| Eintrag | Zweck |
+|---------|-------|
+| **Transaktionen** | alle Zahlungen mit Zuordnung; Erfassen mit allen Positionstypen |
+| **Buchungskonten** | alle Konten mit Funktion, Besitzer, Saldo und Status |
+| **Jahresabschluss** | Strukturprüfung, Bilanz und Abrechnungsstatus je Jahr |
 
 **Nutzermenü** (unten)
 

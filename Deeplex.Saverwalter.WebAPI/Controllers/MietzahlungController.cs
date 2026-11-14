@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -179,54 +179,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Rechnungsbetrag = habenZeile.Betrag,
                 SchonGezahlt = schonGezahlt,
                 VerbleibenderBetrag = habenZeile.Betrag - schonGezahlt
-            });
-        }
-
-        public class MietzahlungDetailEntry
-        {
-            public Guid Id { get; set; }
-            public DateOnly Buchungsdatum { get; set; }
-            public string BetreffenderMonat { get; set; } = string.Empty;
-            public decimal Betrag { get; set; }
-            public SelectionEntry Vertrag { get; set; } = null!;
-            public Permissions Permissions { get; set; } = new Permissions();
-        }
-
-        /// <summary>
-        /// Gibt Details eines einzelnen Mietzahlungs-Buchungssatzes zurück.
-        /// </summary>
-        [HttpGet("satz/{buchungssatzId}")]
-        public async Task<ActionResult<MietzahlungDetailEntry>> GetBySatz(Guid buchungssatzId)
-        {
-            var satz = await ctx.Buchungssaetze
-                .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
-                .FirstOrDefaultAsync(s => s.BuchungssatzId == buchungssatzId);
-
-            if (satz is null) return NotFound();
-
-            var habenZeile = satz.Buchungszeilen.FirstOrDefault(z => z.SollHaben == SollHaben.Haben);
-            if (habenZeile is null) return NotFound();
-
-            var vertrag = await ctx.Vertraege
-                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
-                .FirstOrDefaultAsync(v => v.MietBuchungskonto.BuchungskontoId == habenZeile.Buchungskonto.BuchungskontoId);
-
-            if (vertrag is null) return NotFound();
-
-            var authRx = await auth.AuthorizeAsync(User, vertrag, [Operations.Read]);
-            if (!authRx.Succeeded) return Forbid();
-
-            var permissions = await GetPermissions(User, vertrag, auth);
-            var wohnungText = (vertrag.Wohnung.Adresse?.Anschrift ?? "?") + " - " + vertrag.Wohnung.Bezeichnung;
-
-            return Ok(new MietzahlungDetailEntry
-            {
-                Id = satz.BuchungssatzId,
-                Buchungsdatum = satz.Buchungsdatum,
-                BetreffenderMonat = new DateOnly(satz.Buchungsdatum.Year, satz.Buchungsdatum.Month, 1).ToString("yyyy-MM-01"),
-                Betrag = habenZeile.Betrag,
-                Vertrag = new SelectionEntry(vertrag.VertragId, wohnungText),
-                Permissions = permissions
             });
         }
 

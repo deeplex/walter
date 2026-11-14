@@ -26,7 +26,6 @@ export const navigation = {
     account: (id: number) => walter_goto(`/accounts/${id}`),
     adresse: (id: number) => walter_goto(`/adressen/${id}`),
     kontakt: (id: number) => walter_goto(`/kontakte/${id}`),
-    miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
     transaktion: (id: number) => walter_goto(`/transaktionen/${id}`),
     hkvo: (id: number) => walter_goto(`/hkvo/${id}`),

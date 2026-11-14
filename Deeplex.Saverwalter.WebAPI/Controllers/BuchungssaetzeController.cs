@@ -351,7 +351,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Select(z => z.Buchungskonto.BuchungskontoId)
                 .Distinct()
                 .ToList();
-            entry.Verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+            entry.Verknuepfungen = await Kontorollen.VerknuepfungenAsync(ctx, kontoIds);
 
             // Offene Posten gibt es nur auf Ausgleichskonten — auf Summenkonten
             // (Erträge, Zahlungseingänge, ...) ist "Offen" bedeutungslos.

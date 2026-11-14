@@ -28,11 +28,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         ArrowsHorizontal,
         Building,
+        Catalog,
         ChartRelationship,
+        DataBase,
         Document,
+        Finance,
         Home,
         IbmDataReplication,
-        ListBoxes,
         Location,
         Logout,
         Meter,
@@ -83,18 +85,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
         <WalterSideNavLink icon={Building} text="Garagen" href="/garagen" />
         <SideNavDivider />
+        <!-- Stammdaten: was Wohnungen und Verträge voraussetzen. -->
         <div>
-            <SideNavMenu icon={ListBoxes} text="Erweitert">
-                <WalterSideNavLink
-                    icon={ArrowsHorizontal}
-                    text="Transaktionen"
-                    href="/transaktionen"
-                />
-                <WalterSideNavLink
-                    icon={TaskComplete}
-                    text="Jahresabschluss"
-                    href="/jahresabschlusskontrolle"
-                />
+            <SideNavMenu icon={DataBase} text="Stammdaten">
                 <WalterSideNavLink
                     icon={ChartRelationship}
                     text="Umlagen"
@@ -111,7 +104,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     text="Adressen"
                     href="/adressen"
                 />
-                <!-- </div> -->
+            </SideNavMenu>
+        </div>
+        <!-- Buchhaltung: die Expertenebene unter der Fachsicht. -->
+        <div>
+            <SideNavMenu icon={Finance} text="Buchhaltung">
+                <WalterSideNavLink
+                    icon={ArrowsHorizontal}
+                    text="Transaktionen"
+                    href="/transaktionen"
+                />
+                <WalterSideNavLink
+                    icon={Catalog}
+                    text="Buchungskonten"
+                    href="/buchungskonten"
+                />
+                <WalterSideNavLink
+                    icon={TaskComplete}
+                    text="Jahresabschluss"
+                    href="/jahresabschlusskontrolle"
+                />
             </SideNavMenu>
         </div>
 

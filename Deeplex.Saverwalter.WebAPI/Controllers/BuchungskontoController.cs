@@ -39,6 +39,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Funktion { get; set; }
             /// <summary>Ob das Konto sich ausgleichen soll — ein Saldo ist dann ein offener Posten.</summary>
             public bool Ausgleichbar { get; set; }
+            /// <summary>Wem das Konto gehört (z. B. Vertrag mit Anschrift und Mietern).</summary>
+            public string? Besitzer { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
@@ -127,6 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Sum(z => z.SollHaben == Model.SollHaben.Soll ? z.Betrag : -z.Betrag),
                 Funktion = verknuepfung?.Funktion,
                 Ausgleichbar = verknuepfung?.Ausgleichbar ?? false,
+                Besitzer = verknuepfung?.Text,
                 CreatedAt = k.CreatedAt,
                 LastModified = k.LastModified,
                 Permissions = new Permissions(true) { Update = canUpdate }
@@ -175,7 +178,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .ToListAsync();
 
             var vollmachtIds = await VollmachtKontoIds();
-            var verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(
+            var verknuepfungen = await Kontorollen.VerknuepfungenAsync(
                 ctx, konten.Select(k => k.BuchungskontoId).ToList());
             return Ok(konten.Select(k => ToEntry(k,
                 vollmachtIds == null || vollmachtIds.Contains(k.BuchungskontoId),
@@ -210,8 +213,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     g.Buchungskonto.Kontotyp == BuchungskontoTyp.Ertrag);
 
             var vollmachtIds = await VollmachtKontoIds();
-            var verknuepfungen = await KontoVerknuepfungService
-                .ForKontenAsync(ctx, [konto.BuchungskontoId]);
+            var verknuepfungen = await Kontorollen
+                .VerknuepfungenAsync(ctx, [konto.BuchungskontoId]);
             var entry = ToEntry(konto,
                 vollmachtIds == null || vollmachtIds.Contains(konto.BuchungskontoId),
                 verknuepfungen.FirstOrDefault());
@@ -288,8 +291,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             konto.Notiz = update.Notiz;
             await ctx.SaveChangesAsync();
 
-            var verknuepfungen = await KontoVerknuepfungService
-                .ForKontenAsync(ctx, [konto.BuchungskontoId]);
+            var verknuepfungen = await Kontorollen
+                .VerknuepfungenAsync(ctx, [konto.BuchungskontoId]);
             return Ok(ToEntry(konto, canUpdate: true, verknuepfungen.FirstOrDefault()));
         }
     }

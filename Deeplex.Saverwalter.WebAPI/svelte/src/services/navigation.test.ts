@@ -22,7 +22,6 @@ describe('navigation service', () => {
             ['account', 1, '/accounts/1'],
             ['adresse', 2, '/adressen/2'],
             ['kontakt', 5, '/kontakte/5'],
-            ['miete', 6, '/mieten/6'],
             ['mietminderung', 7, '/mietminderungen/7'],
             ['transaktion', 8, '/transaktionen/8'],
             ['umlage', 9, '/umlagen/9'],

@@ -24,7 +24,8 @@ export type WalterKontoVerknuepfung = {
         | 'Umlage'
         | 'Kontakt'
         | 'Garage'
-        | 'GarageVertrag';
+        | 'GarageVertrag'
+        | 'Bankkonto';
     id: string;
     text: string;
     funktion: string;
@@ -94,6 +95,8 @@ export function kontoVerknuepfungHref(v: WalterKontoVerknuepfung): string {
             return `/garagen/${v.id}`;
         case 'GarageVertrag':
             return `/garage-vertraege/${v.id}`;
+        case 'Bankkonto':
+            return `/bankkontos/${v.id}`;
     }
 }
 
@@ -121,7 +124,9 @@ export class WalterBuchungskontoEntry extends WalterApiHandler {
         public monatsSummen: WalterKontoMonatsSumme[],
         public createdAt: Date,
         public lastModified: Date,
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        /** Wem das Konto gehört (z. B. Vertrag mit Anschrift und Mietern). */
+        public besitzer: string | undefined = undefined
     ) {
         super();
     }
@@ -148,7 +153,8 @@ export class WalterBuchungskontoEntry extends WalterApiHandler {
             json.monatsSummen ?? [],
             new Date(json.createdAt),
             new Date(json.lastModified),
-            permissions
+            permissions,
+            json.besitzer ?? undefined
         );
     }
 }

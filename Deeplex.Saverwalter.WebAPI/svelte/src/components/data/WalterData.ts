@@ -20,7 +20,6 @@ import type {
     WalterUmlageEntry,
     WalterWohnungEntry
 } from '$walter/lib';
-import type { WalterMietzahlungListEntry } from '$walter/lib/WalterMietzahlung';
 
 const baseOptions = {
     legend: { enabled: false },
@@ -110,38 +109,6 @@ export const months = [
     'November',
     'Dezember'
 ];
-
-export function walter_data_mieten(
-    title: string,
-    mieten: WalterMietzahlungListEntry[]
-) {
-    const sortedMieten = mieten.sort(
-        (a, b) => a.kaltmieteZahlung - b.kaltmieteZahlung
-    );
-
-    const options = {
-        ...baseOptions,
-        title,
-        axes: {
-            left: {
-                domain: [
-                    sortedMieten[0].kaltmieteZahlung,
-                    sortedMieten[sortedMieten.length - 1].kaltmieteZahlung
-                ],
-                mapsTo: 'value',
-                scaleType: 'linear'
-            },
-            bottom: { mapsTo: 'date', scaleType: 'time' }
-        }
-    };
-
-    const data = mieten.map((miete) => ({
-        value: miete.kaltmieteZahlung,
-        date: miete.betreffenderMonat
-    }));
-
-    return { options, data };
-}
 
 const colorGradient = [
     '#a3c68d',

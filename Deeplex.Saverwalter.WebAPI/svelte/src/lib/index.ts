@@ -29,16 +29,11 @@ export {
 export { WalterHKVOEntry } from './WalterHKVO';
 export { validateHKVO } from './WalterValidation';
 export {
-    WalterMietzahlungListEntry,
-    WalterMietzahlungDetailEntry,
-    WalterMietzahlungApiURL,
-    type WalterMietzahlungInput,
     type WalterForderungsstatusEntry,
     type WalterGarageForderungsstatusEntry,
     type WalterOffenerPostenStatus
 } from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
-export { WalterMiettabelleEntry } from './WalterMiettabelle';
 export { WalterBankkontoEntry } from './WalterBankkonto';
 export {
     WalterBuchungskontoEntry,

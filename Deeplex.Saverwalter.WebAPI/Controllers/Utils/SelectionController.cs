@@ -301,7 +301,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private static string GetVertragName(Vertrag vertrag) =>
-            KontoVerknuepfungService.GetVertragName(vertrag);
+            Kontorollen.VertragText(vertrag);
 
         [HttpGet]
         [Route("api/selection/zaehler")]
