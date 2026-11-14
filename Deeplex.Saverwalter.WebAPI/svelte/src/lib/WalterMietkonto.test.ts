@@ -4,6 +4,7 @@ import {
     mietkontoZeilen,
     zahlungsEintrag,
     type WalterMietkonto,
+    type WalterMietkontoMonat,
     type WalterMietkontoZahlung
 } from './WalterMietkonto';
 
@@ -19,6 +20,11 @@ const zahlung = (
     ...teil
 });
 
+const ohneTransaktionen: Pick<
+    WalterMietkontoMonat,
+    'transaktionen' | 'transaktionenBetrag' | 'nkVorauszahlung'
+> = { transaktionen: [], transaktionenBetrag: 0, nkVorauszahlung: 0 };
+
 const konto: WalterMietkonto = {
     monate: [
         {
@@ -31,7 +37,31 @@ const konto: WalterMietkonto = {
             garagen: [
                 { garageVertragId: 1, kennung: 'G1', faellig: 50, bezahlt: 0 }
             ],
-            zahlungen: [zahlung({})]
+            zahlungen: [zahlung({})],
+            transaktionen: [
+                {
+                    transaktionId: 't1',
+                    datum: '2024-02-02',
+                    betrag: 700,
+                    zahler: 'Müller',
+                    nkVorauszahlung: 150,
+                    zuordnung: [
+                        {
+                            text: 'Kaltmiete Jan 2024',
+                            betrag: 500,
+                            storniert: false
+                        },
+                        {
+                            text: 'NK-Vorauszahlung 2024',
+                            betrag: 150,
+                            storniert: false
+                        },
+                        { text: 'Kaution', betrag: 50, storniert: false }
+                    ]
+                }
+            ],
+            transaktionenBetrag: 700,
+            nkVorauszahlung: 150
         },
         {
             jahr: 2024,
@@ -41,7 +71,8 @@ const konto: WalterMietkonto = {
             offen: 500,
             kaltmiete: 500,
             garagen: [],
-            zahlungen: []
+            zahlungen: [],
+            ...ohneTransaktionen
         },
         {
             jahr: 2023,
@@ -51,12 +82,9 @@ const konto: WalterMietkonto = {
             offen: 0,
             kaltmiete: 500,
             garagen: [],
-            zahlungen: []
+            zahlungen: [],
+            ...ohneTransaktionen
         }
-    ],
-    nkVorauszahlungen: [
-        { jahr: 2024, faellig: 300, bezahlt: 150, offen: 150, zahlungen: [] },
-        { jahr: 2023, faellig: 150, bezahlt: 150, offen: 0, zahlungen: [] }
     ],
     nichtZugeordnet: [],
     rueckgaengigGemacht: [],
@@ -64,20 +92,49 @@ const konto: WalterMietkonto = {
 };
 
 describe('mietkontoZeilen', () => {
-    it('ordnet je Jahr die Monate absteigend, danach die NK-Vorauszahlungen', () => {
+    it('ordnet die Monate absteigend, ohne eigene NK-Zeile', () => {
         expect(mietkontoZeilen(konto).map((z) => z.periode)).toEqual([
             'Feb 2024',
             'Jan 2024',
-            'NK-Vorauszahlungen 2024',
-            'Dez 2023',
-            'NK-Vorauszahlungen 2023'
+            'Dez 2023'
         ]);
     });
 
     it('filtert auf ein Jahr', () => {
         expect(mietkontoZeilen(konto, 2023).map((z) => z.periode)).toEqual([
-            'Dez 2023',
-            'NK-Vorauszahlungen 2023'
+            'Dez 2023'
+        ]);
+    });
+
+    it('zeigt die ganze Transaktion mit NK-Anteil und Zuordnung', () => {
+        const januar = mietkontoZeilen(konto).find(
+            (z) => z.periode === 'Jan 2024'
+        )!;
+        expect(januar).toMatchObject({
+            transaktionen: 700,
+            nkVorauszahlung: 150
+        });
+        expect(januar.zahlungen).toHaveLength(1);
+        expect(januar.zahlungen[0]).toMatchObject({
+            betrag: 700,
+            text: 'Zahlung von Müller',
+            href: '/transaktionen/t1',
+            transaktionId: 't1'
+        });
+        expect(januar.zahlungen[0].teile).toEqual([
+            {
+                text: 'Kaltmiete Jan 2024',
+                betrag: 500,
+                href: undefined,
+                gedimmt: false
+            },
+            {
+                text: 'NK-Vorauszahlung 2024',
+                betrag: 150,
+                href: undefined,
+                gedimmt: false
+            },
+            { text: 'Kaution', betrag: 50, href: undefined, gedimmt: false }
         ]);
     });
 
@@ -116,10 +173,10 @@ describe('mietkontoZeilen', () => {
                             bezahlt: 20
                         }
                     ],
-                    zahlungen: []
+                    zahlungen: [],
+                    ...ohneTransaktionen
                 }
             ],
-            nkVorauszahlungen: [],
             nichtZugeordnet: [],
             rueckgaengigGemacht: [],
             offen: 30
@@ -144,16 +201,9 @@ describe('zahlungsEintrag', () => {
 
     it('verlinkt Buchungen ohne Transaktion auf den Buchungssatz', () => {
         expect(
-            zahlungsEintrag(
-                zahlung({
-                    art: 'MietKorrektur',
-                    transaktionId: null,
-                    zahler: null,
-                    betrag: -100
-                })
-            )
+            zahlungsEintrag(zahlung({ transaktionId: null, zahler: null }))
         ).toMatchObject({
-            text: 'Miet-Korrektur (zur Kaltmiete umgebucht)',
+            text: 'Kaltmiete',
             href: '/buchungssaetze/s1'
         });
     });

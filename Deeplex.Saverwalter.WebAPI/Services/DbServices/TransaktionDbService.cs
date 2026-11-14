@@ -311,8 +311,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                entity.Betrag = entry.Betrag;
-
                 // Zahler/Zahlungsempfänger sind optional (z.B. Abrechnungs-Ausgleich
                 // ohne erfasstes Bankkonto) und können einzeln nachgetragen werden.
                 Bankkonto? zahler = null;
@@ -329,6 +327,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                         ?? throw new ArgumentException("Ungültiger Zahlungsempfänger");
                 }
 
+                if (GebuchtUndGeaendert(entity, entry, zahler, empfaenger) is string sperre)
+                {
+                    return new ConflictObjectResult(sperre);
+                }
+
                 entity.Zahler = zahler;
                 entity.Zahlungsempfaenger = empfaenger;
                 entity.Zahlungsdatum = entry.Zahlungsdatum;
@@ -341,6 +344,36 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
                 return new TransaktionEntry(entity, entry.Permissions);
             });
+        }
+
+        /// <summary>
+        /// Eine gebuchte Transaktion (mit Buchungssätzen, auch stornierten) behält Betrag,
+        /// Zahlungsdatum, Zahler und Zahlungsempfänger — sonst passte sie nicht mehr zu ihren
+        /// Buchungen. Ändern heißt dann: rückgängig machen und neu buchen. Ein fehlender Zahler
+        /// bzw. Empfänger darf nachgetragen werden; Memo und Notiz bleiben änderbar.
+        /// </summary>
+        /// <returns>Der Grund der Sperre, sonst <c>null</c>.</returns>
+        private static string? GebuchtUndGeaendert(
+            Transaktion entity, TransaktionEntry entry, Bankkonto? zahler, Bankkonto? empfaenger)
+        {
+            if (entity.Buchungssaetze.Count == 0)
+            {
+                return null;
+            }
+
+            static bool Geaendert(Bankkonto? alt, Bankkonto? neu) =>
+                alt != null && alt.BankkontoId != neu?.BankkontoId;
+
+            var geaendert = new List<string>();
+            if (entity.Betrag != entry.Betrag) geaendert.Add("Betrag");
+            if (entity.Zahlungsdatum != entry.Zahlungsdatum) geaendert.Add("Zahlungsdatum");
+            if (Geaendert(entity.Zahler, zahler)) geaendert.Add("Zahler");
+            if (Geaendert(entity.Zahlungsempfaenger, empfaenger)) geaendert.Add("Zahlungsempfänger");
+
+            return geaendert.Count == 0
+                ? null
+                : $"Die Transaktion ist gebucht; {string.Join(", ", geaendert)} lässt sich nicht mehr ändern. "
+                    + "Zum Ändern die Transaktion rückgängig machen und neu buchen. Memo und Notiz bleiben änderbar.";
         }
 
         private static void SetOptionalValues(Transaktion entity, TransaktionEntry entry)

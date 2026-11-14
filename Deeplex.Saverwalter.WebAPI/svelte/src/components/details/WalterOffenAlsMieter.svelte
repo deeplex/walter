@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     darunter die Summe. Die Zeile führt zum Mietkonto bzw. zu den Abrechnungen.
 -->
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         InlineLoading,
         StructuredList,
@@ -76,9 +77,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: summe = (zeilen ?? []).reduce((s, z) => s + z.miete + z.nk, 0);
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const betragOderStrich = (v: number) => (v > 0.005 ? eur(v) : '—');
+    const betragOderStrich = (v: number) => (v > 0.005 ? formatEuro(v) : '—');
 </script>
 
 {#if vertraege.length > 0}
@@ -87,7 +86,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             Offen als Mieter
             {#if zeilen}
                 {#if summe > 0.005}
-                    <Tag type="red">{eur(summe)} offen</Tag>
+                    <Tag type="red">{formatEuro(summe)} offen</Tag>
                 {:else}
                     <Tag type="green">Nichts offen</Tag>
                 {/if}
@@ -122,7 +121,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                 {#if z.nk > 0.005}
                                     <a
                                         href={`/vertraege/${z.vertrag.id}#abrechnungen`}
-                                        >{eur(z.nk)}</a
+                                        >{formatEuro(z.nk)}</a
                                     >
                                 {:else}
                                     —

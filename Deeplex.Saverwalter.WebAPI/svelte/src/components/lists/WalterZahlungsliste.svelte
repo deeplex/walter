@@ -15,14 +15,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <!--
-    Schlichte Liste von Zahlungen unter einer Überschrift, z. B. Guthaben oder rückgängig
-    gemachte Zahlungen. Mit `bearbeitbar` je Zahlung „Rückgängig machen“, mit
-    `rueckgaengigGemacht` stattdessen der Tag „Rückgängig gemacht“.
+    Liste von Zahlungen unter einer Überschrift, z. B. Guthaben oder rückgängig gemachte
+    Zahlungen — in derselben Form wie aufgeklappte Tabellenzeilen (WalterEintraege). Mit
+    `bearbeitbar` je Zahlung „Rückgängig machen“, mit `rueckgaengigGemacht` stattdessen
+    der Tag „Rückgängig gemacht“.
 -->
 <script lang="ts">
-    import { Tag } from 'carbon-components-svelte';
+    import WalterEintraege from '../elements/WalterEintraege.svelte';
     import WalterRueckgaengig from '../details/WalterRueckgaengig.svelte';
-    import type { WalterZahlungsEintrag } from '$walter/lib';
+    import { ZAHLUNGS_STATUS, type WalterZahlungsEintrag } from '$walter/lib';
     import { createEventDispatcher } from 'svelte';
 
     export let titel: string;
@@ -34,50 +35,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     /** `erledigt`: eine Zahlung wurde rückgängig gemacht. */
     const dispatch = createEventDispatcher<{ erledigt: void }>();
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
+    $: angezeigt = rueckgaengigGemacht
+        ? eintraege.map((e) => ({
+              ...e,
+              tag: {
+                  text: ZAHLUNGS_STATUS.rueckgaengig.text,
+                  tag: ZAHLUNGS_STATUS.rueckgaengig.tag
+              }
+          }))
+        : eintraege;
 </script>
 
 {#if eintraege.length > 0}
-    <h5 style="margin-top: 1rem">{titel}</h5>
-    <ul class="liste">
-        {#each eintraege as z (z.id)}
-            <li>
-                <span>{datumText(z.datum)}</span>
-                <span>{eur(z.betrag)}</span>
-                <span class="text">{z.text}</span>
-                {#if rueckgaengigGemacht}
-                    <Tag size="sm" type="gray">Rückgängig gemacht</Tag>
-                {/if}
-                <a href={z.href}>Details →</a>
-                {#if bearbeitbar && !rueckgaengigGemacht}
-                    <WalterRueckgaengig
-                        {fetchImpl}
-                        transaktionId={z.transaktionId}
-                        buchungssatzId={z.buchungssatzId}
-                        on:erledigt={() => dispatch('erledigt')}
-                    />
-                {/if}
-            </li>
-        {/each}
-    </ul>
+    <h5 class="titel">{titel}</h5>
+    <WalterEintraege eintraege={angezeigt}>
+        <svelte:fragment slot="aktion" let:eintrag>
+            {#if bearbeitbar && !rueckgaengigGemacht}
+                <WalterRueckgaengig
+                    {fetchImpl}
+                    transaktionId={eintrag.transaktionId}
+                    buchungssatzId={eintrag.buchungssatzId}
+                    on:erledigt={() => dispatch('erledigt')}
+                />
+            {/if}
+        </svelte:fragment>
+    </WalterEintraege>
 {/if}
 
 <style>
-    .liste {
-        list-style: none;
-        margin: 0.5rem 0 0 0;
-        padding: 0;
-    }
-    .liste li {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 0.25rem 0;
-    }
-    .text {
-        flex: 1;
+    .titel {
+        margin: 1.5rem 0 0.5rem 0;
     }
 </style>

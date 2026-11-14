@@ -90,7 +90,10 @@ export {
 export { WalterWohnungEigentuemerEntry } from './WalterWohnungEigentuemer';
 export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';
-export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
+export {
+    WalterZaehlerstandEntry,
+    zaehlerstandEintraege
+} from './WalterZaehlerstand';
 export {
     type GaragenmietInput,
     type StandaloneGaragenmietInput,
@@ -116,5 +119,6 @@ export {
 export * from './WalterValidation';
 export * from './WalterZahlungsStatus';
 export * from './WalterMietkonto';
+export * from './WalterEintrag';
 export * from './WalterNebenkostenabrechnungen';
 export * from './WalterRechnungen';

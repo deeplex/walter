@@ -34,7 +34,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertPercent,
         convertTime
     } from '$walter/services/utils';
-    import { dates, euro, formatToTableDate, time } from './WalterDataTable';
+    import {
+        dates,
+        euro,
+        formatToTableDate,
+        time,
+        zahlen
+    } from './WalterDataTable';
+    import { formatZahl } from '$walter/services/format';
     import { Add } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
@@ -84,6 +91,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let on_click_row: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
+    /**
+     * Aufklappbare Zeilen: Inhalt im Slot `expanded-row` (let:row), am besten mit
+     * WalterEintraege. Ein Klick auf die Zeile klappt auf, außer die Zeile hat einen Link.
+     */
+    export let expandable = false;
+    export let nonExpandableRowIds: (string | number)[] = [];
+    export let expandedRowIds: (string | number)[] = [];
+    /** Suchleiste; aus z. B. für kurze Tabellen auf einer Detailseite. */
+    export let search = true;
+    /**
+     * Zeilen je Seite für übergebene `rows` (ohne `fetchData`), z. B. 12 Monate. Die Suche
+     * filtert vorher über alle Zeilen; die Seitenleiste erscheint erst bei mehr Treffern.
+     */
+    export let pageSize = 25;
 
     // When provided, WalterDataTable manages server-side pagination internally.
     export let fetchData:
@@ -121,7 +142,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let _pagedRows: WalterDataTableRow[] = [];
     let _totalCount = 0;
     let _page = 1;
-    let _pageSize = initialPageSize;
+    let _pageSize = fetchData ? initialPageSize : pageSize;
     let _sortBy = initialSortBy;
     let _sortDir: 'asc' | 'desc' = initialSortDir;
     // Initialise from URL so that a page reload preserves the search term.
@@ -162,6 +183,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ? _pagedRows.map(transformRow)
             : _pagedRows
         : (rows ?? []);
+
+    // Lokale Zeilen: erst über alle suchen, dann nur die aktuelle Seite an die Tabelle.
+    $: lokal = !fetchData;
+    $: gefiltert =
+        lokal && search && searchQuery
+            ? displayRows.filter((row) => shouldFilterRows(row, searchQuery))
+            : displayRows;
+    $: if (lokal) {
+        const seiten = Math.max(1, Math.ceil(gefiltert.length / _pageSize));
+        if (_page > seiten) _page = seiten;
+    }
+    $: tableRows = lokal
+        ? gefiltert.slice((_page - 1) * _pageSize, _page * _pageSize)
+        : displayRows;
+    /** Anzahl im Titel (alle Zeilen) und für die Seitenleiste (Treffer). */
+    $: gesamt = fetchData ? _totalCount : displayRows.length;
+    $: treffer = fetchData ? _totalCount : gefiltert.length;
+    $: seitengroessen = lokal
+        ? [...new Set([pageSize, pageSize * 2, pageSize * 5])]
+        : [25, 50, 100, 250];
 
     function quick_add() {
         addModalOpen = true;
@@ -224,6 +265,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function toolbarSearchInput() {
         if (fetchData) return;
+        _page = 1;
         updateSearchUrl(searchQuery);
     }
 
@@ -311,6 +353,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return rowHref?.(typedRow);
     }
 
+    // Ziel des letzten Klicks: Links und Buttons in einer Zeile klappen sie nicht auf.
+    let letztesKlickZiel: EventTarget | null = null;
+
+    function handleRowClick(e: CustomEvent<DataTableRow>) {
+        const row = e.detail;
+        const aufInteraktivem =
+            letztesKlickZiel instanceof Element &&
+            !!letztesKlickZiel.closest('a, button, input, label');
+        if (
+            expandable &&
+            !aufInteraktivem &&
+            !resolveRowHref(row) &&
+            !nonExpandableRowIds.includes(row.id)
+        ) {
+            expandedRowIds = expandedRowIds.includes(row.id)
+                ? expandedRowIds.filter((id) => id !== row.id)
+                : [...expandedRowIds, row.id];
+        }
+        return on_click_row(e);
+    }
+
     function onRowLinkClick(event: MouseEvent) {
         // Prevent DataTable row click handlers from firing when the user
         // explicitly clicked the anchor, while preserving native link behavior.
@@ -369,6 +432,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         }
         if (euro(cell.key)) {
             return convertEuro(cell.value as number | undefined) || '---';
+        }
+        if (zahlen(cell.key)) {
+            return formatZahl(cell.value as number);
         }
         if (cell.key === 'anteil') {
             return convertPercent(cell.value as number | undefined) || '---';
@@ -465,64 +531,77 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterDataTableContainer
         {layout}
         accordionTitle={resolvedAccordionTitle}
-        count={fetchData ? _totalCount : displayRows.length}
+        count={gesamt}
         {initialOpen}
     >
         {#if showSkeleton}
             <DataTableSkeleton showHeader={false} showToolbar={false} />
         {:else}
+            <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
             <div
                 class:has-compact-button-column={hasCompactButtonColumn}
                 class:sticky-chrome={!!fetchData}
+                class:walter-expandable={expandable}
+                on:click|capture={(e) => (letztesKlickZiel = e.target)}
             >
                 <DataTable
                     {size}
-                    on:click:row={on_click_row}
+                    {expandable}
+                    {nonExpandableRowIds}
+                    bind:expandedRowIds
+                    on:click:row={handleRowClick}
                     on:click:header={handleHeaderClick}
                     sortable
-                    zebra
-                    stickyHeader={!fetchData}
+                    zebra={!expandable}
+                    stickyHeader={!fetchData && !expandable}
                     {headers}
-                    rows={displayRows}
+                    rows={tableRows}
                     class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
                     style="cursor-events: none !important; max-height: none !important;"
                 >
-                    <Toolbar>
-                        <ToolbarContent>
-                            <ToolbarSearch
-                                placeholder={useServerSearch
-                                    ? 'Suche...'
-                                    : 'Suche mit ; separierter Liste...'}
-                                persistent
-                                on:input={toolbarSearchInput}
-                                bind:value={searchQuery}
-                                shouldFilterRows={useServerSearch
-                                    ? () => true
-                                    : shouldFilterRows}
-                            />
-                            {#if (addUrl || onAdd) && !readonly}
-                                <Button
-                                    style="right: -1em; position: sticky;"
-                                    href={newPageUrl}
-                                    on:click={(e) => {
-                                        e.preventDefault();
-                                        (onAdd ?? handleAddClick)();
-                                    }}
-                                    iconDescription="Eintrag hinzufügen"
-                                    icon={Add}
-                                >
-                                    Eintrag hinzufügen
-                                </Button>
-                            {/if}
-                        </ToolbarContent>
-                    </Toolbar>
+                    {#if search || ((addUrl || onAdd) && !readonly)}
+                        <Toolbar>
+                            <ToolbarContent>
+                                {#if search}
+                                    <ToolbarSearch
+                                        placeholder={useServerSearch
+                                            ? 'Suche...'
+                                            : 'Suche mit ; separierter Liste...'}
+                                        persistent
+                                        on:input={toolbarSearchInput}
+                                        bind:value={searchQuery}
+                                        shouldFilterRows={() => true}
+                                    />
+                                {/if}
+                                {#if (addUrl || onAdd) && !readonly}
+                                    <Button
+                                        style="right: -1em; position: sticky;"
+                                        href={newPageUrl}
+                                        on:click={(e) => {
+                                            e.preventDefault();
+                                            (onAdd ?? handleAddClick)();
+                                        }}
+                                        iconDescription="Eintrag hinzufügen"
+                                        icon={Add}
+                                    >
+                                        Eintrag hinzufügen
+                                    </Button>
+                                {/if}
+                            </ToolbarContent>
+                        </Toolbar>
+                    {/if}
+                    <svelte:fragment slot="expanded-row" let:row>
+                        <slot name="expanded-row" {row} />
+                    </svelte:fragment>
                     <span
                         class="walter-table-cell"
                         slot="cell"
                         let:cell
                         let:row
                     >
-                        {#if cell.key === 'button'}
+                        {#if cell.key === 'button' && cell.value === null}
+                            <!-- null: keine Aktion in dieser Zeile -->
+                        {:else if cell.key === 'button'}
                             {@const buttonConfig = resolveActionButton(
                                 cell.value
                             )}
@@ -574,13 +653,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     </span>
                 </DataTable>
             </div>
-            {#if fetchData && _totalCount > _pageSize}
+            {#if treffer > _pageSize}
                 <div class="pagination-sticky">
                     <Pagination
-                        totalItems={_totalCount}
+                        totalItems={treffer}
                         pageSize={_pageSize}
                         page={_page}
-                        pageSizes={[25, 50, 100, 250]}
+                        pageSizes={seitengroessen}
+                        itemsPerPageText="Pro Seite:"
+                        itemRangeText={(min, max, total) =>
+                            `${min}–${max} von ${total}`}
+                        pageRangeText={(_, total) =>
+                            `von ${total} ${total === 1 ? 'Seite' : 'Seiten'}`}
+                        forwardText="Nächste Seite"
+                        backwardText="Vorige Seite"
                         on:update={(e) => {
                             _page = e.detail.page;
                             _pageSize = e.detail.pageSize;
@@ -590,60 +676,100 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {/if}
         {/if}
     </WalterDataTableContainer>
+</Content>
 
-    <style>
-        .pagination-sticky {
-            position: sticky;
-            bottom: 0;
-        }
+<style>
+    .pagination-sticky {
+        position: sticky;
+        bottom: 0;
+    }
 
+    :global(
         .proper-list
             > .bx--data-table_inner-container
-            > .bx--data-table--sticky-header {
-            max-height: none !important;
-        }
+            > .bx--data-table--sticky-header
+    ) {
+        max-height: none !important;
+    }
 
-        .walter-table-cell {
-            display: block;
-            width: 100%;
-        }
+    .walter-table-cell {
+        display: block;
+        width: 100%;
+    }
 
-        .walter-table-link {
-            color: inherit;
-            text-decoration: none;
-            display: block;
-            box-sizing: border-box;
-            width: calc(100% + 2rem);
-            margin: -0.5rem -1rem;
-            padding: 0.5rem 1rem;
-        }
+    /*
+     * Aufklappbar: ohne Zebra (Carbons Zebra zählt die versteckten Unterzeilen mit) und
+     * ohne Sticky-Header (der macht die Tabelle zum Block mit fester Höhe). Die ganze
+     * Zeile ist klickbar, Zeilen sind durch Linien getrennt, der aufgeklappte Teil ist
+     * grau abgesetzt. Nur die aufgeklappte Unterzeile bekommt Abstand.
+     */
+    .walter-expandable :global(.bx--parent-row) {
+        cursor: pointer;
+    }
+    .walter-expandable :global(.bx--parent-row > td) {
+        vertical-align: middle;
+        border-top: 1px solid var(--cds-ui-03);
+        border-bottom: 1px solid var(--cds-ui-03);
+    }
+    /* Ohne Sticky-Header nehmen Spalten ihre natürliche Breite: Text bricht daher um. */
+    .walter-expandable .walter-table-link__label,
+    .walter-expandable .walter-table-text {
+        white-space: normal;
+    }
+    .walter-expandable :global(.bx--child-row-inner-container) {
+        width: 100%;
+    }
+    /* Aufgeklappte Zeile und ihr Inhalt bilden einen grauen Block. */
+    .walter-expandable :global(tr.bx--parent-row.bx--expandable-row > td) {
+        background: var(--cds-ui-background);
+        border-bottom-color: transparent !important;
+    }
+    .walter-expandable
+        :global(
+            tr.bx--parent-row.bx--expandable-row + tr[data-child-row] > td
+        ) {
+        padding: 0 1rem 0.75rem 4rem;
+        background: var(--cds-ui-background);
+        border-top: none;
+        border-bottom: 1px solid var(--cds-ui-03);
+    }
 
-        .walter-table-link__label,
-        .walter-table-text {
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    .walter-table-link {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+        box-sizing: border-box;
+        width: calc(100% + 2rem);
+        margin: -0.5rem -1rem;
+        padding: 0.5rem 1rem;
+    }
 
-        .button-cell {
-            align-items: center;
-            display: flex;
-            height: 100%;
-            justify-content: center;
-            min-height: 1.5rem;
-        }
+    .walter-table-link__label,
+    .walter-table-text {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-        :global(.has-compact-button-column .bx--data-table th:last-child),
-        :global(.has-compact-button-column .bx--data-table td:last-child) {
-            max-width: 2.75rem !important;
-            min-width: 2.75rem !important;
-            padding-left: 0.25rem !important;
-            padding-right: 0.25rem !important;
-            text-align: center;
-            vertical-align: middle;
-            white-space: nowrap;
-            width: 2.75rem !important;
-        }
-    </style>
-</Content>
+    .button-cell {
+        align-items: center;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        min-height: 1.5rem;
+    }
+
+    .has-compact-button-column :global(.bx--data-table th:last-child),
+    .has-compact-button-column
+        :global(.bx--data-table tr:not([data-child-row]) > td:last-child) {
+        max-width: 2.75rem !important;
+        min-width: 2.75rem !important;
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        width: 2.75rem !important;
+    }
+</style>

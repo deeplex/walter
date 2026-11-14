@@ -134,14 +134,14 @@ test('Ausgleich einer Nebenkostenabrechnung erfassen und rückgängig machen', a
 
     try {
         await authenticatePage(page, 'admin.dev');
-        await page.goto(`/vertraege/${vertragId}`);
+        await page.goto(`/vertraege/${vertragId}#abrechnungen`);
 
         const abschnitt = page.locator('#abrechnungen');
         const zeile = abschnitt
             .getByRole('row')
             .filter({ hasText: `Abrechnung ${jahr} – ${art}` })
             .first();
-        await expect(zeile.getByRole('link')).toHaveAttribute(
+        await expect(zeile.getByRole('link').first()).toHaveAttribute(
             'href',
             `/abrechnungsresultate/${abrechnung.abrechnungsresultatId}`
         );

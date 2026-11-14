@@ -38,6 +38,7 @@ const bk = (teil: Partial<WalterUmlageRechnung>): WalterUmlageRechnung => ({
     storniert: false,
     kannBezahlen: true,
     zahlungen: [],
+    verteilung: [],
     ...teil
 });
 
@@ -48,7 +49,7 @@ describe('erhaltungsaufwandZeilen', () => {
             jahre: []
         });
         expect(zeile).toMatchObject({
-            periode: `${new Date('2024-03-01').toLocaleDateString('de-DE')} – Heizungsreparatur – Handwerker GmbH`,
+            periode: `01.03.2024 – Heizungsreparatur – Handwerker GmbH`,
             href: '/buchungssaetze/s1',
             faellig: 500,
             bezahlt: 200,
@@ -71,6 +72,45 @@ describe('erhaltungsaufwandZeilen', () => {
 });
 
 describe('umlageRechnungZeilen', () => {
+    it('zeigt die Verteilung als Abschnitt, ohne Verteilung keinen', () => {
+        const [verteilt, offen] = umlageRechnungZeilen({
+            rechnungen: [
+                bk({
+                    verteilung: [
+                        {
+                            text: 'Mieteranteil – Müller',
+                            href: '/vertraege/1#abrechnungen',
+                            betrag: 700
+                        },
+                        { text: 'Eigenanteil – EG links', betrag: 300 }
+                    ]
+                }),
+                bk({ buchungssatzId: 'b2' })
+            ],
+            rueckgaengigGemacht: []
+        });
+        expect(verteilt.abschnitte).toEqual([
+            {
+                titel: 'Verteilung',
+                eintraege: [
+                    {
+                        id: 'verteilung-0',
+                        betrag: 700,
+                        text: 'Mieteranteil – Müller',
+                        href: '/vertraege/1#abrechnungen'
+                    },
+                    {
+                        id: 'verteilung-1',
+                        betrag: 300,
+                        text: 'Eigenanteil – EG links',
+                        href: undefined
+                    }
+                ]
+            }
+        ]);
+        expect(offen.abschnitte).toBeUndefined();
+    });
+
     it('zeigt, wie viel verteilt ist', () => {
         const zusatz = umlageRechnungZeilen({
             rechnungen: [
@@ -100,9 +140,7 @@ describe('umlageRechnungZeilen', () => {
             ],
             rueckgaengigGemacht: []
         });
-        expect(offen.periode).toBe(
-            `2024 – Rechnung vom ${new Date('2024-11-01').toLocaleDateString('de-DE')}`
-        );
+        expect(offen.periode).toBe(`2024 – Rechnung vom 01.11.2024`);
         expect(offen.erfassenFuer).toBe('b1');
         expect(bezahlt.erfassenFuer).toBeUndefined();
     });

@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         WalterDatePicker,
         WalterTextArea,
@@ -129,10 +130,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: blockSave = hasVersionChanges && !seitWann;
 
-    const eur = (v: number | undefined) =>
-        v != null
-            ? v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
-            : '?';
+    const eur = (v: number | undefined) => (v != null ? formatEuro(v) : '?');
 
     $: versionChanges = [
         displayVersion.grundmiete !== latestVersion?.grundmiete && {

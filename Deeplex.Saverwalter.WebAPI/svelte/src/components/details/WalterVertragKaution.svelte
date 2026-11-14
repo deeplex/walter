@@ -15,14 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro, formatDatum } from '$walter/services/format';
     import {
         Button,
         InlineNotification,
         Modal,
-        StructuredList,
-        StructuredListBody,
-        StructuredListCell,
-        StructuredListRow,
+        Row,
         TextInput
     } from 'carbon-components-svelte';
     import { Add, Subtract } from 'carbon-icons-svelte';
@@ -31,6 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import { walter_get, walter_post } from '$walter/services/requests';
     import WalterRueckgaengig from './WalterRueckgaengig.svelte';
+    import WalterEintraege from '../elements/WalterEintraege.svelte';
     import { addToast, changeTracker } from '$walter/store';
     import { get } from 'svelte/store';
 
@@ -50,12 +49,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         entry.kautionsBuchungen = aktualisiert.kautionsBuchungen;
     }
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
-
     $: gehalten = entry.kaution ?? 0;
     $: buchungen = entry.kautionsBuchungen ?? [];
+    $: kautionsEintraege = buchungen.map((b, i) => ({
+        id: `kaution-${i}`,
+        datum: b.datum,
+        betrag: b.betrag,
+        text: b.beschreibung,
+        href: b.transaktionId ? `/transaktionen/${b.transaktionId}` : undefined,
+        transaktionId: b.transaktionId ?? undefined
+    }));
 
     let open = false;
     let rueckzahlung = false;
@@ -100,7 +103,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const toast = new WalterToastContent(
             `Kaution ${art} gebucht`,
             `Fehler bei der Kaution`,
-            () => `Kaution ${art} über ${eur(betrag ?? 0)} gebucht.`,
+            () => `Kaution ${art} über ${formatEuro(betrag ?? 0)} gebucht.`,
             (e: unknown) => `Konnte Kaution nicht buchen: ${e}`
         );
         try {
@@ -125,62 +128,52 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<p>
-    Gehaltene Kaution: <strong>{eur(gehalten)}</strong>
-</p>
-
-{#if buchungen.length > 0}
-    <StructuredList condensed style="margin: 0.5rem 0 1rem 0">
-        <StructuredListBody>
-            {#each buchungen as b}
-                <StructuredListRow>
-                    <StructuredListCell>{datumText(b.datum)}</StructuredListCell
-                    >
-                    <StructuredListCell>{b.beschreibung}</StructuredListCell>
-                    <StructuredListCell style="text-align: right">
-                        {eur(b.betrag)}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {#if b.transaktionId}
-                            <a href={`/transaktionen/${b.transaktionId}`}
-                                >Details →</a
-                            >
-                            {#if !readonly}
-                                <WalterRueckgaengig
-                                    {fetchImpl}
-                                    transaktionId={b.transaktionId}
-                                    on:erledigt={neuLaden}
-                                />
-                            {/if}
-                        {/if}
-                    </StructuredListCell>
-                </StructuredListRow>
-            {/each}
-        </StructuredListBody>
-    </StructuredList>
-{/if}
-
-{#if !readonly && entry.id}
-    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem">
-        <Button
-            kind="tertiary"
-            size="small"
-            icon={Add}
-            on:click={() => oeffnen(false)}
-        >
-            Kaution erhalten
-        </Button>
-        <Button
-            kind="tertiary"
-            size="small"
-            icon={Subtract}
-            disabled={gehalten <= 0}
-            on:click={() => oeffnen(true)}
-        >
-            Kaution zurückzahlen
-        </Button>
-    </div>
-{/if}
+<!-- Teil der Vertragsdetails: gehaltene Kaution, „erhalten“/„zurückzahlen“, darunter die Buchungen. -->
+<div id="kaution">
+    <Row>
+        <TextInput
+            readonly
+            labelText="Kaution (gehalten)"
+            value={formatEuro(gehalten)}
+        />
+        {#if !readonly && entry.id}
+            <div class="knoepfe">
+                <Button
+                    kind="tertiary"
+                    size="field"
+                    icon={Add}
+                    on:click={() => oeffnen(false)}
+                >
+                    Kaution erhalten
+                </Button>
+                <Button
+                    kind="tertiary"
+                    size="field"
+                    icon={Subtract}
+                    disabled={gehalten <= 0}
+                    on:click={() => oeffnen(true)}
+                >
+                    Kaution zurückzahlen
+                </Button>
+            </div>
+        {/if}
+    </Row>
+    {#if buchungen.length > 0}
+        <div class="buchungen">
+            <WalterEintraege eintraege={kautionsEintraege}>
+                <svelte:fragment slot="aktion" let:eintrag>
+                    {#if !readonly && eintrag.transaktionId}
+                        <WalterRueckgaengig
+                            {fetchImpl}
+                            transaktionId={eintrag.transaktionId}
+                            on:erledigt={neuLaden}
+                        />
+                    {/if}
+                </svelte:fragment>
+            </WalterEintraege>
+        </div>
+    {/if}
+</div>
 
 <Modal
     bind:open
@@ -194,7 +187,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if open}
         {#if rueckzahlung}
             <p style="margin-bottom: 1rem">
-                Gehaltene Kaution: <strong>{eur(gehalten)}</strong>. Die
+                Gehaltene Kaution: <strong>{formatEuro(gehalten)}</strong>. Die
                 Rückzahlung darf diesen Betrag nicht übersteigen.
             </p>
         {/if}
@@ -217,3 +210,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     {/if}
 </Modal>
+
+<style>
+    .knoepfe {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+        padding-bottom: 0.5rem;
+    }
+    .buchungen {
+        margin: 0 1rem 1rem 1rem;
+    }
+</style>

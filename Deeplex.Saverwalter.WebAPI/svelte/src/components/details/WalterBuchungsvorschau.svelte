@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     aufklappen. `gueltig` ist true, sobald der Server die Eingabe akzeptiert.
 -->
 <script lang="ts">
+    import { formatEuro, formatDatum } from '$walter/services/format';
     import {
         Accordion,
         AccordionItem,
@@ -39,10 +40,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let laedt = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let anfrage = 0;
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 
     async function lade(eingabe: TransaktionsInput, nr: number) {
         laedt = true;
@@ -100,7 +97,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     {:else if vorschau && input}
         <p>
-            Zahlung <strong>{eur(vorschau.betrag)}</strong> am {datumText(
+            Zahlung <strong>{formatEuro(vorschau.betrag)}</strong> am {formatDatum(
                 input.zahlungsdatum
             )}
             {#if vorschau.zahler}von {vorschau.zahler}{/if}
@@ -108,11 +105,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <ul>
             {#each vorschau.positionen as p}
                 <li>
-                    → {eur(p.betrag)}
+                    → {formatEuro(p.betrag)}
                     {p.text}
                     {#if p.danachOffen != null}
                         <span class="hinweis"
-                            >(danach offen: {eur(p.danachOffen)})</span
+                            >(danach offen: {formatEuro(p.danachOffen)})</span
                         >
                     {/if}
                 </li>
@@ -122,7 +119,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <AccordionItem title="Buchungssätze anzeigen">
                 {#each vorschau.saetze as satz}
                     <p class="satz">
-                        {datumText(satz.buchungsdatum)} · {satz.beschreibung}
+                        {formatDatum(satz.buchungsdatum)} · {satz.beschreibung}
                         {#if !satz.istZahlung}
                             <span class="hinweis">(entsteht mit)</span>
                         {/if}
@@ -132,7 +129,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             <tr>
                                 <td>{z.sollHaben}</td>
                                 <td>{z.kontonummer} {z.kontobezeichnung}</td>
-                                <td class="betrag">{eur(z.betrag)}</td>
+                                <td class="betrag">{formatEuro(z.betrag)}</td>
                             </tr>
                         {/each}
                     </table>

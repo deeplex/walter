@@ -14,12 +14,21 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
+<!--
+    Transaktionen als aufklappbare Tabelle: aufgeklappt die Zuordnung, d. h. wofür die
+    einzelnen Teile gebucht wurden, und der Link zur Transaktion.
+-->
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataTable, WalterTransaktion } from '$walter/components';
-    import { WalterTransaktionEntry, zuordnungZelle } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
+    import WalterEintraege from '../elements/WalterEintraege.svelte';
+    import { fileURL } from '$walter/services/files';
+    import {
+        WalterTransaktionEntry,
+        zuordnungAlsEintraege,
+        zuordnungZelle
+    } from '$walter/lib';
 
     export let fetchImpl: typeof fetch;
     export let fullHeight = false;
@@ -49,9 +58,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     });
     $: tableRows = rows?.map((r) => transformRow(r as unknown as DataTableRow));
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.transaktion(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
+    const zuordnungVon = (row: DataTableRow) =>
+        (row as unknown as WalterTransaktionEntry).zuordnung ?? [];
+    const notizVon = (row: DataTableRow) =>
+        (row as unknown as WalterTransaktionEntry).notiz;
 
     const fetchData =
         rows === undefined
@@ -65,8 +75,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterDataTable
     addUrl={WalterTransaktionEntry.ApiURL}
-    {on_click_row}
-    {rowHref}
+    expandable
     addEntry={entry}
     submitDisabled={!transaktionIsValid}
     layout={title !== undefined ? 'accordion' : 'inline'}
@@ -83,4 +92,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterTransaktion {fetchImpl} bind:isValid={transaktionIsValid} />
     {/if}
+    <svelte:fragment slot="expanded-row" let:row>
+        <WalterEintraege
+            eintraege={zuordnungAlsEintraege(zuordnungVon(row))}
+            leerText="Nicht zugeordnet."
+            mehrHref={`/transaktionen/${row.id}`}
+            mehrText="Transaktion öffnen →"
+            notiz={notizVon(row)}
+            anhaengeUrl={fileURL.transaktion(`${row.id}`)}
+            {fetchImpl}
+        />
+    </svelte:fragment>
 </WalterDataTable>

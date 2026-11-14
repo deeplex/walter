@@ -14,6 +14,13 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import type { WalterZahlungsStatus } from './WalterZahlungsStatus';
+import { formatMonat } from '../services/format';
+import type { WalterZuordnungEintrag } from './WalterTransaktion';
+import {
+    zuordnungAlsTeile,
+    type WalterEintrag,
+    type WalterEintragTagFarbe
+} from './WalterEintrag';
 
 // ── Antwort von GET /api/vertraege/{id}/mietkonto ───────────────────────────
 // und GET /api/garage-vertraege/{id}/mietkonto (nur Garagenmiete, keine NK-VZ)
@@ -21,8 +28,20 @@ import type { WalterZahlungsStatus } from './WalterZahlungsStatus';
 export type WalterMietkontoZahlungsArt =
     | 'Kaltmiete'
     | 'Garage'
-    | 'NkVorauszahlung'
-    | 'MietKorrektur';
+    | 'NkVorauszahlung';
+
+/** Transaktion, die (auch) die Miete eines Monats bezahlt hat. */
+export interface WalterMietkontoTransaktion {
+    transaktionId: string;
+    datum: string;
+    /** Betrag der ganzen Transaktion. */
+    betrag: number;
+    zahler?: string | null;
+    /** Davon NK-Vorauszahlung des Vertrags (zählt für ihr Buchungsjahr). */
+    nkVorauszahlung: number;
+    /** Wofür die Transaktion gebucht wurde. */
+    zuordnung: WalterZuordnungEintrag[];
+}
 
 export interface WalterMietkontoZahlung {
     buchungssatzId: string;
@@ -49,20 +68,16 @@ export interface WalterMietkontoMonat {
     offen: number;
     kaltmiete: number;
     garagen: WalterMietkontoGarage[];
+    /** Per Ausgleich an den Sollstellungen des Monats hängende Zahlungszeilen. */
     zahlungen: WalterMietkontoZahlung[];
-}
-
-export interface WalterMietkontoNkJahr {
-    jahr: number;
-    faellig: number;
-    bezahlt: number;
-    offen: number;
-    zahlungen: WalterMietkontoZahlung[];
+    /** Die Transaktionen hinter `zahlungen`. */
+    transaktionen: WalterMietkontoTransaktion[];
+    transaktionenBetrag: number;
+    nkVorauszahlung: number;
 }
 
 export interface WalterMietkonto {
     monate: WalterMietkontoMonat[];
-    nkVorauszahlungen: WalterMietkontoNkJahr[];
     nichtZugeordnet: WalterMietkontoZahlung[];
     rueckgaengigGemacht: WalterMietkontoZahlung[];
     offen: number;
@@ -70,17 +85,18 @@ export interface WalterMietkonto {
 
 // ── Zeilen für WalterZahlungsuebersicht ─────────────────────────────────────
 
-/** Einzelne Zahlung unter einer Zeile der Zahlungsübersicht. */
-export interface WalterZahlungsEintrag {
-    id: string;
+/**
+ * Einzelne Zahlung unter einer Zeile der Zahlungsübersicht. Der Link führt zur
+ * Transaktion, sonst zum Buchungssatz; bei einer ganzen Transaktion sind die Teile
+ * ihre Zuordnung.
+ */
+export interface WalterZahlungsEintrag extends WalterEintrag {
     datum: string;
     betrag: number;
-    text: string;
-    /** Ziel des Links „Details“: Transaktion, sonst Buchungssatz. */
     href: string;
     /** Für „Rückgängig machen“: die ganze Zahlung, sonst der einzelne Buchungssatz. */
     transaktionId?: string;
-    buchungssatzId: string;
+    buchungssatzId?: string;
 }
 
 /** Teilbetrag einer Zeile, z. B. Kaltmiete und Garage eines Monats. */
@@ -101,6 +117,8 @@ export interface WalterZahlungsZeile {
     offen: number;
     aufschluesselung: WalterZahlungsTeil[];
     zahlungen: WalterZahlungsEintrag[];
+    /** Weitere Abschnitte im aufgeklappten Teil vor den Zahlungen, z. B. die Verteilung. */
+    abschnitte?: { titel: string; eintraege: WalterEintrag[] }[];
     /**
      * Wofür sich hier eine Zahlung erfassen lässt: Monat (`yyyy-mm-01`) im Mietkonto,
      * Id der Abrechnung bei Nebenkostenabrechnungen, Id des Buchungssatzes bei Rechnungen.
@@ -110,31 +128,16 @@ export interface WalterZahlungsZeile {
     status?: WalterZahlungsStatus;
     /** Inhalt der Zusatzspalte, z. B. wie viel einer Rechnung verteilt ist. */
     zusatz?: WalterZahlungsZusatz;
+    /** Mietkonto: Summe der Transaktionen hinter der Zeile (ganze Beträge). */
+    transaktionen?: number;
+    /** Mietkonto: darin enthaltene NK-Vorauszahlung. */
+    nkVorauszahlung?: number;
 }
 
 /** Tag in der Zusatzspalte der Zahlungsübersicht. */
 export interface WalterZahlungsZusatz {
     text: string;
-    tag: 'green' | 'warm-gray' | 'red' | 'blue' | 'gray';
-}
-
-const MONAT = [
-    'Jan',
-    'Feb',
-    'Mär',
-    'Apr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Dez'
-];
-
-export function monatText(jahr: number, monat: number): string {
-    return `${MONAT[monat - 1]} ${jahr}`;
+    tag: WalterEintragTagFarbe;
 }
 
 /** Wofür die Zahlung war — aus Art und Bezug, nie aus Freitext. */
@@ -146,9 +149,22 @@ export function zahlungsArtText(z: WalterMietkontoZahlung): string {
             return z.garage ? `Garage ${z.garage}` : 'Garage';
         case 'NkVorauszahlung':
             return 'NK-Vorauszahlung';
-        case 'MietKorrektur':
-            return 'Miet-Korrektur (zur Kaltmiete umgebucht)';
     }
+}
+
+/** Eine ganze Transaktion als Eintrag, mit ihrer Zuordnung. */
+export function transaktionsEintrag(
+    t: WalterMietkontoTransaktion
+): WalterZahlungsEintrag {
+    return {
+        id: t.transaktionId,
+        datum: t.datum,
+        betrag: t.betrag,
+        text: t.zahler ? `Zahlung von ${t.zahler}` : 'Zahlung',
+        href: `/transaktionen/${t.transaktionId}`,
+        transaktionId: t.transaktionId,
+        teile: zuordnungAlsTeile(t.zuordnung)
+    };
 }
 
 export function zahlungsEintrag(
@@ -193,55 +209,31 @@ function monatsZeile(m: WalterMietkontoMonat): WalterZahlungsZeile {
     const aufschluesselung = teile.length > 1 ? teile : [];
     return {
         id: `monat-${m.jahr}-${m.monat}`,
-        periode: monatText(m.jahr, m.monat),
+        periode: formatMonat(m.jahr, m.monat),
         faellig: m.faellig,
         bezahlt: m.bezahlt,
         offen: m.offen,
         aufschluesselung,
-        zahlungen: m.zahlungen.map(zahlungsEintrag),
-        erfassenFuer: `${m.jahr}-${String(m.monat).padStart(2, '0')}-01`
+        // Ganze Transaktionen; Ausgleiche ohne Transaktion einzeln.
+        zahlungen: [
+            ...m.transaktionen.map(transaktionsEintrag),
+            ...m.zahlungen.filter((z) => !z.transaktionId).map(zahlungsEintrag)
+        ],
+        erfassenFuer: `${m.jahr}-${String(m.monat).padStart(2, '0')}-01`,
+        transaktionen: m.transaktionenBetrag,
+        nkVorauszahlung: m.nkVorauszahlung
     };
 }
 
-function nkZeile(n: WalterMietkontoNkJahr): WalterZahlungsZeile {
-    return {
-        id: `nk-${n.jahr}`,
-        periode: `NK-Vorauszahlungen ${n.jahr}`,
-        faellig: n.faellig,
-        bezahlt: n.bezahlt,
-        offen: n.offen,
-        aufschluesselung: [],
-        zahlungen: n.zahlungen.map(zahlungsEintrag)
-    };
-}
-
-/**
- * Zeilen des Mietkontos, neuestes Jahr zuerst: je Jahr die Monate (Kaltmiete und
- * Garagen), danach die NK-Vorauszahlungen des Jahres. Mit `jahr` nur dieses Jahr.
- */
+/** Zeilen des Mietkontos, neuester Monat zuerst. Mit `jahr` nur dieses Jahr. */
 export function mietkontoZeilen(
     konto: WalterMietkonto,
     jahr?: number
 ): WalterZahlungsZeile[] {
-    const jahre = [
-        ...new Set([
-            ...konto.monate.map((m) => m.jahr),
-            ...konto.nkVorauszahlungen.map((n) => n.jahr)
-        ])
-    ]
-        .filter((j) => jahr === undefined || j === jahr)
-        .sort((a, b) => b - a);
-
-    return jahre.flatMap((j) => {
-        const monate = konto.monate
-            .filter((m) => m.jahr === j)
-            .sort((a, b) => b.monat - a.monat)
-            .map(monatsZeile);
-        const nk = konto.nkVorauszahlungen
-            .filter((n) => n.jahr === j)
-            .map(nkZeile);
-        return [...monate, ...nk];
-    });
+    return konto.monate
+        .filter((m) => jahr === undefined || m.jahr === jahr)
+        .sort((a, b) => b.jahr - a.jahr || b.monat - a.monat)
+        .map(monatsZeile);
 }
 
 /** Wofür eine Zahlung im schlanken Erfassen gebucht wird. */

@@ -130,6 +130,33 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var einzige = (await ErmittleAsync(ctx, umlage)).Rechnungen.Should().ContainSingle().Subject;
 
             einzige.Verteilt.Should().Be(600m);
+            einzige.Verteilung.Should().ContainSingle()
+                .Which.Should().Match<UmlageRechnungenService.Verteilung>(v =>
+                    v.Betrag == 600m && v.Text == "Buchungskonto 1500 NK Mieter");
+        }
+
+        [Fact]
+        public async Task VerteilungNenntDenVertragUndDenEigenanteil()
+        {
+            var ctx = TestUtils.GetContext();
+            var (umlage, _) = await SeedAsync(ctx);
+            var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
+            await ctx.SaveChangesAsync();
+            var rechnung = await RechnungAsync(ctx, umlage, 1000m, 2024);
+            rechnung.Buchungszeilen.AddRange([
+                new Buchungszeile(SollHaben.Soll, 300m) { Buchungssatz = rechnung, Buchungskonto = vertrag.NkBuchungskonto },
+                new Buchungszeile(SollHaben.Soll, 400m) { Buchungssatz = rechnung, Buchungskonto = vertrag.NkBuchungskonto },
+                new Buchungszeile(SollHaben.Soll, 300m) { Buchungssatz = rechnung, Buchungskonto = vertrag.Wohnung.AufwandsKonto },
+            ]);
+            await ctx.SaveChangesAsync();
+            ctx.ChangeTracker.Clear();
+
+            var einzige = (await ErmittleAsync(ctx, umlage)).Rechnungen.Should().ContainSingle().Subject;
+
+            einzige.Verteilung.Select(v => v.Betrag).Should().Equal(700m, 300m);
+            einzige.Verteilung[0].Text.Should().StartWith("Mieteranteil – ");
+            einzige.Verteilung[0].Href.Should().Be($"/vertraege/{vertrag.VertragId}#abrechnungen");
+            einzige.Verteilung[1].Text.Should().StartWith("Eigenanteil – ");
         }
     }
 }

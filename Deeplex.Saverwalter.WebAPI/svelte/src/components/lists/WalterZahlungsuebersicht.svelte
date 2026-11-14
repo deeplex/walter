@@ -16,14 +16,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <!--
     Zahlungsübersicht: was war fällig, was kam, was ist offen. Eine Zeile je Periode
-    bzw. Forderung, aufklappbar zu den einzelnen Zahlungen.
+    bzw. Forderung in einer aufklappbaren WalterDataTable; aufgeklappt die Aufschlüsselung
+    und die einzelnen Zahlungen als WalterEintraege.
 -->
 <script lang="ts">
-    import { Button, DataTable, Tag } from 'carbon-components-svelte';
+    import { formatEuro, formatEuroOderStrich } from '$walter/services/format';
     import { Add } from 'carbon-icons-svelte';
-    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+    import WalterDataTable from '../elements/WalterDataTable.svelte';
+    import WalterEintraege from '../elements/WalterEintraege.svelte';
     import WalterRueckgaengig from '../details/WalterRueckgaengig.svelte';
-    import { zahlungsStatus, type WalterZahlungsZeile } from '$walter/lib';
+    import {
+        zahlungsStatus,
+        type WalterEintrag,
+        type WalterZahlungsZeile
+    } from '$walter/lib';
     import { createEventDispatcher } from 'svelte';
 
     export let rows: WalterZahlungsZeile[] = [];
@@ -37,6 +43,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let faelligTitel = 'Fällig';
     /** Mit Titel: Zusatzspalte aus `zusatz` der Zeilen (z. B. „Auf Mieter verteilt“). */
     export let zusatzTitel: string | undefined = undefined;
+    /**
+     * Mietkonto: statt „Bezahlt“ die Transaktionen hinter der Zeile (ganze Beträge), mit
+     * `mitNk` dazu deren NK-Vorauszahlungs-Anteil.
+     */
+    export let mitTransaktionen = false;
+    export let mitNk = false;
+    /** Zeilen je Seite, z. B. 12 Monate im Mietkonto. */
+    export let pageSize = 25;
 
     /** `zahlung`: „+ Zahlung“ geklickt; `geaendert`: eine Zahlung wurde rückgängig gemacht. */
     const dispatch = createEventDispatcher<{
@@ -44,141 +58,114 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         geaendert: void;
     }>();
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
-    const betragOderStrich = (v: number) =>
-        Math.abs(v) < 0.005 ? '—' : eur(v);
-
+    // Beträge sind vorformatiert; sortiert wird in dieser Übersicht nicht.
     $: headers = [
         { key: 'periode', value: periodeTitel },
         { key: 'faellig', value: faelligTitel },
-        { key: 'bezahlt', value: 'Bezahlt' },
+        ...(mitTransaktionen
+            ? [
+                  { key: 'transaktionen', value: 'Transaktion' },
+                  ...(mitNk
+                      ? [{ key: 'nkVorauszahlung', value: 'davon NK-VZ' }]
+                      : [])
+              ]
+            : [{ key: 'bezahlt', value: 'Bezahlt' }]),
         { key: 'offen', value: 'Offen' },
         { key: 'status', value: 'Status' },
         ...(zusatzTitel ? [{ key: 'zusatz', value: zusatzTitel }] : []),
-        ...(bearbeitbar ? [{ key: 'aktion', empty: true }] : [])
-    ];
+        ...(bearbeitbar ? [{ key: 'button', value: '' }] : [])
+    ].map((h) => ({ ...h, sort: false as const }));
 
-    $: tableRows = rows as unknown as DataTableRow[];
-    $: zeileVon = (row: DataTableRow) => row as unknown as WalterZahlungsZeile;
+    $: zeilen = new Map(rows.map((z) => [z.id, z]));
+
+    $: tableRows = rows.map((z) => ({
+        id: z.id,
+        periode: z.periode,
+        faellig: formatEuro(z.faellig),
+        bezahlt: formatEuro(z.bezahlt),
+        transaktionen: formatEuroOderStrich(z.transaktionen),
+        nkVorauszahlung: formatEuroOderStrich(z.nkVorauszahlung),
+        offen: formatEuroOderStrich(z.offen),
+        status: z.status ?? zahlungsStatus(z.faellig, z.bezahlt),
+        zusatz: z.zusatz ?? '',
+        button:
+            bearbeitbar && z.erfassenFuer
+                ? {
+                      icon: Add,
+                      kind: 'ghost' as const,
+                      iconDescription: 'Zahlung erfassen',
+                      onClick: () => dispatch('zahlung', z)
+                  }
+                : null
+    }));
+
     $: nichtAufklappbar = rows
         .filter(
-            (r) => r.zahlungen.length === 0 && r.aufschluesselung.length === 0
+            (r) =>
+                r.zahlungen.length === 0 &&
+                r.aufschluesselung.length === 0 &&
+                !r.abschnitte?.length
         )
         .map((r) => r.id);
+
+    function aufschluesselung(z: WalterZahlungsZeile): WalterEintrag[] {
+        return z.aufschluesselung.map((teil, i) => ({
+            id: `teil-${i}`,
+            text: `${teil.text}: fällig ${formatEuro(teil.faellig)}, bezahlt ${formatEuro(teil.bezahlt)}`
+        }));
+    }
 </script>
 
 {#if rows.length === 0}
     <p>{leerText}</p>
 {:else}
-    <DataTable
+    <WalterDataTable
         size="short"
+        search={false}
+        {pageSize}
         expandable
         nonExpandableRowIds={nichtAufklappbar}
         {headers}
         rows={tableRows}
+        rowHref={(row) => zeilen.get(`${row.id}`)?.href}
     >
-        <svelte:fragment slot="cell" let:row let:cell>
-            {@const zeile = zeileVon(row)}
-            {#if cell.key === 'status'}
-                {@const status =
-                    zeile.status ??
-                    zahlungsStatus(zeile.faellig, zeile.bezahlt)}
-                <Tag size="sm" type={status.tag}>{status.text}</Tag>
-            {:else if cell.key === 'zusatz'}
-                {#if zeile.zusatz}
-                    <Tag size="sm" type={zeile.zusatz.tag}
-                        >{zeile.zusatz.text}</Tag
-                    >
-                {/if}
-            {:else if cell.key === 'aktion'}
-                {#if zeile.erfassenFuer}
-                    <Button
-                        kind="ghost"
-                        size="small"
-                        icon={Add}
-                        on:click={(e) => {
-                            e.stopPropagation();
-                            dispatch('zahlung', zeile);
-                        }}
-                    >
-                        Zahlung
-                    </Button>
-                {/if}
-            {:else if cell.key === 'faellig' || cell.key === 'bezahlt'}
-                {eur(cell.value)}
-            {:else if cell.key === 'offen'}
-                {betragOderStrich(cell.value)}
-            {:else if cell.key === 'periode' && zeile.href}
-                <a href={zeile.href} on:click|stopPropagation>{cell.value}</a>
-            {:else}
-                {cell.value}
-            {/if}
-        </svelte:fragment>
         <svelte:fragment slot="expanded-row" let:row>
-            {@const zeile = zeileVon(row)}
-            {#if zeile.aufschluesselung.length > 0}
-                <ul class="teile">
-                    {#each zeile.aufschluesselung as teil}
-                        <li>
-                            {teil.text}: fällig {eur(teil.faellig)}, bezahlt {eur(
-                                teil.bezahlt
-                            )}
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
-            {#if zeile.zahlungen.length > 0}
-                <ul class="zahlungen">
-                    {#each zeile.zahlungen as zahlung (zahlung.id)}
-                        <li>
-                            <span class="datum">{datumText(zahlung.datum)}</span
-                            >
-                            <span class="betrag">{eur(zahlung.betrag)}</span>
-                            <span class="text">{zahlung.text}</span>
-                            <a href={zahlung.href}>Details →</a>
-                            {#if bearbeitbar}
-                                <WalterRueckgaengig
-                                    {fetchImpl}
-                                    transaktionId={zahlung.transaktionId}
-                                    buchungssatzId={zahlung.buchungssatzId}
-                                    on:erledigt={() => dispatch('geaendert')}
-                                />
-                            {/if}
-                        </li>
-                    {/each}
-                </ul>
-            {:else}
-                <p>Noch keine Zahlung.</p>
+            {@const zeile = zeilen.get(`${row.id}`)}
+            {#if zeile}
+                <WalterEintraege eintraege={aufschluesselung(zeile)} />
+                {#each zeile.abschnitte ?? [] as abschnitt}
+                    <h6 class="abschnitt">{abschnitt.titel}</h6>
+                    <WalterEintraege eintraege={abschnitt.eintraege} />
+                {/each}
+                {#if zeile.abschnitte?.length}
+                    <h6 class="abschnitt">Zahlungen</h6>
+                {/if}
+                <WalterEintraege
+                    eintraege={zeile.zahlungen}
+                    leerText="Noch keine Zahlung."
+                >
+                    <svelte:fragment slot="aktion" let:eintrag>
+                        {#if bearbeitbar}
+                            <WalterRueckgaengig
+                                {fetchImpl}
+                                transaktionId={eintrag.transaktionId}
+                                buchungssatzId={eintrag.buchungssatzId}
+                                on:erledigt={() => dispatch('geaendert')}
+                            />
+                        {/if}
+                    </svelte:fragment>
+                </WalterEintraege>
             {/if}
         </svelte:fragment>
-    </DataTable>
+    </WalterDataTable>
 {/if}
 
 <style>
-    ul {
-        list-style: none;
-        margin: 0 0 0.5rem 0;
-        padding: 0;
+    .abschnitt {
+        margin: 0.75rem 0 0.25rem 0;
+        color: var(--cds-text-02);
     }
-    .teile li {
-        color: var(--cds-text-secondary);
-    }
-    .zahlungen li {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        padding: 0.25rem 0;
-    }
-    .datum {
-        min-width: 6rem;
-    }
-    .betrag {
-        min-width: 7rem;
-        text-align: right;
-    }
-    .text {
-        flex: 1;
+    .abschnitt:first-child {
+        margin-top: 0.25rem;
     }
 </style>

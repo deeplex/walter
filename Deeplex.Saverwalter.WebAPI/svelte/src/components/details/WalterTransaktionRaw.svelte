@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterDatePicker
     } from '$walter/components';
 
-    import { Row } from 'carbon-components-svelte';
+    import { InlineNotification, Row } from 'carbon-components-svelte';
     import type {
         WalterSelectionEntry,
         WalterTransaktionEntry
@@ -39,6 +39,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: {
         readonly = entry?.permissions?.update === false;
     }
+    // Gebucht: Betrag, Datum und ein erfasster Zahler bzw. Empfänger passen zu den
+    // Buchungen und bleiben fest (der Server lehnt Änderungen ab); Memo und Notiz nicht.
+    // Ein beim Laden fehlender Zahler bzw. Empfänger darf nachgetragen werden.
+    $: gebucht = (entry?.buchungssaetze?.length ?? 0) > 0;
+    const zahlerAnfangs = !!entry?.zahler;
+    const empfaengerAnfangs = !!entry?.zahlungsempfaenger;
+    $: zahlerFest = gebucht && zahlerAnfangs;
+    $: empfaengerFest = gebucht && empfaengerAnfangs;
 
     const dispatch = createEventDispatcher<{
         zahlerChange: WalterSelectionEntry | undefined;
@@ -46,10 +54,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }>();
 </script>
 
+{#if gebucht && !readonly}
+    <Row>
+        <InlineNotification
+            kind="info"
+            lowContrast
+            hideCloseButton
+            title="Gebucht:"
+            subtitle="Betrag, Zahlungsdatum, Zahler und Zahlungsempfänger lassen sich nur über „Rückgängig machen“ und neu buchen ändern. Memo und Notiz bleiben änderbar."
+        />
+    </Row>
+{/if}
+
 <Row>
     <WalterComboBoxBankkonto
         {fetchImpl}
-        {readonly}
+        readonly={readonly || zahlerFest}
         bind:value={entry.zahler}
         title="Zahler"
         initialId={initialZahlerId}
@@ -58,7 +78,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     <WalterComboBoxBankkonto
         {fetchImpl}
-        {readonly}
+        readonly={readonly || empfaengerFest}
         bind:value={entry.zahlungsempfaenger}
         title="Zahlungsempfänger"
         initialId={initialZahlungsempfaengerId}
@@ -78,7 +98,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {:else}
         <WalterNumberInput
             required
-            {readonly}
+            readonly={readonly || gebucht}
             bind:value={entry.betrag}
             label="Betrag"
         />
@@ -93,7 +113,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {:else}
         <WalterDatePicker
             required
-            disabled={readonly}
+            disabled={readonly || gebucht}
             bind:value={entry.zahlungsdatum}
             labelText="Zahlungsdatum"
         />

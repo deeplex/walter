@@ -28,9 +28,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   Miete laut Vertragsversion, solange der Monat im Vertrag liegt und nicht in der Zukunft.
     ///   Bezahlt ist, was per Ausgleich an der Sollstellung hängt — eine Zahlung zählt also
     ///   für den Monat, dem sie zugeordnet wurde, nicht für den Monat ihres Zahlungsdatums.
-    /// - <b>NK-Vorauszahlungen je Jahr.</b> Fällig ist die Summe der monatlichen Vorauszahlungen
-    ///   laut Vertragsversion; bezahlt ist, was die Abrechnung als Vorauszahlung des
-    ///   Buchungsjahres zählt (<see cref="NkVorauszahlung"/>), also einschließlich Miet-Korrekturen.
+    /// - <b>Transaktionen je Monat.</b> Die Transaktionen, deren Zahlungen an der Sollstellung des
+    ///   Monats hängen, mit ihrem ganzen Betrag, dem darin enthaltenen NK-Vorauszahlungs-Anteil
+    ///   des Vertrags und ihrer <see cref="Zuordnung"/> (wofür jeder Teil gebucht wurde). Die
+    ///   NK-Vorauszahlung selbst gehört zu ihrem Buchungsjahr, nicht zum Monat; sie wird hier
+    ///   nur gezeigt und erst in der Abrechnung je Jahr gezählt (<see cref="NkVorauszahlung"/>).
+    ///   Zahlt eine Transaktion mehrere Monate, erscheint sie bei jedem davon.
     /// - <b>Nicht zugeordnet:</b> Zahlungen auf Miet- oder Garagenkonto ohne Ausgleich (Guthaben).
     /// - <b>Rückgängig gemacht:</b> stornierte Zahlungen. Ihr Ausgleich ist mit dem Storno
     ///   entfallen, daher stehen sie nicht mehr bei einem Monat.
@@ -39,14 +42,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     {
         private const decimal Toleranz = 0.005m;
 
-        public enum MietkontoZahlungsArt { Kaltmiete, Garage, NkVorauszahlung, MietKorrektur }
+        public enum MietkontoZahlungsArt { Kaltmiete, Garage, NkVorauszahlung }
 
         public class MietkontoZahlung
         {
             public Guid BuchungssatzId { get; set; }
             public Guid? TransaktionId { get; set; }
             public DateOnly Datum { get; set; }
-            /// <summary>Betrag der Zahlung (Miet-Korrektur: Wirkung auf die NK-Vorauszahlung, kann negativ sein).</summary>
             public decimal Betrag { get; set; }
             public string? Zahler { get; set; }
             [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
@@ -73,29 +75,38 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             /// <summary>Fällige Kaltmiete des Monats.</summary>
             public decimal Kaltmiete { get; set; }
             public List<MietkontoGarage> Garagen { get; set; } = [];
+            /// <summary>Per Ausgleich an den Sollstellungen des Monats hängende Zahlungszeilen.</summary>
             public List<MietkontoZahlung> Zahlungen { get; set; } = [];
+            /// <summary>Die Transaktionen hinter <see cref="Zahlungen"/>, nach Zahlungsdatum.</summary>
+            public List<MietkontoTransaktion> Transaktionen { get; set; } = [];
+            /// <summary>Summe der ganzen Beträge von <see cref="Transaktionen"/>.</summary>
+            public decimal TransaktionenBetrag => Transaktionen.Sum(t => t.Betrag);
+            /// <summary>Darin enthaltene NK-Vorauszahlung des Vertrags.</summary>
+            public decimal NkVorauszahlung => Transaktionen.Sum(t => t.NkVorauszahlung);
         }
 
-        public class MietkontoNkJahr
+        /// <summary>Eine Transaktion, die (auch) die Miete eines Monats bezahlt hat.</summary>
+        public class MietkontoTransaktion
         {
-            public int Jahr { get; set; }
-            public decimal Faellig { get; set; }
-            public decimal Bezahlt { get; set; }
-            public decimal Offen => Faellig - Bezahlt;
-            public List<MietkontoZahlung> Zahlungen { get; set; } = [];
+            public Guid TransaktionId { get; set; }
+            public DateOnly Datum { get; set; }
+            /// <summary>Betrag der ganzen Transaktion.</summary>
+            public decimal Betrag { get; set; }
+            public string? Zahler { get; set; }
+            /// <summary>Davon NK-Vorauszahlung des Vertrags (für ihr Buchungsjahr).</summary>
+            public decimal NkVorauszahlung { get; set; }
+            /// <summary>Wofür die Transaktion gebucht wurde.</summary>
+            public List<ZuordnungEintrag> Zuordnung { get; set; } = [];
         }
 
         public class Mietkonto
         {
             /// <summary>Neuester Monat zuerst.</summary>
             public List<MietkontoMonat> Monate { get; set; } = [];
-            /// <summary>Neuestes Jahr zuerst.</summary>
-            public List<MietkontoNkJahr> NkVorauszahlungen { get; set; } = [];
             public List<MietkontoZahlung> NichtZugeordnet { get; set; } = [];
             public List<MietkontoZahlung> RueckgaengigGemacht { get; set; } = [];
             /// <summary>Summe offen; negativ bei Guthaben.</summary>
-            public decimal Offen =>
-                Monate.Sum(m => m.Offen) + NkVorauszahlungen.Sum(n => n.Offen) - NichtZugeordnet.Sum(z => z.Betrag);
+            public decimal Offen => Monate.Sum(m => m.Offen) - NichtZugeordnet.Sum(z => z.Betrag);
         }
 
         /// <param name="heute">Stichtag: spätere Monate werden ohne Sollstellung nicht als fällig gezeigt.</param>
@@ -125,6 +136,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             var aktuellerMonat = ErsterDesMonats(heute);
             var monate = new Dictionary<DateOnly, MietkontoMonat>();
+            var transaktionen = new Dictionary<DateOnly, List<Transaktion>>();
 
             // Kaltmiete
             var mietZeilen = zeilen.Where(z => z.Buchungskonto.BuchungskontoId == mietKontoId).ToList();
@@ -138,46 +150,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 eintrag.Kaltmiete = posten.Faellig;
                 eintrag.Bezahlt += posten.Bezahlt;
                 eintrag.Zahlungen.AddRange(posten.Zahlungen.Select(z => Zahlung(z, MietkontoZahlungsArt.Kaltmiete)));
+                MerkeTransaktionen(transaktionen, monat, posten.Zahlungen);
             }
 
             foreach (var gv in vertrag.GarageVertraege)
-                TrageGarageEin(monate, gv, zeilen, aktuellerMonat);
+                TrageGarageEin(monate, transaktionen, gv, zeilen, aktuellerMonat);
 
-            // NK-Vorauszahlungen je Buchungsjahr
+            // NK-Vorauszahlung je Transaktion, gerechnet wie in der Abrechnung.
             var zaehlt = NkVorauszahlung.Zaehlt(vertrag).Compile();
-            var nkZeilen = zeilen.Where(zaehlt).ToList();
-            var nkFaellig = VertragsMonate(vertrag.Beginn(), vertrag.Ende, aktuellerMonat)
-                .GroupBy(m => m.Year)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Sum(m => vertrag.Versionen.Where(v => v.Beginn <= m).MaxBy(v => v.Beginn)?.Nebenkostenvorauszahlung ?? 0m));
-            var nkJahre = nkFaellig.Keys.Union(nkZeilen.Select(z => z.Buchungssatz.Buchungsjahr));
-            var nkVorauszahlungen = nkJahre
-                .Select(jahr =>
-                {
-                    var jahresZeilen = nkZeilen.Where(z => z.Buchungssatz.Buchungsjahr == jahr).ToList();
-                    return new MietkontoNkJahr
-                    {
-                        Jahr = jahr,
-                        Faellig = nkFaellig.GetValueOrDefault(jahr),
-                        Bezahlt = jahresZeilen.Sum(NkVorauszahlung.Betrag),
-                        Zahlungen = jahresZeilen
-                            .OrderBy(z => z.Buchungssatz.Buchungsdatum)
-                            .Select(z =>
-                            {
-                                var art = z.Buchungssatz.Transaktion != null
-                                    ? MietkontoZahlungsArt.NkVorauszahlung
-                                    : MietkontoZahlungsArt.MietKorrektur;
-                                var zahlung = Zahlung(z, art);
-                                zahlung.Betrag = NkVorauszahlung.Betrag(z);
-                                return zahlung;
-                            })
-                            .ToList(),
-                    };
-                })
-                .Where(n => Math.Abs(n.Faellig) > Toleranz || n.Zahlungen.Count > 0)
-                .OrderByDescending(n => n.Jahr)
-                .ToList();
+            var nkJeTransaktion = zeilen
+                .Where(z => z.Buchungssatz.Transaktion != null && zaehlt(z))
+                .GroupBy(z => z.Buchungssatz.Transaktion!.TransaktionId)
+                .ToDictionary(g => g.Key, g => g.Sum(NkVorauszahlung.Betrag));
+            await TrageTransaktionenEinAsync(monate, transaktionen, nkJeTransaktion);
 
             var garagen = vertrag.GarageVertraege.ToDictionary(g => g.MietBuchungskonto.BuchungskontoId, g => g.Garage.Kennung);
             MietkontoZahlung ZahlungAufKonto(Buchungszeile z)
@@ -191,7 +176,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             return new Mietkonto
             {
                 Monate = Sortiert(monate),
-                NkVorauszahlungen = nkVorauszahlungen,
                 NichtZugeordnet = NichtZugeordnet(zeilen.Where(z => z.Buchungskonto.BuchungskontoId != nkKontoId), ZahlungAufKonto),
                 RueckgaengigGemacht = RueckgaengigGemacht(zeilen, ZahlungAufKonto),
             };
@@ -213,7 +197,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             var zeilen = await LadeZeilenAsync([gv.MietBuchungskonto.BuchungskontoId]);
             var monate = new Dictionary<DateOnly, MietkontoMonat>();
-            TrageGarageEin(monate, gv, zeilen, ErsterDesMonats(heute));
+            var transaktionen = new Dictionary<DateOnly, List<Transaktion>>();
+            TrageGarageEin(monate, transaktionen, gv, zeilen, ErsterDesMonats(heute));
+            await TrageTransaktionenEinAsync(monate, transaktionen, []);
             MietkontoZahlung ZahlungAufKonto(Buchungszeile z) => GaragenZahlung(z, gv.Garage.Kennung);
 
             return new Mietkonto
@@ -244,9 +230,50 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private static List<MietkontoMonat> Sortiert(Dictionary<DateOnly, MietkontoMonat> monate) =>
             monate.Values.OrderByDescending(m => m.Jahr).ThenByDescending(m => m.Monat).ToList();
 
+        /// <summary>Merkt die Transaktionen der Zahlungszeilen eines Monats.</summary>
+        private static void MerkeTransaktionen(
+            Dictionary<DateOnly, List<Transaktion>> transaktionen, DateOnly monat, IEnumerable<Buchungszeile> zahlungen)
+        {
+            if (!transaktionen.TryGetValue(monat, out var liste)) transaktionen[monat] = liste = [];
+            liste.AddRange(zahlungen.Select(z => z.Buchungssatz.Transaktion).OfType<Transaktion>());
+        }
+
+        /// <summary>
+        /// Trägt je Monat die gemerkten Transaktionen ein — jede einmal, mit ihrem NK-Anteil und
+        /// ihrer Zuordnung.
+        /// </summary>
+        private async Task TrageTransaktionenEinAsync(
+            Dictionary<DateOnly, MietkontoMonat> monate,
+            Dictionary<DateOnly, List<Transaktion>> transaktionen,
+            Dictionary<Guid, decimal> nkJeTransaktion)
+        {
+            var ids = transaktionen.Values.SelectMany(l => l).Select(t => t.TransaktionId).Distinct().ToList();
+            var zuordnung = await Zuordnung.ErmittleAsync(ctx, ids);
+            foreach (var (monat, liste) in transaktionen)
+            {
+                monate[monat].Transaktionen = liste
+                    .DistinctBy(t => t.TransaktionId)
+                    .OrderBy(t => t.Zahlungsdatum)
+                    .Select(t => new MietkontoTransaktion
+                    {
+                        TransaktionId = t.TransaktionId,
+                        Datum = t.Zahlungsdatum,
+                        Betrag = t.Betrag,
+                        Zahler = ZahlerText(t),
+                        NkVorauszahlung = nkJeTransaktion.GetValueOrDefault(t.TransaktionId),
+                        Zuordnung = zuordnung[t.TransaktionId],
+                    })
+                    .ToList();
+            }
+        }
+
+        private static string? ZahlerText(Transaktion t) =>
+            t.Zahler?.Besitzer.FirstOrDefault()?.Bezeichnung ?? t.Zahler?.Iban;
+
         /// <summary>Garagenmiete je Monat in die Monate eintragen.</summary>
         private static void TrageGarageEin(
-            Dictionary<DateOnly, MietkontoMonat> monate, GarageVertrag gv, List<Buchungszeile> zeilen, DateOnly aktuellerMonat)
+            Dictionary<DateOnly, MietkontoMonat> monate, Dictionary<DateOnly, List<Transaktion>> transaktionen,
+            GarageVertrag gv, List<Buchungszeile> zeilen, DateOnly aktuellerMonat)
         {
             var kontoId = gv.MietBuchungskonto.BuchungskontoId;
             var posten = Monatsposten(
@@ -265,6 +292,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 });
                 eintrag.Bezahlt += p.Bezahlt;
                 eintrag.Zahlungen.AddRange(p.Zahlungen.Select(z => GaragenZahlung(z, gv.Garage.Kennung)));
+                MerkeTransaktionen(transaktionen, monat, p.Zahlungen);
             }
         }
 
@@ -350,14 +378,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private static MietkontoZahlung Zahlung(Buchungszeile z, MietkontoZahlungsArt art)
         {
             var satz = z.Buchungssatz;
-            var zahler = satz.Transaktion?.Zahler;
             return new MietkontoZahlung
             {
                 BuchungssatzId = satz.BuchungssatzId,
                 TransaktionId = satz.Transaktion?.TransaktionId,
                 Datum = satz.Transaktion?.Zahlungsdatum ?? satz.Buchungsdatum,
                 Betrag = z.Betrag,
-                Zahler = zahler?.Besitzer.FirstOrDefault()?.Bezeichnung ?? zahler?.Iban,
+                Zahler = satz.Transaktion is Transaktion t ? ZahlerText(t) : null,
                 Art = art,
             };
         }

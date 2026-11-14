@@ -21,15 +21,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     Mieteinnahmen, Erhaltungsaufwand und nicht verteilte Betriebskosten je Jahr.
 -->
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         Button,
-        DataTable,
         InlineLoading,
         InlineNotification,
         Modal,
-        Tag,
-        Tile
+        Tag
     } from 'carbon-components-svelte';
+    import WalterDataTableContainer from '../elements/WalterDataTableContainer.svelte';
+    import WalterDataTable from '../elements/WalterDataTable.svelte';
     import { Add } from 'carbon-icons-svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
@@ -73,9 +74,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: offen = daten
         ? daten.rechnungen.reduce((s, r) => s + Math.max(0, r.offen), 0)
         : 0;
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     // ── + Zahlung ────────────────────────────────────────────────────────────
     let zahlungOffen = false;
@@ -140,18 +138,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             key: 'betriebskostenEigenanteil',
             value: 'Betriebskosten (nicht verteilt)'
         }
-    ];
-    $: jahresZeilen = (daten?.jahre ?? []).map((j) => ({ id: j.wert, ...j }));
+    ].map((h) => ({ ...h, sort: false as const }));
+    // Beträge vorformatiert; die Tabelle sortiert nicht.
+    $: jahresZeilen = (daten?.jahre ?? []).map((j) => ({
+        id: j.wert,
+        wert: `${j.wert}`,
+        mieteinnahmen: formatEuro(j.mieteinnahmen),
+        erhaltungsaufwand: formatEuro(j.erhaltungsaufwand),
+        betriebskostenEigenanteil: formatEuro(j.betriebskostenEigenanteil)
+    }));
 </script>
 
-<Tile id="erhaltungsaufwand" style="margin-bottom: 1rem">
-    <div class="kopf">
-        <h4>
-            Erhaltungsaufwand
-            {#if daten && offen > 0.005}
-                <Tag type="red">{eur(offen)} offen</Tag>
-            {/if}
-        </h4>
+<WalterDataTableContainer
+    layout="accordion"
+    accordionTitle="Erhaltungsaufwand"
+    count={zeilen.length}
+    id="erhaltungsaufwand"
+>
+    <svelte:fragment slot="titel">
+        {#if daten && offen > 0.005}
+            <Tag size="sm" type="red">{formatEuro(offen)} offen</Tag>
+        {/if}
+    </svelte:fragment>
+    <svelte:fragment slot="aktionen">
         {#if bearbeitbar}
             <Button
                 kind="ghost"
@@ -162,7 +171,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 Rechnung
             </Button>
         {/if}
-    </div>
+    </svelte:fragment>
 
     {#if fehler}
         <InlineNotification
@@ -186,18 +195,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         {#if jahresZeilen.length > 0}
             <h5 style="margin-top: 1.5rem">Jahresüberblick</h5>
-            <DataTable size="short" headers={jahresKoepfe} rows={jahresZeilen}>
-                <svelte:fragment slot="cell" let:cell>
-                    {#if cell.key === 'wert'}
-                        {cell.value}
-                    {:else}
-                        {eur(cell.value)}
-                    {/if}
-                </svelte:fragment>
-            </DataTable>
+            <WalterDataTable
+                size="short"
+                search={false}
+                headers={jahresKoepfe}
+                rows={jahresZeilen}
+            />
         {/if}
     {/if}
-</Tile>
+</WalterDataTableContainer>
 
 {#if bearbeitbar && zahlungFuer}
     <WalterZahlungErfassen
@@ -240,12 +246,3 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     </Modal>
 {/if}
-
-<style>
-    .kopf {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-    }
-</style>

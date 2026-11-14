@@ -16,6 +16,8 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
+import type { WalterEintrag } from './WalterEintrag';
+import { formatDatum, formatZahl } from '../services/format';
 
 export class WalterZaehlerstandEntry extends WalterApiHandler {
     public static ApiURL = `/api/zaehlerstaende`;
@@ -52,4 +54,35 @@ export class WalterZaehlerstandEntry extends WalterApiHandler {
             permissions
         );
     }
+}
+
+type WalterStand = Pick<
+    WalterZaehlerstandEntry,
+    'id' | 'datum' | 'stand' | 'einheit' | 'notiz'
+>;
+
+/**
+ * Zählerstände als Einträge (WalterEintraege), neuester zuerst: Datum, Stand mit Einheit,
+ * dazu der Verbrauch seit dem vorigen Stand und die Notiz.
+ */
+export function zaehlerstandEintraege(staende: WalterStand[]): WalterEintrag[] {
+    const aufsteigend = [...staende].sort((a, b) =>
+        a.datum.localeCompare(b.datum)
+    );
+    return aufsteigend
+        .map((s, i) => {
+            const vorher = aufsteigend[i - 1];
+            const einheit = s.einheit ? ` ${s.einheit}` : '';
+            const verbrauch = vorher
+                ? `${s.stand - vorher.stand >= 0 ? '+' : '−'}${formatZahl(Math.abs(s.stand - vorher.stand))}${einheit} seit ${formatDatum(vorher.datum)}`
+                : 'Erster Stand';
+            return {
+                id: `${s.id}`,
+                datum: s.datum,
+                wert: `${formatZahl(s.stand)}${einheit}`,
+                text: s.notiz ? `${verbrauch} – ${s.notiz}` : verbrauch,
+                href: `/zaehlerstaende/${s.id}`
+            };
+        })
+        .reverse();
 }

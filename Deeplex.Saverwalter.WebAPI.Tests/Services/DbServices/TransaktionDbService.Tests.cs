@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
@@ -162,6 +164,75 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await service.Storno(user, transaktion.TransaktionId, "  ");
 
             result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        private static async Task<Transaktion> GebuchteTransaktionAsync(SaverwalterContext ctx)
+        {
+            var bank = new Buchungskonto("1000", "Bank", BuchungskontoTyp.Aktiv);
+            var ertrag = new Buchungskonto("4000", "Ertrag", BuchungskontoTyp.Ertrag);
+            var transaktion = NeueTransaktion();
+            var satz = new Buchungssatz(new DateOnly(2024, 1, 5), "Freie Buchung") { Transaktion = transaktion };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m) { Buchungssatz = satz, Buchungskonto = bank });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 100m) { Buchungssatz = satz, Buchungskonto = ertrag });
+            ctx.Transaktionen.Add(transaktion);
+            ctx.Buchungssaetze.Add(satz);
+            await ctx.SaveChangesAsync();
+            return transaktion;
+        }
+
+        [Fact]
+        public async Task PutGebucht_BetragUndDatumGesperrt()
+        {
+            var (ctx, auth, user) = Setup();
+            var transaktion = await GebuchteTransaktionAsync(ctx);
+            var entry = new TransaktionEntry(transaktion, new Permissions())
+            {
+                Betrag = 120m,
+                Zahlungsdatum = new DateOnly(2024, 2, 1),
+            };
+
+            var result = await MakeService(ctx, auth).Put(user, transaktion.TransaktionId, entry);
+
+            var konflikt = result.Result.Should().BeOfType<ConflictObjectResult>().Subject;
+            konflikt.Value.Should().BeOfType<string>().Which.Should().Contain("Betrag, Zahlungsdatum");
+            (await ctx.Transaktionen.SingleAsync()).Betrag.Should().Be(100m);
+        }
+
+        [Fact]
+        public async Task PutGebucht_MemoUndNotizBleibenAenderbar()
+        {
+            var (ctx, auth, user) = Setup();
+            var transaktion = await GebuchteTransaktionAsync(ctx);
+            var entry = new TransaktionEntry(transaktion, new Permissions())
+            {
+                Verwendungszweck = "Miete Januar",
+                Notiz = "Mieter hat telefonisch bestätigt",
+            };
+
+            var result = await MakeService(ctx, auth).Put(user, transaktion.TransaktionId, entry);
+
+            result.Result.Should().BeNull();
+            var gespeichert = await ctx.Transaktionen.SingleAsync();
+            gespeichert.Verwendungszweck.Should().Be("Miete Januar");
+            gespeichert.Notiz.Should().Be("Mieter hat telefonisch bestätigt");
+        }
+
+        [Fact]
+        public async Task PutUngebucht_BetragAenderbar()
+        {
+            var (ctx, auth, user) = Setup();
+            var transaktion = NeueTransaktion();
+            ctx.Transaktionen.Add(transaktion);
+            await ctx.SaveChangesAsync();
+            var entry = new TransaktionEntry(transaktion, new Permissions())
+            {
+                Betrag = 120m,
+            };
+
+            var result = await MakeService(ctx, auth).Put(user, transaktion.TransaktionId, entry);
+
+            result.Result.Should().BeNull();
+            (await ctx.Transaktionen.SingleAsync()).Betrag.Should().Be(120m);
         }
     }
 }

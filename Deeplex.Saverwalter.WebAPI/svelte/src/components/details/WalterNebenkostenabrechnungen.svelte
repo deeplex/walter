@@ -17,15 +17,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <!--
     Nebenkostenabrechnungen eines Vertrags: je Abrechnung die Nachzahlung bzw. Erstattung,
     bezahlt und offen. „+ Zahlung“ bei versendeten, offenen Abrechnungen; aufgeklappt die
-    Zahlungen mit „Rückgängig machen“. Der Link der Zeile führt zur Abrechnung.
+    Zahlungen mit „Rückgängig machen“. Der Link der Zeile führt zur Abrechnung. Ein
+    aufklappbarer Abschnitt „Nebenkostenabrechnungen (Anzahl)“ mit dem Stand als Tags;
+    Sprungziel `#abrechnungen`.
 -->
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         InlineLoading,
         InlineNotification,
-        Tag,
-        Tile
+        Tag
     } from 'carbon-components-svelte';
+    import WalterDataTableContainer from '../elements/WalterDataTableContainer.svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
     import WalterZahlungsliste from '../lists/WalterZahlungsliste.svelte';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
@@ -70,9 +73,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: nachzahlungOffen = daten ? offen(daten.abrechnungen, false) : 0;
     $: erstattungOffen = daten ? offen(daten.abrechnungen, true) : 0;
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-
     let erfassenOffen = false;
     let erfassen: WalterNebenkostenabrechnung | undefined;
     function zahlungErfassen(e: CustomEvent<WalterZahlungsZeile>) {
@@ -83,21 +83,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<Tile id="abrechnungen" style="margin-bottom: 1rem">
-    <h4 style="margin-bottom: 0.75rem">
-        Nebenkostenabrechnungen
+<WalterDataTableContainer
+    layout="accordion"
+    accordionTitle="Nebenkostenabrechnungen"
+    count={zeilen.length}
+    id="abrechnungen"
+>
+    <svelte:fragment slot="titel">
         {#if daten}
             {#if nachzahlungOffen > 0.005}
-                <Tag type="red">{eur(nachzahlungOffen)} Nachzahlung offen</Tag>
+                <Tag size="sm" type="red"
+                    >{formatEuro(nachzahlungOffen)} Nachzahlung offen</Tag
+                >
             {/if}
             {#if erstattungOffen > 0.005}
-                <Tag type="blue">{eur(erstattungOffen)} Erstattung offen</Tag>
+                <Tag size="sm" type="blue"
+                    >{formatEuro(erstattungOffen)} Erstattung offen</Tag
+                >
             {/if}
             {#if nachzahlungOffen <= 0.005 && erstattungOffen <= 0.005 && zeilen.length > 0}
-                <Tag type="green">Alles ausgeglichen</Tag>
+                <Tag size="sm" type="green">Alles ausgeglichen</Tag>
             {/if}
         {/if}
-    </h4>
+    </svelte:fragment>
 
     {#if fehler}
         <InlineNotification
@@ -125,7 +133,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rueckgaengigGemacht
         />
     {/if}
-</Tile>
+</WalterDataTableContainer>
 
 {#if bearbeitbar && erfassen}
     <WalterZahlungErfassen

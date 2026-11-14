@@ -168,24 +168,26 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task NkVorauszahlungenJeJahr()
+        public async Task MonatZeigtDieTransaktionMitGanzemBetragUndNkAnteil()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = await VertragAsync(ctx);
 
-            await ZahleAsync(ctx, vertrag, Januar, new DateOnly(2024, 1, 5), 500m, 150m);
-            await ZahleAsync(ctx, vertrag, Februar, new DateOnly(2024, 2, 5), 500m, 150m);
+            var transaktion = await ZahleAsync(ctx, vertrag, Januar, new DateOnly(2024, 1, 5), 500m, 150m);
 
-            var nk = (await MietkontoAsync(ctx, vertrag)).NkVorauszahlungen.Should().ContainSingle().Subject;
-            nk.Jahr.Should().Be(2024);
-            nk.Faellig.Should().Be(450m, "Januar bis März");
-            nk.Bezahlt.Should().Be(300m);
-            nk.Zahlungen.Should().HaveCount(2)
-                .And.AllSatisfy(z => z.Art.Should().Be(MietkontoZahlungsArt.NkVorauszahlung));
+            var januar = Monat(await MietkontoAsync(ctx, vertrag), Januar);
+            januar.Bezahlt.Should().Be(500m, "bezahlt ist die Kaltmiete; die NK-VZ gehört zum Jahr");
+            januar.Offen.Should().Be(0m);
+            januar.TransaktionenBetrag.Should().Be(650m);
+            januar.NkVorauszahlung.Should().Be(150m);
+            var t = januar.Transaktionen.Should().ContainSingle().Subject;
+            t.TransaktionId.Should().Be(transaktion.TransaktionId);
+            t.Betrag.Should().Be(650m);
+            t.Zuordnung.Select(z => z.Betrag).Should().BeEquivalentTo([500m, 150m]);
         }
 
         [Fact]
-        public async Task NkVorauszahlungZaehltFuerDasJahrDesBetreffendenMonats()
+        public async Task NkVorauszahlungBehaeltDasJahrDesBetreffendenMonats()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = await VertragAsync(ctx);
@@ -195,14 +197,48 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             await ZahleAsync(ctx, vertrag, dezember, new DateOnly(2024, 1, 3), 500m, 150m);
 
-            var konto = await MietkontoAsync(ctx, vertrag);
-            konto.NkVorauszahlungen.Single(n => n.Jahr == 2023).Bezahlt.Should().Be(150m);
-            konto.NkVorauszahlungen.Single(n => n.Jahr == 2024).Bezahlt.Should().Be(0m);
-            Monat(konto, dezember).Bezahlt.Should().Be(500m);
+            var dez = Monat(await MietkontoAsync(ctx, vertrag), dezember);
+            dez.Bezahlt.Should().Be(500m);
+            dez.NkVorauszahlung.Should().Be(150m);
+            dez.Transaktionen.Single().Zuordnung.Should().Contain(z => z.Text.StartsWith("NK-Vorauszahlung 2023"));
         }
 
         [Fact]
-        public async Task MietKorrekturErscheintBeiDenNkVorauszahlungen()
+        public async Task TransaktionFuerZweiMonateErscheintBeiBeiden()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAsync(ctx);
+            var transaktion = await new TransaktionBuchungsService(ctx).BucheAsync(new TransaktionBuchungsService.TransaktionsInput
+            {
+                Betrag = 1150m,
+                Zahlungsdatum = new DateOnly(2024, 2, 5),
+                Mieten =
+                {
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId, BetreffenderMonat = Januar, Kaltmiete = 500m,
+                    },
+                    new TransaktionBuchungsService.MietzahlungsInput
+                    {
+                        VertragId = vertrag.VertragId, BetreffenderMonat = Februar, Kaltmiete = 500m, NkVorauszahlung = 150m,
+                    },
+                },
+            });
+
+            var konto = await MietkontoAsync(ctx, vertrag);
+
+            foreach (var monat in new[] { Januar, Februar })
+            {
+                var m = Monat(konto, monat);
+                m.Bezahlt.Should().Be(500m);
+                m.Transaktionen.Should().ContainSingle()
+                    .Which.Should().Match<MietkontoTransaktion>(t => t.TransaktionId == transaktion.TransaktionId && t.Betrag == 1150m);
+            }
+            Monat(konto, Maerz).Transaktionen.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task MietKorrekturIstKeineZahlungAufEinenMonat()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = await VertragAsync(ctx);
@@ -212,13 +248,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx))
                 .BucheDifferenzAsync(vertrag.VertragId, 2024, "Mieterhöhung nachgetragen");
 
-            var konto = await MietkontoAsync(ctx, vertrag);
+            var januar = Monat(await MietkontoAsync(ctx, vertrag), Januar);
 
-            var nk = konto.NkVorauszahlungen.Single();
-            nk.Bezahlt.Should().Be(50m);
-            nk.Zahlungen.Should().ContainSingle(z => z.Art == MietkontoZahlungsArt.MietKorrektur)
-                .Which.Betrag.Should().Be(-100m);
-            Monat(konto, Januar).Bezahlt.Should().Be(500m, "die Korrektur ist keine Zahlung auf einen Monat");
+            januar.Bezahlt.Should().Be(500m);
+            januar.Transaktionen.Should().ContainSingle().Which.NkVorauszahlung.Should().Be(150m);
         }
 
         [Fact]
@@ -254,7 +287,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var konto = await MietkontoAsync(ctx, vertrag);
 
             Monat(konto, Januar).Bezahlt.Should().Be(0m);
-            konto.NkVorauszahlungen.Single().Bezahlt.Should().Be(0m);
+            Monat(konto, Januar).Transaktionen.Should().BeEmpty();
             konto.RueckgaengigGemacht.Select(z => (z.Art, z.Betrag)).Should().BeEquivalentTo(
                 [(MietkontoZahlungsArt.Kaltmiete, 500m), (MietkontoZahlungsArt.NkVorauszahlung, 150m)]);
             konto.RueckgaengigGemacht.Should().AllSatisfy(z => z.TransaktionId.Should().Be(transaktion.TransaktionId));
@@ -277,7 +310,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var konto = await MietkontoAsync(ctx, vertrag);
 
             konto.NichtZugeordnet.Should().ContainSingle().Which.Betrag.Should().Be(80m);
-            konto.Offen.Should().Be(3 * 500m + 3 * 150m - 80m);
+            konto.Offen.Should().Be(3 * 500m - 80m);
         }
 
         [Fact]
@@ -291,7 +324,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var konto = await MietkontoAsync(ctx, vertrag);
 
             konto.Monate.Select(m => m.Monat).Should().Equal(2, 1);
-            konto.NkVorauszahlungen.Single().Faellig.Should().Be(300m);
         }
 
         private static Task<Transaktion> ZahleGarageAsync(
@@ -337,7 +369,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Which.Should().Match<MietkontoZahlung>(z => z.Art == MietkontoZahlungsArt.Garage && z.Garage == "G1");
             Monat(konto, Februar).Offen.Should().Be(30m);
             Monat(konto, Maerz).Offen.Should().Be(50m, "auch ohne Sollstellung ist die Garagenmiete fällig");
-            konto.NkVorauszahlungen.Should().BeEmpty();
+            Monat(konto, Februar).Transaktionen.Should().ContainSingle().Which.Betrag.Should().Be(20m);
             konto.Offen.Should().Be(80m);
         }
 

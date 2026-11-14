@@ -116,7 +116,8 @@ test('Miete im Mietkonto erfassen und rückgängig machen', async ({ page }) => 
     const kaltmieteText = `Kaltmiete ${LANG[monat.monat - 1]} ${monat.jahr}`;
 
     await authenticatePage(page, 'admin.dev');
-    await page.goto(`/vertraege/${vertragId}`);
+    // Das Mietkonto ist ein aufklappbarer Abschnitt; der Anker öffnet ihn.
+    await page.goto(`/vertraege/${vertragId}#mietkonto`);
 
     // ---- erfassen -----------------------------------------------------
     const zeile = page.getByRole('row').filter({ hasText: periode }).first();
@@ -293,7 +294,7 @@ test('Garagenmiete im Garagenmietkonto erfassen und rückgängig machen', async 
         });
 
     await authenticatePage(page, 'admin.dev');
-    await page.goto(`/garage-vertraege/${garageVertragId}`);
+    await page.goto(`/garage-vertraege/${garageVertragId}#mietkonto`);
     await expect(page.getByText('Garagenmietkonto')).toBeVisible();
 
     const zeile = page.getByRole('row').filter({ hasText: periode }).first();

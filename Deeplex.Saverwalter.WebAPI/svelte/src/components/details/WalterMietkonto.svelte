@@ -15,19 +15,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <!--
-    Mietkonto eines Vertrags: Kaltmiete und Garagen je Monat, NK-Vorauszahlungen je
-    Jahr. Mit `jahr` nur dieses Jahr (Abrechnungslauf), dann ohne Miet-Korrektur-Hinweis.
+    Mietkonto eines Vertrags: je Monat das Soll (Kaltmiete und Garagen) gegen die
+    Transaktionen, die es bezahlt haben, samt deren NK-Vorauszahlungs-Anteil; aufgeklappt
+    jede Transaktion mit ihrer Zuordnung. Auf der Vertragsseite ein aufklappbarer Abschnitt
+    „Mietkonto (Monate)“ mit dem Stand als Tag, 12 Monate je Seite; offen, wenn die Adresse
+    auf `#mietkonto` zeigt. Mit `jahr` nur dieses Jahr als Kachel (Abrechnungslauf), dann
+    ohne Miet-Korrektur-Hinweis.
     Mit `garageVertragId` statt `vertragId` das Garagenmietkonto: nur die Garagenmiete
     je Monat.
 -->
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         InlineLoading,
         InlineNotification,
-        Tag,
-        Tile
+        Tag
     } from 'carbon-components-svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
+    import WalterDataTableContainer from '../elements/WalterDataTableContainer.svelte';
     import WalterMietKorrektur from './WalterMietKorrektur.svelte';
     import WalterZahlungsliste from '../lists/WalterZahlungsliste.svelte';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
@@ -57,9 +62,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let konto: WalterMietkonto | undefined;
     let fehler: string | null = null;
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     $: url = vertragId
         ? `/api/vertraege/${vertragId}/mietkonto`
@@ -96,60 +98,90 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: guthaben = nichtZugeordnet.reduce((s, z) => s + z.betrag, 0);
     $: gesamt = offen - guthaben;
     $: rueckgaengig = konto ? imJahr(konto.rueckgaengigGemacht) : [];
+
+    /** Auf der Vertrags- bzw. Garagenseite ein aufklappbarer Abschnitt, im Abrechnungslauf eine Kachel. */
+    $: alsAbschnitt = jahr === undefined;
+    $: status = !konto
+        ? undefined
+        : gesamt > 0.005
+          ? { tag: 'red' as const, text: `${formatEuro(gesamt)} offen` }
+          : gesamt < -0.005
+            ? { tag: 'blue' as const, text: `${formatEuro(-gesamt)} Guthaben` }
+            : { tag: 'green' as const, text: 'Alles bezahlt' };
 </script>
 
-<Tile id="mietkonto" style="margin-bottom: 1rem">
-    <h4 style="margin-bottom: 0.75rem">
-        {title}
-        {#if konto}
-            {#if gesamt > 0.005}
-                <Tag type="red">{eur(gesamt)} offen</Tag>
-            {:else if gesamt < -0.005}
-                <Tag type="blue">{eur(-gesamt)} Guthaben</Tag>
-            {:else}
-                <Tag type="green">Alles bezahlt</Tag>
-            {/if}
+<WalterDataTableContainer
+    layout={alsAbschnitt ? 'accordion' : 'inline'}
+    accordionTitle={title}
+    count={zeilen.length}
+    id={alsAbschnitt ? 'mietkonto' : undefined}
+>
+    <svelte:fragment slot="titel">
+        {#if status}
+            <Tag size="sm" type={status.tag}>{status.text}</Tag>
         {/if}
-    </h4>
+    </svelte:fragment>
+    <div
+        id={alsAbschnitt ? undefined : 'mietkonto'}
+        class:bx--tile={!alsAbschnitt}
+        class:kachel={!alsAbschnitt}
+    >
+        {#if !alsAbschnitt}
+            <h4 style="margin-bottom: 0.75rem">
+                {title}
+                {#if status}
+                    <Tag type={status.tag}>{status.text}</Tag>
+                {/if}
+            </h4>
+        {/if}
 
-    <slot />
+        <slot />
 
-    {#if jahr === undefined && vertragId}
-        <WalterMietKorrektur {vertragId} {fetchImpl} on:geaendert={refresh} />
-    {/if}
+        {#if jahr === undefined && vertragId}
+            <WalterMietKorrektur
+                {vertragId}
+                {fetchImpl}
+                on:geaendert={refresh}
+            />
+        {/if}
 
-    {#if fehler}
-        <InlineNotification
-            kind="error"
-            title="Mietkonto nicht verfügbar"
-            subtitle={fehler}
-            hideCloseButton
-        />
-    {:else if !konto}
-        <InlineLoading description="Lade Mietkonto…" />
-    {:else}
-        <WalterZahlungsuebersicht
-            rows={zeilen}
-            {bearbeitbar}
-            {fetchImpl}
-            on:zahlung={zahlungErfassen}
-            on:geaendert={refresh}
-        />
+        {#if fehler}
+            <InlineNotification
+                kind="error"
+                title="Mietkonto nicht verfügbar"
+                subtitle={fehler}
+                hideCloseButton
+            />
+        {:else if !konto}
+            <InlineLoading description="Lade Mietkonto…" />
+        {:else}
+            <WalterZahlungsuebersicht
+                rows={zeilen}
+                pageSize={12}
+                faelligTitel="Soll"
+                mitTransaktionen
+                mitNk={!!vertragId}
+                {bearbeitbar}
+                {fetchImpl}
+                on:zahlung={zahlungErfassen}
+                on:geaendert={refresh}
+            />
 
-        <WalterZahlungsliste
-            titel="Guthaben (keinem Monat zugeordnet)"
-            eintraege={nichtZugeordnet.map(zahlungsEintrag)}
-            {bearbeitbar}
-            {fetchImpl}
-            on:erledigt={refresh}
-        />
-        <WalterZahlungsliste
-            titel="Rückgängig gemachte Zahlungen"
-            eintraege={rueckgaengig.map(zahlungsEintrag)}
-            rueckgaengigGemacht
-        />
-    {/if}
-</Tile>
+            <WalterZahlungsliste
+                titel="Guthaben (keinem Monat zugeordnet)"
+                eintraege={nichtZugeordnet.map(zahlungsEintrag)}
+                {bearbeitbar}
+                {fetchImpl}
+                on:erledigt={refresh}
+            />
+            <WalterZahlungsliste
+                titel="Rückgängig gemachte Zahlungen"
+                eintraege={rueckgaengig.map(zahlungsEintrag)}
+                rueckgaengigGemacht
+            />
+        {/if}
+    </div>
+</WalterDataTableContainer>
 
 {#if bearbeitbar && erfassenZeile && erfassenZiel}
     <WalterZahlungErfassen
@@ -161,3 +193,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         on:gebucht={refresh}
     />
 {/if}
+
+<style>
+    .kachel {
+        margin-bottom: 1rem;
+    }
+</style>

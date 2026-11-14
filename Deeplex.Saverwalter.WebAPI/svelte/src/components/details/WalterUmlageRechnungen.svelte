@@ -17,18 +17,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <!--
     Betriebskostenrechnungen einer Umlage: je Rechnung Betrag, bezahlt, offen und wie viel
     auf die Mieter verteilt ist. „+ Rechnung“ erfasst eine Rechnung, „+ Zahlung“ bezahlt
-    sie; aufgeklappt die Zahlungen mit „Rückgängig machen“. Der Link der Zeile führt zum
-    Buchungssatz der Rechnung.
+    sie; aufgeklappt die Verteilung und die Zahlungen mit „Rückgängig machen“. Der Link der
+    Zeile führt zum Buchungssatz der Rechnung. Ein aufklappbarer Abschnitt „Rechnungen
+    (Anzahl)“ mit dem offenen Betrag als Tag; Sprungziel `#rechnungen`.
 -->
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         Button,
         InlineLoading,
         InlineNotification,
         Modal,
-        Tag,
-        Tile
+        Tag
     } from 'carbon-components-svelte';
+    import WalterDataTableContainer from '../elements/WalterDataTableContainer.svelte';
     import { Add } from 'carbon-icons-svelte';
     import WalterZahlungsuebersicht from '../lists/WalterZahlungsuebersicht.svelte';
     import WalterZahlungsliste from '../lists/WalterZahlungsliste.svelte';
@@ -80,9 +82,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: offen = daten
         ? daten.rechnungen.reduce((s, r) => s + Math.max(0, r.offen), 0)
         : 0;
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     // ── + Zahlung ────────────────────────────────────────────────────────────
     let zahlungOffen = false;
@@ -137,14 +136,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-<Tile id="rechnungen" style="margin-bottom: 1rem">
-    <div class="kopf">
-        <h4>
-            Rechnungen
-            {#if daten && offen > 0.005}
-                <Tag type="red">{eur(offen)} offen</Tag>
-            {/if}
-        </h4>
+<WalterDataTableContainer
+    layout="accordion"
+    accordionTitle="Rechnungen"
+    count={zeilen.length}
+    id="rechnungen"
+>
+    <svelte:fragment slot="titel">
+        {#if daten && offen > 0.005}
+            <Tag size="sm" type="red">{formatEuro(offen)} offen</Tag>
+        {/if}
+    </svelte:fragment>
+    <svelte:fragment slot="aktionen">
         {#if bearbeitbar}
             <Button
                 kind="ghost"
@@ -155,7 +158,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 Rechnung
             </Button>
         {/if}
-    </div>
+    </svelte:fragment>
 
     {#if fehler}
         <InlineNotification
@@ -184,7 +187,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rueckgaengigGemacht
         />
     {/if}
-</Tile>
+</WalterDataTableContainer>
 
 {#if bearbeitbar && zahlungFuer}
     <WalterZahlungErfassen
@@ -223,12 +226,3 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {/if}
     </Modal>
 {/if}
-
-<style>
-    .kopf {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-    }
-</style>

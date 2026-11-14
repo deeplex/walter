@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro, formatDatum } from '$walter/services/format';
     import {
         Row,
         Column,
@@ -93,11 +94,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let stornoBuchung: MietKorrekturBuchung | null = null;
     let stornoGrund = '';
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
     const monatText = (jahr: number, m: MietKorrekturMonat) =>
         `${String(m.monat).padStart(2, '0')}/${jahr}`;
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 
     export async function refresh() {
         if (!vertragId) return;
@@ -127,7 +125,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const toast = new WalterToastContent(
             'Miet-Korrektur gebucht',
             'Fehler bei der Miet-Korrektur',
-            () => `Kaltmiete ${j.jahr} um ${eur(j.differenz)} korrigiert.`,
+            () =>
+                `Kaltmiete ${j.jahr} um ${formatEuro(j.differenz)} korrigiert.`,
             (e: unknown) => `Konnte Miet-Korrektur nicht buchen: ${e}`
         );
         try {
@@ -227,7 +226,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <td><strong>{j.jahr}</strong></td>
                         <td />
                         <td />
-                        <td><strong>{eur(j.differenz)}</strong></td>
+                        <td><strong>{formatEuro(j.differenz)}</strong></td>
                         <td>
                             <Tag type={statusTag[j.status]}
                                 >{statusLabel[j.status]}</Tag
@@ -240,7 +239,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                     disabled={busy || grund.trim().length === 0}
                                     title={grund.trim().length === 0
                                         ? 'Bitte zuerst einen Grund angeben'
-                                        : `Kaltmiete ${j.jahr} um ${eur(j.differenz)} korrigieren`}
+                                        : `Kaltmiete ${j.jahr} um ${formatEuro(j.differenz)} korrigieren`}
                                     on:click={() => differenzBuchen(j)}
                                 >
                                     Differenz buchen
@@ -253,9 +252,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             <td style="padding-left: 2rem;"
                                 >{monatText(j.jahr, m)}</td
                             >
-                            <td>{eur(m.istKaltmiete)}</td>
-                            <td>{eur(m.sollKaltmiete)}</td>
-                            <td>{eur(m.delta)}</td>
+                            <td>{formatEuro(m.istKaltmiete)}</td>
+                            <td>{formatEuro(m.sollKaltmiete)}</td>
+                            <td>{formatEuro(m.delta)}</td>
                             <td />
                             <td />
                         </tr>
@@ -264,11 +263,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         <tr>
                             <td style="padding-left: 2rem;">
                                 <a href={`/buchungssaetze/${k.id}`}
-                                    >Korrektur vom {datumText(k.datum)}</a
+                                    >Korrektur vom {formatDatum(k.datum)}</a
                                 >
                                 {#if k.notiz}<br /><small>{k.notiz}</small>{/if}
                             </td>
-                            <td>{eur(k.betrag)}</td>
+                            <td>{formatEuro(k.betrag)}</td>
                             <td />
                             <td />
                             <td />

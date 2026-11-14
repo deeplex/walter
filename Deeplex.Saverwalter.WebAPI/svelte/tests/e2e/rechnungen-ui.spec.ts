@@ -119,14 +119,14 @@ test('Rechnung für Erhaltungsaufwand bezahlen und rückgängig machen', async (
 
     try {
         await authenticatePage(page, 'admin.dev');
-        await page.goto(`/wohnungen/${angelegt.wohnungId}`);
+        await page.goto(`/wohnungen/${angelegt.wohnungId}#erhaltungsaufwand`);
 
         const zeile = page
             .locator('#erhaltungsaufwand')
             .getByRole('row')
             .filter({ hasText: bezeichnung })
             .first();
-        await expect(zeile.getByRole('link')).toHaveAttribute(
+        await expect(zeile.getByRole('link').first()).toHaveAttribute(
             'href',
             `/buchungssaetze/${angelegt.id}`
         );
@@ -175,7 +175,7 @@ test('Betriebskostenrechnung erfassen, bezahlen und rückgängig machen', async 
 
     try {
         await authenticatePage(page, 'admin.dev');
-        await page.goto(`/umlagen/${umlageId}`);
+        await page.goto(`/umlagen/${umlageId}#rechnungen`);
         const abschnitt = page.locator('#rechnungen');
 
         await abschnitt

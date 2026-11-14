@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     stehen nur zur Information da.
 -->
 <script lang="ts">
+    import { formatEuro, formatDatum } from '$walter/services/format';
     import {
         InlineLoading,
         InlineNotification,
@@ -69,10 +70,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: storniert =
         ergebnis?.zahlungenOhneZuordnung.filter((z) => z.storniert) ?? [];
     $: anzahl = (ergebnis?.mehrdeutigeKonten.length ?? 0) + offen.length;
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 </script>
 
 <Tile id="strukturpruefung" style="margin-bottom: 1rem">
@@ -127,8 +124,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <ul class="liste">
                 {#each offen as z (z.transaktionId + z.text)}
                     <li>
-                        <span>{datumText(z.datum)}</span>
-                        <span>{eur(z.betrag)}</span>
+                        <span>{formatDatum(z.datum)}</span>
+                        <span>{formatEuro(z.betrag)}</span>
                         <a href={`/transaktionen/${z.transaktionId}`}
                             >{z.text}</a
                         >
@@ -144,8 +141,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <ul class="liste">
                 {#each storniert as z (z.transaktionId + z.text)}
                     <li>
-                        <span>{datumText(z.datum)}</span>
-                        <span>{eur(z.betrag)}</span>
+                        <span>{formatDatum(z.datum)}</span>
+                        <span>{formatEuro(z.betrag)}</span>
                         <a href={`/transaktionen/${z.transaktionId}`}
                             >{z.text}</a
                         >

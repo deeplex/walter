@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
         WalterBuchhaltungAbschnitt,
         WalterBuchungssaetze,
@@ -40,9 +41,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
-
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 
     async function erledigt(e: CustomEvent<RueckgaengigPlan>) {
         if (e.detail.art === 'Loeschen') await walter_goto('/transaktionen');
@@ -71,7 +69,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         {:else}
                             {zuordnungText(w)}
                         {/if}
-                        <span class="betrag">{eur(w.betrag)}</span>
+                        <span class="betrag">{formatEuro(w.betrag)}</span>
                     </li>
                 {/each}
             </ul>

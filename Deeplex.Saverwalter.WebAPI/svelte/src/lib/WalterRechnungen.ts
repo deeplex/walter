@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import { formatEuro, formatDatum } from '../services/format';
 import type {
     WalterZahlungsEintrag,
     WalterZahlungsZeile
@@ -75,6 +76,14 @@ export interface WalterUmlageRechnung {
     storniert: boolean;
     kannBezahlen: boolean;
     zahlungen: WalterRechnungsZahlung[];
+    /** Wer den verteilten Betrag trägt (Mieteranteil bzw. Eigenanteil), größter zuerst. */
+    verteilung: WalterRechnungsVerteilung[];
+}
+
+export interface WalterRechnungsVerteilung {
+    text: string;
+    href?: string | null;
+    betrag: number;
 }
 
 export interface WalterUmlageRechnungen {
@@ -83,10 +92,6 @@ export interface WalterUmlageRechnungen {
 }
 
 // ── Zeilen für WalterZahlungsuebersicht ─────────────────────────────────────
-
-const eur = (v: number) =>
-    v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-const datumText = (d: string) => new Date(d).toLocaleDateString('de-DE');
 
 /** Zahlung einer Rechnung: „Zahlung an X“ bzw. „von Y“, sonst nur „Zahlung“. */
 export function rechnungsZahlungsEintrag(
@@ -115,7 +120,7 @@ export function erhaltungsaufwandZeilen(
 ): WalterZahlungsZeile[] {
     return daten.rechnungen.map((r) => ({
         id: r.buchungssatzId,
-        periode: [datumText(r.datum), r.bezeichnung, r.aussteller]
+        periode: [formatDatum(r.datum), r.bezeichnung, r.aussteller]
             .filter(Boolean)
             .join(' – '),
         href: `/buchungssaetze/${r.buchungssatzId}`,
@@ -140,13 +145,27 @@ export function umlageRechnungZeilen(
         const nichtVerteilt = r.betrag - r.verteilt;
         return {
             id: r.buchungssatzId,
-            periode: `${r.jahr} – Rechnung vom ${datumText(r.datum)}`,
+            periode: `${r.jahr} – Rechnung vom ${formatDatum(r.datum)}`,
             href: `/buchungssaetze/${r.buchungssatzId}`,
             faellig: r.betrag,
             bezahlt: r.bezahlt,
             offen: r.offen,
             aufschluesselung: [],
             zahlungen: r.zahlungen.map(rechnungsZahlungsEintrag),
+            abschnitte:
+                r.verteilung.length > 0
+                    ? [
+                          {
+                              titel: 'Verteilung',
+                              eintraege: r.verteilung.map((v, i) => ({
+                                  id: `verteilung-${i}`,
+                                  betrag: v.betrag,
+                                  text: v.text,
+                                  href: v.href ?? undefined
+                              }))
+                          }
+                      ]
+                    : undefined,
             erfassenFuer: r.kannBezahlen ? r.buchungssatzId : undefined,
             status: r.storniert ? ZAHLUNGS_STATUS.storniert : undefined,
             zusatz: r.storniert
@@ -156,7 +175,7 @@ export function umlageRechnungZeilen(
                   : r.verteilt <= 0.005
                     ? { text: 'Nicht verteilt', tag: 'warm-gray' }
                     : {
-                          text: `${eur(r.verteilt)} verteilt`,
+                          text: `${formatEuro(r.verteilt)} verteilt`,
                           tag: 'warm-gray'
                       }
         };

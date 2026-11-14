@@ -25,7 +25,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     /// auf dem Verrechnungskonto der Umlage; bezahlt ist, was per Ausgleich daran hängt,
     /// verteilt die gebuchten Soll-Zeilen im selben Satz (<see cref="NkVerteilung"/>).
     /// Storno-Sätze sind keine Rechnungen; eine stornierte Rechnung bleibt als Beleg in der
-    /// Liste, ist aber nicht mehr offen. Liest nur.
+    /// Liste, ist aber nicht mehr offen. Die <see cref="Rechnung.Verteilung"/> nennt je
+    /// Konto, wer den verteilten Betrag trägt (Mieter eines Vertrags oder Eigenanteil einer
+    /// Wohnung), aufgelöst über <see cref="Kontorollen"/>. Liest nur.
     /// </summary>
     public class UmlageRechnungenService(SaverwalterContext ctx)
     {
@@ -44,6 +46,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public decimal Offen => Storniert ? 0m : Betrag - Bezahlt;
             public bool KannBezahlen => !Storniert && Offen > Toleranz;
             public List<RechnungsZahlung> Zahlungen { get; set; } = [];
+            /// <summary>Wer den verteilten Betrag trägt, je Konto; größter Anteil zuerst.</summary>
+            public List<Verteilung> Verteilung { get; set; } = [];
+        }
+
+        /// <summary>Anteil einer Rechnung, den ein Vertrag (Mieter) oder eine Wohnung (Eigenanteil) trägt.</summary>
+        public class Verteilung
+        {
+            public string Text { get; set; } = "";
+            public string? Href { get; set; }
+            public decimal Betrag { get; set; }
         }
 
         public class UmlageRechnungen
@@ -77,6 +89,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     .ThenInclude(s => s.Transaktion).ThenInclude(t => t!.Zahlungsempfaenger).ThenInclude(b => b!.Besitzer)
                 .ToListAsync();
 
+            var verteilZeilen = saetze
+                .SelectMany(s => s.Buchungszeilen)
+                .Where(z => z.SollHaben == SollHaben.Soll && NkVerteilung.IstAktiv(z))
+                .ToList();
+            var besitzer = (await Kontorollen.ErmittleAsync(
+                ctx, verteilZeilen.Select(z => z.Buchungskonto.BuchungskontoId).ToHashSet())).Eindeutig;
+
             var rechnungen = saetze
                 .Select(s =>
                 {
@@ -100,6 +119,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                             .OrderBy(z => z.Buchungssatz.Buchungsdatum)
                             .Select(RechnungsZahlung.Aus)
                             .ToList(),
+                        Verteilung = s.Buchungszeilen
+                            .Where(z => z.SollHaben == SollHaben.Soll && NkVerteilung.IstAktiv(z))
+                            .GroupBy(z => z.Buchungskonto.BuchungskontoId)
+                            .Select(g => VerteilungAuf(g.First().Buchungskonto, g.Sum(z => z.Betrag), besitzer))
+                            .OrderByDescending(v => v.Betrag)
+                            .ToList(),
                     };
                 })
                 .OrderByDescending(r => r.Jahr)
@@ -120,6 +145,29 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             {
                 Rechnungen = rechnungen,
                 RueckgaengigGemacht = rueckgaengig.Select(RechnungsZahlung.Aus).ToList(),
+            };
+        }
+
+        /// <summary>Wer ein Verteil-Konto trägt; ohne eindeutigen Besitzer das Konto selbst.</summary>
+        private static Verteilung VerteilungAuf(Buchungskonto konto, decimal betrag, Dictionary<int, KontoBesitz> besitzer)
+        {
+            if (!besitzer.TryGetValue(konto.BuchungskontoId, out var b))
+                return new Verteilung
+                {
+                    Text = $"Buchungskonto {konto.Kontonummer} {konto.Bezeichnung}",
+                    Href = $"/buchungskonten/{konto.BuchungskontoId}",
+                    Betrag = betrag,
+                };
+            return b.Rolle switch
+            {
+                KontoRolle.NkVorauszahlung => new Verteilung
+                {
+                    Text = $"Mieteranteil – {b.Text}",
+                    Href = $"/vertraege/{b.Id}#abrechnungen",
+                    Betrag = betrag,
+                },
+                KontoRolle.Aufwand => new Verteilung { Text = $"Eigenanteil – {b.Text}", Href = b.Href, Betrag = betrag },
+                _ => new Verteilung { Text = $"{b.Typ} {b.Text}", Href = b.Href, Betrag = betrag },
             };
         }
     }
