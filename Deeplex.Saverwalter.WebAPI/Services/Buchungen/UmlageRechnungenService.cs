@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         public class Verteilung
         {
             public string Text { get; set; } = "";
-            public string? Href { get; set; }
+            public EntityRef? Ref { get; set; }
             public decimal Betrag { get; set; }
         }
 
@@ -152,22 +152,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         private static Verteilung VerteilungAuf(Buchungskonto konto, decimal betrag, Dictionary<int, KontoBesitz> besitzer)
         {
             if (!besitzer.TryGetValue(konto.BuchungskontoId, out var b))
-                return new Verteilung
-                {
-                    Text = $"Buchungskonto {konto.Kontonummer} {konto.Bezeichnung}",
-                    Href = $"/buchungskonten/{konto.BuchungskontoId}",
-                    Betrag = betrag,
-                };
+                return new Verteilung { Text = Kontorollen.KontoText(konto), Ref = EntityRef.For(konto), Betrag = betrag };
             return b.Rolle switch
             {
+                // Der Mieteranteil gehört zur Abrechnung des Vertrags, nicht zu seinem Mietkonto.
                 KontoRolle.NkVorauszahlung => new Verteilung
                 {
                     Text = $"Mieteranteil – {b.Text}",
-                    Href = $"/vertraege/{b.Id}#abrechnungen",
+                    Ref = b.Ref with { Section = EntityRefSection.Abrechnungen },
                     Betrag = betrag,
                 },
-                KontoRolle.Aufwand => new Verteilung { Text = $"Eigenanteil – {b.Text}", Href = b.Href, Betrag = betrag },
-                _ => new Verteilung { Text = $"{b.Typ} {b.Text}", Href = b.Href, Betrag = betrag },
+                KontoRolle.Aufwand => new Verteilung { Text = $"Eigenanteil – {b.Text}", Ref = b.Ref, Betrag = betrag },
+                _ => new Verteilung { Text = $"{b.Typ} {b.Text}", Ref = b.Ref, Betrag = betrag },
             };
         }
     }

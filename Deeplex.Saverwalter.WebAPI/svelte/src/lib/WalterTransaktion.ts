@@ -17,11 +17,12 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBuchungssatzEntry } from './WalterBuchungssatz';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
+import type { WalterEntityRef } from './WalterEntityRef';
 
 /** Zuordnung einer Zahlung: wofür sie war (aus den Buchungen, nie aus Freitext). */
 export interface WalterZuordnungEintrag {
     text: string;
-    href?: string | null;
+    ref?: WalterEntityRef | null;
     betrag: number;
     /** Der Satz dieser Zahlung wurde storniert. */
     storniert: boolean;

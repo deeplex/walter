@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { entityRefHref } from '$walter/lib/WalterEntityRef';
     import {
         WalterUmlageEntry,
         WalterZaehlerstandEntry,
@@ -299,7 +300,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: forderungTableRows = offeneMietForderungen.map((f) => ({
         id: `forderung-${f.vertragId}-${f.monat}`,
-        href: `/vertraege/${f.vertragId}#mietkonto`,
+        href: entityRefHref({
+            type: 'Vertrag',
+            id: f.vertragId,
+            section: 'mietkonto'
+        }),
         monat: monatText(f.monat),
         vertrag: f.vertragBezeichnung,
         offen: f.offen.toFixed(2),
@@ -418,7 +423,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: guthabenTableRows = guthaben.map((g) => ({
         id: `guthaben-${g.vertragId}-${g.monat}`,
-        href: `/vertraege/${g.vertragId}#mietkonto`,
+        href: entityRefHref({
+            type: 'Vertrag',
+            id: g.vertragId,
+            section: 'mietkonto'
+        }),
         monat: monatText(g.monat),
         vertrag: g.vertragBezeichnung,
         guthaben: g.guthaben.toFixed(2)

@@ -19,6 +19,7 @@ import type {
     WalterZahlungsZeile
 } from './WalterMietkonto';
 import { ZAHLUNGS_STATUS } from './WalterZahlungsStatus';
+import { entityRefHref, type WalterEntityRef } from './WalterEntityRef';
 
 // ── Antworten von GET /api/wohnungen/{id}/erhaltungsaufwand ─────────────────
 // und GET /api/umlagen/{id}/rechnungen
@@ -82,7 +83,7 @@ export interface WalterUmlageRechnung {
 
 export interface WalterRechnungsVerteilung {
     text: string;
-    href?: string | null;
+    ref?: WalterEntityRef | null;
     betrag: number;
 }
 
@@ -161,7 +162,7 @@ export function umlageRechnungZeilen(
                                   id: `verteilung-${i}`,
                                   betrag: v.betrag,
                                   text: v.text,
-                                  href: v.href ?? undefined
+                                  href: entityRefHref(v.ref)
                               }))
                           }
                       ]

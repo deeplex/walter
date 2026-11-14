@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             zuordnung.Select(z => (z.Text.Split(" – ")[0], z.Betrag)).Should()
                 .BeEquivalentTo([("Kaltmiete Mär 2024", 500m), ("NK-Vorauszahlung 2024", 50m)]);
-            zuordnung.Should().OnlyContain(z => z.Href == $"/vertraege/{vertrag.VertragId}#mietkonto" && !z.Storniert);
+            zuordnung.Should().OnlyContain(z => z.Ref == new EntityRef("Vertrag", vertrag.VertragId.ToString(), EntityRefSection.Mietkonto) && !z.Storniert);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var z = (await ZuordnungAsync(ctx, t)).Should().ContainSingle().Subject;
 
             z.Text.Should().Be("Betriebskosten Wasser 2023");
-            z.Href.Should().Be($"/umlagen/{umlage.UmlageId}#rechnungen");
+            z.Ref.Should().Be(new EntityRef("Umlage", umlage.UmlageId.ToString(), EntityRefSection.Rechnungen));
             z.Storniert.Should().BeTrue();
         }
 
@@ -159,7 +159,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var z = (await ZuordnungAsync(ctx, t)).Should().ContainSingle().Subject;
 
             z.Text.Should().Be("Erhaltungsaufwand – EG links");
-            z.Href.Should().Be($"/wohnungen/{wohnung.WohnungId}#erhaltungsaufwand");
+            z.Ref.Should().Be(new EntityRef("Wohnung", wohnung.WohnungId.ToString(), EntityRefSection.Erhaltungsaufwand));
             z.Storniert.Should().BeTrue();
         }
 
@@ -221,7 +221,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var z = (await ZuordnungAsync(ctx, t)).Should().ContainSingle().Subject;
 
             z.Text.Should().Be("Buchungskonto 9999 Sonstiges");
-            z.Href.Should().Be($"/buchungskonten/{fremd.BuchungskontoId}");
+            z.Ref.Should().Be(new EntityRef("Buchungskonto", fremd.BuchungskontoId.ToString()));
         }
 
         [Fact]

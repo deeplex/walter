@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { entityRefHref } from '$walter/lib/WalterEntityRef';
     import type { PageData } from './$types';
     import {
         WalterBuchhaltungAbschnitt,
@@ -70,8 +71,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {#if data.entry.vertrag?.id}
             <p class="hinweis">
                 Die Garage gehört zum
-                <a href={`/vertraege/${data.entry.vertrag.id}#mietkonto`}
-                    >Mietkonto des Wohnungsvertrags</a
+                <a
+                    href={entityRefHref({
+                        type: 'Vertrag',
+                        id: data.entry.vertrag.id,
+                        section: 'mietkonto'
+                    })}>Mietkonto des Wohnungsvertrags</a
                 >; dort erscheinen dieselben Monate, und eine Zahlung für
                 Wohnung und Garage zusammen wird dort erfasst.
             </p>

@@ -19,11 +19,11 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
-    /// <summary>Zuordnung einer Transaktion: wofür sie war, mit Link zum Fachobjekt.</summary>
+    /// <summary>Zuordnung einer Transaktion: wofür sie war, mit Referenz auf das Fachobjekt.</summary>
     public class ZuordnungEintrag
     {
         public string Text { get; set; } = "";
-        public string? Href { get; set; }
+        public EntityRef? Ref { get; set; }
         public decimal Betrag { get; set; }
         /// <summary>Der Satz wurde storniert.</summary>
         public bool Storniert { get; set; }
@@ -106,11 +106,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                         .Where(z => RolleVon(z, bezuege) != KontoRolle.Geld)
                         .Select(z => ZahlungsEintrag(z, satz, bezuege))
                     : [Entstehung(satz, bezuege)];
-                foreach (var (text, href, betrag) in eintraege)
+                foreach (var (text, entityRef, betrag) in eintraege)
                 {
-                    var gleich = liste.FirstOrDefault(e => e.Text == text && e.Href == href && e.Storniert == storniert);
+                    var gleich = liste.FirstOrDefault(e => e.Text == text && e.Ref == entityRef && e.Storniert == storniert);
                     if (gleich != null) gleich.Betrag += betrag;
-                    else liste.Add(new ZuordnungEintrag { Text = text, Href = href, Betrag = betrag, Storniert = storniert });
+                    else liste.Add(new ZuordnungEintrag { Text = text, Ref = entityRef, Betrag = betrag, Storniert = storniert });
                 }
             }
 
@@ -123,11 +123,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         private static bool IstZahlung(Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege) =>
             satz.Buchungszeilen.Any(z => RolleVon(z, bezuege) == KontoRolle.Geld);
 
-        private static (string Text, string? Href, decimal Betrag) ZahlungsEintrag(
+        private static (string Text, EntityRef? Ref, decimal Betrag) ZahlungsEintrag(
             Buchungszeile zeile, Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege)
         {
             if (!bezuege.TryGetValue(zeile.Buchungskonto.BuchungskontoId, out var bezug))
-                return (KontoText(zeile.Buchungskonto), KontoHref(zeile.Buchungskonto), zeile.Betrag);
+                return (Kontorollen.KontoText(zeile.Buchungskonto), EntityRef.For(zeile.Buchungskonto), zeile.Betrag);
 
             var posten = zeile.ZugeordnetZu;
             string Mit(string art) => $"{art} – {bezug.Kontext}";
@@ -152,13 +152,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             if (text is null)
             {
                 var rechnung = Entstehung(posten!.Buchungssatz, bezuege);
-                return (rechnung.Text, rechnung.Href, zeile.Betrag);
+                return (rechnung.Text, rechnung.Ref, zeile.Betrag);
             }
-            return (text, bezug.Href, zeile.Betrag);
+            return (text, bezug.Ref, zeile.Betrag);
         }
 
         /// <summary>Der eine Posten eines Satzes ohne Geld-Zeile (Rechnung).</summary>
-        private static (string Text, string? Href, decimal Betrag) Entstehung(
+        private static (string Text, EntityRef? Ref, decimal Betrag) Entstehung(
             Buchungssatz satz, Dictionary<int, KontoBesitz> bezuege)
         {
             Buchungszeile? Erste(KontoRolle rolle, SollHaben? seite = null) =>
@@ -172,7 +172,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 var betrag = satz.Buchungszeilen
                     .Where(z => z.Buchungskonto.BuchungskontoId == bkZeile.Buchungskonto.BuchungskontoId)
                     .Sum(z => z.SollHaben == bkZeile.SollHaben ? z.Betrag : -z.Betrag);
-                return ($"Betriebskosten {bk.Kontext} {satz.Buchungsjahr}", bk.Href, betrag);
+                return ($"Betriebskosten {bk.Kontext} {satz.Buchungsjahr}", bk.Ref, betrag);
             }
 
             if (Erste(KontoRolle.Aufwand, SollHaben.Soll) is Buchungszeile aufwandZeile)
@@ -181,7 +181,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 var betrag = satz.Buchungszeilen
                     .Where(z => RolleVon(z, bezuege) == KontoRolle.Aufwand && z.SollHaben == SollHaben.Soll)
                     .Sum(z => z.Betrag);
-                return ($"Erhaltungsaufwand – {aufwand.Kontext}", aufwand.Href, betrag);
+                return ($"Erhaltungsaufwand – {aufwand.Kontext}", aufwand.Ref, betrag);
             }
 
             // Sonst: erste Zeile mit Besitzer außer dem Gläubiger, dann der Gläubiger, dann ein Konto.
@@ -189,9 +189,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 ?? satz.Buchungszeilen.FirstOrDefault(z => RolleVon(z, bezuege) == KontoRolle.Verbindlichkeit)
                 ?? satz.Buchungszeilen.First();
             if (!bezuege.TryGetValue(zeile.Buchungskonto.BuchungskontoId, out var b))
-                return (KontoText(zeile.Buchungskonto), KontoHref(zeile.Buchungskonto), zeile.Betrag);
+                return (Kontorollen.KontoText(zeile.Buchungskonto), EntityRef.For(zeile.Buchungskonto), zeile.Betrag);
             var art = b.Rolle == KontoRolle.Verbindlichkeit ? "Rechnung" : Art(b.Rolle);
-            return ($"{art} – {b.Kontext}", b.Href, zeile.Betrag);
+            return ($"{art} – {b.Kontext}", b.Ref, zeile.Betrag);
         }
 
         private static string Art(KontoRolle rolle) => rolle switch
@@ -209,8 +209,5 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             KontoRolle.Verbindlichkeit => "Verbindlichkeit",
             _ => "Zahlung",
         };
-
-        private static string KontoText(Buchungskonto k) => $"Buchungskonto {k.Kontonummer} {k.Bezeichnung}";
-        private static string KontoHref(Buchungskonto k) => $"/buchungskonten/{k.BuchungskontoId}";
     }
 }

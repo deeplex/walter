@@ -6,6 +6,10 @@ import {
     signInApi,
     withFreshApiContext
 } from './auth';
+import {
+    entityRefHref,
+    type WalterEntityRef
+} from '../../src/lib/WalterEntityRef';
 
 /**
  * „Zuordnung“ einer Zahlung: in der Transaktionsliste als Spalte, auf der Transaktion oben mit
@@ -14,7 +18,7 @@ import {
 
 type ZuordnungEintrag = {
     text: string;
-    href?: string | null;
+    ref?: WalterEntityRef | null;
     storniert: boolean;
 };
 type Transaktion = { id: string; zuordnung: ZuordnungEintrag[] };
@@ -27,18 +31,18 @@ test('Zuordnung auf der Transaktion und in der Liste', async ({ page }) => {
             token,
             '/api/transaktionen?take=50'
         );
-        return liste.find((t) => t.zuordnung.some((w) => w.href));
+        return liste.find((t) => t.zuordnung.some((w) => w.ref));
     });
     expect(
         transaktion,
         'erwartet eine zugeordnete Transaktion im Dev-Seed'
     ).toBeDefined();
-    const eintrag = transaktion!.zuordnung.find((w) => w.href)!;
+    const eintrag = transaktion!.zuordnung.find((w) => w.ref)!;
 
     await authenticatePage(page, 'admin.dev');
     await page.goto(`/transaktionen/${transaktion!.id}`);
     const link = page.locator('#zuordnung').getByRole('link').first();
-    await expect(link).toHaveAttribute('href', eintrag.href!);
+    await expect(link).toHaveAttribute('href', entityRefHref(eintrag.ref)!);
     await expect(link).toContainText(eintrag.text);
 
     await page.goto('/transaktionen');

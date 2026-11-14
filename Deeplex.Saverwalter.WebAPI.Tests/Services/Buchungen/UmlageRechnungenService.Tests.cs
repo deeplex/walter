@@ -15,6 +15,7 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using FluentAssertions;
 using Xunit;
@@ -155,7 +156,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             einzige.Verteilung.Select(v => v.Betrag).Should().Equal(700m, 300m);
             einzige.Verteilung[0].Text.Should().StartWith("Mieteranteil – ");
-            einzige.Verteilung[0].Href.Should().Be($"/vertraege/{vertrag.VertragId}#abrechnungen");
+            einzige.Verteilung[0].Ref.Should().Be(
+                new EntityRef("Vertrag", vertrag.VertragId.ToString(), EntityRefSection.Abrechnungen));
             einzige.Verteilung[1].Text.Should().StartWith("Eigenanteil – ");
         }
     }

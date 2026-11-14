@@ -15,6 +15,7 @@
 
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
+import { entityRefHref } from './WalterEntityRef';
 
 /** Verknüpfung eines Buchungskontos zu seiner Besitzer-Entität. */
 export type WalterKontoVerknuepfung = {
@@ -82,22 +83,7 @@ export function kontoStatusTag(
 }
 
 export function kontoVerknuepfungHref(v: WalterKontoVerknuepfung): string {
-    switch (v.typ) {
-        case 'Vertrag':
-            return `/vertraege/${v.id}`;
-        case 'Wohnung':
-            return `/wohnungen/${v.id}`;
-        case 'Umlage':
-            return `/umlagen/${v.id}`;
-        case 'Kontakt':
-            return `/kontakte/${v.id}`;
-        case 'Garage':
-            return `/garagen/${v.id}`;
-        case 'GarageVertrag':
-            return `/garage-vertraege/${v.id}`;
-        case 'Bankkonto':
-            return `/bankkontos/${v.id}`;
-    }
+    return entityRefHref({ type: v.typ, id: v.id })!;
 }
 
 export class WalterBuchungskontoEntry extends WalterApiHandler {

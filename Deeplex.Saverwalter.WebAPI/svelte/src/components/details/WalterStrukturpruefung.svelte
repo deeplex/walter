@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     stehen nur zur Information da.
 -->
 <script lang="ts">
+    import type { WalterEntityRef } from '$walter/lib/WalterEntityRef';
     import { formatEuro, formatDatum } from '$walter/services/format';
     import {
         InlineLoading,
@@ -43,7 +44,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         datum: string;
         betrag: number;
         text: string;
-        href?: string | null;
+        ref?: WalterEntityRef | null;
         storniert: boolean;
     };
     type Ergebnis = {

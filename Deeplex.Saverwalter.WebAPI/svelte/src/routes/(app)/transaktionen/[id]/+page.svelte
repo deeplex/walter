@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterFileWrapper,
+        entityRefHref,
         zuordnungText,
         type RueckgaengigPlan
     } from '$walter/lib';
@@ -64,8 +65,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <ul class="zuordnung">
                 {#each data.entry.zuordnung as w}
                     <li>
-                        {#if w.href}
-                            <a href={w.href}>{zuordnungText(w)}</a>
+                        {#if w.ref}
+                            <a href={entityRefHref(w.ref)}>{zuordnungText(w)}</a
+                            >
                         {:else}
                             {zuordnungText(w)}
                         {/if}

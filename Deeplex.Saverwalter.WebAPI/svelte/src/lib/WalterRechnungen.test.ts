@@ -79,7 +79,11 @@ describe('umlageRechnungZeilen', () => {
                     verteilung: [
                         {
                             text: 'Mieteranteil – Müller',
-                            href: '/vertraege/1#abrechnungen',
+                            ref: {
+                                type: 'Vertrag',
+                                id: '1',
+                                section: 'abrechnungen'
+                            },
                             betrag: 700
                         },
                         { text: 'Eigenanteil – EG links', betrag: 300 }

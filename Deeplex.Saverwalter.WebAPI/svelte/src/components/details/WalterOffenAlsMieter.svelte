@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     darunter die Summe. Die Zeile führt zum Mietkonto bzw. zu den Abrechnungen.
 -->
 <script lang="ts">
+    import { entityRefHref } from '$walter/lib/WalterEntityRef';
     import { formatEuro } from '$walter/services/format';
     import {
         InlineLoading,
@@ -110,8 +111,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     {#each zeilen as z (z.vertrag.id)}
                         <StructuredListRow>
                             <StructuredListCell>
-                                <a href={`/vertraege/${z.vertrag.id}#mietkonto`}
-                                    >{z.vertrag.text}</a
+                                <a
+                                    href={entityRefHref({
+                                        type: 'Vertrag',
+                                        id: z.vertrag.id,
+                                        section: 'mietkonto'
+                                    })}>{z.vertrag.text}</a
                                 >
                             </StructuredListCell>
                             <StructuredListCell
@@ -120,8 +125,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             <StructuredListCell>
                                 {#if z.nk > 0.005}
                                     <a
-                                        href={`/vertraege/${z.vertrag.id}#abrechnungen`}
-                                        >{formatEuro(z.nk)}</a
+                                        href={entityRefHref({
+                                            type: 'Vertrag',
+                                            id: z.vertrag.id,
+                                            section: 'abrechnungen'
+                                        })}>{formatEuro(z.nk)}</a
                                     >
                                 {:else}
                                     —

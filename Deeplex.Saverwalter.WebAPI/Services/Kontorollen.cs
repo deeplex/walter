@@ -71,14 +71,36 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     }
 
     /// <summary>
+    /// Reference to a domain object (<c>Type</c>, <c>Id</c>), optionally to a section of its
+    /// page (<see cref="EntityRefSection"/>). The backend knows no routes: the frontend builds
+    /// the URL in one place (<c>entityRefHref</c>). Types as in <see cref="KontoBesitz.Typ"/>,
+    /// plus <c>Buchungskonto</c> for accounts without a unique owner.
+    /// </summary>
+    public record EntityRef(string Type, string Id, string? Section = null)
+    {
+        public static EntityRef For(Buchungskonto k) => new("Buchungskonto", k.BuchungskontoId.ToString());
+    }
+
+    /// <summary>Sections of a page an <see cref="EntityRef"/> can point to (their anchor ids).</summary>
+    public static class EntityRefSection
+    {
+        public const string Mietkonto = "mietkonto";
+        public const string Abrechnungen = "abrechnungen";
+        public const string Kaution = "kaution";
+        public const string Rechnungen = "rechnungen";
+        public const string Erhaltungsaufwand = "erhaltungsaufwand";
+    }
+
+    /// <summary>
     /// Ein Besitzer eines Kontos: Rolle (Zuordnung) und Funktion (Buchhaltung,
     /// Jahresabschluss), welches Objekt (<c>Typ</c>, <c>Id</c>, <c>Text</c>), ein kurzer
-    /// Kontext für Klartexte und der Link zum passenden Abschnitt.
+    /// Kontext für Klartexte und der passende Abschnitt seiner Seite (<c>Section</c>).
     /// </summary>
     public record KontoBesitz(
-        KontoRolle Rolle, KontoFunktion Funktion, string Typ, string Id, string Text, string Kontext, string? Href)
+        KontoRolle Rolle, KontoFunktion Funktion, string Typ, string Id, string Text, string Kontext, string? Section)
     {
         public string Besitzer => $"{Typ} {Id}";
+        public EntityRef Ref => new(Typ, Id, Section);
     }
 
     /// <summary>
@@ -110,6 +132,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         /// <summary>
         /// Verknüpfungen der Konten zu ihren Besitzern; ein mehrdeutiges Konto hat mehrere.
         /// </summary>
+        /// <summary>Klartext eines Kontos ohne eindeutigen Besitzer.</summary>
+        public static string KontoText(Buchungskonto k) => $"Buchungskonto {k.Kontonummer} {k.Bezeichnung}";
+
         public static async Task<List<KontoVerknuepfungEntry>> VerknuepfungenAsync(
             SaverwalterContext ctx, IEnumerable<int> kontoIds)
         {
@@ -134,12 +159,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         {
             var alle = new Dictionary<int, List<KontoBesitz>>();
             void Add(Buchungskonto? konto, KontoRolle rolle, KontoFunktion funktion,
-                string typ, int id, string text, string kontext, string? href)
+                string typ, int id, string text, string kontext, string? section = null)
             {
                 if (konto == null || (kontoIds != null && !kontoIds.Contains(konto.BuchungskontoId))) return;
                 if (!alle.TryGetValue(konto.BuchungskontoId, out var liste))
                     alle[konto.BuchungskontoId] = liste = [];
-                liste.Add(new KontoBesitz(rolle, funktion, typ, id.ToString(), text, kontext, href));
+                liste.Add(new KontoBesitz(rolle, funktion, typ, id.ToString(), text, kontext, section));
             }
             bool Relevant(int id) => kontoIds == null || kontoIds.Contains(id);
 
@@ -165,14 +190,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 var text = VertragText(v);
                 var kontext = WohnungText(v.Wohnung);
-                var href = $"/vertraege/{v.VertragId}";
-                void V(Buchungskonto k, KontoRolle r, KontoFunktion f, string h) => Add(k, r, f, "Vertrag", v.VertragId, text, kontext, h);
-                V(v.MietBuchungskonto, KontoRolle.Kaltmiete, KontoFunktion.Mietforderungen, href + "#mietkonto");
-                V(v.NkBuchungskonto, KontoRolle.NkVorauszahlung, KontoFunktion.NkVorauszahlungen, href + "#mietkonto");
-                V(v.BkAbrechnungsKonto, KontoRolle.BkAbrechnung, KontoFunktion.BkAbrechnung, href + "#abrechnungen");
-                V(v.KautionsKonto, KontoRolle.Kaution, KontoFunktion.Kaution, href + "#kaution");
-                V(v.MietminderungsKonto, KontoRolle.Mietminderung, KontoFunktion.Mietminderungen, href);
-                V(v.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge, href);
+                void V(Buchungskonto k, KontoRolle r, KontoFunktion f, string? section = null) =>
+                    Add(k, r, f, "Vertrag", v.VertragId, text, kontext, section);
+                V(v.MietBuchungskonto, KontoRolle.Kaltmiete, KontoFunktion.Mietforderungen, EntityRefSection.Mietkonto);
+                V(v.NkBuchungskonto, KontoRolle.NkVorauszahlung, KontoFunktion.NkVorauszahlungen, EntityRefSection.Mietkonto);
+                V(v.BkAbrechnungsKonto, KontoRolle.BkAbrechnung, KontoFunktion.BkAbrechnung, EntityRefSection.Abrechnungen);
+                V(v.KautionsKonto, KontoRolle.Kaution, KontoFunktion.Kaution, EntityRefSection.Kaution);
+                V(v.MietminderungsKonto, KontoRolle.Mietminderung, KontoFunktion.Mietminderungen);
+                V(v.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge);
             }
 
             var garageVertraege = await ctx.GarageVertraege
@@ -188,9 +213,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 var text = $"{gv.Garage.Kennung} | {string.Join(", ", gv.Mieter.Select(m => m.Bezeichnung))}";
                 var kontext = $"Garage {gv.Garage.Kennung}";
-                var href = $"/garage-vertraege/{gv.GarageVertragId}";
-                Add(gv.MietBuchungskonto, KontoRolle.Garagenmiete, KontoFunktion.Mietforderungen, "GarageVertrag", gv.GarageVertragId, text, kontext, href);
-                Add(gv.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge, "GarageVertrag", gv.GarageVertragId, text, kontext, href);
+                Add(gv.MietBuchungskonto, KontoRolle.Garagenmiete, KontoFunktion.Mietforderungen, "GarageVertrag", gv.GarageVertragId, text, kontext, EntityRefSection.Mietkonto);
+                Add(gv.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge, "GarageVertrag", gv.GarageVertragId, text, kontext);
             }
 
             var umlagen = await ctx.Umlagen
@@ -206,10 +230,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             foreach (var u in umlagen)
             {
                 var t = u.Typ.Bezeichnung;
-                var href = $"/umlagen/{u.UmlageId}#rechnungen";
-                Add(u.NkVerrechnungsKonto, KontoRolle.Betriebskosten, KontoFunktion.NkVerrechnung, "Umlage", u.UmlageId, t, t, href);
-                Add(u.NkSonderVerrechnungsKonto, KontoRolle.Betriebskosten, KontoFunktion.NkSonderVerrechnung, "Umlage", u.UmlageId, t, t, href);
-                Add(u.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge, "Umlage", u.UmlageId, t, t, href);
+                const string rechnungen = EntityRefSection.Rechnungen;
+                Add(u.NkVerrechnungsKonto, KontoRolle.Betriebskosten, KontoFunktion.NkVerrechnung, "Umlage", u.UmlageId, t, t, rechnungen);
+                Add(u.NkSonderVerrechnungsKonto, KontoRolle.Betriebskosten, KontoFunktion.NkSonderVerrechnung, "Umlage", u.UmlageId, t, t, rechnungen);
+                Add(u.ZahlungsKonto, KontoRolle.Geld, KontoFunktion.Zahlungseingaenge, "Umlage", u.UmlageId, t, t, rechnungen);
             }
 
             var wohnungen = await ctx.Wohnungen
@@ -222,8 +246,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .ToListAsync();
             foreach (var w in wohnungen)
             {
-                Add(w.AufwandsKonto, KontoRolle.Aufwand, KontoFunktion.Aufwendungen, "Wohnung", w.WohnungId, WohnungLang(w), WohnungText(w), $"/wohnungen/{w.WohnungId}#erhaltungsaufwand");
-                Add(w.MietErtragskonto, KontoRolle.Mietertrag, KontoFunktion.Mietertraege, "Wohnung", w.WohnungId, WohnungLang(w), WohnungText(w), $"/wohnungen/{w.WohnungId}");
+                Add(w.AufwandsKonto, KontoRolle.Aufwand, KontoFunktion.Aufwendungen, "Wohnung", w.WohnungId, WohnungLang(w), WohnungText(w), EntityRefSection.Erhaltungsaufwand);
+                Add(w.MietErtragskonto, KontoRolle.Mietertrag, KontoFunktion.Mietertraege, "Wohnung", w.WohnungId, WohnungLang(w), WohnungText(w));
             }
 
             var garagen = await ctx.Garagen
@@ -231,7 +255,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Include(g => g.Ertragskonto)
                 .ToListAsync();
             foreach (var g in garagen)
-                Add(g.Ertragskonto, KontoRolle.Garagenertrag, KontoFunktion.Mietertraege, "Garage", g.GarageId, g.Kennung, $"Garage {g.Kennung}", $"/garagen/{g.GarageId}");
+                Add(g.Ertragskonto, KontoRolle.Garagenertrag, KontoFunktion.Mietertraege, "Garage", g.GarageId, g.Kennung, $"Garage {g.Kennung}");
 
             var kontakte = await ctx.Kontakte
                 .Where(k => k.VerbindlichkeitsKonto != null
@@ -239,14 +263,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Include(k => k.VerbindlichkeitsKonto)
                 .ToListAsync();
             foreach (var k in kontakte)
-                Add(k.VerbindlichkeitsKonto, KontoRolle.Verbindlichkeit, KontoFunktion.Verbindlichkeiten, "Kontakt", k.KontaktId, k.Bezeichnung, k.Bezeichnung, $"/kontakte/{k.KontaktId}");
+                Add(k.VerbindlichkeitsKonto, KontoRolle.Verbindlichkeit, KontoFunktion.Verbindlichkeiten, "Kontakt", k.KontaktId, k.Bezeichnung, k.Bezeichnung);
 
             var bankkonten = await ctx.Bankkontos
                 .Where(b => kontoIds == null || kontoIds.Contains(b.BuchungsKonto.BuchungskontoId))
                 .Include(b => b.BuchungsKonto)
                 .ToListAsync();
             foreach (var b in bankkonten)
-                Add(b.BuchungsKonto, KontoRolle.Geld, KontoFunktion.Bankkonto, "Bankkonto", b.BankkontoId, b.Iban ?? b.Bank ?? "", b.Iban ?? "", $"/bankkontos/{b.BankkontoId}");
+                Add(b.BuchungsKonto, KontoRolle.Geld, KontoFunktion.Bankkonto, "Bankkonto", b.BankkontoId, b.Iban ?? b.Bank ?? "", b.Iban ?? "");
 
             var ergebnis = new Ergebnis();
             foreach (var (id, liste) in alle.Where(e => Relevant(e.Key)))

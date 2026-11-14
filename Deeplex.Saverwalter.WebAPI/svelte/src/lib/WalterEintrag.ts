@@ -15,6 +15,7 @@
 
 import type { WalterZuordnungEintrag } from './WalterTransaktion';
 import { zuordnungText } from './WalterTransaktion';
+import { entityRefHref } from './WalterEntityRef';
 
 /** Farbe eines Tags an einem Eintrag. */
 export type WalterEintragTagFarbe =
@@ -58,7 +59,7 @@ export function zuordnungAlsTeile(
     return zuordnung.map((z) => ({
         text: zuordnungText(z),
         betrag: z.betrag,
-        href: z.href,
+        href: entityRefHref(z.ref),
         gedimmt: z.storniert
     }));
 }
@@ -74,7 +75,7 @@ export function zuordnungAlsEintraege(
         id: `zuordnung-${i}`,
         betrag: z.betrag,
         text: z.text,
-        href: z.href ?? undefined,
+        href: entityRefHref(z.ref),
         tag: z.storniert
             ? { text: 'Rückgängig gemacht', tag: 'gray' as const }
             : undefined

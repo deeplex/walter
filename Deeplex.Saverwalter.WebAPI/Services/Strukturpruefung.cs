@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             public DateOnly Datum { get; set; }
             public decimal Betrag { get; set; }
             public string Text { get; set; } = "";
-            public string? Href { get; set; }
+            public EntityRef? Ref { get; set; }
             public bool Storniert { get; set; }
         }
 
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                         Datum = t.Zahlungsdatum,
                         Betrag = z.Betrag,
                         Text = $"{art} – {besitz.Kontext}",
-                        Href = besitz.Href,
+                        Ref = besitz.Ref,
                         Storniert = z.Buchungssatz.StornoNach != null,
                     };
                 })

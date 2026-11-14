@@ -1,17 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
 import { zuordnungAlsEintraege, zuordnungAlsTeile } from './WalterEintrag';
+import type { WalterZuordnungEintrag } from './WalterTransaktion';
 
-const zuordnung = [
+const zuordnung: WalterZuordnungEintrag[] = [
     {
         text: 'Kaltmiete Jan 2026 – EG links',
-        href: '/vertraege/1#mietkonto',
+        ref: { type: 'Vertrag', id: '1', section: 'mietkonto' },
         betrag: 500,
         storniert: false
     },
     {
         text: 'NK-Vorauszahlung 2026 – EG links',
-        href: null,
+        ref: null,
         betrag: 150,
         storniert: true
     }
