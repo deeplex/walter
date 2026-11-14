@@ -14,10 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -218,9 +218,31 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             foreach (var bk in input.BetriebskostenEingaenge)
             {
-                var umlage = await _ctx.Umlagen.FindAsync(bk.UmlageId);
-                if (umlage is null) return NotFound($"Umlage {bk.UmlageId} nicht gefunden.");
+                // Zahlung einer erfassten Rechnung: die Umlage ist die des Verrechnungskontos.
+                var umlage = bk.ExistingBuchungssatzId is Guid rechnungId
+                    ? await _ctx.Umlagen.FirstOrDefaultAsync(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Haben && z.Buchungssatz.BuchungssatzId == rechnungId))
+                    : await _ctx.Umlagen.FindAsync(bk.UmlageId);
+                if (umlage is null)
+                    return NotFound(bk.ExistingBuchungssatzId is Guid id
+                        ? $"Betriebskostenrechnung {id} nicht gefunden."
+                        : $"Umlage {bk.UmlageId} nicht gefunden.");
                 var authRx = await _auth.AuthorizeAsync(User!, umlage, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var ea in input.Erhaltungsaufwendungen)
+            {
+                // Zahlung einer erfassten Rechnung: die Wohnung ist die des Aufwandskontos.
+                var wohnung = ea.ExistingBuchungssatzId is Guid rechnungId
+                    ? await _ctx.Wohnungen.FirstOrDefaultAsync(w => w.AufwandsKonto.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Soll && z.Buchungssatz.BuchungssatzId == rechnungId))
+                    : await _ctx.Wohnungen.FindAsync(ea.WohnungId);
+                if (wohnung is null)
+                    return NotFound(ea.ExistingBuchungssatzId is Guid id
+                        ? $"Rechnung {id} nicht gefunden."
+                        : $"Wohnung {ea.WohnungId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, wohnung, [Operations.SubCreate]);
                 if (!authRx.Succeeded) return Forbid();
             }
 

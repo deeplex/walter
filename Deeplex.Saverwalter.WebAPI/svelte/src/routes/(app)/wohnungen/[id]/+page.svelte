@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import {
         WalterBuchhaltungAbschnitt,
+        WalterErhaltungsaufwand,
         WalterGrid,
         WalterWohnungen,
         WalterVertraege,
@@ -122,6 +123,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:entry={data.entry}
         bind:blockSave
         bind:commitVersionIfPending
+    />
+
+    <WalterErhaltungsaufwand
+        fetchImpl={data.fetchImpl}
+        wohnung={{ id: data.entry.id, text: title }}
+        bearbeitbar={data.entry.permissions?.update !== false}
     />
 
     <WalterLinks>

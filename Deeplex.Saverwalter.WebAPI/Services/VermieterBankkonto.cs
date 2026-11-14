@@ -35,9 +35,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .FirstOrDefaultAsync();
             if (direkt != null) return direkt;
 
+            return await EigentuemerAsync(ctx, vertrag.Wohnung.WohnungId);
+        }
+
+        /// <summary>
+        /// Bankkonto der aktuellen Eigentümer einer Wohnung — Vorbelegung, wenn der Vermieter
+        /// zahlt (z. B. eine Rechnung für Erhaltungsaufwand).
+        /// </summary>
+        public static async Task<int?> EigentuemerAsync(SaverwalterContext ctx, int wohnungId)
+        {
             var today = DateOnly.FromDateTime(DateTime.Today);
             var besitzerIds = await ctx.Wohnungen
-                .Where(w => w.WohnungId == vertrag.Wohnung.WohnungId)
+                .Where(w => w.WohnungId == wohnungId)
                 .SelectMany(w => w.Eigentuemer)
                 .Where(e => e.Bis == null || e.Bis >= today)
                 .Select(e => e.Kontakt.KontaktId)

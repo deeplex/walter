@@ -208,7 +208,8 @@ Zählerstände sollten mindestens zu folgenden Terminen erfasst werden:
 
 Für jede Umlage wird je Abrechnungsjahr die vom Versorger/Dienstleister ausgestellte
 Jahresrechnung als **Buchung** erfasst — als Position **Betriebskosteneingang** in
-einer Transaktion oder direkt auf der Umlage. Fachlich entsteht dabei ein Buchungssatz
+einer Transaktion oder direkt auf der Umlage (**+ Rechnung** im Abschnitt „Rechnungen“,
+bezahlt wird sie dort über **+ Zahlung**). Fachlich entsteht dabei ein Buchungssatz
 auf dem `NkVerrechnungsKonto` der Umlage (Haben = Kosten, negativer Betrag = Gutschrift).
 
 > Liegt für eine Umlage im Abrechnungsjahr keine Rechnung vor, meldet der
@@ -433,8 +434,10 @@ Als **Transaktion** mit einer **Miete**-Position. Den vom Mieter gezahlten Gesam
 die Sollstellung aus.
 
 **Wie buche ich eine Handwerkerrechnung (Erhaltungsaufwand)?**
-Als Transaktion mit einer **Erhaltungsaufwendung**-Position. Sie wird auf das
-`AufwandsKonto` der Wohnung gebucht.
+Auf der Wohnung im Abschnitt „Erhaltungsaufwand“: **+ Rechnung** erfasst sie (Soll
+`AufwandsKonto` der Wohnung / Haben Verbindlichkeitskonto des Ausstellers), **+ Zahlung**
+bezahlt sie später. Gleich bezahlt geht es als Transaktion mit einer
+**Erhaltungsaufwendung**-Position (Soll `AufwandsKonto` / Haben Bankkonto).
 
 **Ein Mieter ist im Laufe des Jahres eingezogen — was ist zu tun?**
 Nichts Besonderes. Walter berechnet automatisch einen **Zeitanteil**; der Mieter zahlt

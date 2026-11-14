@@ -150,6 +150,14 @@ zurückgenommen. Die Buchungssätze stehen eingeklappt im Abschnitt **Buchhaltun
 
 Die Wohnungs-Detailseite bündelt alles zu einer Einheit:
 
+- **Erhaltungsaufwand** — je Rechnung Betrag, bezahlt, offen und Status; im Kopf, was
+  insgesamt noch offen ist. **+ Rechnung** erfasst eine Handwerkerrechnung (noch nicht
+  bezahlt), **+ Zahlung** bezahlt sie (Bankkonto des Zahlers ist vorbelegt mit dem
+  Bankkonto des Eigentümers). Aufgeklappt stehen die Zahlungen mit **Rückgängig
+  machen**; direkt beim Kauf bezahlte Rechnungen (Transaktion mit
+  Erhaltungsaufwendung) erscheinen gleich als bezahlt. Darunter der **Jahresüberblick**:
+  Mieteinnahmen (Kaltmiete laut Sollstellung), Erhaltungsaufwand und nicht verteilte
+  Betriebskosten (z. B. bei Leerstand) je Jahr.
 - **Versionen** — zeitlich gültige Flächen und Anteile (Wohnfläche, Nutzfläche,
   Nutzeinheiten, Miteigentumsanteile). Bei Änderung eine neue Version anlegen.
 - **Eigentümer** — zeitlich gültige Eigentümer-Zuordnung (Kontakt).
@@ -231,8 +239,11 @@ wird im Mietkonto des Vertrags erfasst, eine Zahlung nur für die Garage geht au
   **Verteilungsschlüssel** liegt in der zeitlich gültigen `UmlageVersion`.
 - Für **Heizkosten** wird an der Umlage eine **HKVO-Konfiguration** hinterlegt
   (Verbrauchsanteile § 7/§ 8, Warmwasserberechnung § 9(2)).
-- Die Umlage-Detailseite zeigt die eingebuchten Betriebskostenrechnungen des Jahres und
-  ihren Verteilungsstatus (bezahlt/verteilt).
+- Die Umlage-Detailseite zeigt unter **Rechnungen** je Betriebskostenrechnung Betrag,
+  bezahlt, offen, Status und wie viel davon auf die Mieter verteilt ist (verteilt wird im
+  Abrechnungslauf). **+ Rechnung** erfasst eine Rechnung, **+ Zahlung** bezahlt sie;
+  aufgeklappt stehen die Zahlungen mit **Rückgängig machen**. Der Link einer Zeile führt
+  zum Buchungssatz der Rechnung.
 
 ---
 

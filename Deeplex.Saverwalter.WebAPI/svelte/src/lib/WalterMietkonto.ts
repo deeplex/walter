@@ -103,11 +103,19 @@ export interface WalterZahlungsZeile {
     zahlungen: WalterZahlungsEintrag[];
     /**
      * Wofür sich hier eine Zahlung erfassen lässt: Monat (`yyyy-mm-01`) im Mietkonto,
-     * Id der Abrechnung bei Nebenkostenabrechnungen.
+     * Id der Abrechnung bei Nebenkostenabrechnungen, Id des Buchungssatzes bei Rechnungen.
      */
     erfassenFuer?: string;
     /** Status statt des aus Fällig/Bezahlt ermittelten, z. B. nicht versendet. */
     status?: WalterZahlungsStatus;
+    /** Inhalt der Zusatzspalte, z. B. wie viel einer Rechnung verteilt ist. */
+    zusatz?: WalterZahlungsZusatz;
+}
+
+/** Tag in der Zusatzspalte der Zahlungsübersicht. */
+export interface WalterZahlungsZusatz {
+    text: string;
+    tag: 'green' | 'warm-gray' | 'red' | 'blue' | 'gray';
 }
 
 const MONAT = [
@@ -252,4 +260,6 @@ export type WalterZahlungsZiel =
     /** Neue Betriebskostenrechnung, gleich bezahlt. */
     | { art: 'bkNeu'; umlageId: number; jahr: number }
     /** Nachzahlung oder Erstattung einer Nebenkostenabrechnung. */
-    | { art: 'abrechnung'; abrechnungsresultatId: string; erstattung: boolean };
+    | { art: 'abrechnung'; abrechnungsresultatId: string; erstattung: boolean }
+    /** Zahlung einer erfassten Rechnung für Erhaltungsaufwand. */
+    | { art: 'erhaltungsaufwand'; buchungssatzId: string; wohnungId: number };

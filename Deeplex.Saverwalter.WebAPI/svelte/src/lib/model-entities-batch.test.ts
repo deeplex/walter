@@ -100,7 +100,6 @@ describe('lib entity mappers batch', () => {
             zaehler: [zaehler],
             vertraege: [],
             betriebskostenrechnungen: [],
-            erhaltungsaufwendungen: [],
             umlagen: [],
             bewohner: '1',
             permissions: { read: true, update: true, remove: false }

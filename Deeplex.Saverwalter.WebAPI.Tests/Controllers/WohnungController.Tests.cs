@@ -17,6 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
@@ -40,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
-            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>(), new ErhaltungsaufwandService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -60,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
-            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>(), new ErhaltungsaufwandService(ctx));
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -105,7 +106,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
-            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>(), new ErhaltungsaufwandService(ctx));
 
             var entity = vertrag.Wohnung;
 
@@ -123,7 +124,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
-            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>(), new ErhaltungsaufwandService(ctx));
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -156,7 +157,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
-            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new WohnungController(logger, dbService, A.Fake<HttpClient>(), new ErhaltungsaufwandService(ctx));
 
             var entity = vertrag.Wohnung;
             var id = entity.WohnungId;

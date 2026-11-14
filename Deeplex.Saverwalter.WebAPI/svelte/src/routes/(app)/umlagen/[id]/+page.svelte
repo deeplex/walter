@@ -17,7 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterBetriebskostenrechnungen,
         WalterBuchhaltungAbschnitt,
         WalterHeaderDetail,
         WalterGrid,
@@ -29,8 +28,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinks,
         WalterLinkTile,
         WalterZaehler,
-        WalterVertragsNkAnteile
+        WalterVertragsNkAnteile,
+        WalterUmlageRechnungen
     } from '$walter/components';
+    import { invalidateAll } from '$app/navigation';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
@@ -109,6 +110,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:commitVersionIfPending
     />
 
+    <WalterUmlageRechnungen
+        fetchImpl={data.fetchImpl}
+        umlageId={data.entry.id}
+        bezeichnung={data.entry.typ.text}
+        neueRechnung={betriebskostenrechungEntry}
+        bearbeitbar={data.entry.permissions?.update !== false}
+        on:geaendert={() => invalidateAll()}
+    />
+
     <WalterLinks>
         <WalterUmlageVersionen
             entry={umlageversionEntry}
@@ -133,12 +143,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Wohnungen"
             rows={data.entry.wohnungen}
-        />
-        <WalterBetriebskostenrechnungen
-            fetchImpl={data.fetchImpl}
-            entry={betriebskostenrechungEntry}
-            title="Rechnungen"
-            rows={data.entry.betriebskostenrechnungen}
         />
         <WalterVertragsNkAnteile
             fetchImpl={data.fetchImpl}

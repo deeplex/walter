@@ -16,10 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <!--
     Schlankes Erfassen einer Zahlung für ein Ziel aus dem Kontext — Miete eines Monats,
-    Garagenmiete, Zahlung einer erfassten oder neuen Betriebskostenrechnung, Nachzahlung
-    oder Erstattung einer Nebenkostenabrechnung: Datum, Betrag, optional das Bankkonto
-    des Mieters (bei einer Erstattung der Empfänger, sonst der Zahler) und ein
-    Verwendungszweck. Wie eine
+    Garagenmiete, Zahlung einer erfassten oder neuen Betriebskostenrechnung oder einer
+    Rechnung für Erhaltungsaufwand, Nachzahlung oder Erstattung einer
+    Nebenkostenabrechnung: Datum, Betrag, ein Bankkonto und ein Verwendungszweck. Das
+    Bankkonto ist bei einer Erstattung der Empfänger, sonst der Zahler; bei einer Rechnung
+    für Erhaltungsaufwand ist es Pflicht (vorbelegt mit dem Bankkonto des Vermieters).
+    Wie eine
     Mietzahlung auf Kaltmiete, Garagen und NK-Vorauszahlung verteilt wird, entscheidet
     der Server; die Vorschau zeigt es vor dem Speichern. „Erweitert …“ öffnet das volle
     Transaktionsformular mit denselben Werten. Event `gebucht` nach dem Speichern.
@@ -58,7 +60,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let vorschlag = 0;
     /**
      * Bankkonto des Vermieters, falls bekannt: Empfänger der Zahlung, bei einer
-     * Erstattung der Zahler.
+     * Erstattung oder einer Rechnung für Erhaltungsaufwand der Zahler.
      */
     export let vermieterBankkontoId: number | undefined = undefined;
     export let open = false;
@@ -88,12 +90,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         datum = convertDateCanadian(new Date());
         betrag = vorschlag > 0 ? Math.round(vorschlag * 100) / 100 : undefined;
         gegenkonto = undefined;
+        if (ziel.art === 'erhaltungsaufwand' && vermieterBankkontoId)
+            vorbelegen(vermieterBankkontoId);
         verwendungszweck = '';
         erweitert = false;
         fehler = null;
     } else if (!open && warOffen) {
         warOffen = false;
         changeTracker.set(tracker);
+    }
+
+    async function vorbelegen(id: number) {
+        const konto = (await bankkonten).find((b) => b.id === id);
+        if (konto && !gegenkonto) gegenkonto = konto;
     }
 
     /** Positionen zum Ziel; `aufteilen`: der Server teilt eine Mietzahlung auf. */
@@ -153,10 +162,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         }
                     ]
                 };
+            case 'erhaltungsaufwand':
+                return {
+                    erhaltungsaufwendungen: [
+                        {
+                            existingBuchungssatzId: ziel.buchungssatzId,
+                            wohnungId: ziel.wohnungId,
+                            betrag
+                        }
+                    ]
+                };
         }
     }
 
     $: auszahlung = ziel.art === 'abrechnung' && ziel.erstattung;
+    /** Der Vermieter zahlt eine Rechnung: das gewählte Bankkonto ist der Zahler. */
+    $: rechnungZahlen = ziel.art === 'erhaltungsaufwand';
 
     function eingabeFuer(aufteilen: boolean): TransaktionsInput {
         return {
@@ -168,7 +189,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 : (gegenkonto?.id as number | undefined),
             zahlungsempfaengerId: auszahlung
                 ? (gegenkonto?.id as number | undefined)
-                : vermieterBankkontoId,
+                : rechnungZahlen
+                  ? undefined
+                  : vermieterBankkontoId,
             verwendungszweck,
             ...positionen(betrag ?? 0, datum ?? '', aufteilen)
         };
@@ -182,11 +205,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         verwendungszweck,
         vermieterBankkontoId,
         ziel,
-        auszahlung
+        auszahlung,
+        rechnungZahlen
     );
     function neuBerechnen(...felder: unknown[]): TransaktionsInput | undefined {
         void felder;
-        return datum && betrag && betrag > 0 ? eingabeFuer(true) : undefined;
+        return datum && betrag && betrag > 0 && (!rechnungZahlen || gegenkonto)
+            ? eingabeFuer(true)
+            : undefined;
     }
 
     function erweitern() {
@@ -249,9 +275,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 bind:value={betrag}
             />
             <WalterComboBox
+                required={rechnungZahlen}
                 titleText={auszahlung
                     ? 'Bankkonto des Empfängers (optional)'
-                    : 'Bankkonto des Zahlers (optional)'}
+                    : rechnungZahlen
+                      ? 'Bankkonto des Zahlers'
+                      : 'Bankkonto des Zahlers (optional)'}
                 entries={bankkonten}
                 bind:value={gegenkonto}
             />

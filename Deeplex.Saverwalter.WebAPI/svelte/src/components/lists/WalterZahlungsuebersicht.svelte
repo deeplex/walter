@@ -32,6 +32,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     /** „+ Zahlung“ bei Zeilen mit `erfassenFuer` und „Rückgängig machen“ je Zahlung. */
     export let bearbeitbar = false;
     export let fetchImpl: typeof fetch = fetch;
+    /** Spaltenköpfe für Zeitraum und Fällig, z. B. „Rechnung“ und „Betrag“. */
+    export let periodeTitel = 'Zeitraum';
+    export let faelligTitel = 'Fällig';
+    /** Mit Titel: Zusatzspalte aus `zusatz` der Zeilen (z. B. „Auf Mieter verteilt“). */
+    export let zusatzTitel: string | undefined = undefined;
 
     /** `zahlung`: „+ Zahlung“ geklickt; `geaendert`: eine Zahlung wurde rückgängig gemacht. */
     const dispatch = createEventDispatcher<{
@@ -46,11 +51,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Math.abs(v) < 0.005 ? '—' : eur(v);
 
     $: headers = [
-        { key: 'periode', value: 'Zeitraum' },
-        { key: 'faellig', value: 'Fällig' },
+        { key: 'periode', value: periodeTitel },
+        { key: 'faellig', value: faelligTitel },
         { key: 'bezahlt', value: 'Bezahlt' },
         { key: 'offen', value: 'Offen' },
         { key: 'status', value: 'Status' },
+        ...(zusatzTitel ? [{ key: 'zusatz', value: zusatzTitel }] : []),
         ...(bearbeitbar ? [{ key: 'aktion', empty: true }] : [])
     ];
 
@@ -80,6 +86,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     zeile.status ??
                     zahlungsStatus(zeile.faellig, zeile.bezahlt)}
                 <Tag size="sm" type={status.tag}>{status.text}</Tag>
+            {:else if cell.key === 'zusatz'}
+                {#if zeile.zusatz}
+                    <Tag size="sm" type={zeile.zusatz.tag}
+                        >{zeile.zusatz.text}</Tag
+                    >
+                {/if}
             {:else if cell.key === 'aktion'}
                 {#if zeile.erfassenFuer}
                     <Button
