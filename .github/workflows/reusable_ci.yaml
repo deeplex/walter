@@ -203,6 +203,12 @@ jobs:
           --logger trx
           --results-directory artifacts/test-results/dotnet
 
+      - name: S3 server log
+        if: ${{ failure() && env.ACT != 'true' }}
+        run: |
+          docker ps -a
+          docker logs s3 2>&1 | tail -n 200 || true
+
       - name: Upload .NET test results
         if: ${{ !cancelled() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
@@ -341,6 +347,12 @@ jobs:
           WALTER_PRESERVE_LOGS_ON_FAILURE: 1
           WALTER_APP_BINARY: ${{ github.workspace }}/artifacts/publish/webapi/Deeplex.Saverwalter.WebAPI
         run: bash ./scripts/test-full-stack.sh
+
+      - name: S3 server log
+        if: ${{ failure() && env.ACT != 'true' }}
+        run: |
+          docker ps -a
+          docker logs s3 2>&1 | tail -n 200 || true
 
       - name: Upload Playwright artifacts
         if: ${{ !cancelled() && env.ACT != 'true' }}

@@ -32,3 +32,14 @@ runs:
         fi
 
         curl --fail --silent --show-error -X PUT http://127.0.0.1:9000/saverwalter
+
+        # A write makes SeaweedFS allocate its first volume; if the server cannot do that,
+        # fail here with its log instead of in the tests.
+        probe=http://127.0.0.1:9000/saverwalter/.probe
+        if ! { curl --fail --silent --show-error -X PUT --data probe "$probe" \
+          && curl --fail --silent --show-error "$probe" > /dev/null \
+          && curl --fail --silent --show-error -X DELETE "$probe"; }; then
+          docker ps -a
+          docker logs s3 || true
+          exit 1
+        fi
