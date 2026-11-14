@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { WalterGarageVertragEntry } from '$walter/lib';
+import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -23,6 +24,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
+        fileURL: fileURL.garagevertrag(params.id),
         entry: WalterGarageVertragEntry.GetOne<WalterGarageVertragEntry>(
             params.id,
             fetch

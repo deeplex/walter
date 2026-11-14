@@ -44,7 +44,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterRenameFile from './WalterRenameFile.svelte';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
     import { openModal } from '$walter/store';
-    import { walter_file_delete } from '$walter/services/files';
+    import {
+        walter_file_change_year,
+        walter_file_delete
+    } from '$walter/services/files';
+    import { selectableYears, yearLabel } from '$walter/lib';
+    import { hasYears } from '../subdetails/WalterAnhaengeMove';
+    import { Select, SelectItem } from 'carbon-components-svelte';
 
     export let open = false;
     export let file: WalterFile;
@@ -97,14 +103,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let newFileName = file.fileName;
 
-    function updateOtherHandle() {
-        const otherHandleIndex = allHandles.findIndex(
-            (e) => e.name === selectedEntry!.text
-        );
-        if (otherHandleIndex !== -1) {
-            allHandles[otherHandleIndex].files =
-                allHandles[otherHandleIndex].addFile(file);
-        }
+    // Nach dem Kopieren oder Verschieben stimmt die Liste der Ziel- und der Quell-Ablage nicht mehr.
+    function reloadHandles() {
+        for (const other of allHandles) other.reload();
+        allHandles = allHandles;
     }
 
     async function copy() {
@@ -115,11 +117,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             selectedEntry
         );
 
-        if (copied && selectedTable && selectedEntry) {
-            updateOtherHandle();
-            selectedTable = undefined;
-            selectedEntry = undefined;
-            step = 0;
+        if (copied) {
+            reloadHandles();
+            if (selectedTable && selectedEntry) {
+                selectedTable = undefined;
+                selectedEntry = undefined;
+                step = 0;
+            }
         }
     }
 
@@ -131,10 +135,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             selectedEntry
         );
 
-        if (moved && selectedTable && selectedEntry) {
+        if (moved) {
             open = false;
-            updateOtherHandle();
-            handle.files = handle.removeFile(file);
+            reloadHandles();
         }
     }
 
@@ -151,6 +154,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 )}${newFileName}`;
                 return files;
             });
+        }
+    }
+
+    // Die Jahre zur Auswahl; das der Datei ist immer dabei.
+    $: yearOptions = [
+        ...new Set([...selectableYears(new Date().getFullYear()), file.year])
+    ]
+        .filter((year) => year > 0)
+        .sort((a, b) => b - a);
+    let newYear = file.year;
+    $: newYear = file.year;
+
+    async function changeYear() {
+        const toast = new WalterToastContent(
+            'Jahr geändert',
+            'Jahr ändern fehlgeschlagen',
+            () =>
+                newYear > 0
+                    ? `${file.fileName} liegt jetzt in ${newYear}.`
+                    : `${file.fileName} liegt jetzt ohne Jahr.`,
+            () =>
+                `Konnte ${file.fileName} nicht nach ${yearLabel(newYear)} verschieben.`
+        );
+        const response = await walter_file_change_year(
+            file,
+            newYear,
+            fetchImpl,
+            toast
+        );
+        if (response.status === 200) {
+            file.year = newYear;
+            handle.files = handle.reload();
+            open = false;
         }
     }
 
@@ -190,6 +226,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             case TabSelector.Rename:
                 rename();
                 break;
+            case TabSelector.Year:
+                changeYear();
+                break;
             case TabSelector.Delete:
                 remove(file);
                 break;
@@ -203,6 +242,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Copy,
         Move,
         Rename,
+        Year,
         Delete
     }
 </script>
@@ -220,6 +260,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <Tab
                     label="Umbenennen"
                     disabled={permissions && !permissions?.update}
+                />
+                <Tab
+                    label="Jahr"
+                    disabled={(permissions && !permissions?.update) ||
+                        !hasYears(handle)}
                 />
                 <Tab
                     label="Löschen"
@@ -263,6 +308,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         {:else if selectedTab === TabSelector.Rename}
             <WalterRenameFile bind:value={newFileName} bind:file />
+        {:else if selectedTab === TabSelector.Year}
+            <p>Aktuelles Jahr: {yearLabel(file.year)}</p>
+            <Select labelText="In das Jahr verschieben" bind:selected={newYear}>
+                <SelectItem value={0} text={yearLabel(0)} />
+                {#each yearOptions as year}
+                    <SelectItem value={year} text={yearLabel(year)} />
+                {/each}
+            </Select>
         {:else if selectedTab === TabSelector.Delete}
             <p>Datei {file.fileName} löschen</p>
         {/if}

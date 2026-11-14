@@ -194,35 +194,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterLinks>
         {#if data.entry.stornoNach}
             <WalterLinkTile
-                fileref=""
                 name={`Storniert durch: Buchungssatz ${data.entry.stornoNach.buchungsjahr}-${data.entry.stornoNach.buchungsnummer}`}
                 href={`/buchungssaetze/${data.entry.stornoNach.id}`}
             />
         {/if}
         {#if data.entry.stornoVon}
             <WalterLinkTile
-                fileref=""
                 name={`Storno von: Buchungssatz ${data.entry.stornoVon.buchungsjahr}-${data.entry.stornoVon.buchungsnummer}`}
                 href={`/buchungssaetze/${data.entry.stornoVon.id}`}
             />
         {/if}
         {#if data.entry.transaktion}
             <WalterLinkTile
-                fileref=""
                 name={`Transaktion: ${data.entry.transaktion.text}`}
                 href={`/transaktionen/${data.entry.transaktion.id}`}
             />
         {/if}
         {#each ausgleiche as ausgleich}
             <WalterLinkTile
-                fileref=""
                 name={`OPOS-Ausgleich: ${ausgleich.buchungsjahr}-${ausgleich.buchungsnummer} | ${formatToTableDate(ausgleich.buchungsdatum)} | ${ausgleich.beschreibung} — ${convertEuro(ausgleich.betrag)}`}
                 href={`/buchungssaetze/${ausgleich.buchungssatzId}`}
             />
         {/each}
         {#each verknuepfungen as verknuepfung}
             <WalterLinkTile
-                fileref=""
                 name={`${verknuepfung.typ}: ${verknuepfung.text} (${verknuepfung.funktionen.join(', ')})`}
                 href={kontoVerknuepfungHref(verknuepfung)}
             />

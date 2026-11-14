@@ -23,7 +23,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterFileWrapper, validateUmlageVersion } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -48,8 +47,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterGrid>
     <WalterUmlageVersion bind:entry={data.entry} fetchImpl={data.fetchImpl} />
     <WalterLinkTile
-        bind:fileWrapper
-        fileref={fileURL.umlage(`${data.entry.umlage.id}`)}
         name={`Umlage: ${data.entry.umlage.text}`}
         href={`/umlagen/${data.entry.umlage.id}`}
     />

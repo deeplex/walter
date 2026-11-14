@@ -95,6 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly IAuthorizationService _auth;
         protected override TransaktionDbService DbService { get; }
 
+        protected override int? FileYearOf(Transaktion e) => e.Zahlungsdatum.Year;
         public TransaktionController(
             ILogger<TransaktionController> logger,
             TransaktionDbService dbService,

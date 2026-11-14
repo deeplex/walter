@@ -47,6 +47,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
+    fileWrapper.register(title, data.fileURL);
 
     $: submitDisabled = !validateGarageVertrag(data.entry);
 </script>
@@ -99,8 +100,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.garage?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref=""
                 name={`Garage: ${data.entry.garage.text}`}
                 href={`/garagen/${data.entry.garage.id}`}
             />
@@ -108,8 +107,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.vertrag?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref=""
                 name={`Wohnungsvertrag: ${data.entry.vertrag.text}`}
                 href={`/vertraege/${data.entry.vertrag.id}`}
             />

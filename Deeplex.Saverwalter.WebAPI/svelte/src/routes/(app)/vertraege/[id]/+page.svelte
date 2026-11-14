@@ -39,7 +39,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateVertrag
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
@@ -128,15 +127,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.ansprechpartner?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
                 name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
                 href={`/kontakte/${data.entry.ansprechpartner.id}`}
             />
         {/if}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

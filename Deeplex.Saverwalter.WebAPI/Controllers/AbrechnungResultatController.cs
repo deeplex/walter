@@ -115,6 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<AbrechnungsresultatController> _logger;
         protected override AbrechnungsresultatDbService DbService { get; }
 
+        protected override int? FileYearOf(Abrechnungsresultat e) => e.Buchungssatz.Buchungsjahr;
         public AbrechnungsresultatController(
             ILogger<AbrechnungsresultatController> logger,
             AbrechnungsresultatDbService service,

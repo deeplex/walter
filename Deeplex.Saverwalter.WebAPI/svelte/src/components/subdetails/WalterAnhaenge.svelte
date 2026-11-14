@@ -19,13 +19,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         FileUploaderDropContainer,
         HeaderPanelLinks,
         InlineLoading,
+        Select,
+        SelectItem,
         TextInput
     } from 'carbon-components-svelte';
 
     import { upload_new_files } from './WalterAnhaenge';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
     import WalterAnhaengeHandle from './WalterAnhaengeHandle.svelte';
+    import { noYear, selectableYears, yearLabel } from '$walter/lib';
     import type { WalterFileWrapper, WalterFileHandle } from '$walter/lib';
+    import { fileURL } from '$walter/services/files';
 
     export let fileWrapper: WalterFileWrapper;
     export let permissions: WalterPermissions | undefined = undefined;
@@ -33,11 +37,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let newFiles: File[] = [];
     let allHandles: WalterFileHandle[] = fileWrapper.handles;
 
+    // In dieses Jahr kommen die neuen Dateien; der Ablagestapel hat keine Jahre. Voreingestellt
+    // ist das Jahr des Objekts (z. B. das Datum eines Zählerstands), sonst „Ohne Jahr“.
+    const currentYear = new Date().getFullYear();
+    let year = noYear;
+    let yearChosen = false;
+    $: years = [...new Set([...selectableYears(currentYear), year])]
+        .filter((y) => y > 0)
+        .sort((a, b) => b - a);
+    $: hasYears = fileWrapper.handles[0]?.fileURL !== fileURL.stack;
+    $: fileWrapper.handles[0]?.files.then(() => {
+        const preset = fileWrapper.handles[0]?.defaultYear;
+        if (!yearChosen && preset !== undefined) year = preset;
+    });
+
     async function upload() {
         await upload_new_files(
             fileWrapper.handles[0],
             newFiles,
-            fileWrapper.fetchImpl
+            fileWrapper.fetchImpl,
+            hasYears ? year : undefined
         );
         allHandles = fileWrapper.handles;
         newFiles = [];
@@ -48,6 +67,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <HeaderPanelLinks>
     {#if !permissions || permissions.update}
+        {#if hasYears}
+            <Select
+                size="sm"
+                labelText="Jahr der neuen Dateien"
+                bind:selected={year}
+                on:change={() => (yearChosen = true)}
+                style="padding: 0 1rem"
+            >
+                <SelectItem value={0} text={yearLabel(0)} />
+                {#each years as y}
+                    <SelectItem value={y} text={yearLabel(y)} />
+                {/each}
+            </Select>
+        {/if}
         <FileUploaderDropContainer
             style="scale: 0.9; margin-top: -2em"
             bind:files={newFiles}

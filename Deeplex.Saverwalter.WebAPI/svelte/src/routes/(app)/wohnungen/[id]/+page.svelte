@@ -42,7 +42,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateWohnung
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -168,8 +167,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
 
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />

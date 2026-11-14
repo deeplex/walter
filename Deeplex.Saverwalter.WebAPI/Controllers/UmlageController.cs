@@ -202,6 +202,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<UmlageController> _logger;
         protected override UmlageDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Umlage e) => FileFamilies.Of(e);
         private readonly UmlageRechnungenService _rechnungenService;
 
         public UmlageController(

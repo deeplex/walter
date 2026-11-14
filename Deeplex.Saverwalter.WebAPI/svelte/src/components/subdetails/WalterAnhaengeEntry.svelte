@@ -73,10 +73,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <svelte:fragment slot="tooltip">
             <div style="width: 14em;">
                 {file.fileName}
+                {#if file.source}({file.source}){/if}
             </div>
         </svelte:fragment>
         <p {style}>
             {file.fileName}
         </p>
     </TooltipDefinition>
+    {#if file.source}
+        <span class="quelle">{file.source}</span>
+    {/if}
 </HeaderPanelLink>
+
+<style>
+    .quelle {
+        display: block;
+        margin-top: -0.25rem;
+        padding-bottom: 0.25rem;
+        font-size: 0.7rem;
+        color: #8d8d8d;
+    }
+</style>

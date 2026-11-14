@@ -94,7 +94,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     {#if data.entry.zahler}
         <WalterLinkTile
-            fileref=""
             name={`Zahler: ${data.entry.zahler.text}`}
             href={`/bankkontos/${data.entry.zahler.id}`}
         />
@@ -102,7 +101,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     {#if data.entry.zahlungsempfaenger}
         <WalterLinkTile
-            fileref=""
             name={`Zahlungsempfänger: ${data.entry.zahlungsempfaenger.text}`}
             href={`/bankkontos/${data.entry.zahlungsempfaenger.id}`}
         />

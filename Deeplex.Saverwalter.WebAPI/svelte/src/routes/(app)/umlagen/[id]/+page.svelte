@@ -43,7 +43,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -157,8 +156,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         {/if}
         <WalterLinkTile
-            {fileWrapper}
-            fileref={fileURL.umlagetyp(`${data.entry.typ.id}`)}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />

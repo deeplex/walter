@@ -35,7 +35,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterTransaktionEntry,
         validateKontakt
     } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
     import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
 
@@ -127,8 +126,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.adresse}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse.anschrift}`}
                 href={`/adressen/${data.entry.adresse.id}`}
             />

@@ -28,7 +28,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Row } from 'carbon-components-svelte';
     import { walter_selection } from '$walter/services/requests';
     import { changeTracker } from '$walter/store';
-    import { fileURL } from '$walter/services/files';
     import { WalterFileWrapper } from '$walter/lib';
 
     export let data: PageData;
@@ -132,8 +131,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     {#await data.umlage then umlage}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.umlage(`${umlage.id}`)}
             name={`Umlage: ${umlage.typ?.text} – ${umlage.wohnungenBezeichnung}`}
             href={`/umlagen/${umlage.id}`}
         />

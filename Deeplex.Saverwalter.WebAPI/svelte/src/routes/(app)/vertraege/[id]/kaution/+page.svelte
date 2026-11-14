@@ -23,7 +23,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterVertragKaution
     } from '$walter/components';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -42,7 +41,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     <WalterLinks>
         <WalterLinkTile
-            fileref={fileURL.vertrag(data.id)}
             name={`Vertrag: ${data.entry.wohnung?.text} - ${mieter}`}
             href={`/vertraege/${data.id}`}
         />

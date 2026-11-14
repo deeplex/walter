@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
@@ -71,6 +72,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<ZaehlerstandController> _logger;
         protected override ZaehlerstandDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Zaehlerstand e) => FileFamilies.Of(e);
+        protected override int? FileYearOf(Zaehlerstand e) => e.Datum.Year;
         public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;

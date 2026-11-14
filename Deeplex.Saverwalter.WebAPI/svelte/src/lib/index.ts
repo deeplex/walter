@@ -72,6 +72,13 @@ export {
 export { WalterKontaktMitgliedschaftEntry } from './WalterKontaktMitgliedschaft';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';
+export {
+    groupFilesByYear,
+    selectableYears,
+    noYear,
+    yearLabel,
+    type WalterFileYearGroup
+} from './WalterFileYear';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';

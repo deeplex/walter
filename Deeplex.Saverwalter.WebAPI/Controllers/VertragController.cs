@@ -164,6 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly NebenkostenabrechnungenService _abrechnungenService;
         protected override VertragDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Vertrag e) => FileFamilies.Of(e);
         public VertragController(
             ILogger<VertragController> logger,
             VertragDbService dbService,

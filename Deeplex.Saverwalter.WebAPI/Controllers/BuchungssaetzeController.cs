@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly SaverwalterContext ctx;
         protected override BuchungssatzDbService DbService { get; }
 
+        protected override int? FileYearOf(Buchungssatz e) => e.Buchungsjahr;
         public BuchungssaetzeController(
             ILogger<BuchungssaetzeController> logger,
             BuchungssatzDbService dbService,

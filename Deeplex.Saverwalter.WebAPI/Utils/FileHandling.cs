@@ -26,6 +26,10 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
         public string Key { get; set; } = null!;
         public long LastModified { get; set; }
         public long? Size { get; set; }
+        /// <summary>Das Jahr, in dem die Datei liegt: ihr Ordner; 0 bei einer Datei ohne Jahr.</summary>
+        public int Year { get; set; }
+        /// <summary>Bei Dateien einer Familie: das Objekt, dem sie gehören; leer beim Objekt der Seite selbst.</summary>
+        public string? Source { get; set; }
         public byte[] Blob { get; set; } = null!;
         public string Type { get; set; } = null!;
     }
@@ -128,6 +132,18 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
 
             return await httpClient.SendAsync(trashRequest, CancellationToken.None);
         }
+
+        /// <summary>Schreibt den Body der Anfrage an die Adresse; die Antwort des Servers bleibt erhalten.</summary>
+        public static async Task<HttpResponseMessage> PutAsync(HttpRequest request, HttpClient client, string url)
+        {
+            var message = new HttpRequestMessage(HttpMethod.Put, url) { Content = FillContent(url, request) };
+            return await client.SendAsync(message, CancellationToken.None);
+        }
+
+        public static async Task<IActionResult> ToResultAsync(HttpResponseMessage response) =>
+            new FileContentResult(
+                await response.Content.ReadAsByteArrayAsync(),
+                response.Content.Headers.ContentType?.MediaType ?? "plain/text");
 
         public static async Task<IActionResult> RedirectToFileServer(HttpRequest request, HttpClient client, string path)
         {

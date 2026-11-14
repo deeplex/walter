@@ -31,7 +31,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Add } from 'carbon-icons-svelte';
     import { invalidateAll } from '$app/navigation';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
-    import { fileURL } from '$walter/services/files';
     import type { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
     import {
@@ -216,7 +215,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterLinks>
     <WalterLinkTile
-        fileref={fileURL.vertrag(`${entry.vertrag?.id}`)}
         name={`Vertrag: ${entry?.vertrag?.text || 'ansehen'}`}
         href={`/vertraege/${entry.vertrag?.id}`}
     />

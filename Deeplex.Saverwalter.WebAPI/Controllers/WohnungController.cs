@@ -169,6 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<WohnungController> _logger;
         protected override WohnungDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Wohnung e) => FileFamilies.Of(e);
         private readonly ErhaltungsaufwandService _erhaltungsaufwandService;
 
         public WohnungController(
