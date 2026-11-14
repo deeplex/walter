@@ -14,9 +14,9 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Reference to a domain object as delivered by the backend (`EntityRef` in `Kontorollen.cs`):
- * type and id, optionally a section of the page. The backend knows no routes — URLs are built
- * only here, in `entityRefHref`. The values are domain terms or anchors and therefore German.
+ * Referenz auf ein Fachobjekt, wie sie das Backend liefert (`EntityRef` in `Kontorollen.cs`):
+ * Typ und Id, optional ein Abschnitt der Seite. Das Backend kennt keine Routen — die URL
+ * entsteht nur hier, in `entityRefHref`. Die Werte sind Fachbegriffe bzw. Anker und daher deutsch.
  */
 export type WalterEntityRefType =
     | 'Vertrag'
@@ -28,7 +28,7 @@ export type WalterEntityRefType =
     | 'Bankkonto'
     | 'Buchungskonto';
 
-/** Collapsible sections of a page (their `id` is the anchor). */
+/** Aufklappbare Abschnitte einer Seite (ihre `id` ist das Sprungziel). */
 export type WalterEntityRefSection =
     | 'mietkonto'
     | 'abrechnungen'
@@ -53,7 +53,7 @@ const ROUTES: Record<WalterEntityRefType, string> = {
     Buchungskonto: 'buchungskonten'
 };
 
-/** URL of a reference, e.g. `/vertraege/3#mietkonto`; `undefined` without a reference. */
+/** Die URL einer Referenz, z. B. `/vertraege/3#mietkonto`; ohne Referenz `undefined`. */
 export function entityRefHref(
     ref: WalterEntityRef | null | undefined
 ): string | undefined {

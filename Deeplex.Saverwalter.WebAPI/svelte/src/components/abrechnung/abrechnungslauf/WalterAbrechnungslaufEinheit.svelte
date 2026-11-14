@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import type {
         AbrechnungseinheitInfo,
         PersonenZeitanteilInfo,
@@ -31,15 +32,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertPercent
     } from '$walter/services/utils';
     import {
-        DataTable,
         Row,
         StructuredList,
         StructuredListBody,
         StructuredListCell,
         StructuredListHead,
-        StructuredListRow,
-        Toolbar,
-        ToolbarContent
+        StructuredListRow
     } from 'carbon-components-svelte';
 
     export let einheit: AbrechnungseinheitInfo;
@@ -460,7 +458,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/if}
 
 <!-- Kostentabelle -->
-<DataTable
+<WalterDataTable
     headers={[
         { key: 'typ', value: 'Kostenanteil' },
         { key: 'schluessel', value: 'Schlüssel' },
@@ -469,16 +467,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'anteil', value: 'Anteil' },
         { key: 'betrag', value: 'Kosten' }
     ]}
-    rows={meineZeilen.map((r) => ({
-        ...r,
-        gesamtBetrag: convertEuro(r.gesamtBetrag),
-        betragLetztesJahr: convertEuro(r.betragLetztesJahr),
-        anteil: convertPercent(r.anteil),
-        betrag: convertEuro(r.betrag)
-    }))}
+    rows={meineZeilen}
     size="short"
+    search={false}
+    customCells={['typ', 'schluessel']}
 >
-    <Toolbar><ToolbarContent /></Toolbar>
     <svelte:fragment slot="cell" let:cell let:row>
         {#if cell.key === 'typ'}
             {#if row.rechnungId}
@@ -506,11 +499,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {/each}
         {:else if cell.key === 'schluessel'}
             <span title={schluesselTitel(row.schluesselTyp)}>{cell.value}</span>
-        {:else}
-            {cell.value}
         {/if}
     </svelte:fragment>
-</DataTable>
+</WalterDataTable>
 
 <p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">
     Kalte Nebenkosten: {convertEuro(betragKalt)}

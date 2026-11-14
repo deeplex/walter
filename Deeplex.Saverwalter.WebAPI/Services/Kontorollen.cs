@@ -71,17 +71,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     }
 
     /// <summary>
-    /// Reference to a domain object (<c>Type</c>, <c>Id</c>), optionally to a section of its
-    /// page (<see cref="EntityRefSection"/>). The backend knows no routes: the frontend builds
-    /// the URL in one place (<c>entityRefHref</c>). Types as in <see cref="KontoBesitz.Typ"/>,
-    /// plus <c>Buchungskonto</c> for accounts without a unique owner.
+    /// Referenz auf ein Fachobjekt (<c>Type</c>, <c>Id</c>), optional auf einen Abschnitt seiner
+    /// Seite (<see cref="EntityRefSection"/>). Das Backend kennt keine Routen: die URL baut das
+    /// Frontend an einer Stelle (<c>entityRefHref</c>). Typen wie bei <see cref="KontoBesitz.Typ"/>,
+    /// dazu <c>Buchungskonto</c> für Konten ohne eindeutigen Besitzer.
     /// </summary>
     public record EntityRef(string Type, string Id, string? Section = null)
     {
         public static EntityRef For(Buchungskonto k) => new("Buchungskonto", k.BuchungskontoId.ToString());
     }
 
-    /// <summary>Sections of a page an <see cref="EntityRef"/> can point to (their anchor ids).</summary>
+    /// <summary>Abschnitte einer Seite, auf die eine <see cref="EntityRef"/> zeigen kann (ihre Anker).</summary>
     public static class EntityRefSection
     {
         public const string Mietkonto = "mietkonto";

@@ -15,13 +15,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import { WalterLinks } from '$walter/components';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import {
         Button,
         Checkbox,
         ClickableTile,
-        DataTable,
         InlineNotification,
         Row,
         Column,
@@ -59,11 +59,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const abgesendet = (e: Event) => {
         entry.abgesendet = (e.target as HTMLInputElement).checked;
-    };
-
-    const formatDate = (d: string) => {
-        const [y, m, day] = d.split('-');
-        return `${day}.${m}.${y}`;
     };
 
     // Nachzahlung bzw. Erstattung erfassen.
@@ -187,9 +182,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <!-- Ausgleichszahlungen -->
 {#if entry.ausgleichsZahlungen?.length > 0}
     <Row>
-        <DataTable
+        <WalterDataTable
             title="Ausgleichszahlungen"
             size="short"
+            search={false}
             headers={[
                 { key: 'datum', value: 'Datum' },
                 { key: 'betrag', value: 'Betrag' },
@@ -197,22 +193,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ]}
             rows={entry.ausgleichsZahlungen.map((z, i) => ({
                 id: String(i),
-                datum: formatDate(z.datum),
-                betrag: convertEuro(z.betrag),
+                datum: z.datum,
+                betrag: z.betrag,
                 link: z.buchungssatzId
             }))}
-            style="margin-bottom: 1rem;"
+            customCells={['link']}
         >
             <svelte:fragment slot="cell" let:cell>
                 {#if cell.key === 'link'}
                     <a href={`/buchungssaetze/${cell.value}`}
                         >Zum Buchungssatz</a
                     >
-                {:else}
-                    {cell.value}
                 {/if}
             </svelte:fragment>
-        </DataTable>
+        </WalterDataTable>
     </Row>
 {/if}
 

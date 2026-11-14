@@ -101,6 +101,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     /** Suchleiste; aus z. B. für kurze Tabellen auf einer Detailseite. */
     export let search = true;
     /**
+     * Spalten, die der Aufrufer selbst darstellt: für diese Schlüssel kommt der Slot `cell`
+     * (let:row, let:cell) zum Zug, alle übrigen Spalten zeigt die Tabelle wie gewohnt.
+     */
+    export let customCells: string[] = [];
+    /** Überschrift und Beschreibung über der Tabelle (wie bei Carbons DataTable). */
+    export let title: string | undefined = undefined;
+    export let description: string | undefined = undefined;
+    /**
      * Zeilen je Seite für übergebene `rows` (ohne `fetchData`), z. B. 12 Monate. Die Suche
      * filtert vorher über alle Zeilen; die Seitenleiste erscheint erst bei mehr Treffern.
      */
@@ -548,12 +556,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     {size}
                     {expandable}
                     {nonExpandableRowIds}
+                    {title}
+                    {description}
                     bind:expandedRowIds
                     on:click:row={handleRowClick}
                     on:click:header={handleHeaderClick}
                     sortable
                     zebra={!expandable}
-                    stickyHeader={!fetchData && !expandable}
                     {headers}
                     rows={tableRows}
                     class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
@@ -599,7 +608,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         let:cell
                         let:row
                     >
-                        {#if cell.key === 'button' && cell.value === null}
+                        {#if customCells.includes(cell.key)}
+                            <slot name="cell" {row} {cell} />
+                        {:else if cell.key === 'button' && cell.value === null}
                             <!-- null: keine Aktion in dieser Zeile -->
                         {:else if cell.key === 'button'}
                             {@const buttonConfig = resolveActionButton(
@@ -711,11 +722,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         border-top: 1px solid var(--cds-ui-03);
         border-bottom: 1px solid var(--cds-ui-03);
     }
-    /* Ohne Sticky-Header nehmen Spalten ihre natürliche Breite: Text bricht daher um. */
-    .walter-expandable .walter-table-link__label,
-    .walter-expandable .walter-table-text {
-        white-space: normal;
-    }
     .walter-expandable :global(.bx--child-row-inner-container) {
         width: 100%;
     }
@@ -744,12 +750,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         padding: 0.5rem 1rem;
     }
 
+    /*
+     * Kein Sticky-Header: die Tabelle zeigt eine Seite in voller Höhe statt eines eigenen
+     * Scrollkastens. Spalten nehmen ihre natürliche Breite, Text bricht daher um.
+     */
     .walter-table-link__label,
     .walter-table-text {
         display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        overflow-wrap: break-word;
     }
 
     .button-cell {
