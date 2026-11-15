@@ -47,7 +47,12 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public ende: string | undefined = undefined,
         public betriebskostenrechnungsJahre: number[] = [],
         public konten: Partial<WalterBuchungskontoEntry>[] = [],
-        public letztesRechnungsjahr: number | undefined = undefined
+        public letztesRechnungsjahr: number | undefined = undefined,
+        public wohnungenKurz: {
+            id: number;
+            adresse: string;
+            bezeichnung: string;
+        }[] = []
     ) {
         super();
     }
@@ -97,7 +102,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
             json.ende ?? undefined,
             json.betriebskostenrechnungsJahre ?? [],
             json.konten ?? [],
-            json.letztesRechnungsjahr ?? undefined
+            json.letztesRechnungsjahr ?? undefined,
+            json.wohnungenKurz ?? []
         );
     }
 }

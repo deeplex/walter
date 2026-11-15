@@ -106,6 +106,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
         }
 
+        public record UmlageWohnungEntry(int Id, string Adresse, string Bezeichnung);
+
         public class UmlageEntryBase
         {
             public int Id { get; set; }
@@ -117,6 +119,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             // For Tabelle
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
+
+            /// <summary>Die Wohnungen mit getrennter Adresse und Bezeichnung, z. B. zum Gruppieren.</summary>
+            public IEnumerable<UmlageWohnungEntry>? WohnungenKurz { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
 
             public UmlageEntryBase() { }
@@ -140,6 +145,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     new SelectionEntry(
                         e.WohnungId,
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
+
+                WohnungenKurz = entity.Wohnungen.Select(e =>
+                    new UmlageWohnungEntry(
+                        e.WohnungId,
+                        e.Adresse?.Anschrift ?? "Unbekannte Anschrift",
+                        e.Bezeichnung));
 
                 Permissions = permissions;
             }

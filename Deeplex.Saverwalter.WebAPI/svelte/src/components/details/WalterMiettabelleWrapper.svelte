@@ -22,7 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterUmlageEntry as WalterUmlageEntryType,
         type WalterZahlungsZiel
     } from '$walter/lib';
-    import { NumberInput, SkeletonText, Tile } from 'carbon-components-svelte';
+    import {
+        Tab,
+        TabContent,
+        Tabs,
+        NumberInput,
+        SkeletonText,
+        Tile
+    } from 'carbon-components-svelte';
     import { WalterDataTable } from '$walter/components';
     import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
@@ -30,6 +37,37 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterZaehlerstand from './WalterZaehlerstand.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
+    import WalterMatrix from '../elements/WalterMatrix.svelte';
+    import WalterMatrixWerkzeuge from '../elements/WalterMatrixWerkzeuge.svelte';
+    import WalterMatrixDetailInhalt from '../elements/WalterMatrixDetailInhalt.svelte';
+    import {
+        baueRechnungsMatrix,
+        baueAbrechnungsMatrix,
+        baueGarageMatrix,
+        baueMietMatrix,
+        baueZaehlerMatrix,
+        zaehlerDetail,
+        leeresDetail,
+        mietDetail,
+        rechnungsDetail,
+        zaehleOffen,
+        zaehleOffeneBezuege,
+        type MatrixDetail,
+        type AbrechnungsMatrixZeileDaten,
+        type GarageMatrixZeileDaten,
+        type MietkontoDaten,
+        type MietMatrixZeileDaten,
+        type RechnungDaten,
+        type ZaehlerMatrixZeileDaten,
+        type MatrixZelle
+    } from '$walter/services/matrix';
+    import {
+        euro,
+        gruppiereNachId,
+        plural,
+        zeitraumText
+    } from '$walter/services/postings';
 
     interface OffeneBkForderungEntry {
         buchungssatzId: string;
@@ -39,30 +77,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         verbleibend: number;
     }
 
-    interface OffeneGarageInfo {
-        garageVertragId: number;
-        garageKennung: string;
-        offen: number;
-    }
-
-    interface OffeneMietForderungEntry {
-        vertragId: number;
-        vertragBezeichnung: string;
-        monat: string;
-        kaltmieteOffen: number;
-        offen: number;
-        zahlungsempfaengerId?: number;
-        garagen: OffeneGarageInfo[];
-    }
-
-    interface OffeneGarageForderungEntry {
-        garageVertragId: number;
-        bezeichnung: string;
-        monat: string;
-        offen: number;
-        zahlungsempfaengerId?: number;
-    }
-
     interface GuthabenEntry {
         vertragId: number;
         vertragBezeichnung: string;
@@ -70,57 +84,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         guthaben: number;
     }
 
-    interface ZaehlerstandFaelligEntry {
-        id: number;
-        kennnummer: string;
-        typText: string;
-        lastStand?: number;
-        lastEinheit?: string;
-    }
-
     export let fetchImpl: typeof fetch;
 
     let umlagen: WalterUmlageEntryType[] = [];
-    let zaehlerFaellig: ZaehlerstandFaelligEntry[] = [];
     let umlagenReady = false;
 
-    // ── Offene Mietforderungen ──────────────────────────────────────────────
-    let offeneMietForderungen: OffeneMietForderungEntry[] = [];
-    let mietForderungenReady = false;
+    // ── Mietmatrix (Vertrag × Monat) ────────────────────────────────────────
+    let mietMatrixDaten: MietMatrixZeileDaten[] = [];
+    let mietMatrixReady = false;
 
-    async function ladeOffeneMietForderungen(jahr: number) {
-        mietForderungenReady = false;
+    async function ladeMietMatrix(jahr: number) {
+        mietMatrixReady = false;
         try {
             const resp = await walter_get(
-                `/api/offene-forderungen/${jahr}`,
+                `/api/offene-forderungen/matrix/${jahr}`,
                 fetchImpl
             );
-            offeneMietForderungen = (resp as OffeneMietForderungEntry[]) ?? [];
+            mietMatrixDaten = (resp as MietMatrixZeileDaten[]) ?? [];
         } catch (e) {
-            console.error('Konnte offene Forderungen nicht laden:', e);
-            offeneMietForderungen = [];
+            console.error('Konnte die Mietmatrix nicht laden:', e);
+            mietMatrixDaten = [];
         }
-        mietForderungenReady = true;
+        mietMatrixReady = true;
     }
 
-    // ── Offene Garagenforderungen (standalone) ──────────────────────────────
-    let offeneGarageForderungen: OffeneGarageForderungEntry[] = [];
-    let garageForderungenReady = false;
+    // ── Garagen (Matrix Garage × Monat, eigenständige Garagenverträge) ──────
+    let garageMatrixDaten: GarageMatrixZeileDaten[] = [];
+    let garageMatrixReady = false;
 
-    async function ladeOffeneGarageForderungen(jahr: number) {
-        garageForderungenReady = false;
+    async function ladeGarageMatrix(jahr: number) {
+        garageMatrixReady = false;
         try {
             const resp = await walter_get(
-                `/api/offene-forderungen/garagen/${jahr}`,
+                `/api/offene-forderungen/matrix/garagen/${jahr}`,
                 fetchImpl
             );
-            offeneGarageForderungen =
-                (resp as OffeneGarageForderungEntry[]) ?? [];
+            garageMatrixDaten = (resp as GarageMatrixZeileDaten[]) ?? [];
         } catch (e) {
-            console.error('Konnte offene Garagenforderungen nicht laden:', e);
-            offeneGarageForderungen = [];
+            console.error('Konnte die Garagenmatrix nicht laden:', e);
+            garageMatrixDaten = [];
         }
-        garageForderungenReady = true;
+        garageMatrixReady = true;
     }
 
     // ── Miet-Guthaben (Überzahlungen) ──────────────────────────────────────
@@ -161,26 +165,75 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bkForderungenReady = true;
     }
 
-    async function ladeZaehlerFaellig(jahr: number) {
+    // ── Zähler (Zähler × Jahr) ──────────────────────────────────────────────
+    let zaehlerMatrixDaten: ZaehlerMatrixZeileDaten[] = [];
+    let zaehlerMatrixReady = false;
+
+    async function ladeZaehlerMatrix(jahr: number) {
+        zaehlerMatrixReady = false;
         try {
             const resp = await walter_get(
-                `/api/offene-forderungen/zaehlerstaende-faellig/${jahr}`,
+                `/api/offene-forderungen/matrix/zaehler/${jahr}`,
                 fetchImpl
             );
-            zaehlerFaellig = (resp as ZaehlerstandFaelligEntry[]) ?? [];
+            zaehlerMatrixDaten = (resp as ZaehlerMatrixZeileDaten[]) ?? [];
         } catch (e) {
-            console.error('Konnte fällige Zählerstände nicht laden:', e);
-            zaehlerFaellig = [];
+            console.error('Konnte die Zählermatrix nicht laden:', e);
+            zaehlerMatrixDaten = [];
+        }
+        zaehlerMatrixReady = true;
+    }
+
+    // ── Wohnungen mit nötiger Abrechnung im Jahr ────────────────────────────
+    // Für die übrigen Wohnungen sind Rechnungen und Zählerstände nicht nötig; ist die
+    // Abrechnung schon gesendet, gelten sie als erledigt.
+    let benoetigteWohnungen: Map<number, boolean> | undefined;
+
+    async function ladeBenoetigteWohnungen(jahr: number) {
+        try {
+            const resp = await walter_get(
+                `/api/fristen/benoetigt/${jahr}`,
+                fetchImpl
+            );
+            if (jahr === selectedYear)
+                benoetigteWohnungen = new Map(
+                    (
+                        (resp as {
+                            wohnungId: number;
+                            abgeschlossen: boolean;
+                        }[]) ?? []
+                    ).map((w) => [w.wohnungId, w.abgeschlossen])
+                );
+        } catch (e) {
+            console.error('Konnte die nötigen Abrechnungen nicht laden:', e);
+            benoetigteWohnungen = undefined;
         }
     }
 
+    // ── Abrechnungen (Matrix Vertrag × Abrechnungsjahr) ─────────────────────
+    let abrechnungsDaten: AbrechnungsMatrixZeileDaten[] = [];
+    let abrechnungenReady = false;
+
+    async function ladeAbrechnungen() {
+        try {
+            const resp = await walter_get('/api/fristen/matrix', fetchImpl);
+            abrechnungsDaten = (resp as AbrechnungsMatrixZeileDaten[]) ?? [];
+        } catch (e) {
+            console.error('Konnte die Abrechnungsmatrix nicht laden:', e);
+            abrechnungsDaten = [];
+        }
+        abrechnungenReady = true;
+    }
+
     onMount(async () => {
+        ladeAbrechnungen();
+        ladeBenoetigteWohnungen(selectedYear);
         await Promise.all([
-            ladeOffeneMietForderungen(selectedYear),
-            ladeOffeneGarageForderungen(selectedYear),
+            ladeMietMatrix(selectedYear),
+            ladeGarageMatrix(selectedYear),
             ladeOffeneBkForderungen(selectedYear),
             ladeGuthaben(selectedYear),
-            ladeZaehlerFaellig(selectedYear)
+            ladeZaehlerMatrix(selectedYear)
         ]);
         await ladeUmlagen();
     });
@@ -199,14 +252,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         history.replaceState(history.state, '', `?${params}`);
     }
 
+    // ── Tabs, mit Auswahl in der URL ────────────────────────────────────────
+    const tabNamen = [
+        'mieten',
+        'garagen',
+        'rechnungen',
+        'zaehler',
+        'abrechnungen'
+    ];
+    let tab = Math.max(0, tabNamen.indexOf(_urlParams.get('tab') ?? ''));
+
+    // Suche und „Nur Offene“ gelten für alle Tabs und stehen in der URL.
+    let suche = _urlParams.get('q') ?? '';
+    let nurOffene = _urlParams.get('offen') === '1';
+
+    $: if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', tabNamen[tab] ?? tabNamen[0]);
+        if (suche.trim() !== '') params.set('q', suche);
+        else params.delete('q');
+        if (nurOffene) params.set('offen', '1');
+        else params.delete('offen');
+        history.replaceState(history.state, '', `?${params}`);
+    }
+
     let _lastLoadedYear = selectedYear;
     $: if (selectedYear !== _lastLoadedYear) {
         _lastLoadedYear = selectedYear;
-        ladeOffeneMietForderungen(selectedYear);
-        ladeOffeneGarageForderungen(selectedYear);
+        ladeMietMatrix(selectedYear);
+        ladeGarageMatrix(selectedYear);
         ladeOffeneBkForderungen(selectedYear);
         ladeGuthaben(selectedYear);
-        ladeZaehlerFaellig(selectedYear);
+        ladeZaehlerMatrix(selectedYear);
+        ladeBenoetigteWohnungen(selectedYear);
     }
 
     // ── Zahlung erfassen (für alle Forderungen) ─────────────────────────────
@@ -222,6 +300,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         vorschlag: number,
         empfaenger?: number
     ) {
+        zahlungDetail = undefined;
         zahlungZiel = ziel;
         zahlungTitel = titel;
         zahlungVorschlag = vorschlag;
@@ -233,27 +312,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         switch (zahlungZiel?.art) {
             case 'miete':
                 await Promise.all([
-                    ladeOffeneMietForderungen(selectedYear),
+                    ladeMietMatrix(selectedYear),
                     ladeGuthaben(selectedYear)
                 ]);
                 break;
             case 'garage':
-                await ladeOffeneGarageForderungen(selectedYear);
+                await ladeGarageMatrix(selectedYear);
                 break;
             case 'bkRechnung':
                 await ladeOffeneBkForderungen(selectedYear);
                 break;
             case 'bkNeu':
+                alleRechnungen = undefined;
                 await ladeUmlagen();
                 break;
         }
     }
-
-    const monatText = (monat: string) =>
-        new Date(monat + 'T00:00:00').toLocaleDateString('de-DE', {
-            month: 'long',
-            year: 'numeric'
-        });
 
     const zahlungsButton = (onClick: () => void) => ({
         onClick: (e: MouseEvent) => {
@@ -263,78 +337,165 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         iconDescription: 'Zahlung erfassen'
     });
 
-    const forderungHeaders = [
-        { key: 'monat', value: 'Monat' },
-        { key: 'vertrag', value: 'Vertrag' },
-        { key: 'offen', value: 'Offen (€)' },
-        { key: 'button', value: '' }
+    // Mieten, Garagenmieten und Guthaben werden pro Vertrag zusammengefasst.
+    // Einzelne Zahlungen werden im Mietkonto des Vertrags erfasst.
+    const gruppenHeaders = (label: string, summeLabel: string) => [
+        { key: 'bezeichnung', value: label },
+        { key: 'monate', value: 'Monate' },
+        { key: 'zeitraum', value: 'Zeitraum' },
+        { key: 'summe', value: summeLabel }
     ];
 
-    const garageForderungHeaders = [
-        { key: 'monat', value: 'Monat' },
-        { key: 'bezeichnung', value: 'Garage' },
-        { key: 'offen', value: 'Offen (€)' },
-        { key: 'button', value: '' }
-    ];
+    const guthabenHeaders = gruppenHeaders('Vertrag', 'Guthaben');
 
-    $: garageForderungTableRows = offeneGarageForderungen.map((f) => ({
-        id: `garage-${f.garageVertragId}-${f.monat}`,
-        href: `/garage-vertraege/${f.garageVertragId}`,
-        monat: monatText(f.monat),
-        bezeichnung: f.bezeichnung,
-        offen: f.offen.toFixed(2),
-        button: zahlungsButton(() =>
-            zahlungErfassen(
-                {
-                    art: 'garage',
-                    garageVertragId: f.garageVertragId,
-                    monat: f.monat,
-                    kennung: f.bezeichnung
-                },
-                `${f.bezeichnung} – ${monatText(f.monat)}`,
-                f.offen,
-                f.zahlungsempfaengerId
-            )
-        )
-    }));
+    $: guthabenGruppen = gruppiereNachId(
+        guthaben.map((g) => ({
+            id: g.vertragId,
+            bezeichnung: g.vertragBezeichnung,
+            monat: g.monat,
+            betrag: g.guthaben
+        }))
+    );
 
-    $: forderungTableRows = offeneMietForderungen.map((f) => ({
-        id: `forderung-${f.vertragId}-${f.monat}`,
-        href: entityRefHref({
-            type: 'Vertrag',
-            id: f.vertragId,
-            section: 'mietkonto'
-        }),
-        monat: monatText(f.monat),
-        vertrag: f.vertragBezeichnung,
-        offen: f.offen.toFixed(2),
-        button: zahlungsButton(() =>
-            zahlungErfassen(
-                { art: 'miete', vertragId: f.vertragId, monat: f.monat },
-                `${f.vertragBezeichnung} – ${monatText(f.monat)}`,
-                f.offen,
-                f.zahlungsempfaengerId
-            )
-        )
-    }));
+    const gruppenRows = (
+        gruppen: ReturnType<typeof gruppiereNachId>,
+        prefix: string,
+        href: (id: number) => string | undefined
+    ) =>
+        gruppen.map((g) => ({
+            id: `${prefix}-${g.id}`,
+            href: href(g.id),
+            bezeichnung: g.bezeichnung,
+            monate: g.anzahl,
+            zeitraum: zeitraumText(g),
+            summe: euro(g.summe)
+        }));
 
-    // ── Meter reading tasks ─────────────────────────────────────────────────
-    const meterHeaders = [
-        { key: 'kennnummer', value: 'Kennnummer' },
-        { key: 'type', value: 'Typ' }
-    ];
+    const vertragMietkontoHref = (id: number) =>
+        entityRefHref({ type: 'Vertrag', id, section: 'mietkonto' });
 
-    $: meterTableRows = zaehlerFaellig.map((z) => ({
-        id: `meter-${z.id}`,
-        kennnummer: z.kennnummer,
-        type: z.typText || 'Zähler',
-        button: () => openMeterQuickAdd(z)
-    }));
+    $: guthabenTableRows = gruppenRows(
+        guthabenGruppen,
+        'guthaben',
+        vertragMietkontoHref
+    );
+
+    const summe = (gruppen: { summe: number }[]) =>
+        gruppen.reduce((acc, g) => acc + g.summe, 0);
+
+    // ── Mieten (Matrix Vertrag × Monat) ─────────────────────────────────────
+    $: mietMatrix = baueMietMatrix(mietMatrixDaten);
+    $: vertraegeMitOffenerMiete = mietMatrixDaten.filter((z) =>
+        z.monate.some((m) => m.offen > 0.005)
+    ).length;
+
+    // ── Vorhandenes im Erfassen-Dialog ──────────────────────────────────────
+    // Der Dialog zeigt über dem Formular, was für das Feld schon eingetragen ist.
+    let zahlungDetail: MatrixDetail | undefined;
+    let zahlungDetailLaden = false;
+    let zahlungDetailLeerText = '';
+    let zahlungFormularZu = false;
+    let zahlungWeitereAktion = 'Weitere Zahlung erfassen';
+
+    function mitDetail(
+        leerText: string,
+        formularZu: boolean,
+        weitereAktion = 'Weitere Zahlung erfassen'
+    ) {
+        zahlungDetail = leeresDetail();
+        zahlungDetailLaden = true;
+        zahlungDetailLeerText = leerText;
+        zahlungFormularZu = formularZu;
+        zahlungWeitereAktion = weitereAktion;
+    }
+
+    async function mieteOeffnen(
+        zelle: MatrixZelle,
+        zeileId: string,
+        spaltenId: string
+    ) {
+        const zeile = mietMatrixDaten.find((z) => `${z.vertragId}` === zeileId);
+        const monat = zeile?.monate.find((m) => m.monat === zelle.ref);
+        if (!zeile || !monat) return;
+
+        mieteErfassen(zelle, zeileId, spaltenId);
+        mitDetail(
+            monat.soll <= 0.005
+                ? 'Für diesen Monat ist keine Miete fällig.'
+                : monat.offen <= 0.005
+                  ? 'Für diesen Monat ist nichts offen.'
+                  : 'Für diesen Monat ist noch keine Zahlung eingetragen.',
+            monat.offen <= 0.005
+        );
+
+        let konto: MietkontoDaten | undefined;
+        try {
+            konto = (await walter_get(
+                `/api/vertraege/${zeile.vertragId}/mietkonto`,
+                fetchImpl
+            )) as MietkontoDaten;
+        } catch (e) {
+            console.error('Konnte das Mietkonto nicht laden:', e);
+        }
+        zahlungDetail = mietDetail(
+            monat,
+            konto,
+            vertragMietkontoHref(zeile.vertragId)
+        );
+        zahlungDetailLaden = false;
+    }
+
+    function mieteErfassen(
+        zelle: MatrixZelle,
+        zeileId: string,
+        _spaltenId: string
+    ) {
+        const zeile = mietMatrixDaten.find((z) => `${z.vertragId}` === zeileId);
+        const monat = zeile?.monate.find((m) => m.monat === zelle.ref);
+        if (!zeile || !monat) return;
+        const monatText = new Date(
+            monat.monat + 'T00:00:00'
+        ).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+        zahlungErfassen(
+            { art: 'miete', vertragId: zeile.vertragId, monat: monat.monat },
+            `${zeile.vertragBezeichnung} – ${monatText}`,
+            Math.max(monat.offen, 0),
+            zeile.zahlungsempfaengerId
+        );
+    }
+
+    // ── Abrechnungen (Matrix) ───────────────────────────────────────────────
+    // Abgerechnet wird ein Jahr nach dem anderen; die letzte Spalte ist das
+    // jüngste Jahr, das schon abzurechnen ist.
+    $: abrechnungsMatrix = baueAbrechnungsMatrix(
+        abrechnungsDaten,
+        Math.min(selectedYear, currentYear - 1)
+    );
+    $: abrechnungenOffen = zaehleOffen(abrechnungsMatrix);
+
+    // Die Abrechnung selbst entsteht im Abrechnungslauf.
+    function abrechnungOeffnen(zelle: MatrixZelle) {
+        goto(`/abrechnungslauf?jahr=${zelle.ref}`);
+    }
+
+    // ── Zähler (Matrix) ─────────────────────────────────────────────────────
+    $: zaehlerMatrix = baueZaehlerMatrix(
+        zaehlerMatrixDaten,
+        selectedYear,
+        benoetigteWohnungen
+    );
+    $: zaehlerOffen = zaehleOffen(zaehlerMatrix);
 
     let addZaehlerstandOpen = false;
     let addZaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {};
+    let zaehlerDetailDaten: MatrixDetail = leeresDetail();
 
-    function openMeterQuickAdd(z: ZaehlerstandFaelligEntry) {
+    // Ein Klick zeigt zuerst die Stände des Jahres und bietet darunter das
+    // Erfassen eines weiteren Standes an.
+    function zaehlerOeffnen(_zelle: MatrixZelle, zeileId: string) {
+        const z = zaehlerMatrixDaten.find((x) => `${x.id}` === zeileId);
+        if (!z) return;
+        zaehlerDetailDaten = zaehlerDetail(z, `/zaehler/${z.id}`);
         addZaehlerstandEntry = {
             datum:
                 selectedYear === currentYear
@@ -350,16 +511,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     async function onSubmitZaehlerstand() {
         addZaehlerstandOpen = false;
         addZaehlerstandEntry = {};
-        await ladeZaehlerFaellig(selectedYear);
+        await ladeZaehlerMatrix(selectedYear);
     }
 
-    // ── Missing billing tasks ───────────────────────────────────────────────
-    const billingHeaders = [
-        { key: 'typ', value: 'Kostenart' },
-        { key: 'wohnungen', value: 'Wohnungen' },
-        { key: 'button', value: '' }
-    ];
-
+    // ── Rechnungen (Matrix Wohnung × Umlage) ───────────────────────────────
     async function ladeUmlagen() {
         try {
             const paged =
@@ -394,44 +549,120 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         )
     }));
 
-    $: billingTasks = umlagen.filter(
-        (u) =>
-            (u.selectedWohnungen || []).length > 0 &&
-            (!u.ende || new Date(u.ende).getFullYear() >= selectedYear) &&
-            !(u.betriebskostenrechnungsJahre || []).includes(selectedYear)
+    $: rechnungsMatrix = baueRechnungsMatrix(
+        umlagen,
+        selectedYear,
+        benoetigteWohnungen
     );
+    $: rechnungenOffeneUmlagen = zaehleOffeneBezuege(rechnungsMatrix);
 
-    $: billingTableRows = billingTasks.map((u) => ({
-        id: `billing-${u.id}`,
-        typ: u.typ?.text || '—',
-        wohnungen: (u.selectedWohnungen || []).map((w) => w.text).join(', '),
-        button: zahlungsButton(() =>
-            zahlungErfassen(
-                { art: 'bkNeu', umlageId: u.id, jahr: selectedYear },
-                `${u.typ?.text || 'Betriebskostenrechnung'} ${selectedYear}`,
-                0
-            )
-        )
-    }));
+    // ── Garagen (Matrix) ────────────────────────────────────────────────────
+    $: garageMatrix = baueGarageMatrix(garageMatrixDaten);
+    $: garagenMitOffenerMiete = garageMatrixDaten.filter((z) =>
+        z.monate.some((m) => m.offen > 0.005)
+    ).length;
 
-    // ── Guthaben ────────────────────────────────────────────────────────────
-    const guthabenHeaders = [
-        { key: 'monat', value: 'Monat' },
-        { key: 'vertrag', value: 'Vertrag' },
-        { key: 'guthaben', value: 'Guthaben (€)' }
-    ];
+    async function garageOeffnen(zelle: MatrixZelle, zeileId: string) {
+        const zeile = garageMatrixDaten.find(
+            (z) => `${z.garageVertragId}` === zeileId
+        );
+        const monat = zeile?.monate.find((m) => m.monat === zelle.ref);
+        if (!zeile || !monat) return;
 
-    $: guthabenTableRows = guthaben.map((g) => ({
-        id: `guthaben-${g.vertragId}-${g.monat}`,
-        href: entityRefHref({
-            type: 'Vertrag',
-            id: g.vertragId,
-            section: 'mietkonto'
-        }),
-        monat: monatText(g.monat),
-        vertrag: g.vertragBezeichnung,
-        guthaben: g.guthaben.toFixed(2)
-    }));
+        const monatText = new Date(
+            monat.monat + 'T00:00:00'
+        ).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+        zahlungErfassen(
+            {
+                art: 'garage',
+                garageVertragId: zeile.garageVertragId,
+                monat: monat.monat,
+                kennung: zeile.garage
+            },
+            `${zeile.bezeichnung} – ${monatText}`,
+            Math.max(monat.offen, 0),
+            zeile.zahlungsempfaengerId
+        );
+        mitDetail(
+            monat.soll <= 0.005
+                ? 'Für diesen Monat ist keine Miete fällig.'
+                : monat.offen <= 0.005
+                  ? 'Für diesen Monat ist nichts offen.'
+                  : 'Für diesen Monat ist noch keine Zahlung eingetragen.',
+            monat.offen <= 0.005
+        );
+
+        let konto: MietkontoDaten | undefined;
+        try {
+            konto = (await walter_get(
+                `/api/garage-vertraege/${zeile.garageVertragId}/mietkonto`,
+                fetchImpl
+            )) as MietkontoDaten;
+        } catch (e) {
+            console.error('Konnte das Garagenmietkonto nicht laden:', e);
+        }
+        zahlungDetail = mietDetail(
+            monat,
+            konto,
+            `/garage-vertraege/${zeile.garageVertragId}`
+        );
+        zahlungDetailLaden = false;
+    }
+
+    // Alle erfassten Rechnungen werden beim ersten Klick geladen und danach
+    // wiederverwendet; nach dem Erfassen einer Rechnung werden sie verworfen.
+    let alleRechnungen: RechnungDaten[] | undefined;
+
+    async function ladeRechnungen(): Promise<RechnungDaten[]> {
+        if (alleRechnungen) return alleRechnungen;
+        try {
+            const resp = (await walter_get(
+                '/api/betriebskostenrechnungen?take=10000',
+                fetchImpl
+            )) as { items?: RechnungDaten[] };
+            alleRechnungen = resp.items ?? [];
+        } catch (e) {
+            console.error('Konnte die Rechnungen nicht laden:', e);
+            return [];
+        }
+        return alleRechnungen;
+    }
+
+    async function rechnungOeffnen(
+        zelle: MatrixZelle,
+        zeileId: string,
+        spaltenId: string
+    ) {
+        const umlageId = zelle.ref ?? '';
+        rechnungErfassen(zelle, zeileId, spaltenId);
+        mitDetail(
+            'Für dieses Jahr ist noch keine Rechnung eingetragen.',
+            zelle.status === 'erledigt',
+            'Weitere Rechnung erfassen'
+        );
+
+        const rechnungen = await ladeRechnungen();
+        zahlungDetail = rechnungsDetail(
+            rechnungen,
+            umlageId,
+            selectedYear,
+            `/umlagen/${umlageId}`
+        );
+        zahlungDetailLaden = false;
+    }
+
+    function rechnungErfassen(
+        zelle: MatrixZelle,
+        _zeileId: string,
+        spaltenId: string
+    ) {
+        const spalte = rechnungsMatrix.spalten.find((x) => x.id === spaltenId);
+        zahlungErfassen(
+            { art: 'bkNeu', umlageId: +(zelle.ref ?? 0), jahr: selectedYear },
+            `${spalte?.label || 'Betriebskostenrechnung'} ${selectedYear}`,
+            0
+        );
+    }
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -441,6 +672,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addModalOpen={addZaehlerstandOpen}
     onSubmit={() => onSubmitZaehlerstand()}
 >
+    <WalterMatrixDetailInhalt detail={zaehlerDetailDaten} />
+    <h5 style="margin: 1.5rem 0 0.5rem">Neu erfassen</h5>
     <WalterZaehlerstand {fetchImpl} entry={addZaehlerstandEntry} />
 </WalterDataWrapperQuickAdd>
 
@@ -452,6 +685,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         vorschlag={zahlungVorschlag}
         vermieterBankkontoId={zahlungEmpfaenger}
         bind:open={zahlungOffen}
+        detail={zahlungDetail}
+        detailLaden={zahlungDetailLaden}
+        detailLeerText={zahlungDetailLeerText}
+        formularZu={zahlungFormularZu}
+        weitereAktion={zahlungWeitereAktion}
         on:gebucht={nachZahlung}
     />
 {/if}
@@ -467,98 +705,188 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
     </div>
 
-    {#if mietForderungenReady}
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Offene Mieten"
-            initialOpen={forderungTableRows.length > 0}
-            rows={forderungTableRows}
-            headers={forderungHeaders}
-            rowHref={(row) => row.href}
-        />
-    {:else}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-    {/if}
+    <div class="tabs">
+        <Tabs bind:selected={tab}>
+            <Tab
+                >Mieten <span
+                    class="zahl"
+                    class:fertig={vertraegeMitOffenerMiete === 0}
+                    >{vertraegeMitOffenerMiete === 0
+                        ? '✓'
+                        : vertraegeMitOffenerMiete}</span
+                ></Tab
+            >
+            <Tab
+                >Garagen <span
+                    class="zahl"
+                    class:fertig={garagenMitOffenerMiete === 0}
+                    >{garagenMitOffenerMiete === 0
+                        ? '✓'
+                        : garagenMitOffenerMiete}</span
+                ></Tab
+            >
+            <Tab
+                >Rechnungen <span
+                    class="zahl"
+                    class:fertig={rechnungenOffeneUmlagen === 0}
+                    >{rechnungenOffeneUmlagen === 0
+                        ? '✓'
+                        : rechnungenOffeneUmlagen}</span
+                ></Tab
+            >
+            <Tab
+                >Zähler <span class="zahl" class:fertig={zaehlerOffen === 0}
+                    >{zaehlerOffen === 0 ? '✓' : zaehlerOffen}</span
+                ></Tab
+            >
+            <Tab
+                >Abrechnungen <span
+                    class="zahl"
+                    class:fertig={abrechnungenOffen === 0}
+                    >{abrechnungenOffen === 0 ? '✓' : abrechnungenOffen}</span
+                ></Tab
+            >
 
-    {#if garageForderungenReady}
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Offene Garagenmieten"
-            initialOpen={garageForderungTableRows.length > 0}
-            rows={garageForderungTableRows}
-            headers={garageForderungHeaders}
-            rowHref={(row) => row.href}
-        />
-    {:else}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-    {/if}
+            <svelte:fragment slot="content">
+                <WalterMatrixWerkzeuge bind:suche bind:nurOffene />
 
-    {#if umlagenReady}
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Fehlende Betriebskostenrechnungen"
-            initialOpen={billingTableRows.length > 0}
-            rows={billingTableRows}
-            headers={billingHeaders}
-            on_click_row={(e) => {
-                const row = billingTableRows.find((r) => r.id === e.detail.id);
-                row?.button.onClick(new MouseEvent('click'));
-            }}
-        />
-    {:else}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-    {/if}
+                <TabContent>
+                    {#if mietMatrixReady}
+                        <WalterMatrix
+                            matrix={mietMatrix}
+                            {suche}
+                            {nurOffene}
+                            zeilenLabel="Vertrag"
+                            onZelle={mieteOeffnen}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                    {/if}
 
-    {#if bkForderungenReady}
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Offene Betriebskostenrechnungen"
-            initialOpen={bkForderungTableRows.length > 0}
-            rows={bkForderungTableRows}
-            headers={bkForderungHeaders}
-            on_click_row={(e) => {
-                const row = bkForderungTableRows.find(
-                    (r) => r.id === e.detail.id
-                );
-                row?.button.onClick(new MouseEvent('click'));
-            }}
-        />
-    {:else}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-    {/if}
+                    {#if guthabenReady}
+                        <WalterDataTable
+                            layout="accordion"
+                            accordionTitle={`Guthaben – ${plural(guthabenGruppen.length, 'Vertrag', 'Verträge')}, ${euro(summe(guthabenGruppen))}`}
+                            initialOpen={false}
+                            rows={guthabenTableRows}
+                            headers={guthabenHeaders}
+                            rowHref={(row) => row.href}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                        <div style="height: 2px;" />
+                    {/if}
+                </TabContent>
 
-    {#if guthabenReady}
-        <WalterDataTable
-            layout="accordion"
-            accordionTitle="Guthaben"
-            initialOpen={guthabenTableRows.length > 0}
-            rows={guthabenTableRows}
-            headers={guthabenHeaders}
-            rowHref={(row) => row.href}
-        />
-    {:else}
-        <SkeletonText style="margin: 0; height: 42px;" />
-        <div style="height: 2px;" />
-    {/if}
+                <TabContent>
+                    {#if garageMatrixReady}
+                        <WalterMatrix
+                            matrix={garageMatrix}
+                            {suche}
+                            {nurOffene}
+                            zeilenLabel="Garage"
+                            onZelle={garageOeffnen}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                    {/if}
+                </TabContent>
 
-    <WalterDataTable
-        layout="accordion"
-        accordionTitle="Zählerstände fällig"
-        rows={meterTableRows}
-        headers={meterHeaders}
-        on_click_row={(e) => {
-            const row = meterTableRows.find((r) => r.id === e.detail.id);
-            if (row?.button) row.button();
-        }}
-    />
+                <TabContent>
+                    {#if umlagenReady}
+                        <WalterMatrix
+                            matrix={rechnungsMatrix}
+                            {suche}
+                            {nurOffene}
+                            zeilenLabel="Wohnung"
+                            onZelle={rechnungOeffnen}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                    {/if}
+
+                    {#if bkForderungenReady}
+                        <WalterDataTable
+                            layout="accordion"
+                            accordionTitle={`Offene Betriebskostenrechnungen – ${bkForderungTableRows.length}`}
+                            initialOpen={false}
+                            rows={bkForderungTableRows}
+                            headers={bkForderungHeaders}
+                            on_click_row={(e) => {
+                                const row = bkForderungTableRows.find(
+                                    (r) => r.id === e.detail.id
+                                );
+                                row?.button.onClick(new MouseEvent('click'));
+                            }}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                        <div style="height: 2px;" />
+                    {/if}
+                </TabContent>
+
+                <TabContent>
+                    {#if zaehlerMatrixReady}
+                        <WalterMatrix
+                            matrix={zaehlerMatrix}
+                            {suche}
+                            {nurOffene}
+                            zeilenLabel="Zähler"
+                            onZelle={zaehlerOeffnen}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                    {/if}
+                </TabContent>
+
+                <TabContent>
+                    {#if abrechnungenReady}
+                        <WalterMatrix
+                            matrix={abrechnungsMatrix}
+                            {suche}
+                            {nurOffene}
+                            zeilenLabel="Vertrag"
+                            onZelle={abrechnungOeffnen}
+                        />
+                    {:else}
+                        <SkeletonText style="margin: 0; height: 42px;" />
+                    {/if}
+                </TabContent>
+            </svelte:fragment>
+        </Tabs>
+    </div>
 </Tile>
 
 <style>
     .year-selector {
         max-width: 10rem;
+    }
+
+    .zahl {
+        display: inline-block;
+        min-width: 1.4rem;
+        margin-left: 0.4rem;
+        padding: 0 0.4rem;
+        border-radius: 0.7rem;
+        background: var(--cds-layer-accent, #e0e0e0);
+        font-size: 0.75rem;
+        line-height: 1.4rem;
+        text-align: center;
+    }
+
+    .zahl.fertig {
+        background: var(--cds-support-success, #24a148);
+        color: #fff;
+    }
+
+    /* Carbon gibt jedem Tab 10 rem und kürzt längere Namen mit „…“; hier steht
+       hinter dem Namen noch die Zahl der offenen Felder. */
+    .tabs :global(.bx--tabs__nav-item),
+    .tabs :global(a.bx--tabs__nav-link) {
+        width: auto;
+        min-width: 8rem;
+        overflow: visible;
+        white-space: nowrap;
+        text-overflow: clip;
     }
 </style>

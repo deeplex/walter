@@ -40,6 +40,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import WalterTransaktion from './WalterTransaktion.svelte';
     import WalterBuchungsvorschau from './WalterBuchungsvorschau.svelte';
+    import WalterMatrixDetailInhalt from '../elements/WalterMatrixDetailInhalt.svelte';
+    import type { MatrixDetail } from '$walter/services/matrix';
     import {
         emptyTransaktionsInput,
         type TransaktionsInput,
@@ -64,6 +66,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
      */
     export let vermieterBankkontoId: number | undefined = undefined;
     export let open = false;
+    /**
+     * Was für das Feld schon eingetragen ist. Steht es da, zeigt der Dialog es über
+     * dem Formular, damit man Vorhandenes und Neues in einem Dialog sieht.
+     */
+    export let detail: MatrixDetail | undefined = undefined;
+    export let detailLaden = false;
+    export let detailLeerText = 'Noch nichts eingetragen.';
+    /** Das Feld ist erledigt: das Formular bleibt zu, bis man mehr erfassen will. */
+    export let formularZu = false;
+    export let weitereAktion = 'Weitere Zahlung erfassen';
 
     const dispatch = createEventDispatcher<{ gebucht: void }>();
     const bankkonten = walter_selection.bankkontos(fetchImpl);
@@ -78,6 +90,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let erweitertGueltig = false;
     let vorschauGueltig = false;
     let busy = false;
+    /** Bei einem erledigten Feld bleibt das Formular zunächst zu. */
+    let formularSichtbar = true;
     let fehler: string | null = null;
 
     // Die Eingabefelder melden Änderungen an den Seiten-Änderungszähler; der Dialog
@@ -95,6 +109,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         verwendungszweck = '';
         erweitert = false;
         fehler = null;
+        formularSichtbar = !(detail && formularZu);
     } else if (!open && warOffen) {
         warOffen = false;
         changeTracker.set(tracker);
@@ -250,8 +265,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Modal
     bind:open
-    size={erweitert ? 'lg' : 'sm'}
-    modalHeading={`Zahlung erfassen – ${titel}`}
+    size={erweitert || detail ? 'lg' : 'sm'}
+    modalHeading={detail ? titel : `Zahlung erfassen – ${titel}`}
     primaryButtonText="Buchen"
     secondaryButtonText="Abbrechen"
     primaryButtonDisabled={!buchbar}
@@ -260,7 +275,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     on:submit={buchen}
 >
     {#if open}
-        {#if erweitert}
+        {#if detail}
+            <WalterMatrixDetailInhalt
+                {detail}
+                loading={detailLaden}
+                leerText={detailLeerText}
+            />
+            {#if !formularSichtbar}
+                <Button
+                    kind="tertiary"
+                    size="small"
+                    style="margin-top: 1rem"
+                    on:click={() => (formularSichtbar = true)}
+                >
+                    {weitereAktion}
+                </Button>
+            {:else}
+                <h5 class="neu">Neu erfassen</h5>
+            {/if}
+        {/if}
+
+        {#if !formularSichtbar}
+            <!-- Formular zu: nichts offen -->
+        {:else if erweitert}
             <WalterTransaktion
                 {fetchImpl}
                 bind:buchung={erweitertInput}
@@ -298,19 +335,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </Button>
         {/if}
 
-        <WalterBuchungsvorschau
-            input={eingabe}
-            bind:gueltig={vorschauGueltig}
-        />
-
-        {#if fehler}
-            <InlineNotification
-                kind="error"
-                title="Buchung nicht möglich:"
-                subtitle={fehler}
-                hideCloseButton
-                lowContrast
+        {#if formularSichtbar}
+            <WalterBuchungsvorschau
+                input={eingabe}
+                bind:gueltig={vorschauGueltig}
             />
+
+            {#if fehler}
+                <InlineNotification
+                    kind="error"
+                    title="Buchung nicht möglich:"
+                    subtitle={fehler}
+                    hideCloseButton
+                    lowContrast
+                />
+            {/if}
         {/if}
     {/if}
 </Modal>
+
+<style>
+    .neu {
+        margin: 1.5rem 0 0.5rem;
+    }
+</style>

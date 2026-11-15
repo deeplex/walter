@@ -21,7 +21,6 @@ import {
     walter_data_ne,
     walter_data_nf,
     walter_data_rechnungen_year,
-    walter_data_rechnungentabelle,
     walter_data_wf
 } from './WalterData';
 
@@ -77,50 +76,5 @@ describe('WalterData helpers', () => {
         expect(walter_data_nf('NF', wohnungen).data[1].value).toBe(40);
         expect(walter_data_mea('MEA', wohnungen).data[0].value).toBe(120);
         expect(walter_data_ne('NE', wohnungen).data[1].value).toBe(1);
-    });
-
-    it('builds rechnungentabelle heatmap and normalizes non-positive values', () => {
-        const config = walter_data_rechnungentabelle(
-            [
-                {
-                    id: 1,
-                    typ: { id: 11, text: 'Wasser' },
-                    selectedWohnungen: [
-                        { id: 101, text: 'W1' },
-                        { id: 102, text: 'W2' }
-                    ],
-                    betriebskostenrechnungen: [
-                        { betreffendesJahr: 2026, betrag: 50 },
-                        { betreffendesJahr: 2025, betrag: 20 }
-                    ]
-                },
-                {
-                    id: 2,
-                    typ: { id: 12, text: 'Hausstrom' },
-                    selectedWohnungen: [{ id: 101, text: 'W1' }],
-                    betriebskostenrechnungen: [
-                        { betreffendesJahr: 2026, betrag: -10 }
-                    ]
-                }
-            ] as never,
-            2026
-        );
-
-        expect(config.data).toContainEqual(
-            expect.objectContaining({
-                group: 'W1',
-                key: 'Wasser',
-                value: 50,
-                wohnungId: '101'
-            })
-        );
-        expect(config.data).toContainEqual(
-            expect.objectContaining({
-                group: 'W1',
-                key: 'Hausstrom',
-                value: undefined
-            })
-        );
-        expect(config.options.height).toBe('20em');
     });
 });

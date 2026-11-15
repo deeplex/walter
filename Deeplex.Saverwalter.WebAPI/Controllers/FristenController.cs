@@ -21,81 +21,184 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     /// <summary>
-    /// Überwacht Abrechnungsfristen nach § 556 Abs. 3 BGB.
-    /// Die Frist zur Zustellung einer Betriebskostenabrechnung endet 12 Monate
-    /// nach Ablauf des Abrechnungszeitraums. Bei Versäumnis verliert der
-    /// Vermieter den Anspruch auf Nachzahlungen.
+    /// Abrechnungsstand je Vertrag und Jahr: welche Abrechnungen gesendet sind, für welche
+    /// Wohnungen im Jahr eine Abrechnung nötig ist und bis wann abgerechnet werden soll
+    /// (Fristablauf ist der 31.12. des Folgejahres).
     /// </summary>
     [ApiController]
     [Route("api/fristen")]
     public class FristenController(SaverwalterContext ctx) : ControllerBase
     {
-        public class FristWarnung
+        public class AbrechnungsMatrixJahr
         {
-            public int VertragId { get; set; }
-            public string VertragBezeichnung { get; set; } = string.Empty;
-            public int Abrechnungsjahr { get; set; }
-            /// <summary>31.12.(Abrechnungsjahr + 1) nach § 556 Abs. 3 BGB.</summary>
+            public int Jahr { get; set; }
+            /// <summary>Für das Jahr liegt eine gesendete, nicht stornierte Abrechnung vor.</summary>
+            public bool Gesendet { get; set; }
             public DateOnly Fristablauf { get; set; }
             public bool IstAbgelaufen { get; set; }
         }
 
+        public class AbrechnungsMatrixZeile
+        {
+            public int VertragId { get; set; }
+            public string VertragBezeichnung { get; set; } = string.Empty;
+            public string Adresse { get; set; } = string.Empty;
+            public string Wohnung { get; set; } = string.Empty;
+            public string Mieter { get; set; } = string.Empty;
+            /// <summary>
+            /// Alle Abrechnungsjahre des Vertrags, auch die schon gesendeten. Jahre, in denen
+            /// weder Miete noch NK-Vorauszahlung vereinbart war oder ein Abrechnungsverzicht
+            /// hinterlegt ist, fehlen: dort gibt es nichts abzurechnen.
+            /// </summary>
+            public List<AbrechnungsMatrixJahr> Jahre { get; set; } = [];
+        }
+
         /// <summary>
-        /// Gibt alle Verträge zurück, für die ein Abrechnungsjahr ohne gesendetes
-        /// Abrechnungsresultat existiert, zusammen mit dem jeweiligen Fristablauf.
+        /// Je Vertrag alle Abrechnungsjahre mit dem Stand „gesendet oder nicht“, damit sich
+        /// erledigte und offene Jahre nebeneinander darstellen lassen.
         /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<FristWarnung>>> GetFristen()
+        [HttpGet("matrix")]
+        public async Task<ActionResult<IEnumerable<AbrechnungsMatrixZeile>>> GetMatrix()
         {
             var heute = DateOnly.FromDateTime(DateTime.Today);
 
             var vertraege = await VertragPermissionHandler
                 .GetQueryable(ctx, User!)
                 .Include(v => v.Versionen)
+                .Include(v => v.Mieter)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
                 .Include(v => v.Abrechnungsresultate)
                     .ThenInclude(r => r.Buchungssatz)
                 .ToListAsync();
 
-            var warnungen = new List<FristWarnung>();
+            var verzichte = (await ctx.Abrechnungsverzichte
+                .Select(v => new { v.Vertrag.VertragId, v.Jahr })
+                .ToListAsync())
+                .Select(v => (v.VertragId, v.Jahr))
+                .ToHashSet();
+
+            var zeilen = new List<AbrechnungsMatrixZeile>();
 
             foreach (var vertrag in vertraege)
             {
                 if (!vertrag.Versionen.Any()) continue;
 
                 var beginnjahr = vertrag.Versionen.Min(v => v.Beginn).Year;
-                // Letztes abzurechnende Jahr: entweder das Jahr vor Vertragsende oder letztes Kalenderjahr
                 var endjahr = vertrag.Ende.HasValue
                     ? vertrag.Ende.Value.Year
                     : heute.Year - 1;
 
                 if (endjahr < beginnjahr) continue;
 
-                var bezeichnung = (vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift")
-                    + " – " + vertrag.Wohnung.Bezeichnung;
+                var anschrift = vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
+                var mieter = vertrag.Mieter.Count > 0
+                    ? string.Join(", ", vertrag.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+
+                var zeile = new AbrechnungsMatrixZeile
+                {
+                    VertragId = vertrag.VertragId,
+                    VertragBezeichnung = $"{anschrift} – {vertrag.Wohnung.Bezeichnung} | {mieter}",
+                    Adresse = anschrift,
+                    Wohnung = vertrag.Wohnung.Bezeichnung,
+                    Mieter = mieter,
+                };
+
+                var versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
 
                 for (var jahr = beginnjahr; jahr <= endjahr; jahr++)
                 {
-                    var hatAbgesendet = vertrag.Abrechnungsresultate
-                        .Any(r => r.Abgesendet && r.Buchungssatz.Buchungsjahr == jahr && r.Buchungssatz.StornoNach == null);
+                    if (!ZahltImJahr(versionen, jahr)) continue;
+                    if (verzichte.Contains((vertrag.VertragId, jahr))) continue;
 
-                    if (!hatAbgesendet)
+                    var fristablauf = new DateOnly(jahr + 1, 12, 31);
+                    zeile.Jahre.Add(new AbrechnungsMatrixJahr
                     {
-                        var fristablauf = new DateOnly(jahr + 1, 12, 31);
-                        warnungen.Add(new FristWarnung
-                        {
-                            VertragId = vertrag.VertragId,
-                            VertragBezeichnung = bezeichnung,
-                            Abrechnungsjahr = jahr,
-                            Fristablauf = fristablauf,
-                            IstAbgelaufen = fristablauf < heute,
-                        });
-                    }
+                        Jahr = jahr,
+                        Gesendet = vertrag.Abrechnungsresultate
+                            .Any(r => r.Abgesendet && r.Buchungssatz.Buchungsjahr == jahr && r.Buchungssatz.StornoNach == null),
+                        Fristablauf = fristablauf,
+                        IstAbgelaufen = fristablauf < heute,
+                    });
                 }
+
+                if (zeile.Jahre.Count > 0) zeilen.Add(zeile);
             }
 
-            return Ok(warnungen.OrderBy(w => w.IstAbgelaufen ? 0 : 1).ThenBy(w => w.Fristablauf));
+            return Ok(zeilen.OrderBy(z => z.Adresse).ThenBy(z => z.Wohnung).ThenBy(z => z.Mieter));
+        }
+
+        public class WohnungMitAbrechnung
+        {
+            public int WohnungId { get; set; }
+            /// <summary>
+            /// Alle nötigen Abrechnungen der Wohnung sind für das Jahr gesendet; Rechnungen und
+            /// Zählerstände lassen sich dann nicht mehr ergänzen und gelten als erledigt.
+            /// </summary>
+            public bool Abgeschlossen { get; set; }
+        }
+
+        /// <summary>
+        /// Die Wohnungen, für die im Jahr eine Abrechnung nötig ist: mindestens ein Vertrag
+        /// läuft im Jahr, hat dort Miete oder NK-Vorauszahlung und keinen Abrechnungsverzicht.
+        /// Für alle anderen Wohnungen sind Rechnungen und Zählerstände des Jahres nicht nötig.
+        /// Dazu, ob die Abrechnungen der Wohnung schon alle gesendet sind.
+        /// </summary>
+        [HttpGet("benoetigt/{jahr}")]
+        public async Task<ActionResult<IEnumerable<WohnungMitAbrechnung>>> GetWohnungenMitAbrechnung(int jahr)
+        {
+            var vertraege = await VertragPermissionHandler
+                .GetQueryable(ctx, User!)
+                .Include(v => v.Versionen)
+                .Include(v => v.Wohnung)
+                .Include(v => v.Abrechnungsresultate)
+                    .ThenInclude(r => r.Buchungssatz)
+                .ToListAsync();
+
+            var verzichte = (await ctx.Abrechnungsverzichte
+                .Where(v => v.Jahr == jahr)
+                .Select(v => v.Vertrag.VertragId)
+                .ToListAsync())
+                .ToHashSet();
+
+            var noetig = vertraege
+                .Where(v => v.Versionen.Any())
+                .Where(v => v.Versionen.Min(x => x.Beginn).Year <= jahr
+                    && (!v.Ende.HasValue || v.Ende.Value.Year >= jahr))
+                .Where(v => ZahltImJahr(v.Versionen.OrderBy(x => x.Beginn).ToList(), jahr))
+                .Where(v => !verzichte.Contains(v.VertragId));
+
+            var result = noetig
+                .GroupBy(v => v.Wohnung.WohnungId)
+                .Select(g => new WohnungMitAbrechnung
+                {
+                    WohnungId = g.Key,
+                    Abgeschlossen = g.All(v => v.Abrechnungsresultate
+                        .Any(r => r.Abgesendet && r.Buchungssatz.Buchungsjahr == jahr && r.Buchungssatz.StornoNach == null))
+                })
+                .OrderBy(w => w.WohnungId);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gilt im Jahr eine Version, in der Miete oder NK-Vorauszahlung vereinbart ist?
+        /// Eine Version gilt von ihrem Beginn bis zum Tag vor der nächsten.
+        /// </summary>
+        private static bool ZahltImJahr(IReadOnlyList<VertragVersion> versionen, int jahr)
+        {
+            var anfang = new DateOnly(jahr, 1, 1);
+            var ende = new DateOnly(jahr, 12, 31);
+            for (var i = 0; i < versionen.Count; i++)
+            {
+                var von = versionen[i].Beginn;
+                var bis = i + 1 < versionen.Count ? versionen[i + 1].Beginn.AddDays(-1) : DateOnly.MaxValue;
+                if (von <= ende && bis >= anfang
+                    && (versionen[i].Grundmiete > 0 || versionen[i].Nebenkostenvorauszahlung > 0))
+                    return true;
+            }
+            return false;
         }
     }
 }

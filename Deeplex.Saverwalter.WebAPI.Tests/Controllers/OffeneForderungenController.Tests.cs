@@ -15,12 +15,14 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietzahlungController;
@@ -51,6 +53,23 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 }
             });
 
+        private static OffeneForderungenController AlsAdmin(SaverwalterContext ctx)
+        {
+            var admin = new UserAccount { Username = "admin", Name = "admin", Role = UserRole.Admin };
+            ctx.UserAccounts.Add(admin);
+            ctx.SaveChanges();
+            return new OffeneForderungenController(ctx)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        User = new ClaimsPrincipal(new ClaimsIdentity(admin.AssembleClaims(), "mock"))
+                    }
+                }
+            };
+        }
+
         private static async Task<Vertrag> VertragAbAsync(SaverwalterContext ctx, DateOnly beginn)
         {
             var vertrag = TestUtils.FillVertragWithSomeData(ctx, 500m);
@@ -77,12 +96,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx))
                 .BucheDifferenzAsync(vertrag.VertragId, vormonat.Year, "Mieterhöhung nachgetragen");
 
-            var result = await new OffeneForderungenController(ctx).GetOffeneForderungen(heute.Year);
+            var result = await AlsAdmin(ctx).GetMietMatrix(heute.Year);
 
-            var eintraege = result.Result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneForderungEntry>>().Subject;
-            eintraege.Should().ContainSingle(e => e.Monat == dieserMonat.ToString("yyyy-MM-dd"))
-                .Which.KaltmieteOffen.Should().Be(600m);
+            var zeile = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<MietMatrixZeile>>().Subject.Single();
+            zeile.Monate.Should().ContainSingle(m => m.Monat == dieserMonat.ToString("yyyy-MM-dd"))
+                .Which.Should().Match<MietMatrixMonat>(m => m.Offen == 600m && m.Gezahlt == 0m);
         }
 
         [Fact]
@@ -104,18 +123,100 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.GarageVertraege.Add(garage);
             await ctx.SaveChangesAsync();
             var vorher = ctx.Buchungssaetze.Count();
-            var controller = new OffeneForderungenController(ctx);
+            var controller = AlsAdmin(ctx);
 
-            var miete = (await controller.GetOffeneForderungen(2024)).Result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneForderungEntry>>().Subject.ToList();
-            var garagen = (await controller.GetOffeneGarageForderungen(2024)).Result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeAssignableTo<IEnumerable<OffeneGarageForderungEntry>>().Subject.ToList();
+            var miete = (await controller.GetMietMatrix(2024)).Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<MietMatrixZeile>>().Subject.Single().Monate;
+            var garagen = (await controller.GetGarageMatrix(2024)).Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<GarageMatrixZeile>>().Subject.Single().Monate;
 
             miete.Should().HaveCount(12);
-            miete.Should().OnlyContain(e => e.KaltmieteOffen == 500m);
+            miete.Should().OnlyContain(m => m.Offen == 500m);
             garagen.Should().HaveCount(12);
-            garagen.Should().OnlyContain(e => e.Offen == 50m);
+            garagen.Should().OnlyContain(m => m.Offen == 50m);
             ctx.Buchungssaetze.Count().Should().Be(vorher);
+        }
+
+        [Fact]
+        public async Task MietMatrixZeigtBezahlteUndOffeneMonateNebeneinander()
+        {
+            var ctx = TestUtils.GetContext();
+            var januar = new DateOnly(2024, 1, 1);
+            var vertrag = await VertragAbAsync(ctx, januar);
+            await ZahleAsync(ctx, vertrag, januar, new DateOnly(2024, 1, 5));
+
+            var result = await AlsAdmin(ctx).GetMietMatrix(2024);
+
+            var zeile = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<MietMatrixZeile>>().Subject.Single();
+            zeile.VertragId.Should().Be(vertrag.VertragId);
+            zeile.Adresse.Should().NotBeNullOrWhiteSpace();
+            zeile.Wohnung.Should().Be(vertrag.Wohnung.Bezeichnung);
+            zeile.Mieter.Should().NotBeNullOrWhiteSpace();
+            zeile.Monate.Should().HaveCount(12);
+            zeile.Monate[0].Should().Match<MietMatrixMonat>(m => m.Soll == 500m && m.Gezahlt == 500m && m.Offen == 0m);
+            zeile.Monate[1].Should().Match<MietMatrixMonat>(m => m.Soll == 500m && m.Gezahlt == 0m && m.Offen == 500m);
+        }
+
+        [Fact]
+        public async Task GarageMatrixListetEigenstaendigeGaragenMitAllenMonaten()
+        {
+            var ctx = TestUtils.GetContext();
+            var vertrag = await VertragAbAsync(ctx, new DateOnly(2024, 1, 1));
+            var garage = new GarageVertrag
+            {
+                Garage = new Garage("G1")
+                {
+                    Besitzer = vertrag.Ansprechpartner!,
+                    Ertragskonto = new Buchungskonto("4100", "Garagenmiete", BuchungskontoTyp.Ertrag),
+                },
+                MietBuchungskonto = new Buchungskonto("1100", "Garage", BuchungskontoTyp.Aktiv),
+                ZahlungsKonto = new Buchungskonto("1101", "Garage Zahlung", BuchungskontoTyp.Aktiv),
+            };
+            garage.Versionen.Add(new GarageVertragVersion(new DateOnly(2024, 1, 1), 50m) { GarageVertrag = garage });
+            ctx.GarageVertraege.Add(garage);
+            await ctx.SaveChangesAsync();
+
+            var result = await AlsAdmin(ctx).GetGarageMatrix(2024);
+
+            var zeile = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<GarageMatrixZeile>>().Subject.Single();
+            zeile.Garage.Should().Be("G1");
+            zeile.Monate.Should().HaveCount(12);
+            zeile.Monate.Should().OnlyContain(m => m.Soll == 50m && m.Gezahlt == 0m && m.Offen == 50m);
+        }
+
+        [Fact]
+        public async Task ZaehlerMatrixListetAuchZaehlerMitStandImJahr()
+        {
+            var ctx = TestUtils.GetContext();
+            var user = new UserAccount { Username = "test", Name = "test", Role = UserRole.User };
+            ctx.UserAccounts.Add(user);
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            ctx.VerwalterSet.Add(new Verwalter(VerwalterRolle.Eigentuemer) { UserAccount = user, Wohnung = vertrag.Wohnung });
+            var zaehler = vertrag.Wohnung.Zaehler.First();
+            zaehler.Staende.Add(new Zaehlerstand(new DateOnly(2024, 5, 1), 100m) { Zaehler = zaehler });
+            await ctx.SaveChangesAsync();
+            var controller = new OffeneForderungenController(ctx)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        User = new ClaimsPrincipal(new ClaimsIdentity(user.AssembleClaims(), "mock"))
+                    }
+                }
+            };
+
+            var result = await controller.GetZaehlerMatrix(2024);
+
+            var zeilen = result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeAssignableTo<IEnumerable<ZaehlerMatrixZeile>>().Subject.ToList();
+            zeilen.Should().ContainSingle(z => z.Id == zaehler.ZaehlerId)
+                .Which.Should().Match<ZaehlerMatrixZeile>(z =>
+                    z.Staende.Count == 1 && z.Staende[0].Stand == 100m
+                    && z.LastStand == 100m && z.LastDatum == "2024-05-01");
+            zeilen.Where(z => z.Id != zaehler.ZaehlerId).Should().OnlyContain(z => z.Staende.Count == 0);
         }
 
         [Fact]

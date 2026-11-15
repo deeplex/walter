@@ -81,10 +81,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         max-height: none !important;
     }
 
-    :global(.cds--cc--heatmap rect.heat) {
-        fill: #d5d5d5;
-    }
-
     /* Sidenav theming doesn't seem to have a token */
     :global(a) {
         color: #2e7d32;
@@ -119,10 +115,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     /* Adjust accordion for detail views */
     :global(.bx--content, .bx--accordion__content) {
         padding: 0 !important;
-    }
-
-    :global(.cds--cc--heatmap g.axis.left .tick text) {
-        text-anchor: end;
     }
 
     :global(.bx--list-box__menu-item) {

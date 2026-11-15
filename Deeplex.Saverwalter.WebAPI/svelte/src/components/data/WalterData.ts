@@ -17,7 +17,6 @@ import type {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
     WalterKontoMonatsSumme,
-    WalterUmlageEntry,
     WalterWohnungEntry
 } from '$walter/lib';
 
@@ -91,105 +90,6 @@ export function walter_data_wf(
         group: wohnung.bezeichnung,
         value: wohnung.wohnflaeche
     }));
-
-    return { data, options };
-}
-
-export const months = [
-    'Januar',
-    'Februar',
-    'März',
-    'April',
-    'Mai',
-    'Juni',
-    'Juli',
-    'August',
-    'September',
-    'Oktober',
-    'November',
-    'Dezember'
-];
-
-const colorGradient = [
-    '#a3c68d',
-    '#93bd7a',
-    '#83b368',
-    '#73aa56',
-    '#63a143',
-    '#2e7d32'
-];
-
-const heatMapOptions = {
-    ...baseOptions,
-    legend: {
-        enabled: true
-    },
-    color: {
-        gradient: {
-            colors: colorGradient
-        }
-    },
-    heatmap: {
-        colorLegend: {
-            type: 'quantize'
-        }
-    }
-};
-
-export function walter_data_rechnungentabelle(
-    umlagen: WalterUmlageEntry[],
-    year: number
-): WalterDataConfigType {
-    const options = {
-        ...heatMapOptions,
-        axes: {
-            bottom: {
-                title: 'Umlage',
-                mapsTo: 'key',
-                scaleType: 'labels',
-                showTitle: false
-            },
-            left: {
-                title: 'Wohnung',
-                truncation: {
-                    threshold: 999
-                },
-                mapsTo: 'group',
-                scaleType: 'labels'
-            }
-        }
-    };
-
-    const data: WalterDataType = [];
-
-    for (const umlage of umlagen) {
-        const rechnungen = umlage.betriebskostenrechnungen.filter(
-            (rechnung) => rechnung.betreffendesJahr === year
-        );
-
-        for (const wohnung of umlage.selectedWohnungen) {
-            data.push({
-                id: `${umlage.id}`,
-                id2: `${umlage.typ.id}`,
-                wohnungId: `${wohnung.id}`,
-                group: wohnung.text,
-                key: umlage.typ.text,
-                value: rechnungen.reduce((pre, cur) => pre + cur.betrag, 0)
-            });
-        }
-    }
-
-    data.forEach((entry) => {
-        entry.value =
-            entry.value === null || (entry.value as number) > 0
-                ? entry.value
-                : undefined;
-    });
-
-    const wohnungen = new Set();
-    data.forEach((entry) => wohnungen.add(entry.group));
-
-    options.height = `${Math.max(wohnungen.size * 3, 20)}em`;
 
     return { data, options };
 }
@@ -272,7 +172,6 @@ export type WalterDataConfigType = {
 
 export type WalterDataOptionsType = {
     legend: { enabled: boolean };
-    heatmap: unknown;
     height: string;
     title?: string;
     curve?: string;
@@ -293,10 +192,8 @@ export type WalterDataType = WalterDataPoint[];
 export type WalterDataPoint = {
     value: number | number[] | null | undefined;
     year?: number;
-    group?: string; // row in heatmap
+    group?: string;
     id?: string; // id of vertrag
-    id2?: string;
-    wohnungId?: string;
-    key?: string; // column in heatmap
+    key?: string;
     date?: string; // Date in Canadian Format
 };

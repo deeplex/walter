@@ -22,7 +22,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     /// <summary>
-    /// Gibt die offenen Forderungen für ein Jahr zurück. Strikt lesend: Ein Monat ohne
+    /// Status von Mieten, Garagen, Zählerständen, offenen Betriebskostenrechnungen und
+    /// Guthaben für ein Jahr, für die Startseite. Strikt lesend: Ein Monat ohne
     /// Sollstellung gilt als fällig mit der Miete der Vertragsversion und nichts bezahlt.
     /// Angelegt werden die Sollstellungen vom <see cref="SollstellungService"/>.
     /// </summary>
@@ -30,29 +31,74 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/offene-forderungen")]
     public class OffeneForderungenController(SaverwalterContext ctx) : ControllerBase
     {
-        public class OffeneGarageInfo
+        public class MietMatrixMonat
         {
-            public int GarageVertragId { get; set; }
-            public string GarageKennung { get; set; } = "";
+            public string Monat { get; set; } = "";
+            /// <summary>Kaltmiete und Garagen des Vertrags für diesen Monat.</summary>
+            public decimal Soll { get; set; }
+            public decimal Gezahlt { get; set; }
             public decimal Offen { get; set; }
         }
 
-        public class OffeneForderungEntry
+        public class MietMatrixZeile
         {
             public int VertragId { get; set; }
             public string VertragBezeichnung { get; set; } = "";
-            public string Monat { get; set; } = "";
-            public decimal KaltmieteOffen { get; set; }
-            public decimal Offen { get; set; }
+            public string Adresse { get; set; } = "";
+            public string Wohnung { get; set; } = "";
+            public string Mieter { get; set; } = "";
             public int? ZahlungsempfaengerId { get; set; }
-            public List<OffeneGarageInfo> Garagen { get; set; } = [];
+            /// <summary>Nur die fälligen Monate; künftige Monate fehlen.</summary>
+            public List<MietMatrixMonat> Monate { get; set; } = [];
         }
 
-        [HttpGet("{jahr}")]
-        public Task<ActionResult<IEnumerable<OffeneForderungEntry>>> GetOffeneForderungen(int jahr) =>
-            ErmittleOffeneForderungenAsync(jahr);
+        /// <summary>
+        /// Alle fälligen Monate je Vertrag – auch die bezahlten –, damit sich
+        /// erledigte und offene Monate nebeneinander darstellen lassen.
+        /// </summary>
+        [HttpGet("matrix/{jahr}")]
+        public async Task<ActionResult<IEnumerable<MietMatrixZeile>>> GetMietMatrix(int jahr)
+        {
+            var monate = await ErmittleMietMonateAsync(jahr);
+            var result = monate
+                .GroupBy(m => m.VertragId)
+                .Select(g => new MietMatrixZeile
+                {
+                    VertragId = g.Key,
+                    VertragBezeichnung = g.First().VertragBezeichnung,
+                    Adresse = g.First().Adresse,
+                    Wohnung = g.First().Wohnung,
+                    Mieter = g.First().Mieter,
+                    ZahlungsempfaengerId = g.First().ZahlungsempfaengerId,
+                    Monate = g.OrderBy(m => m.Monat)
+                        .Select(m => new MietMatrixMonat
+                        {
+                            Monat = m.Monat,
+                            Soll = m.Soll,
+                            Gezahlt = m.Gezahlt,
+                            Offen = m.Offen
+                        })
+                        .ToList()
+                })
+                .OrderBy(z => z.VertragBezeichnung);
+            return Ok(result);
+        }
 
-        private async Task<ActionResult<IEnumerable<OffeneForderungEntry>>> ErmittleOffeneForderungenAsync(int jahr)
+        private sealed class MietMonat
+        {
+            public int VertragId { get; init; }
+            public string VertragBezeichnung { get; init; } = "";
+            public string Adresse { get; init; } = "";
+            public string Wohnung { get; init; } = "";
+            public string Mieter { get; init; } = "";
+            public string Monat { get; init; } = "";
+            public decimal Soll { get; init; }
+            public decimal Gezahlt { get; init; }
+            public decimal Offen { get; init; }
+            public int? ZahlungsempfaengerId { get; init; }
+        }
+
+        private async Task<List<MietMonat>> ErmittleMietMonateAsync(int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
@@ -60,9 +106,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             // Künftige Monate sind nicht fällig: ein künftiges Jahr hat keine.
             if (jahr > today.Year)
-                return Ok(Array.Empty<OffeneForderungEntry>());
+                return [];
 
-            var vertraege = await ctx.Vertraege
+            var vertraege = await VertragPermissionHandler.GetQueryable(ctx, User)
                 .AsSplitQuery()
                 .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
@@ -127,68 +173,68 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .GroupBy(o => o.SollZeile.BuchungszeileId)
                 .ToDictionary(g => g.Key, g => g.Sum(o => o.HabenZeile.Betrag));
 
-            var result = new List<OffeneForderungEntry>();
+            var result = new List<MietMonat>();
 
             foreach (var vertrag in vertraege)
             {
+                bankkontoByZahlungsKonto.TryGetValue(vertrag.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
+
                 foreach (var monat in Sollstellung.Monate(jahr, today, vertrag.Beginn(), vertrag.Ende))
                 {
                     var version = vertrag.Versionen
                         .Where(v => v.Beginn <= monat)
                         .MaxBy(v => v.Beginn);
 
-                    if (version != null)
+                    if (version == null) continue;
+
+                    var sollZeile = vertrag.MietBuchungskonto.Buchungszeilen
+                        .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat, vertrag.NkBuchungskonto.BuchungskontoId));
+
+                    // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
+                    var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                    var kaltmieteSoll = sollZeile?.Betrag ?? version.Grundmiete;
+                    var kaltmieteOffen = kaltmieteSoll - gezahlt;
+
+                    var soll = kaltmieteSoll;
+                    var gesamtGezahlt = gezahlt;
+
+                    // Garagen des Vertrags in diesem Monat
+                    var garageOffen = 0m;
+                    foreach (var gv in vertrag.GarageVertraege)
                     {
-                        var sollZeile = vertrag.MietBuchungskonto.Buchungszeilen
-                            .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat, vertrag.NkBuchungskonto.BuchungskontoId));
+                        var gvVersion = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
+                        if (gvVersion == null) continue;
 
-                        // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
-                        var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
-                        var kaltmieteOffen = (sollZeile?.Betrag ?? version.Grundmiete) - gezahlt;
+                        var gvSollZeile = gv.MietBuchungskonto.Buchungszeilen
+                            .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
-                        // Collect open garage forderungen for this month
-                        var offeneGaragen = new List<OffeneGarageInfo>();
-                        foreach (var gv in vertrag.GarageVertraege)
-                        {
-                            var gvVersion = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
-                            if (gvVersion == null) continue;
+                        var gvGezahlt = gvSollZeile != null && oposBySollZeile.TryGetValue(gvSollZeile.BuchungszeileId, out var gg) ? gg : 0m;
+                        var gvSoll = gvSollZeile?.Betrag ?? gvVersion.GaragenMiete;
+                        var gvOffen = gvSoll - gvGezahlt;
 
-                            var gvSollZeile = gv.MietBuchungskonto.Buchungszeilen
-                                .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
+                        soll += gvSoll;
+                        gesamtGezahlt += gvGezahlt;
 
-                            var gvGezahlt = gvSollZeile != null && oposBySollZeile.TryGetValue(gvSollZeile.BuchungszeileId, out var gg) ? gg : 0m;
-                            var gvOffen = (gvSollZeile?.Betrag ?? gvVersion.GaragenMiete) - gvGezahlt;
-
-                            if (gvOffen > 0.005m)
-                                offeneGaragen.Add(new OffeneGarageInfo
-                                {
-                                    GarageVertragId = gv.GarageVertragId,
-                                    GarageKennung = gv.Garage.Kennung,
-                                    Offen = gvOffen
-                                });
-                        }
-
-                        var totalOffen = kaltmieteOffen + offeneGaragen.Sum(og => og.Offen);
-
-                        if (totalOffen > 0.005m)
-                        {
-                            bankkontoByZahlungsKonto.TryGetValue(vertrag.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
-                            result.Add(new OffeneForderungEntry
-                            {
-                                VertragId = vertrag.VertragId,
-                                VertragBezeichnung = BuildBezeichnung(vertrag),
-                                Monat = monat.ToString("yyyy-MM-dd"),
-                                KaltmieteOffen = kaltmieteOffen,
-                                Offen = totalOffen,
-                                ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId,
-                                Garagen = offeneGaragen
-                            });
-                        }
+                        if (gvOffen > 0.005m) garageOffen += gvOffen;
                     }
+
+                    result.Add(new MietMonat
+                    {
+                        VertragId = vertrag.VertragId,
+                        VertragBezeichnung = BuildBezeichnung(vertrag),
+                        Adresse = vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift",
+                        Wohnung = vertrag.Wohnung.Bezeichnung,
+                        Mieter = BuildMieter(vertrag),
+                        Monat = monat.ToString("yyyy-MM-dd"),
+                        Soll = soll,
+                        Gezahlt = gesamtGezahlt,
+                        Offen = kaltmieteOffen + garageOffen,
+                        ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId
+                    });
                 }
             }
 
-            return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.VertragBezeichnung));
+            return result;
         }
 
         public class GuthabenEntry
@@ -209,7 +255,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
 
-            var vertraege = await ctx.Vertraege
+            var vertraege = await VertragPermissionHandler.GetQueryable(ctx, User)
                 .AsSplitQuery()
                 .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
@@ -321,32 +367,77 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result);
         }
 
-        public class OffeneGarageForderungEntry
+        public class GarageMatrixZeile
         {
             public int GarageVertragId { get; set; }
             public string Bezeichnung { get; set; } = "";
-            public string Monat { get; set; } = "";
-            public decimal Offen { get; set; }
+            public string Adresse { get; set; } = "";
+            public string Garage { get; set; } = "";
+            public string Mieter { get; set; } = "";
             public int? ZahlungsempfaengerId { get; set; }
+            /// <summary>Nur die fälligen Monate; künftige Monate fehlen.</summary>
+            public List<MietMatrixMonat> Monate { get; set; } = [];
         }
 
-        [HttpGet("garagen/{jahr}")]
-        public Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> GetOffeneGarageForderungen(int jahr) =>
-            ErmittleOffeneGarageForderungenAsync(jahr);
+        /// <summary>
+        /// Alle fälligen Monate je eigenständigem Garagenvertrag – auch die bezahlten.
+        /// Garagen, die zu einem Wohnungsvertrag gehören, stehen in der Mietmatrix.
+        /// </summary>
+        [HttpGet("matrix/garagen/{jahr}")]
+        public async Task<ActionResult<IEnumerable<GarageMatrixZeile>>> GetGarageMatrix(int jahr)
+        {
+            var monate = await ErmittleGarageMonateAsync(jahr);
+            var result = monate
+                .GroupBy(m => m.GarageVertragId)
+                .Select(g => new GarageMatrixZeile
+                {
+                    GarageVertragId = g.Key,
+                    Bezeichnung = $"{g.First().Kennung} | {g.First().Mieter}",
+                    Adresse = g.First().Adresse,
+                    Garage = g.First().Kennung,
+                    Mieter = g.First().Mieter,
+                    ZahlungsempfaengerId = g.First().ZahlungsempfaengerId,
+                    Monate = g.OrderBy(m => m.Monat)
+                        .Select(m => new MietMatrixMonat
+                        {
+                            Monat = m.Monat,
+                            Soll = m.Soll,
+                            Gezahlt = m.Gezahlt,
+                            Offen = m.Offen
+                        })
+                        .ToList()
+                })
+                .OrderBy(z => z.Adresse).ThenBy(z => z.Garage);
+            return Ok(result);
+        }
 
-        private async Task<ActionResult<IEnumerable<OffeneGarageForderungEntry>>> ErmittleOffeneGarageForderungenAsync(int jahr)
+        private sealed class GarageMonat
+        {
+            public int GarageVertragId { get; init; }
+            public string Kennung { get; init; } = "";
+            public string Adresse { get; init; } = "";
+            public string Mieter { get; init; } = "";
+            public string Monat { get; init; } = "";
+            public decimal Soll { get; init; }
+            public decimal Gezahlt { get; init; }
+            public decimal Offen { get; init; }
+            public int? ZahlungsempfaengerId { get; init; }
+        }
+
+        private async Task<List<GarageMonat>> ErmittleGarageMonateAsync(int jahr)
         {
             var startOfYear = new DateOnly(jahr, 1, 1);
             var endOfYear = new DateOnly(jahr, 12, 31);
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             if (jahr > today.Year)
-                return Ok(Array.Empty<OffeneGarageForderungEntry>());
+                return [];
 
-            var garageVertraege = await ctx.GarageVertraege
+            var garageVertraege = await GarageVertragPermissionHandler.GetQueryable(ctx, User)
                 .AsSplitQuery()
                 .Include(gv => gv.Versionen)
                 .Include(gv => gv.Garage).ThenInclude(g => g.Ertragskonto)
+                .Include(gv => gv.Garage).ThenInclude(g => g.Adresse)
                 .Include(gv => gv.Mieter)
                 .Include(gv => gv.ZahlungsKonto)
                 .Include(gv => gv.MietBuchungskonto)
@@ -381,85 +472,123 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .GroupBy(b => b.BuchungsKonto.BuchungskontoId)
                 .ToDictionary(g => g.Key, g => g.First().BankkontoId);
 
-            var result = new List<OffeneGarageForderungEntry>();
+            var result = new List<GarageMonat>();
 
             foreach (var gv in garageVertraege)
             {
+                var mieterNamen = gv.Mieter.Count > 0
+                    ? string.Join(", ", gv.Mieter.Select(m => m.Bezeichnung))
+                    : "Leerstand";
+                bankkontoByZahlungsKonto.TryGetValue(gv.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
+
                 foreach (var monat in Sollstellung.Monate(jahr, today, gv.Beginn(), gv.Ende))
                 {
                     var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
-                    if (version != null)
+                    if (version == null) continue;
+
+                    var sollZeile = gv.MietBuchungskonto.Buchungszeilen
+                        .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
+
+                    // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
+                    var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
+                    var soll = sollZeile?.Betrag ?? version.GaragenMiete;
+
+                    result.Add(new GarageMonat
                     {
-                        var sollZeile = gv.MietBuchungskonto.Buchungszeilen
-                            .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
-
-                        // Ohne Sollstellung: die Miete der Version, nichts bezahlt.
-                        var gezahlt = sollZeile != null && oposBySollZeile.TryGetValue(sollZeile.BuchungszeileId, out var g) ? g : 0m;
-                        var offen = (sollZeile?.Betrag ?? version.GaragenMiete) - gezahlt;
-
-                        if (offen > 0.005m)
-                        {
-                            var mieterNamen = gv.Mieter.Count > 0
-                                ? string.Join(", ", gv.Mieter.Select(m => m.Bezeichnung))
-                                : "Leerstand";
-                            bankkontoByZahlungsKonto.TryGetValue(gv.ZahlungsKonto.BuchungskontoId, out var zahlungsempfaengerId);
-                            result.Add(new OffeneGarageForderungEntry
-                            {
-                                GarageVertragId = gv.GarageVertragId,
-                                Bezeichnung = $"{gv.Garage.Kennung} | {mieterNamen}",
-                                Monat = monat.ToString("yyyy-MM-dd"),
-                                Offen = offen,
-                                ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId
-                            });
-                        }
-                    }
+                        GarageVertragId = gv.GarageVertragId,
+                        Kennung = gv.Garage.Kennung,
+                        Adresse = gv.Garage.Adresse?.Anschrift ?? "Unbekannte Anschrift",
+                        Mieter = mieterNamen,
+                        Monat = monat.ToString("yyyy-MM-dd"),
+                        Soll = soll,
+                        Gezahlt = gezahlt,
+                        Offen = soll - gezahlt,
+                        ZahlungsempfaengerId = zahlungsempfaengerId == 0 ? null : zahlungsempfaengerId
+                    });
                 }
             }
 
-            return Ok(result.OrderBy(r => r.Monat).ThenBy(r => r.Bezeichnung));
+            return result;
         }
 
         private static string BuildBezeichnung(Vertrag vertrag)
         {
             var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "?"} – {vertrag.Wohnung.Bezeichnung}";
-            var mieter = vertrag.Mieter.Count > 0
-                ? string.Join(", ", vertrag.Mieter.Select(m => m.Bezeichnung))
-                : "Leerstand";
-            return $"{wohnung} | {mieter}";
+            return $"{wohnung} | {BuildMieter(vertrag)}";
         }
 
-        public class ZaehlerstandFaelligEntry
+        private static string BuildMieter(Vertrag vertrag) =>
+            vertrag.Mieter.Count > 0
+                ? string.Join(", ", vertrag.Mieter.Select(m => m.Bezeichnung))
+                : "Leerstand";
+
+        public class ZaehlerMatrixStand
+        {
+            public string Datum { get; set; } = "";
+            public decimal Stand { get; set; }
+            public string Einheit { get; set; } = "";
+        }
+
+        public class ZaehlerMatrixZeile
         {
             public int Id { get; set; }
             public string Kennnummer { get; set; } = "";
             public string TypText { get; set; } = "";
+            public string Adresse { get; set; } = "";
+            public string Wohnung { get; set; } = "";
+            /// <summary>Die Wohnung des Zählers; null bei einem allgemeinen Zähler der Adresse.</summary>
+            public int? WohnungId { get; set; }
             public decimal? LastStand { get; set; }
             public string? LastEinheit { get; set; }
+            /// <summary>Datum des letzten bekannten Standes, auch aus früheren Jahren.</summary>
+            public string? LastDatum { get; set; }
+            /// <summary>Die Stände im gewählten Jahr; leer, wenn noch keiner eingetragen ist.</summary>
+            public List<ZaehlerMatrixStand> Staende { get; set; } = [];
         }
 
-        [HttpGet("zaehlerstaende-faellig/{jahr}")]
-        public async Task<ActionResult<IEnumerable<ZaehlerstandFaelligEntry>>> GetZaehlerstaendeFaellig(int jahr)
+        /// <summary>
+        /// Alle Zähler, die im Jahr noch laufen, mit ihren Ständen im Jahr – auch die,
+        /// bei denen schon ein Stand eingetragen ist.
+        /// </summary>
+        [HttpGet("matrix/zaehler/{jahr}")]
+        public async Task<ActionResult<IEnumerable<ZaehlerMatrixZeile>>> GetZaehlerMatrix(int jahr)
         {
             var zaehler = await ZaehlerPermissionHandler.GetQueryable(ctx, User)
                 .Include(z => z.Staende)
+                .Include(z => z.Wohnung).ThenInclude(w => w!.Adresse)
+                .Include(z => z.Adresse)
                 .Where(z => z.Ende == null || z.Ende.Value.Year >= jahr)
-                .Where(z => !z.Staende.Any(s => s.Datum.Year == jahr))
                 .ToListAsync();
 
             return Ok(zaehler
-                .OrderBy(z => z.Kennnummer)
                 .Select(z =>
                 {
                     var last = z.Staende.OrderBy(s => s.Datum).LastOrDefault();
-                    return new ZaehlerstandFaelligEntry
+                    var einheit = z.Typ.ToUnitString();
+                    return new ZaehlerMatrixZeile
                     {
                         Id = z.ZaehlerId,
                         Kennnummer = z.Kennnummer,
                         TypText = z.Typ.ToString(),
+                        Adresse = z.Wohnung?.Adresse?.Anschrift ?? z.Adresse?.Anschrift ?? "Ohne Adresse",
+                        Wohnung = z.Wohnung?.Bezeichnung ?? "",
+                        WohnungId = z.Wohnung?.WohnungId,
                         LastStand = last?.Stand,
-                        LastEinheit = last != null ? z.Typ.ToUnitString() : null
+                        LastEinheit = last != null ? einheit : null,
+                        LastDatum = last?.Datum.ToString("yyyy-MM-dd"),
+                        Staende = z.Staende
+                            .Where(s => s.Datum.Year == jahr)
+                            .OrderBy(s => s.Datum)
+                            .Select(s => new ZaehlerMatrixStand
+                            {
+                                Datum = s.Datum.ToString("yyyy-MM-dd"),
+                                Stand = s.Stand,
+                                Einheit = einheit
+                            })
+                            .ToList()
                     };
-                }));
+                })
+                .OrderBy(z => z.Adresse).ThenBy(z => z.Wohnung).ThenBy(z => z.Kennnummer));
         }
     }
 }

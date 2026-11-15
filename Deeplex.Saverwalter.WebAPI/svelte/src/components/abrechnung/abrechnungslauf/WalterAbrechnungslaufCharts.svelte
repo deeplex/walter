@@ -339,8 +339,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const chartBase = {
         legend: { enabled: false },
         height: '220px',
-        tooltip: { truncation: { threshold: 999 } },
-        heatmap: undefined
+        tooltip: { truncation: { threshold: 999 } }
     };
     const donutPercentCenter = {
         donut: {
