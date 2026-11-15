@@ -17,7 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
+        WalterErhaltungsaufwand,
         WalterGrid,
         WalterWohnungen,
         WalterVertraege,
@@ -41,7 +42,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateWohnung
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -124,6 +124,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:commitVersionIfPending
     />
 
+    <WalterErhaltungsaufwand
+        fetchImpl={data.fetchImpl}
+        wohnung={{ id: data.entry.id, text: title }}
+        bearbeitbar={data.entry.permissions?.update !== false}
+    />
+
     <WalterLinks>
         <WalterWohnungVersionen
             entry={wohnungversionEntry}
@@ -159,15 +165,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Umlagen"
             rows={data.entry.umlagen}
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />
 
         <!-- TODO besitzer id is guid -->
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

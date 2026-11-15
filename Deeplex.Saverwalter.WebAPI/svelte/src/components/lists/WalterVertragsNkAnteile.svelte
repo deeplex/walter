@@ -15,17 +15,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import {
         Accordion,
         AccordionItem,
         Button,
-        DataTable,
         InlineNotification,
         Row,
         Column,
-        Tile,
-        Toolbar,
-        ToolbarContent
+        Tile
     } from 'carbon-components-svelte';
     import { Add, TrashCan } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
@@ -40,7 +38,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_post,
         walter_delete
     } from '$walter/services/requests';
-    import { convertEuro } from '$walter/services/utils';
     import type { WalterSelectionEntry } from '$walter/lib';
 
     export let fetchImpl: typeof fetch;
@@ -183,17 +180,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if rows.length === 0 && !loading}
                 <p style="margin-bottom: 1rem;">Keine NK-Anteile vorhanden.</p>
             {:else}
-                <DataTable
+                <WalterDataTable
                     size="short"
+                    search={false}
                     {headers}
                     {rows}
-                    style="margin-bottom: 1rem;"
+                    customCells={['actions']}
                 >
-                    <Toolbar><ToolbarContent /></Toolbar>
                     <svelte:fragment slot="cell" let:row let:cell>
-                        {#if cell.key === 'betrag'}
-                            {convertEuro(cell.value)}
-                        {:else if cell.key === 'actions'}
+                        {#if cell.key === 'actions'}
                             {#if row.canRemove && !readonly}
                                 <Button
                                     kind="ghost"
@@ -203,11 +198,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                     on:click={() => remove(row.buchungssatzId)}
                                 />
                             {/if}
-                        {:else}
-                            {cell.value}
                         {/if}
                     </svelte:fragment>
-                </DataTable>
+                </WalterDataTable>
             {/if}
 
             {#if !readonly}

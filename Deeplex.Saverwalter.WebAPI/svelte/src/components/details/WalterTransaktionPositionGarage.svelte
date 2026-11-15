@@ -19,8 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Row,
         Column,
         InlineNotification,
-        InlineLoading,
-        Tag
+        InlineLoading
     } from 'carbon-components-svelte';
     import {
         WalterComboBox,

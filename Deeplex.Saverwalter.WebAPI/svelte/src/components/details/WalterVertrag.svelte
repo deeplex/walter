@@ -23,16 +23,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterMultiSelectKontakt,
         WalterNumberInput
     } from '$walter/components';
-    import WalterMietKorrektur from './WalterMietKorrektur.svelte';
     import type { WalterVertragEntry } from '$walter/lib';
     import { WalterToastContent, WalterVertragVersionEntry } from '$walter/lib';
     import {
-        Accordion,
-        AccordionItem,
+        Button,
         Row,
         TextInput,
         InlineNotification
     } from 'carbon-components-svelte';
+    import { formatEuro } from '$walter/services/format';
     import { convertDateGerman } from '$walter/services/utils';
     import { walter_fetch, walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
@@ -131,30 +130,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             displayVersion.personenzahl !== latestVersion?.personenzahl);
 
     $: blockSave = hasVersionChanges && !seitWann;
-
-    const eur = (v: number | undefined) =>
-        v != null
-            ? v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
-            : '?';
-
-    $: versionChanges = [
-        displayVersion.grundmiete !== latestVersion?.grundmiete && {
-            label: 'Grundmiete',
-            from: eur(latestVersion?.grundmiete),
-            to: eur(displayVersion.grundmiete)
-        },
-        displayVersion.nebenkostenvorauszahlung !==
-            latestVersion?.nebenkostenvorauszahlung && {
-            label: 'Nebenkostenvorauszahlung',
-            from: eur(latestVersion?.nebenkostenvorauszahlung),
-            to: eur(displayVersion.nebenkostenvorauszahlung)
-        },
-        displayVersion.personenzahl !== latestVersion?.personenzahl && {
-            label: 'Personenzahl',
-            from: String(latestVersion?.personenzahl ?? '?'),
-            to: String(displayVersion.personenzahl ?? '?')
-        }
-    ].filter(Boolean) as { label: string; from: string; to: string }[];
 
     export let commitVersionIfPending: () => Promise<void> = async () => {};
     $: commitVersionIfPending = async () => {
@@ -259,6 +234,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:value={displayVersion.personenzahl}
         label="Personenzahl"
     />
+    {#if entry.id}
+        <div class="bx--form-item">
+            <span class="bx--label">Kaution</span>
+            <Button
+                class="kaution-knopf"
+                kind="tertiary"
+                size="field"
+                href="/vertraege/{entry.id}/kaution"
+            >
+                {formatEuro(entry.kaution ?? 0)}
+            </Button>
+        </div>
+    {/if}
 </Row>
 {#if hasVersionChanges}
     <Row>
@@ -283,42 +271,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </svelte:fragment>
     </InlineNotification>
 {/if}
-{#if !isNew && entry.id}
-    <Row>
-        <WalterMietKorrektur vertragId={entry.id} {fetchImpl} />
-    </Row>
-{/if}
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>
 
-<Accordion style="margin-bottom: 1rem;">
-    <AccordionItem title="Kaution">
-        <Row>
-            <WalterNumberInput
-                {readonly}
-                hideSteppers
-                bind:value={entry.kautionBetrag}
-                label="Betrag (€)"
-            />
-            <TextInput
-                disabled={readonly}
-                labelText="Art"
-                placeholder="z.B. Sparbuch, Überweisung, Bürgschaft"
-                bind:value={entry.kautionArt}
-            />
-        </Row>
-        <Row>
-            <WalterDatePicker
-                disabled={readonly}
-                bind:value={entry.kautionEingangsdatum}
-                labelText="Eingang"
-            />
-            <WalterDatePicker
-                disabled={readonly}
-                bind:value={entry.kautionRueckgabedatum}
-                labelText="Rückgabe"
-            />
-        </Row>
-    </AccordionItem>
-</Accordion>
+<style>
+    /* Gleiche Breite und Höhe wie die Eingabefelder daneben */
+    :global(.kaution-knopf) {
+        width: 100%;
+        max-width: none;
+    }
+</style>

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
@@ -71,6 +72,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<MietminderungController> _logger;
         protected override MietminderungDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Mietminderung e) => FileFamilies.Of(e);
+        protected override int? FileYearOf(Mietminderung e) => e.Beginn.Year;
         public MietminderungController(ILogger<MietminderungController> logger, MietminderungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;

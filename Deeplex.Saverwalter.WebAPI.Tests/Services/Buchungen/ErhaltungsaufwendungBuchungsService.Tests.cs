@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Buchungen
             soll.Buchungskonto.Should().Be(wohnung.AufwandsKonto);
             soll.Betrag.Should().Be(500m);
             haben.Betrag.Should().Be(500m);
-            satz.Beschreibung.Should().Be("Erhaltungsaufwendung: Heizungsreparatur");
+            satz.Beschreibung.Should().Be("Heizungsreparatur");
         }
 
         [Fact]

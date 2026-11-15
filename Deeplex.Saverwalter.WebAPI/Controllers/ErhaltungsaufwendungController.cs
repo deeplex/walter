@@ -53,9 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .Where(z => z.SollHaben == SollHaben.Soll &&
                                 (aufwandsKontoId < 0 || z.Buchungskonto.BuchungskontoId == aufwandsKontoId))
                     .Sum(z => z.Betrag);
-                Bezeichnung = satz.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
-                    ? satz.Beschreibung["Erhaltungsaufwendung: ".Length..]
-                    : satz.Beschreibung;
+                Bezeichnung = satz.Beschreibung;
                 Wohnung = wohnung;
                 Aussteller = aussteller != null
                     ? new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung)

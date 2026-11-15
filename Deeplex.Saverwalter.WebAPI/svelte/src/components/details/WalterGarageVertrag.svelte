@@ -16,11 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import {
-        WalterComboBox,
         WalterDatePicker,
         WalterMultiSelectKontakt,
-        WalterTextArea,
-        WalterTextInput
+        WalterTextArea
     } from '$walter/components';
     import WalterComboBoxGarage from '$walter/components/elements/WalterComboBoxGarage.svelte';
     import WalterComboBoxVertrag from '$walter/components/elements/WalterComboBoxVertrag.svelte';

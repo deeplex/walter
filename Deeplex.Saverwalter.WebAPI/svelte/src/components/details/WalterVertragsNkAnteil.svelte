@@ -19,8 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterComboBox,
         WalterNumberInput,
-        WalterDatePicker,
-        WalterTextArea
+        WalterDatePicker
     } from '$walter/components';
     import { walter_selection } from '$walter/services/requests';
     import type { WalterVertragsNkAnteilEntry } from '$walter/lib';

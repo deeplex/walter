@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
 
-            var service = new VertragsNkAnteilDbService(ctx, auth, new NkAnteilBuchungsService(ctx));
+            var service = new VertragsNkAnteilDbService(ctx, auth, new NkAnteilBuchungsService(ctx), TestServices.Rueckgaengig(ctx));
             return (service, user, vertrag, umlage);
         }
 
@@ -120,6 +120,25 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             result.Should().BeOfType<Microsoft.AspNetCore.Mvc.OkResult>();
             (await service.GetList(user, vertragId: null, umlageId: null)).Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Delete_IstNachAbrechnungGesperrt()
+        {
+            var ctx = TestUtils.GetContext();
+            var (service, user, vertrag, umlage) = Setup(ctx);
+            var posted = await service.Post(user, NewEntry(vertrag, umlage, 60m));
+
+            var abrechnungssatz = new Buchungssatz(new DateOnly(2024, 12, 31), "BK-Abrechnung 2024") { Buchungsjahr = 2024 };
+            abrechnungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 60m) { Buchungssatz = abrechnungssatz, Buchungskonto = vertrag.NkBuchungskonto });
+            ctx.Buchungssaetze.Add(abrechnungssatz);
+            ctx.Abrechnungsresultate.Add(new Abrechnungsresultat { Vertrag = vertrag, Buchungssatz = abrechnungssatz });
+            ctx.SaveChanges();
+
+            var result = await service.Delete(user, posted.Value!.Id);
+
+            result.Should().BeOfType<Microsoft.AspNetCore.Mvc.ConflictObjectResult>();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == posted.Value.Id).Should().BeTrue();
         }
 
         [Fact]

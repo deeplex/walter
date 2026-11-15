@@ -33,7 +33,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import WalterBetriebskostenrechnungen from '../lists/WalterBetriebskostenrechnungen.svelte';
-    import { fileURL } from '$walter/services/files';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let rechnungen: WalterBetriebskostenrechnungEntry[] = [];
@@ -189,7 +188,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
     <WalterLinks>
         <WalterLinkTile
-            fileref={fileURL.umlage(`${entry.umlage?.id}`)}
             name={'Umlage ansehen'}
             href={`/umlagen/${entry.umlage?.id}`}
         />

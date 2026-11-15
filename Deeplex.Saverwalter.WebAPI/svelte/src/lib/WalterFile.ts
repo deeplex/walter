@@ -20,7 +20,11 @@ export class WalterFile {
         public lastModified: number,
         public size?: number,
         public blob?: Blob,
-        public type?: string
+        public type?: string,
+        /** Das Jahr, in dem die Datei liegt; 0 ohne Jahr (z. B. der Ablagestapel). */
+        public year: number = 0,
+        /** Bei Dateien einer Familie: das Objekt, dem sie gehören; leer beim Objekt der Seite selbst. */
+        public source?: string
     ) {}
 
     static fromFile(file: File, key: string) {

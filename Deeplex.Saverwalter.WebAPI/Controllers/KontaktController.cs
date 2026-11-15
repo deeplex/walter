@@ -96,9 +96,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<KontaktMitgliedschaftEntry> MitgliedschaftenAlsJuristischePerson { get; set; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
-            public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
             public IEnumerable<BankkontoEntryBase> Bankkontos { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
+            /// <summary>Verträge, in denen der Kontakt Mieter ist.</summary>
+            public IEnumerable<int> MietvertragIds { get; set; } = [];
 
             public KontaktEntry() : base() { }
             public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)
@@ -110,6 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entity.Notiz;
                 Konten = BuchungskontoRefEntry.Collect(
                     (entity.VerbindlichkeitsKonto, KontoFunktion.Verbindlichkeiten));
+                MietvertragIds = entity.Mietvertraege.Select(v => v.VertragId).ToList();
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

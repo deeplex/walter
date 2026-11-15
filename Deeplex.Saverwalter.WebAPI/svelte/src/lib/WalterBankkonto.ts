@@ -16,7 +16,6 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
-import { WalterTransaktionEntry } from './WalterTransaktion';
 
 export class WalterBankkontoEntry extends WalterApiHandler {
     public static ApiURL = `/api/bankkontos`;
@@ -28,7 +27,6 @@ export class WalterBankkontoEntry extends WalterApiHandler {
         public bezeichnung: string,
         public notiz: string,
         public selectedBesitzer: WalterSelectionEntry[],
-        public transaktionen: WalterTransaktionEntry[],
         public createdAt: Date,
         public lastModified: Date,
         public permissions: WalterPermissions
@@ -39,8 +37,6 @@ export class WalterBankkontoEntry extends WalterApiHandler {
     static fromJson(json: WalterBankkontoEntry): WalterBankkontoEntry {
         const selectedBesitzer =
             json.selectedBesitzer?.map(WalterSelectionEntry.fromJson) ?? [];
-        const transaktionen =
-            json.transaktionen?.map(WalterTransaktionEntry.fromJson) ?? [];
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
@@ -51,7 +47,6 @@ export class WalterBankkontoEntry extends WalterApiHandler {
             json.bezeichnung,
             json.notiz,
             selectedBesitzer,
-            transaktionen,
             json.createdAt,
             json.lastModified,
             permissions

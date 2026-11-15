@@ -95,7 +95,7 @@ erDiagram
         int     WohnungId          FK
         int     AnsprechpartnerId  FK
         date    Ende
-        decimal KautionBetrag
+        int     KautionsKontoId    FK
     }
     VertragVersion {
         int     VertragVersionId PK
@@ -365,9 +365,7 @@ Ein Mietverhältnis für eine Wohnung. Hält mehrere fachliche Buchungskonten.
 | `BkAbrechnungsKonto` | Buchungskonto | ja      | Konto für das Abrechnungsergebnis |
 | `ZahlungsKonto`      | Buchungskonto | ja      | Zahlungseingangskonto |
 | `MietminderungsKonto`| Buchungskonto | ja      | Konto für Mietminderungen |
-| `KautionBetrag`      | decimal       | nein    | Kautionshöhe |
-| `KautionEingangsdatum` / `KautionRueckgabedatum` | DateOnly | nein | Kautionsdaten |
-| `KautionArt`         | string        | nein    | Art der Kaution |
+| `KautionsKonto`      | Buchungskonto | ja      | Gehaltene Kaution (Passiv): Eingang im Haben, Rückzahlung im Soll |
 | `Notiz`              | string        | nein    | |
 
 Beziehungen: `Versionen`, `Mietminderungen`, `GarageVertraege`, `Mieter` (List\<Kontakt\>), `Abrechnungsresultate`.

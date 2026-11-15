@@ -26,6 +26,10 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
         public string Key { get; set; } = null!;
         public long LastModified { get; set; }
         public long? Size { get; set; }
+        /// <summary>Das Jahr, in dem die Datei liegt: ihr Ordner; 0 bei einer Datei ohne Jahr.</summary>
+        public int Year { get; set; }
+        /// <summary>Bei Dateien einer Familie: das Objekt, dem sie gehören; leer beim Objekt der Seite selbst.</summary>
+        public string? Source { get; set; }
         public byte[] Blob { get; set; } = null!;
         public string Type { get; set; } = null!;
     }
@@ -88,7 +92,7 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
         {
             var content = new StreamContent(request.Body);
 
-            // S3-compatible servers (MinIO etc.) reject PUT without an explicit
+            // S3-compatible servers (MinIO, SeaweedFS etc.) reject PUT without an explicit
             // Content-Length unless they understand the AWS chunked signing
             // protocol. Default missing lengths to zero so we never end up
             // trying to chunk-encode a forwarded request.
@@ -110,7 +114,7 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             // to hide trashed files from regular results. We deliberately do
             // not forward the original request body here (DELETE requests
             // typically don't have one) and we always send Content-Length: 0
-            // so MinIO accepts the PUT.
+            // so the S3 server accepts the PUT.
             var splits = path.Split('/');
             var trashPath = $"{string.Join('/', splits.Reverse().Skip(1).Reverse())}/trash/{splits.Last()}";
             var trashRequest = new HttpRequestMessage(HttpMethod.Put, trashPath)
@@ -128,6 +132,18 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
 
             return await httpClient.SendAsync(trashRequest, CancellationToken.None);
         }
+
+        /// <summary>Schreibt den Body der Anfrage an die Adresse; die Antwort des Servers bleibt erhalten.</summary>
+        public static async Task<HttpResponseMessage> PutAsync(HttpRequest request, HttpClient client, string url)
+        {
+            var message = new HttpRequestMessage(HttpMethod.Put, url) { Content = FillContent(url, request) };
+            return await client.SendAsync(message, CancellationToken.None);
+        }
+
+        public static async Task<IActionResult> ToResultAsync(HttpResponseMessage response) =>
+            new FileContentResult(
+                await response.Content.ReadAsByteArrayAsync(),
+                response.Content.Headers.ContentType?.MediaType ?? "plain/text");
 
         public static async Task<IActionResult> RedirectToFileServer(HttpRequest request, HttpClient client, string path)
         {

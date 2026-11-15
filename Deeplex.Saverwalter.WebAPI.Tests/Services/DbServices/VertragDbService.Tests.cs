@@ -21,6 +21,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
@@ -81,12 +82,41 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 BkAbrechnungsKonto = new Buchungskonto("1003", "BK-Abrechnung", BuchungskontoTyp.Aktiv),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
+                KautionsKonto = new Buchungskonto("1006", "Kaution", BuchungskontoTyp.Passiv),
             };
             var entry = new VertragEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
             result.Value.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task PostNummeriertKontenNachDerVertragsIdUndLegtKautionsKontoAn()
+        {
+            var ctx = TestUtils.GetContext();
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragDbService(ctx, auth);
+            var vorlage = TestUtils.GetVertragForAbrechnung(ctx);
+            var entry = new VertragEntry
+            {
+                Wohnung = new Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController.SelectionEntry(vorlage.Wohnung.WohnungId, vorlage.Wohnung.Bezeichnung),
+            };
+
+            var neu = (await service.Post(user, entry)).Value!;
+
+            neu.Id.Should().NotBe(0);
+            var vertrag = ctx.Vertraege
+                .Include(v => v.MietBuchungskonto)
+                .Include(v => v.KautionsKonto)
+                .Single(v => v.VertragId == neu.Id);
+            var idx = $"V{neu.Id:D5}";
+            vertrag.MietBuchungskonto.Kontonummer.Should().Be($"{idx}-MB");
+            vertrag.KautionsKonto.Kontonummer.Should().Be($"{idx}-KA");
+            vertrag.KautionsKonto.Kontotyp.Should().Be(BuchungskontoTyp.Passiv);
         }
 
         [Fact]

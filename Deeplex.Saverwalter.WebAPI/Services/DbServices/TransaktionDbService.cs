@@ -29,20 +29,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
     public class TransaktionDbService : WalterDbServiceBase<TransaktionEntry, Guid, Transaktion>
     {
         private readonly BuchungssatzSchutzService _schutzService;
-        private readonly StornoBuchungsService _stornoService;
+        private readonly RueckgaengigService _rueckgaengigService;
 
         public TransaktionDbService(
             SaverwalterContext ctx,
             IAuthorizationService authorizationService,
             BuchungssatzSchutzService schutzService,
-            StornoBuchungsService stornoService) : base(ctx, authorizationService)
+            RueckgaengigService rueckgaengigService) : base(ctx, authorizationService)
         {
             _schutzService = schutzService;
-            _stornoService = stornoService;
+            _rueckgaengigService = rueckgaengigService;
         }
 
-        public Task<PagedResult<TransaktionEntryBase>> GetList(ClaimsPrincipal user, PagedQuery query) =>
-            TransaktionPermissionHandler.GetQueryable(Ctx, user).PagedAsync(query,
+        public async Task<PagedResult<TransaktionEntryBase>> GetList(
+            ClaimsPrincipal user, PagedQuery query, int? bankkontoId = null, int? kontaktId = null)
+        {
+            var quelle = TransaktionPermissionHandler.GetQueryable(Ctx, user);
+            if (bankkontoId is int b)
+                quelle = quelle.Where(t =>
+                    (t.Zahler != null && t.Zahler.BankkontoId == b) ||
+                    (t.Zahlungsempfaenger != null && t.Zahlungsempfaenger.BankkontoId == b));
+            if (kontaktId is int k)
+                quelle = quelle.Where(t =>
+                    (t.Zahler != null && t.Zahler.Besitzer.Any(x => x.KontaktId == k)) ||
+                    (t.Zahlungsempfaenger != null && t.Zahlungsempfaenger.Besitzer.Any(x => x.KontaktId == k)));
+            var seite = await quelle.PagedAsync(query,
                 searchPredicate: t => e =>
                     e.Verwendungszweck.ToLower().Contains(t) ||
                     (e.Zahler != null && (
@@ -60,6 +71,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     _ => q.SortBy(e => e.Zahlungsdatum, "desc")
                 },
                 toEntry: async e => new TransaktionEntryBase(e, await GetPermissions(user, e, Auth)));
+            var eintraege = seite.Items.ToList();
+            await Zuordnung.ZuordnenAsync(Ctx, eintraege);
+            return seite with { Items = eintraege };
+        }
 
         public override async Task<ActionResult<Transaktion>> GetEntity(ClaimsPrincipal user, Guid id, OperationAuthorizationRequirement op)
         {
@@ -92,6 +107,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 entry.KannLoeschen = kannLoeschen;
                 entry.KannStornieren = kannStornieren;
                 entry.Sperrgrund = sperrgrund;
+                await Zuordnung.ZuordnenAsync(Ctx, [entry]);
 
                 return entry;
             });
@@ -113,17 +129,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     return new NotFoundResult();
                 }
 
-                foreach (var satz in transaktion.Buchungssaetze)
+                try
                 {
-                    var schutz = await _schutzService.PruefeAsync(satz);
-                    if (!schutz.KannLoeschen)
-                    {
-                        return new ConflictObjectResult(
-                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
-                    }
+                    await _rueckgaengigService.LoeschenAsync(transaktion.Buchungssaetze.ToList());
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return new ConflictObjectResult(ex.Message);
                 }
 
-                Ctx.Buchungssaetze.RemoveRange(transaktion.Buchungssaetze);
                 Ctx.Transaktionen.Remove(transaktion);
                 await Ctx.SaveChangesAsync();
 
@@ -157,22 +171,78 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     return new ConflictObjectResult("Transaktion hat keine Buchungssätze zum Stornieren.");
                 }
 
-                foreach (var satz in transaktion.Buchungssaetze)
+                try
                 {
-                    var schutz = await _schutzService.PruefeAsync(satz);
-                    if (!schutz.KannStornieren)
-                    {
-                        return new ConflictObjectResult(
-                            $"Buchungssatz Nr. {satz.Buchungsnummer}: {schutz.Sperrgrund}");
-                    }
+                    await _rueckgaengigService.StornierenAsync(transaktion.Buchungssaetze.ToList(), grund);
                 }
-
-                foreach (var satz in transaktion.Buchungssaetze.ToList())
+                catch (InvalidOperationException ex)
                 {
-                    await _stornoService.StornierenAsync(satz.BuchungssatzId, grund);
+                    return new ConflictObjectResult(ex.Message);
                 }
 
                 return new OkResult();
+            });
+        }
+
+        /// <summary>
+        /// Was „Rückgängig“ für die Transaktion bedeuten würde — siehe <see cref="RueckgaengigService"/>.
+        /// </summary>
+        public async Task<ActionResult> RueckgaengigPruefen(ClaimsPrincipal user, Guid id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (_) =>
+            {
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null) return new NotFoundResult();
+                if (transaktion.Buchungssaetze.Count == 0)
+                    return new OkObjectResult(new RueckgaengigService.RueckgaengigPlan { Art = RueckgaengigService.RueckgaengigArt.Loeschen });
+                return new OkObjectResult(await _rueckgaengigService.PruefeAsync(transaktion.Buchungssaetze));
+            });
+        }
+
+        /// <summary>
+        /// Macht die Transaktion rückgängig: löscht sie samt Buchungssätzen, wenn nichts daran
+        /// hängt, sonst Storno mit Grund. Betroffene Abrechnungen werden nach Bestätigung mit
+        /// zurückgenommen; dafür ist Lösch-Recht auf allen Wohnungen der Gruppe nötig.
+        /// </summary>
+        public async Task<ActionResult> Rueckgaengig(
+            ClaimsPrincipal user, Guid id, RueckgaengigService.RueckgaengigRequest request)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (_) =>
+            {
+                var transaktion = await LadeMitSaetzenAsync(id);
+                if (transaktion is null) return new NotFoundResult();
+
+                if (transaktion.Buchungssaetze.Count == 0)
+                {
+                    Ctx.Transaktionen.Remove(transaktion);
+                    await Ctx.SaveChangesAsync();
+                    return new OkObjectResult(new RueckgaengigService.RueckgaengigPlan { Art = RueckgaengigService.RueckgaengigArt.Loeschen });
+                }
+
+                var plan = await _rueckgaengigService.PruefeAsync(transaktion.Buchungssaetze);
+                var wohnungIds = plan.Abrechnungen.SelectMany(a => a.WohnungIds).Distinct().ToList();
+                if (wohnungIds.Count > 0
+                    && !await CanAccessAllWohnungen(Auth, Ctx, user, wohnungIds, Operations.Delete))
+                {
+                    return new ForbidResult();
+                }
+
+                try
+                {
+                    plan = await _rueckgaengigService.RueckgaengigAsync(
+                        transaktion.Buchungssaetze, request.Grund, request.AbrechnungenBestaetigt);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return new ConflictObjectResult(ex.Message);
+                }
+
+                if (plan.Art == RueckgaengigService.RueckgaengigArt.Loeschen)
+                {
+                    Ctx.Transaktionen.Remove(transaktion);
+                    await Ctx.SaveChangesAsync();
+                }
+                return new OkObjectResult(plan);
             });
         }
 
@@ -241,8 +311,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                entity.Betrag = entry.Betrag;
-
                 // Zahler/Zahlungsempfänger sind optional (z.B. Abrechnungs-Ausgleich
                 // ohne erfasstes Bankkonto) und können einzeln nachgetragen werden.
                 Bankkonto? zahler = null;
@@ -259,6 +327,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                         ?? throw new ArgumentException("Ungültiger Zahlungsempfänger");
                 }
 
+                if (GebuchtUndGeaendert(entity, entry, zahler, empfaenger) is string sperre)
+                {
+                    return new ConflictObjectResult(sperre);
+                }
+
                 entity.Zahler = zahler;
                 entity.Zahlungsempfaenger = empfaenger;
                 entity.Zahlungsdatum = entry.Zahlungsdatum;
@@ -271,6 +344,36 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 
                 return new TransaktionEntry(entity, entry.Permissions);
             });
+        }
+
+        /// <summary>
+        /// Eine gebuchte Transaktion (mit Buchungssätzen, auch stornierten) behält Betrag,
+        /// Zahlungsdatum, Zahler und Zahlungsempfänger — sonst passte sie nicht mehr zu ihren
+        /// Buchungen. Ändern heißt dann: rückgängig machen und neu buchen. Ein fehlender Zahler
+        /// bzw. Empfänger darf nachgetragen werden; Memo und Notiz bleiben änderbar.
+        /// </summary>
+        /// <returns>Der Grund der Sperre, sonst <c>null</c>.</returns>
+        private static string? GebuchtUndGeaendert(
+            Transaktion entity, TransaktionEntry entry, Bankkonto? zahler, Bankkonto? empfaenger)
+        {
+            if (entity.Buchungssaetze.Count == 0)
+            {
+                return null;
+            }
+
+            static bool Geaendert(Bankkonto? alt, Bankkonto? neu) =>
+                alt != null && alt.BankkontoId != neu?.BankkontoId;
+
+            var geaendert = new List<string>();
+            if (entity.Betrag != entry.Betrag) geaendert.Add("Betrag");
+            if (entity.Zahlungsdatum != entry.Zahlungsdatum) geaendert.Add("Zahlungsdatum");
+            if (Geaendert(entity.Zahler, zahler)) geaendert.Add("Zahler");
+            if (Geaendert(entity.Zahlungsempfaenger, empfaenger)) geaendert.Add("Zahlungsempfänger");
+
+            return geaendert.Count == 0
+                ? null
+                : $"Die Transaktion ist gebucht; {string.Join(", ", geaendert)} lässt sich nicht mehr ändern. "
+                    + "Zum Ändern die Transaktion rückgängig machen und neu buchen. Memo und Notiz bleiben änderbar.";
         }
 
         private static void SetOptionalValues(Transaktion entity, TransaktionEntry entry)

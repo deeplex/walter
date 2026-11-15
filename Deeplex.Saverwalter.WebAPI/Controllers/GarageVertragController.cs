@@ -15,6 +15,7 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -110,6 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<GarageVertragController> _logger;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
+        private readonly MietkontoService _mietkontoService;
         protected override GarageVertragDbService DbService { get; }
 
         public GarageVertragController(
@@ -117,8 +119,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             GarageVertragDbService dbService,
             SaverwalterContext ctx,
             IAuthorizationService auth,
+            MietkontoService mietkontoService,
             HttpClient httpClient) : base(logger, httpClient)
         {
+            _mietkontoService = mietkontoService;
             DbService = dbService;
             _ctx = ctx;
             _auth = auth;
@@ -180,6 +184,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
 
+        /// <summary>
+        /// Garagenmietkonto: Garagenmiete je Monat — siehe <see cref="MietkontoService"/>.
+        /// </summary>
+        [HttpGet("{id}/mietkonto")]
+        public async Task<ActionResult<MietkontoService.Mietkonto>> GetMietkonto(int id)
+        {
+            var gv = await _ctx.GarageVertraege.FindAsync(id);
+            if (gv is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, gv, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
+
+            return Ok(await _mietkontoService.ErmittleGarageAsync(id, DateOnly.FromDateTime(DateTime.Today)));
+        }
+
         public class GarageForderungsstatusEntry
         {
             public int GarageVertragId { get; set; }
@@ -197,6 +216,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Include(g => g.Versionen)
                 .Include(g => g.Garage)
                 .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.Transaktion)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.StornoVon)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.StornoNach)
+                .Include(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.AlsSollZeile)
+                    .ThenInclude(a => a.HabenZeile)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.GarageVertragId == id);
 
             if (gv is null) return NotFound();
@@ -208,17 +237,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var version = gv.Versionen.Where(v => v.Beginn <= ersterDesMonats).MaxBy(v => v.Beginn);
             if (version is null) return NotFound();
 
-            var soll = gv.MietBuchungskonto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                .Sum(z => z.Betrag);
-
-            var haben = gv.MietBuchungskonto.Buchungszeilen
-                .Where(z => z.SollHaben == SollHaben.Haben
-                    && z.Buchungssatz.Buchungsdatum.Year == ersterDesMonats.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == ersterDesMonats.Month)
-                .Sum(z => z.Betrag);
+            // Bezahlt ist, was per Ausgleich an der Sollstellung des Monats hängt.
+            var sollstellungen = gv.MietBuchungskonto.Buchungszeilen
+                .Where(z => Sollstellung.IstImMonat(z, ersterDesMonats))
+                .ToList();
+            var soll = sollstellungen.Sum(z => z.Betrag);
+            var haben = sollstellungen.Sum(Sollstellung.Bezahlt);
 
             return Ok(new GarageForderungsstatusEntry
             {

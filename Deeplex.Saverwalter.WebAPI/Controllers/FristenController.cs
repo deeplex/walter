@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 for (var jahr = beginnjahr; jahr <= endjahr; jahr++)
                 {
                     var hatAbgesendet = vertrag.Abrechnungsresultate
-                        .Any(r => r.Abgesendet && r.Buchungssatz.Buchungsjahr == jahr);
+                        .Any(r => r.Abgesendet && r.Buchungssatz.Buchungsjahr == jahr && r.Buchungssatz.StornoNach == null);
 
                     if (!hatAbgesendet)
                     {

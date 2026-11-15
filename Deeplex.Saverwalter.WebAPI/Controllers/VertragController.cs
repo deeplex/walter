@@ -20,7 +20,6 @@ using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageVertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
@@ -46,8 +45,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Wohnung { get; set; }
             public string? MieterAuflistung { get; set; }
 
-            // For Tabelle
-            public IEnumerable<MietzahlungListEntry>? Mietzahlungen { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -71,9 +68,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Wohnung = new(0, "Unbekannte Wohnung");
                 }
 
-                Mietzahlungen = entity.MietBuchungskonto.Buchungszeilen
-                    .Where(z => z.SollHaben == SollHaben.Haben)
-                    .Select(z => new MietzahlungListEntry(z.Buchungssatz, z.Betrag, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
                 MieterAuflistung = string.Join(", ", entity.Mieter.Select(a => a.Bezeichnung));
 
@@ -94,14 +88,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<MietminderungEntryBase> Mietminderungen { get; set; } = [];
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
 
-            public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             public IEnumerable<GarageVertragEntryBase> GarageVertraege { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
+            /// <summary>Gehaltene Kaution: Saldo des KautionsKontos (Haben positiv).</summary>
+            public decimal Kaution { get; set; }
+            public int? KautionsKontoId { get; set; }
+            /// <summary>Eingänge (positiv) und Rückzahlungen (negativ) auf dem KautionsKonto.</summary>
+            public IEnumerable<KautionsBuchungEntry> KautionsBuchungen { get; set; } = [];
 
-            public decimal? KautionBetrag { get; set; }
-            public DateOnly? KautionEingangsdatum { get; set; }
-            public DateOnly? KautionRueckgabedatum { get; set; }
-            public string? KautionArt { get; set; }
 
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
@@ -113,18 +107,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
                 }
                 Notiz = entity.Notiz;
-                KautionBetrag = entity.KautionBetrag;
-                KautionEingangsdatum = entity.KautionEingangsdatum;
-                KautionRueckgabedatum = entity.KautionRueckgabedatum;
-                KautionArt = entity.KautionArt;
 
                 SelectedMieter = entity.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
                 Mietminderungen = entity.Mietminderungen.ToList().Select(e
                     => new MietminderungEntryBase(e, permissions));
                 Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
-                Abrechnungsresultate = entity.Abrechnungsresultate.Select(e
-                    => new AbrechnungsresultatEntry(e, permissions));
                 GarageVertraege = entity.GarageVertraege.Select(e
                     => new GarageVertragEntryBase(e, permissions));
                 Konten = BuchungskontoRefEntry.Collect(
@@ -132,31 +120,69 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     (entity.NkBuchungskonto, KontoFunktion.NkVorauszahlungen),
                     (entity.BkAbrechnungsKonto, KontoFunktion.BkAbrechnung),
                     (entity.ZahlungsKonto, KontoFunktion.Zahlungseingaenge),
-                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen));
+                    (entity.MietminderungsKonto, KontoFunktion.Mietminderungen),
+                    (entity.KautionsKonto, KontoFunktion.Kaution));
+                if (entity.KautionsKonto is Buchungskonto kautionsKonto)
+                {
+                    KautionsKontoId = kautionsKonto.BuchungskontoId;
+                    Kaution = kautionsKonto.Buchungszeilen
+                        .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+                    KautionsBuchungen = kautionsKonto.Buchungszeilen
+                        .OrderBy(z => z.Buchungssatz.Buchungsdatum)
+                        .Select(z => new KautionsBuchungEntry
+                        {
+                            Datum = z.Buchungssatz.Buchungsdatum,
+                            Betrag = z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag,
+                            Beschreibung = z.Buchungssatz.Beschreibung,
+                            Notiz = z.Buchungssatz.Notiz,
+                            TransaktionId = z.Buchungssatz.Transaktion?.TransaktionId,
+                        })
+                        .ToList();
+                }
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
             }
         }
 
+        public class KautionsBuchungEntry
+        {
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            /// <summary>Notiz des Buchungssatzes, z. B. aus dem Dialog „Kaution erhalten“.</summary>
+            public string? Notiz { get; set; }
+            public Guid? TransaktionId { get; set; }
+        }
+
         private readonly ILogger<VertragController> _logger;
         private readonly SaverwalterContext _ctx;
         private readonly IAuthorizationService _auth;
         private readonly MietKorrekturService _mietKorrekturService;
+        private readonly TransaktionBuchungsService _buchungsService;
+        private readonly MietkontoService _mietkontoService;
+        private readonly NebenkostenabrechnungenService _abrechnungenService;
         protected override VertragDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(Vertrag e) => FileFamilies.Of(e);
         public VertragController(
             ILogger<VertragController> logger,
             VertragDbService dbService,
             SaverwalterContext ctx,
             IAuthorizationService auth,
             MietKorrekturService mietKorrekturService,
+            TransaktionBuchungsService buchungsService,
+            MietkontoService mietkontoService,
+            NebenkostenabrechnungenService abrechnungenService,
             HttpClient httpClient) : base(logger, httpClient)
         {
+            _abrechnungenService = abrechnungenService;
             DbService = dbService;
             _ctx = ctx;
             _auth = auth;
             _mietKorrekturService = mietKorrekturService;
+            _buchungsService = buchungsService;
+            _mietkontoService = mietkontoService;
             _logger = logger;
         }
 
@@ -210,7 +236,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         /// <summary>
         /// Returns all Transaktionen that have Buchungssätze touching this Vertrag's
-        /// MietBuchungskonto or NkBuchungskonto.
+        /// MietBuchungskonto, NkBuchungskonto or KautionsKonto.
         /// </summary>
         [HttpGet("{id}/transaktionen")]
         public async Task<ActionResult<IEnumerable<TransaktionEntry>>> GetTransaktionen(int id)
@@ -225,6 +251,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
             var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+            var kautionsKontoId = vertrag.KautionsKonto.BuchungskontoId;
 
             var transaktionen = await _ctx.Transaktionen
                 .Include(t => t.Zahler)
@@ -235,7 +262,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(t => t.Buchungssaetze.Any(s =>
                     s.Buchungszeilen.Any(z =>
                         z.Buchungskonto.BuchungskontoId == mietKontoId ||
-                        z.Buchungskonto.BuchungskontoId == nkKontoId)))
+                        z.Buchungskonto.BuchungskontoId == nkKontoId ||
+                        z.Buchungskonto.BuchungskontoId == kautionsKontoId)))
                 .OrderByDescending(t => t.Zahlungsdatum)
                 .ToListAsync();
 
@@ -243,21 +271,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             return Ok(result);
         }
 
-        public class MietOposMonat
-        {
-            public int Jahr { get; set; }
-            public int Monat { get; set; }
-            public decimal Soll { get; set; }
-            public decimal Ausgeglichen { get; set; }
-            public decimal Offen => Soll - Ausgeglichen;
-        }
-
         /// <summary>
-        /// Gibt den Miet-OPOS (offene Posten Kaltmiete) pro Monat zurück.
-        /// Soll = gebuchte Mietforderung, Ausgeglichen = per OffenerPostenAusgleich beglichener Anteil.
+        /// Mietkonto des Vertrags: Kaltmiete und Garagen je Monat, NK-Vorauszahlungen je Jahr —
+        /// siehe <see cref="MietkontoService"/>.
         /// </summary>
-        [HttpGet("{id}/miet-opos")]
-        public async Task<ActionResult<IEnumerable<MietOposMonat>>> GetMietOpos(int id)
+        [HttpGet("{id}/mietkonto")]
+        public async Task<ActionResult<MietkontoService.Mietkonto>> GetMietkonto(int id)
         {
             var vertrag = await _ctx.Vertraege.FindAsync(id);
             if (vertrag is null) return NotFound();
@@ -265,60 +284,92 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var mietKontoId = vertrag.MietBuchungskonto.BuchungskontoId;
+            return Ok(await _mietkontoService.ErmittleAsync(id, DateOnly.FromDateTime(DateTime.Today)));
+        }
 
-            var sollZeilen = await _ctx.Buchungszeilen
-                .Where(z =>
-                    z.Buchungskonto.BuchungskontoId == mietKontoId &&
-                    z.SollHaben == SollHaben.Soll)
-                .Include(z => z.Buchungssatz)
-                .Include(z => z.AlsSollZeile)
-                    .ThenInclude(a => a.HabenZeile)
-                .ToListAsync();
+        /// <summary>
+        /// Nebenkostenabrechnungen des Vertrags: je Abrechnung Nachzahlung bzw. Erstattung,
+        /// bezahlt, offen und die Zahlungen — siehe <see cref="NebenkostenabrechnungenService"/>.
+        /// </summary>
+        [HttpGet("{id}/abrechnungen")]
+        public async Task<ActionResult<NebenkostenabrechnungenService.Nebenkostenabrechnungen>> GetAbrechnungen(int id)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
 
-            var result = sollZeilen
-                .GroupBy(z => new { z.Buchungssatz.Buchungsjahr, z.Buchungssatz.Buchungsdatum.Month })
-                .Select(g => new MietOposMonat
-                {
-                    Jahr = g.Key.Buchungsjahr,
-                    Monat = g.Key.Month,
-                    Soll = g.Sum(z => z.Betrag),
-                    Ausgeglichen = g.Sum(z => z.AlsSollZeile.Sum(a => a.HabenZeile.Betrag))
-                })
-                .OrderBy(m => m.Jahr).ThenBy(m => m.Monat);
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
+            if (!authRx.Succeeded) return Forbid();
 
-            return Ok(result);
+            return Ok(await _abrechnungenService.ErmittleAsync(id));
         }
 
         public class MietKorrekturMonatEntry
         {
-            public int Jahr { get; set; }
             public int Monat { get; set; }
             public decimal IstKaltmiete { get; set; }
             public decimal SollKaltmiete { get; set; }
             public decimal Delta { get; set; }
+        }
+
+        public class MietKorrekturBuchungEntry
+        {
+            public Guid Id { get; set; }
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public string Beschreibung { get; set; } = string.Empty;
+            public string? Notiz { get; set; }
+            public bool KannLoeschen { get; set; }
+            public bool KannStornieren { get; set; }
+            public string? Sperrgrund { get; set; }
+        }
+
+        public class MietKorrekturJahrEntry
+        {
+            public int Jahr { get; set; }
+            public List<MietKorrekturMonatEntry> Monate { get; set; } = [];
+            public List<MietKorrekturBuchungEntry> Korrekturen { get; set; } = [];
+            public decimal Abweichung { get; set; }
+            public decimal Korrigiert { get; set; }
+            public decimal Differenz { get; set; }
+            public decimal NkVorauszahlung { get; set; }
             public string Status { get; set; } = string.Empty;
 
-            public MietKorrekturMonatEntry() { }
-            public MietKorrekturMonatEntry(MietKorrekturService.MietKorrekturMonat m)
+            public MietKorrekturJahrEntry() { }
+            public MietKorrekturJahrEntry(MietKorrekturService.MietKorrekturJahr j)
             {
-                Jahr = m.Jahr;
-                Monat = m.Monat;
-                IstKaltmiete = m.IstKaltmiete;
-                SollKaltmiete = m.SollKaltmiete;
-                Delta = m.Delta;
-                Status = m.Status.ToString();
+                Jahr = j.Jahr;
+                Monate = j.Monate.Select(m => new MietKorrekturMonatEntry
+                {
+                    Monat = m.Monat,
+                    IstKaltmiete = m.IstKaltmiete,
+                    SollKaltmiete = m.SollKaltmiete,
+                    Delta = m.Delta,
+                }).ToList();
+                Korrekturen = j.Korrekturen.Select(k => new MietKorrekturBuchungEntry
+                {
+                    Id = k.BuchungssatzId,
+                    Datum = k.Buchungsdatum,
+                    Betrag = k.Betrag,
+                    Beschreibung = k.Beschreibung,
+                    Notiz = k.Notiz,
+                    KannLoeschen = k.KannLoeschen,
+                    KannStornieren = k.KannStornieren,
+                    Sperrgrund = k.Sperrgrund,
+                }).ToList();
+                Abweichung = j.Abweichung;
+                Korrigiert = j.Korrigiert;
+                Differenz = j.Differenz;
+                NkVorauszahlung = j.NkVorauszahlung;
+                Status = j.Status.ToString();
             }
         }
 
         /// <summary>
-        /// Ermittelt bereits bezahlte Monate, deren gebuchte Kaltmiete von der zum Monat
-        /// gültigen <see cref="VertragVersion.Grundmiete"/> abweicht (z. B. weil eine
-        /// Mieterhöhung rückwirkend nachgetragen wurde) — siehe
-        /// <see cref="MietKorrekturService"/>.
+        /// Jahre, deren gebuchte Kaltmiete von den <see cref="VertragVersion"/>en abweicht
+        /// oder die schon Korrekturen haben — siehe <see cref="MietKorrekturService"/>.
         /// </summary>
         [HttpGet("{id}/miet-korrektur")]
-        public async Task<ActionResult<IEnumerable<MietKorrekturMonatEntry>>> GetMietKorrektur(int id)
+        public async Task<ActionResult<IEnumerable<MietKorrekturJahrEntry>>> GetMietKorrektur(int id)
         {
             var vertrag = await _ctx.Vertraege.FindAsync(id);
             if (vertrag is null) return NotFound();
@@ -326,41 +377,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Read]);
             if (!authRx.Succeeded) return Forbid();
 
-            var monate = await _mietKorrekturService.ErmittleAsync(id);
-            return Ok(monate.Select(m => new MietKorrekturMonatEntry(m)));
+            var jahre = await _mietKorrekturService.ErmittleAsync(id);
+            return Ok(jahre.Select(j => new MietKorrekturJahrEntry(j)));
         }
 
         public class MietKorrekturRequest
         {
-            public List<MietKorrekturMonatRequest> Monate { get; set; } = [];
-            public string Grund { get; set; } = string.Empty;
-        }
-
-        public class MietKorrekturMonatRequest
-        {
             public int Jahr { get; set; }
-            public int Monat { get; set; }
-        }
-
-        public class MietKorrekturErgebnisEntry
-        {
-            public List<MietKorrekturMonatRequest> Korrigiert { get; set; } = [];
-            public List<MietKorrekturUebersprungenEntry> Uebersprungen { get; set; } = [];
-        }
-
-        public class MietKorrekturUebersprungenEntry
-        {
-            public int Jahr { get; set; }
-            public int Monat { get; set; }
             public string Grund { get; set; } = string.Empty;
         }
 
         /// <summary>
-        /// Bucht die Miet-Korrektur für die ausgewählten Monate — siehe
-        /// <see cref="MietKorrekturService.AnwendenAsync"/>.
+        /// Bucht die offene Differenz eines Jahres als Korrektur-Satz — siehe
+        /// <see cref="MietKorrekturService.BucheDifferenzAsync"/>. Rückgängig machen oder
+        /// stornieren läuft über die gewöhnlichen Buchungssatz-Endpunkte.
         /// </summary>
         [HttpPost("{id}/miet-korrektur")]
-        public async Task<ActionResult<MietKorrekturErgebnisEntry>> PostMietKorrektur(
+        public async Task<ActionResult<MietKorrekturJahrEntry>> PostMietKorrektur(
             int id, [FromBody] MietKorrekturRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Grund))
@@ -374,23 +407,61 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.Update]);
             if (!authRx.Succeeded) return Forbid();
 
-            var monate = request.Monate.Select(m => (m.Jahr, m.Monat)).ToHashSet();
+            try
+            {
+                await _mietKorrekturService.BucheDifferenzAsync(id, request.Jahr, request.Grund);
+            }
+            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+
+            var jahr = (await _mietKorrekturService.ErmittleAsync(id)).Single(j => j.Jahr == request.Jahr);
+            return Ok(new MietKorrekturJahrEntry(jahr));
+        }
+
+        public class KautionRequest
+        {
+            public DateOnly Datum { get; set; }
+            public decimal Betrag { get; set; }
+            public bool Rueckzahlung { get; set; }
+            public string? Notiz { get; set; }
+        }
+
+        /// <summary>
+        /// Bucht Eingang oder Rückzahlung der Kaution als Transaktion mit einer
+        /// Kautions-Position — siehe <see cref="TransaktionBuchungsService"/>. Rückgängig
+        /// machen läuft über die gewöhnlichen Transaktions-Endpunkte.
+        /// </summary>
+        [HttpPost("{id}/kaution")]
+        public async Task<ActionResult<VertragEntry>> PostKaution(int id, [FromBody] KautionRequest request)
+        {
+            var vertrag = await _ctx.Vertraege.FindAsync(id);
+            if (vertrag is null) return NotFound();
+
+            var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+            if (!authRx.Succeeded) return Forbid();
 
             try
             {
-                var ergebnis = await _mietKorrekturService.AnwendenAsync(id, monate, request.Grund);
-                return Ok(new MietKorrekturErgebnisEntry
+                await _buchungsService.BucheAsync(new TransaktionBuchungsService.TransaktionsInput
                 {
-                    Korrigiert = ergebnis.Korrigiert.Select(k => new MietKorrekturMonatRequest { Jahr = k.Jahr, Monat = k.Monat }).ToList(),
-                    Uebersprungen = ergebnis.Uebersprungen.Select(u => new MietKorrekturUebersprungenEntry
+                    Betrag = request.Betrag,
+                    Zahlungsdatum = request.Datum,
+                    Verwendungszweck = request.Rueckzahlung ? "Kaution Rückzahlung" : "Kaution Eingang",
+                    Notiz = request.Notiz,
+                    Kautionen =
                     {
-                        Jahr = u.Jahr,
-                        Monat = u.Monat,
-                        Grund = u.Grund
-                    }).ToList()
+                        new TransaktionBuchungsService.KautionInput
+                        {
+                            VertragId = id,
+                            Betrag = request.Betrag,
+                            Rueckzahlung = request.Rueckzahlung,
+                        }
+                    }
                 });
             }
-            catch (ArgumentException ex) { return NotFound(ex.Message); }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+
+            return await DbService.Get(User!, id);
         }
     }
 }

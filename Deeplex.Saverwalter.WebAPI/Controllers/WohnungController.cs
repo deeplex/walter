@@ -15,12 +15,12 @@
 
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BuchungskontoController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
@@ -145,7 +145,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<WohnungEntryBase> Haus { get; set; } = [];
             public IEnumerable<ZaehlerEntryBase> Zaehler { get; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
-            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; set; } = [];
             public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
             public IEnumerable<WohnungVersionEntryBase> Versionen { get; set; } = [];
             public IEnumerable<BuchungskontoRefEntry> Konten { get; set; } = [];
@@ -159,7 +158,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Zaehler = entity.Zaehler.Select(e => new ZaehlerEntryBase(e, permissions));
                 Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
-                Erhaltungsaufwendungen = [];
                 Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
                 Versionen = entity.Versionen.OrderBy(v => v.Beginn).Select(e => new WohnungVersionEntryBase(e, permissions));
                 Konten = BuchungskontoRefEntry.Collect(
@@ -171,10 +169,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<WohnungController> _logger;
         protected override WohnungDbService DbService { get; }
 
-        public WohnungController(ILogger<WohnungController> logger, WohnungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+        protected override FileFamily? FileFamilyOf(Wohnung e) => FileFamilies.Of(e);
+        private readonly ErhaltungsaufwandService _erhaltungsaufwandService;
+
+        public WohnungController(
+            ILogger<WohnungController> logger,
+            WohnungDbService dbService,
+            HttpClient httpClient,
+            ErhaltungsaufwandService erhaltungsaufwandService) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;
+            _erhaltungsaufwandService = erhaltungsaufwandService;
         }
 
         [HttpGet]
@@ -191,5 +197,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<WohnungEntry>> Put(int id, WohnungEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Erhaltungsaufwand der Wohnung: Rechnungen mit bezahlt und offen, Jahresüberblick —
+        /// siehe <see cref="ErhaltungsaufwandService"/>.
+        /// </summary>
+        [HttpGet("{id}/erhaltungsaufwand")]
+        public async Task<ActionResult<ErhaltungsaufwandService.Erhaltungsaufwand>> GetErhaltungsaufwand(int id)
+        {
+            var wohnung = await DbService.GetEntity(User!, id, Operations.Read);
+            if (wohnung.Result is not null) return wohnung.Result;
+
+            return Ok(await _erhaltungsaufwandService.ErmittleAsync(id));
+        }
     }
 }

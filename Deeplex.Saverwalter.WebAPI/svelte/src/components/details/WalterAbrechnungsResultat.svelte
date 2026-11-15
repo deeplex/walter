@@ -15,12 +15,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterLinks, WalterTransaktion } from '$walter/components';
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
+    import { WalterLinks } from '$walter/components';
+    import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import {
         Button,
         Checkbox,
         ClickableTile,
-        DataTable,
         InlineNotification,
         Row,
         Column,
@@ -30,18 +31,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Add } from 'carbon-icons-svelte';
     import { invalidateAll } from '$app/navigation';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
-    import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import { fileURL } from '$walter/services/files';
     import type { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
     import {
         convertEuro,
         walter_subscribe_reset_changeTracker
     } from '$walter/services/utils';
-    import {
-        emptyTransaktionsInput,
-        type TransaktionsInput
-    } from '$walter/lib';
 
     export let entry: WalterAbrechnungsresultatEntry;
     export let fetchImpl: typeof fetch;
@@ -49,7 +44,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let readonly = false;
     $: {
         readonly =
-            entry?.permissions?.update === false || entry?.abgesendet === true;
+            entry?.permissions?.update === false ||
+            entry?.abgesendet === true ||
+            entry?.storniert === true;
     }
 
     // Persistierter (in der DB gespeicherter) Abgesendet-Zustand — NICHT der bloß
@@ -63,39 +60,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         entry.abgesendet = (e.target as HTMLInputElement).checked;
     };
 
-    const formatDate = (d: string) => {
-        const [y, m, day] = d.split('-');
-        return `${day}.${m}.${y}`;
-    };
-
-    // Ausgleich als Transaktion erfassen — vorausgefüllt mit diesem Resultat.
+    // Nachzahlung bzw. Erstattung erfassen.
     let ausgleichModalOpen = false;
-    let ausgleichInput: TransaktionsInput = emptyTransaktionsInput();
-    let transaktionValid = false;
-
-    function openAusgleichModal() {
-        ausgleichInput = {
-            ...emptyTransaktionsInput(),
-            betrag: entry.offenerBetrag,
-            verwendungszweck:
-                `BK-Abrechnung ${entry.jahr} ${entry.vertrag?.text ?? ''}`.trim(),
-            // Vermieter-Bankkonto: bei Erstattung fließt das Geld davon ab,
-            // bei Nachzahlung kommt es dort an.
-            zahlerId: entry.saldo < 0 ? entry.vermieterBankkontoId : undefined,
-            zahlungsempfaengerId:
-                entry.saldo > 0 ? entry.vermieterBankkontoId : undefined,
-            abrechnungsAusgleiche: [
-                {
-                    abrechnungsresultatId: entry.id,
-                    betrag: entry.offenerBetrag
-                }
-            ]
-        };
-        ausgleichModalOpen = true;
-    }
+    $: erstattung = entry.saldo < 0;
 </script>
 
-{#if entry.abgesendet}
+{#if entry.storniert}
+    <Row>
+        <InlineNotification
+            kind="warning"
+            title="Storniert:"
+            subtitle="Diese Abrechnung wurde storniert und gilt nicht mehr. Sie bleibt als Beleg erhalten; das Jahr kann im Abrechnungslauf neu abgerechnet werden."
+            hideCloseButton
+        />
+    </Row>
+{:else if entry.abgesendet}
     <Row>
         <InlineNotification
             kind="info"
@@ -112,12 +91,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <Tile>
             <h4 style="margin-bottom: 0.75rem">
                 Betriebskostenabrechnung {entry.jahr}
-                {#if entry.abgesendet}
+                {#if entry.storniert}
+                    <Tag type="red">Storniert</Tag>
+                {:else if entry.abgesendet}
                     <Tag type="blue">Abgesendet</Tag>
                 {:else}
                     <Tag type="gray">Entwurf</Tag>
                 {/if}
-                {#if entry.ausgeglichen}
+                {#if entry.storniert}
+                    <!-- kein offener Betrag: die Forderung ist storniert -->
+                {:else if entry.ausgeglichen}
                     <Tag type="green">Ausgeglichen</Tag>
                 {:else}
                     <Tag type="red"
@@ -164,15 +147,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 bind:checked={entry.abgesendet}
                 on:change={abgesendet}
             />
-            {#if abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
+            {#if abgesendetPersistiert && !entry.storniert && !entry.ausgeglichen && entry.saldo !== 0}
                 <Button
                     kind="tertiary"
                     size="small"
                     icon={Add}
                     style="margin-top: 0.5rem"
-                    on:click={openAusgleichModal}
+                    on:click={() => (ausgleichModalOpen = true)}
                 >
-                    Ausgleich als Transaktion erfassen
+                    {erstattung ? 'Erstattung' : 'Nachzahlung'} erfassen
                 </Button>
             {:else if entry.abgesendet && !abgesendetPersistiert && !entry.ausgeglichen && entry.saldo !== 0}
                 <p
@@ -185,27 +168,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </Column>
 </Row>
 
-<WalterDataWrapperQuickAdd
-    title="Ausgleich BK-Abrechnung {entry.jahr}"
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={ausgleichInput}
-    bind:addModalOpen={ausgleichModalOpen}
-    submitDisabled={!transaktionValid}
-    onSubmit={() => invalidateAll()}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={ausgleichInput}
-        bind:isValid={transaktionValid}
-    />
-</WalterDataWrapperQuickAdd>
+<WalterZahlungErfassen
+    {fetchImpl}
+    ziel={{ art: 'abrechnung', abrechnungsresultatId: entry.id, erstattung }}
+    titel={`${erstattung ? 'Erstattung' : 'Nachzahlung'} Abrechnung ${entry.jahr}`}
+    vorschlag={entry.offenerBetrag}
+    vermieterBankkontoId={entry.vermieterBankkontoId ?? undefined}
+    bind:open={ausgleichModalOpen}
+    on:gebucht={() => invalidateAll()}
+/>
 
 <!-- Ausgleichszahlungen -->
 {#if entry.ausgleichsZahlungen?.length > 0}
     <Row>
-        <DataTable
+        <WalterDataTable
             title="Ausgleichszahlungen"
             size="short"
+            search={false}
             headers={[
                 { key: 'datum', value: 'Datum' },
                 { key: 'betrag', value: 'Betrag' },
@@ -213,22 +192,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ]}
             rows={entry.ausgleichsZahlungen.map((z, i) => ({
                 id: String(i),
-                datum: formatDate(z.datum),
-                betrag: convertEuro(z.betrag),
+                datum: z.datum,
+                betrag: z.betrag,
                 link: z.buchungssatzId
             }))}
-            style="margin-bottom: 1rem;"
+            customCells={['link']}
         >
             <svelte:fragment slot="cell" let:cell>
                 {#if cell.key === 'link'}
                     <a href={`/buchungssaetze/${cell.value}`}
                         >Zum Buchungssatz</a
                     >
-                {:else}
-                    {cell.value}
                 {/if}
             </svelte:fragment>
-        </DataTable>
+        </WalterDataTable>
     </Row>
 {/if}
 
@@ -238,7 +215,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterLinks>
     <WalterLinkTile
-        fileref={fileURL.vertrag(`${entry.vertrag?.id}`)}
         name={`Vertrag: ${entry?.vertrag?.text || 'ansehen'}`}
         href={`/vertraege/${entry.vertrag?.id}`}
     />

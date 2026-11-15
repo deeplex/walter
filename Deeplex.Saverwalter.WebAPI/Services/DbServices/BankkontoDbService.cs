@@ -69,15 +69,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             if (entity is null) return new NotFoundResult();
 
             var entry = new BankkontoEntry(entity, AllowAll);
-            entry.Transaktionen = Ctx.Transaktionen
-                .Where(t => t.Zahler != null && t.Zahler.BankkontoId == id
-                    || t.Zahlungsempfaenger != null && t.Zahlungsempfaenger.BankkontoId == id)
-                .Include(t => t.Zahler)
-                .Include(t => t.Zahlungsempfaenger)
-                .AsEnumerable()
-                .Select(t => new TransaktionEntryBase(t, AllowAll))
-                .ToList();
-
             return entry;
         }
 

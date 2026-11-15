@@ -17,8 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterAbrechnungsresultate,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterGarageVertraege,
         WalterKontakte,
         WalterMietminderungen,
@@ -28,6 +27,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterVertragVersionen,
         WalterLinkTile,
         WalterLinks,
+        WalterMietkonto,
+        WalterNebenkostenabrechnungen,
         WalterVertragsNkAnteile
     } from '$walter/components';
     import { getMietminderungEntry, getVertragversionEntry } from './utils';
@@ -38,7 +39,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         validateVertrag
     } from '$walter/lib';
     import { changeTracker } from '$walter/store';
-    import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
@@ -84,6 +84,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:commitVersionIfPending
     />
 
+    <WalterMietkonto
+        vertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        bearbeitbar={data.entry.permissions?.update !== false}
+    />
+
+    <WalterNebenkostenabrechnungen
+        vertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        bearbeitbar={data.entry.permissions?.update !== false}
+    />
+
     <WalterLinks>
         <WalterKontakte
             fetchImpl={data.fetchImpl}
@@ -113,26 +125,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="NK-Anteile"
         />
 
-        <WalterAbrechnungsresultate
-            title="Abrechnungsresultate"
-            rows={data.entry.abrechnungsresultate}
-        />
-
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
-
         {#if data.entry.ansprechpartner?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
                 name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
                 href={`/kontakte/${data.entry.ansprechpartner.id}`}
             />
         {/if}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

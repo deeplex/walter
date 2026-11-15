@@ -30,22 +30,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/buchungssaetze")]
     public class BuchungssaetzeController : FileControllerBase<BuchungssatzEntry, Guid, Buchungssatz>
     {
-        private readonly StornoBuchungsService stornoService;
         private readonly BuchungssatzSchutzService schutzService;
+        private readonly RueckgaengigService rueckgaengigService;
+        private readonly IAuthorizationService auth;
         private readonly SaverwalterContext ctx;
         protected override BuchungssatzDbService DbService { get; }
 
+        protected override int? FileYearOf(Buchungssatz e) => e.Buchungsjahr;
         public BuchungssaetzeController(
             ILogger<BuchungssaetzeController> logger,
             BuchungssatzDbService dbService,
-            StornoBuchungsService stornoService,
             BuchungssatzSchutzService schutzService,
+            RueckgaengigService rueckgaengigService,
+            IAuthorizationService auth,
             SaverwalterContext ctx,
             HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
-            this.stornoService = stornoService;
             this.schutzService = schutzService;
+            this.rueckgaengigService = rueckgaengigService;
+            this.auth = auth;
             this.ctx = ctx;
         }
 
@@ -348,7 +352,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Select(z => z.Buchungskonto.BuchungskontoId)
                 .Distinct()
                 .ToList();
-            entry.Verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+            entry.Verknuepfungen = await Kontorollen.VerknuepfungenAsync(ctx, kontoIds);
 
             // Offene Posten gibt es nur auf Ausgleichskonten — auf Summenkonten
             // (Erträge, Zahlungseingänge, ...) ist "Offen" bedeutungslos.
@@ -379,6 +383,50 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         /// die auch Wohnungs-, Garagen- und Umlagekonten abdeckt, nicht nur
         /// Vertragskonten.
         /// </summary>
+        /// <summary>
+        /// Was „Rückgängig“ für den Buchungssatz bedeuten würde — siehe <see cref="RueckgaengigService"/>.
+        /// </summary>
+        [HttpGet("{id}/rueckgaengig")]
+        public async Task<ActionResult<RueckgaengigService.RueckgaengigPlan>> RueckgaengigPruefen(Guid id)
+        {
+            var satz = await LadeSatzMitZeilen(id);
+            if (satz == null) return NotFound();
+            if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
+
+            return await rueckgaengigService.PruefeAsync([satz]);
+        }
+
+        /// <summary>
+        /// Macht den Buchungssatz rückgängig: löschen, wenn nichts daran hängt, sonst Storno
+        /// mit Grund. Betroffene Abrechnungen werden nach Bestätigung mit zurückgenommen;
+        /// dafür ist Lösch-Recht auf allen Wohnungen der Gruppe nötig.
+        /// </summary>
+        [HttpPost("{id}/rueckgaengig")]
+        public async Task<ActionResult<RueckgaengigService.RueckgaengigPlan>> Rueckgaengig(
+            Guid id, [FromBody] RueckgaengigService.RueckgaengigRequest request)
+        {
+            var satz = await LadeSatzMitZeilen(id);
+            if (satz == null) return NotFound();
+            if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
+
+            var plan = await rueckgaengigService.PruefeAsync([satz]);
+            var wohnungIds = plan.Abrechnungen.SelectMany(a => a.WohnungIds).Distinct().ToList();
+            if (wohnungIds.Count > 0
+                && !await CanAccessAllWohnungen(auth, ctx, User!, wohnungIds, Operations.Delete))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                return await rueckgaengigService.RueckgaengigAsync([satz], request.Grund, request.AbrechnungenBestaetigt);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
         private async Task<ActionResult?> AuthorizeKorrektur(Guid id)
         {
             if (User!.IsInRole("Admin"))
@@ -425,15 +473,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
 
-            var schutz = await schutzService.PruefeAsync(satz);
-            if (!schutz.KannStornieren)
-            {
-                return Conflict(schutz.Sperrgrund);
-            }
-
             try
             {
-                var storno = await stornoService.StornierenAsync(id, request.Grund);
+                var storno = (await rueckgaengigService.StornierenAsync([satz], request.Grund)).Single();
                 return Ok(new StornoBuchungssatzInfo
                 {
                     BuchungssatzId = storno.BuchungssatzId,
@@ -462,11 +504,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Aktualisiert einen Buchungssatz — Buchungsjahr, Beschreibung, Notiz sind
-        /// frei pflegbar (analog zum Speichern-Button im Frontend). Die Beträge der
-        /// Buchungszeilen lassen sich nur ändern, wenn der Satz auch löschbar wäre
-        /// (<see cref="BuchungssatzSchutz.KannLoeschen"/>) — sonst führt eine
-        /// Korrektur über die Stornobuchung, damit sie nachvollziehbar bleibt.
+        /// Aktualisiert einen Buchungssatz — Beschreibung und Notiz sind frei pflegbar
+        /// (analog zum Speichern-Button im Frontend). Beträge und Buchungsjahr lassen
+        /// sich nur ändern, wenn der Satz auch löschbar wäre
+        /// (<see cref="BuchungssatzSchutz.KannLoeschen"/>), beim Buchungsjahr auch im
+        /// Zieljahr — sonst führt eine Korrektur über die Stornobuchung, damit sie
+        /// nachvollziehbar bleibt.
         /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<BuchungssatzEntry>> Put(Guid id, [FromBody] BuchungssatzPatchEntry patch)
@@ -490,6 +533,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return Conflict(schutz.Sperrgrund ??
                     "Beträge dieses Buchungssatzes können nicht mehr direkt geändert werden — bitte stornieren.");
+            }
+
+            if (patch.Buchungsjahr != satz.Buchungsjahr)
+            {
+                var schutzZiel = await schutzService.PruefeAsync(satz, patch.Buchungsjahr);
+                if (!schutz.KannLoeschen || !schutzZiel.KannLoeschen)
+                {
+                    return Conflict(schutz.Sperrgrund ?? schutzZiel.Sperrgrund);
+                }
             }
 
             satz.Buchungsjahr = patch.Buchungsjahr;
@@ -528,14 +580,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             if (await AuthorizeKorrektur(id) is ActionResult verboten) return verboten;
 
-            var schutz = await schutzService.PruefeAsync(satz);
-            if (!schutz.KannLoeschen)
+            try
             {
-                return Conflict(schutz.Sperrgrund);
+                await rueckgaengigService.LoeschenAsync([satz]);
             }
-
-            ctx.Buchungssaetze.Remove(satz);
-            await ctx.SaveChangesAsync();
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
 
             return Ok();
         }

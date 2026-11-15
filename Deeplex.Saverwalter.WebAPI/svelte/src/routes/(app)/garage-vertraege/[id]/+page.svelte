@@ -15,16 +15,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { entityRefHref } from '$walter/lib/WalterEntityRef';
     import type { PageData } from './$types';
     import {
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterGarageVertrag,
         WalterGarageVertragVersionen,
         WalterGrid,
         WalterHeaderDetail,
         WalterKontakte,
         WalterLinks,
-        WalterLinkTile
+        WalterLinkTile,
+        WalterMietkonto
     } from '$walter/components';
     import {
         WalterFileWrapper,
@@ -45,6 +47,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
+    fileWrapper.register(title, data.fileURL);
 
     $: submitDisabled = !validateGarageVertrag(data.entry);
 </script>
@@ -60,6 +63,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterGrid>
     <WalterGarageVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
+    <WalterMietkonto
+        garageVertragId={data.entry.id}
+        fetchImpl={data.fetchImpl}
+        title="Garagenmietkonto"
+        bearbeitbar={data.entry.permissions?.update !== false}
+    >
+        {#if data.entry.vertrag?.id}
+            <p class="hinweis">
+                Die Garage gehört zum
+                <a
+                    href={entityRefHref({
+                        type: 'Vertrag',
+                        id: data.entry.vertrag.id,
+                        section: 'mietkonto'
+                    })}>Mietkonto des Wohnungsvertrags</a
+                >; dort erscheinen dieselben Monate, und eine Zahlung für
+                Wohnung und Garage zusammen wird dort erfasst.
+            </p>
+        {/if}
+    </WalterMietkonto>
+
     <WalterLinks>
         <WalterKontakte
             fetchImpl={data.fetchImpl}
@@ -73,12 +97,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Nachträge"
             rows={data.entry.versionen}
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
 
         {#if data.entry.garage?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref=""
                 name={`Garage: ${data.entry.garage.text}`}
                 href={`/garagen/${data.entry.garage.id}`}
             />
@@ -86,11 +107,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.vertrag?.id}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref=""
                 name={`Wohnungsvertrag: ${data.entry.vertrag.text}`}
                 href={`/vertraege/${data.entry.vertrag.id}`}
             />
         {/if}
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>
+
+<style>
+    .hinweis {
+        margin-bottom: 0.75rem;
+    }
+</style>

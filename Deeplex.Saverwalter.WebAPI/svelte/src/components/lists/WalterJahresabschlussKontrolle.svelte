@@ -15,12 +15,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
+    import { entityRefHref } from '$walter/lib';
     import {
         Accordion,
         AccordionItem,
         Button,
         Content,
-        DataTable,
         DataTableSkeleton,
         Dropdown,
         InlineLoading,
@@ -615,12 +616,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         {#if abrechnungRows.length === 0}
                             <p>Keine aktiven Verträge in diesem Zeitraum.</p>
                         {:else}
-                            <DataTable
+                            <WalterDataTable
                                 size="short"
+                                search={false}
                                 headers={abrechnungHeaders}
                                 rows={abrechnungRows}
-                                on:click:row={zeigeVertrag}
-                                style="cursor: pointer;"
+                                customCells={['status', 'aktion']}
+                                rowHref={(row) =>
+                                    entityRefHref({
+                                        type: 'Vertrag',
+                                        id: row.id
+                                    })}
+                                on_click_row={zeigeVertrag}
                             >
                                 <svelte:fragment slot="cell" let:row let:cell>
                                     {#if cell.key === 'status'}
@@ -678,11 +685,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                                 >Keine Abrechnung nötig</Button
                                             >
                                         {/if}
-                                    {:else}
-                                        {cell.value}
                                     {/if}
                                 </svelte:fragment>
-                            </DataTable>
+                            </WalterDataTable>
                         {/if}
                     </Tile>
                 </AccordionItem>
@@ -704,12 +709,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             {/if}
                         </svelte:fragment>
                         <Tile style="overflow: auto">
-                            <DataTable
+                            <WalterDataTable
                                 size="short"
+                                search={false}
                                 headers={kontoHeaders}
                                 rows={kontoRows(gruppe.konten)}
-                                on:click:row={zeigeKonto}
-                                style="cursor: pointer;"
+                                customCells={['status', 'endsaldo']}
+                                rowHref={(row) =>
+                                    entityRefHref({
+                                        type: 'Buchungskonto',
+                                        id: row.id
+                                    })}
+                                on_click_row={zeigeKonto}
                             >
                                 <svelte:fragment slot="cell" let:row let:cell>
                                     {#if cell.key === 'status'}
@@ -738,11 +749,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                                         >
                                             {convertEuro(cell.value)}
                                         </span>
-                                    {:else}
-                                        {cell.value}
                                     {/if}
                                 </svelte:fragment>
-                            </DataTable>
+                            </WalterDataTable>
                         </Tile>
                     </AccordionItem>
                 {/each}

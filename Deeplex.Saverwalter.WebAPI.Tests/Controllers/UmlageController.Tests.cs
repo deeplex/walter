@@ -17,6 +17,7 @@ using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
@@ -47,7 +48,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new UmlageDbService(ctx, auth);
-            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>(), new UmlageRechnungenService(ctx));
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -67,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new UmlageDbService(ctx, auth);
-            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>(), new UmlageRechnungenService(ctx));
 
             var typ = new Umlagetyp("Dachrinnenreinigung");
             ctx.Umlagetypen.Add(typ);
@@ -91,7 +92,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new UmlageDbService(ctx, auth);
-            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>(), new UmlageRechnungenService(ctx));
 
             var entity = vertrag.Wohnung.Umlagen.First();
             if (entity == null)
@@ -114,7 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new UmlageDbService(ctx, auth);
-            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>(), new UmlageRechnungenService(ctx));
 
             var entity = vertrag.Wohnung.Umlagen.First();
             if (entity == null)
@@ -140,7 +141,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new UmlageDbService(ctx, auth);
-            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>());
+            var controller = new UmlageController(logger, dbService, A.Fake<HttpClient>(), new UmlageRechnungenService(ctx));
 
             var entity = vertrag.Wohnung.Umlagen.First();
             if (entity == null)

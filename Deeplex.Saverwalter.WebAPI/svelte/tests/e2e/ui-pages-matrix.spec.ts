@@ -14,6 +14,8 @@ const mainRoutes: RouteExpectation[] = [
     { path: '/wohnungen', expectedText: 'Wohnungen' },
     { path: '/vertraege', expectedText: 'Verträge' },
     { path: '/transaktionen', expectedText: 'Transaktionen' },
+    { path: '/buchungskonten', expectedText: 'Buchungskonten' },
+    { path: '/jahresabschlusskontrolle', expectedText: 'Jahresabschluss' },
     { path: '/umlagen', expectedText: 'Umlagen' },
     { path: '/umlagetypen', expectedText: 'Umlagetypen' },
     { path: '/zaehler', expectedText: 'Zähler' },

@@ -23,7 +23,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterFileWrapper } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -48,8 +47,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterMietminderung bind:entry={data.entry} />
 
     <WalterLinkTile
-        bind:fileWrapper
-        fileref={fileURL.vertrag(`${data.entry.vertrag.id}`)}
         name={`Vertrag: ${data.entry.vertrag.text}`}
         href={`/vertraege/${data.entry.vertrag.id}`}
     />

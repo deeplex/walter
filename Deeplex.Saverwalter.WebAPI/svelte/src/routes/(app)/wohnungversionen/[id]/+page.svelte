@@ -23,7 +23,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterFileWrapper, validateWohnungVersion } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -48,8 +47,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterGrid>
     <WalterWohnungVersion bind:entry={data.entry} />
     <WalterLinkTile
-        bind:fileWrapper
-        fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}
         name={`Wohnung: ${data.entry.wohnung.text}`}
         href={`/wohnungen/${data.entry.wohnung.id}`}
     />

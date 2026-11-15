@@ -13,41 +13,48 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { walter_get_files } from '$walter/services/files';
+import { walter_get_family, walter_get_files } from '$walter/services/files';
 import type { WalterFile } from '$walter/types';
 
 export class WalterFileHandle {
     files: Promise<WalterFile[]>;
+    /** Das Jahr, das ein Upload in diese Ablage voreingestellt erhält (Familie), sonst unbekannt. */
+    defaultYear?: number;
 
+    /** `family`: die Dateien der ganzen Familie des Objekts laden, nicht nur seine eigenen. */
     constructor(
         public name: string,
         public fileURL: string,
-        public fetchImpl: typeof fetch
+        public fetchImpl: typeof fetch,
+        public family = false
     ) {
-        this.files = walter_get_files(this.fileURL, this.fetchImpl);
+        this.files = this.load();
     }
 
-    // target might be either an index of a fileURL that has to match the handles fileURL
-    async addFile(file: WalterFile): Promise<WalterFile[]> {
-        const files = await this.files;
-
-        if (!files) {
-            return [];
+    private load(): Promise<WalterFile[]> {
+        if (!this.family) {
+            return walter_get_files(this.fileURL, this.fetchImpl);
         }
-        // Do not overwrite if the file already exists
-        if (files.some((e) => e.fileName === file.fileName)) {
-            return files;
-        }
+        return walter_get_family(this.fileURL, this.fetchImpl).then(
+            (result) => {
+                this.defaultYear = result.defaultYear;
+                return result.files;
+            }
+        );
+    }
 
-        this.files = Promise.resolve([...files, file]);
-
+    /** Lädt die Dateien neu vom Server (z. B. nach einem Upload oder Jahreswechsel). */
+    reload(): Promise<WalterFile[]> {
+        this.files = this.load();
         return this.files;
     }
 
     async removeFile(file: WalterFile) {
         const files = await this.files;
         this.files = Promise.resolve(
-            files.filter((e) => e.fileName !== file.fileName)
+            files.filter(
+                (e) => !(e.fileName === file.fileName && e.key === file.key)
+            )
         );
 
         return this.files;

@@ -129,6 +129,12 @@ namespace Deeplex.Saverwalter.Model
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
+            modelBuilder.Entity<Buchungszeile>()
+                .HasOne(z => z.ZugeordnetZu)
+                .WithMany()
+                .HasForeignKey("ZugeordnetZuId")
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Bankkonto>()
                 .HasOne(b => b.BuchungsKonto)
                 .WithMany()
@@ -238,6 +244,11 @@ namespace Deeplex.Saverwalter.Model
                 .HasOne(v => v.ZahlungsKonto)
                 .WithMany()
                 .HasForeignKey("ZahlungsKontoId")
+                .IsRequired();
+            modelBuilder.Entity<Vertrag>()
+                .HasOne(v => v.KautionsKonto)
+                .WithMany()
+                .HasForeignKey("KautionsKontoId")
                 .IsRequired();
 
             modelBuilder.Entity<Garage>()

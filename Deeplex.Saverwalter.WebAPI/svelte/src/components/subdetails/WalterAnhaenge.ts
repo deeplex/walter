@@ -16,53 +16,51 @@
 import type { WalterFileHandle } from '$walter/lib';
 import { walter_file_post } from '$walter/services/files';
 import { openModal } from '$walter/store';
-import { WalterFile } from '$walter/lib/WalterFile';
+import type { WalterFile } from '$walter/lib/WalterFile';
 
-function upload_finished(
-    handle: WalterFileHandle,
-    file: File
-): Promise<WalterFile[]> {
-    return handle.addFile(
-        new WalterFile(
-            file.name,
-            `${handle.fileURL}/${file.name}`,
-            file.lastModified,
-            file.size,
-            file,
-            file.type
-        )
-    );
-}
-
+// Der Server legt das Jahr fest (auch beim Überschreiben); daher neu laden.
 async function post_file(
     handle: WalterFileHandle,
     file: File,
-    fetchImpl: typeof fetch
+    fetchImpl: typeof fetch,
+    year?: number
 ): Promise<WalterFile[]> {
-    return walter_file_post(file, handle.fileURL, fetchImpl).then(() =>
-        upload_finished(handle, file)
-    );
+    return walter_file_post(
+        file,
+        handle.fileURL,
+        fetchImpl,
+        undefined,
+        year
+    ).then(() => handle.reload());
 }
 
+/** `year`: das Jahr, in das die neuen Dateien kommen; ohne Angabe wählt der Server es. */
 export async function upload_new_files(
     handle: WalterFileHandle,
     newFiles: File[],
-    fetchImpl: typeof fetch
+    fetchImpl: typeof fetch,
+    year?: number
 ) {
     let files = await handle.files;
 
     for (const file of newFiles) {
         {
-            if (files.map((e) => e.fileName).includes(file.name)) {
+            // Nur die Dateien des eigenen Objekts: gleichnamige der Familie bleiben unberührt.
+            if (
+                files
+                    .filter((e) => !e.source)
+                    .map((e) => e.fileName)
+                    .includes(file.name)
+            ) {
                 const content = `Eine Datei mit dem Namen ${file.name} existiert bereits in dieser Ablage. Bist du sicher, dass diese Datei hochgeladen werden soll?`;
                 openModal({
                     modalHeading: `Datei existiert bereits`,
                     content,
                     primaryButtonText: 'Überschreiben',
-                    submit: () => post_file(handle, file, fetchImpl)
+                    submit: () => post_file(handle, file, fetchImpl, year)
                 });
             } else {
-                files = await post_file(handle, file, fetchImpl);
+                files = await post_file(handle, file, fetchImpl, year);
             }
         }
     }

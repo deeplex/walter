@@ -51,8 +51,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var controller = new BuchungssaetzeController(
                 A.Fake<ILogger<BuchungssaetzeController>>(),
                 new BuchungssatzDbService(ctx, auth),
-                new StornoBuchungsService(ctx),
                 new BuchungssatzSchutzService(ctx),
+                TestServices.Rueckgaengig(ctx),
+                auth,
                 ctx,
                 A.Fake<HttpClient>())
             {
@@ -299,6 +300,102 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Should().BeOfType<ConflictObjectResult>();
             (await controller.Stornieren(abrechnungssatz.BuchungssatzId, new StornoRequest { Grund = "Test" }))
                 .Result.Should().BeOfType<ConflictObjectResult>();
+        }
+
+        private static void AddAbrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr)
+        {
+            var abrechnungssatz = new Buchungssatz(new DateOnly(jahr, 12, 31), $"BK-Abrechnung {jahr}") { Buchungsjahr = jahr };
+            abrechnungssatz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m)
+            {
+                Buchungssatz = abrechnungssatz,
+                Buchungskonto = vertrag.NkBuchungskonto
+            });
+            ctx.Buchungssaetze.Add(abrechnungssatz);
+            ctx.Abrechnungsresultate.Add(new Abrechnungsresultat { Vertrag = vertrag, Buchungssatz = abrechnungssatz });
+        }
+
+        private static Buchungssatz AddNkZahlung(SaverwalterContext ctx, Vertrag vertrag, int jahr)
+        {
+            var satz = new Buchungssatz(new DateOnly(jahr, 4, 1), "NK-Vorauszahlung") { Buchungsjahr = jahr };
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Soll, 100m) { Buchungssatz = satz, Buchungskonto = vertrag.ZahlungsKonto });
+            satz.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 100m) { Buchungssatz = satz, Buchungskonto = vertrag.NkBuchungskonto });
+            ctx.Buchungssaetze.Add(satz);
+            return satz;
+        }
+
+        private static BuchungssatzPatchEntry JahrPatch(Buchungssatz satz, int jahr) => new()
+        {
+            Buchungsjahr = jahr,
+            Beschreibung = satz.Beschreibung,
+            Zeilen = []
+        };
+
+        [Fact]
+        public async Task Put_buchungsjahr_freier_satz_wird_geaendert()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+            var satz = AddNkZahlung(ctx, vertrag, 2025);
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            (await controller.Put(satz.BuchungssatzId, JahrPatch(satz, 2024))).Result
+                .Should().BeOfType<OkObjectResult>();
+            satz.Buchungsjahr.Should().Be(2024);
+        }
+
+        [Fact]
+        public async Task Put_buchungsjahr_aus_abgerechnetem_jahr_ist_conflict()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+            var satz = AddNkZahlung(ctx, vertrag, 2025);
+            AddAbrechnung(ctx, vertrag, 2025);
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            (await controller.Put(satz.BuchungssatzId, JahrPatch(satz, 2026))).Result
+                .Should().BeOfType<ConflictObjectResult>();
+            satz.Buchungsjahr.Should().Be(2025);
+        }
+
+        [Fact]
+        public async Task Put_buchungsjahr_in_abgerechnetes_jahr_ist_conflict()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+            var satz = AddNkZahlung(ctx, vertrag, 2026);
+            AddAbrechnung(ctx, vertrag, 2025);
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            (await controller.Put(satz.BuchungssatzId, JahrPatch(satz, 2025))).Result
+                .Should().BeOfType<ConflictObjectResult>();
+            satz.Buchungsjahr.Should().Be(2026);
+        }
+
+        [Fact]
+        public async Task Rueckgaengig_mit_abrechnung_verlangt_bestaetigung()
+        {
+            var ctx = TestUtils.GetContext();
+            var (manager, _, _, vertrag) = Seed(ctx);
+            var zahlung = AddNkZahlung(ctx, vertrag, 2025);
+            AddAbrechnung(ctx, vertrag, 2025);
+            ctx.SaveChanges();
+            var controller = WithUser(ctx, Principal(manager));
+
+            var plan = (await controller.RueckgaengigPruefen(zahlung.BuchungssatzId)).Value!;
+            plan.Abrechnungen.Should().ContainSingle(a => a.Jahr == 2025);
+
+            (await controller.Rueckgaengig(zahlung.BuchungssatzId, new RueckgaengigService.RueckgaengigRequest()))
+                .Result.Should().BeOfType<ConflictObjectResult>();
+            ctx.Abrechnungsresultate.Should().ContainSingle();
+
+            (await controller.Rueckgaengig(zahlung.BuchungssatzId,
+                new RueckgaengigService.RueckgaengigRequest { AbrechnungenBestaetigt = true }))
+                .Value!.Art.Should().Be(RueckgaengigService.RueckgaengigArt.Loeschen);
+            ctx.Abrechnungsresultate.Should().BeEmpty();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == zahlung.BuchungssatzId).Should().BeFalse();
         }
 
         [Fact]

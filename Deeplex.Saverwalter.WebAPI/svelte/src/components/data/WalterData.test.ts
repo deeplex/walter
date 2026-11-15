@@ -18,8 +18,6 @@ import { describe, expect, it } from 'vitest';
 import {
     walter_data_aufwendungen,
     walter_data_mea,
-    walter_data_mieten,
-    walter_data_miettabelle,
     walter_data_ne,
     walter_data_nf,
     walter_data_rechnungen_year,
@@ -81,26 +79,6 @@ describe('WalterData helpers', () => {
         expect(walter_data_ne('NE', wohnungen).data[1].value).toBe(1);
     });
 
-    it('builds mieten chart with sorted min/max domain', () => {
-        const config = walter_data_mieten('Mieten', [
-            { kaltmieteZahlung: 900, betreffenderMonat: '2026-03-01' },
-            { kaltmieteZahlung: 700, betreffenderMonat: '2026-01-01' },
-            { kaltmieteZahlung: 800, betreffenderMonat: '2026-02-01' }
-        ] as never);
-
-        expect(config.options.axes?.left).toMatchObject({
-            domain: [700, 900]
-        });
-        expect(config.data).toContainEqual({
-            value: 900,
-            date: '2026-03-01'
-        });
-        expect(config.data).toContainEqual({
-            value: 700,
-            date: '2026-01-01'
-        });
-    });
-
     it('builds rechnungentabelle heatmap and normalizes non-positive values', () => {
         const config = walter_data_rechnungentabelle(
             [
@@ -144,71 +122,5 @@ describe('WalterData helpers', () => {
             })
         );
         expect(config.options.height).toBe('20em');
-    });
-
-    it('builds miettabelle only for active contracts and active months', () => {
-        const config = walter_data_miettabelle(
-            [
-                {
-                    id: 1,
-                    beginn: '2026-01-01',
-                    ende: undefined,
-                    wohnung: { id: 201, text: 'W1' },
-                    versionen: [{ grundmiete: 700 }],
-                    mietzahlungen: [
-                        {
-                            betreffenderMonat: '2026-01-15',
-                            kaltmieteZahlung: 700
-                        },
-                        {
-                            betreffenderMonat: '2026-02-15',
-                            kaltmieteZahlung: 710
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    beginn: '2025-01-01',
-                    ende: '2025-12-01',
-                    wohnung: { id: 202, text: 'W2' },
-                    versionen: [{ grundmiete: 700 }],
-                    mietzahlungen: [
-                        {
-                            betreffenderMonat: '2026-01-15',
-                            kaltmieteZahlung: 999
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    beginn: '2026-01-01',
-                    ende: undefined,
-                    wohnung: { id: 203, text: 'W3' },
-                    versionen: [{ grundmiete: 0 }],
-                    mietzahlungen: [
-                        {
-                            betreffenderMonat: '2026-01-15',
-                            kaltmieteZahlung: 999
-                        }
-                    ]
-                }
-            ] as never,
-            2026
-        );
-
-        expect(config.data.some((entry) => entry.group === 'W2')).toBe(false);
-        expect(config.data.some((entry) => entry.group === 'W3')).toBe(false);
-        expect(config.data).toContainEqual(
-            expect.objectContaining({
-                group: 'W1',
-                key: 'Januar',
-                value: 700,
-                wohnungId: '201'
-            })
-        );
-        expect(config.data).toContainEqual(
-            expect.objectContaining({ group: 'W1', key: 'Februar', value: 710 })
-        );
-        expect(config.options.height).toBe('3em');
     });
 });

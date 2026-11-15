@@ -72,6 +72,7 @@ namespace Deeplex.Saverwalter.ModelTests
                 BkAbrechnungsKonto = new Buchungskonto("1003", "NK-Abrechnung", BuchungskontoTyp.Ertrag),
                 ZahlungsKonto = new Buchungskonto("1004", "Zahlung", BuchungskontoTyp.Aktiv),
                 MietminderungsKonto = new Buchungskonto("1005", "Mietminderung", BuchungskontoTyp.Aufwand),
+                KautionsKonto = new Buchungskonto("1006", "Kaution", BuchungskontoTyp.Passiv),
             };
             var mieter = new Kontakt("TestMieter", Rechtsform.natuerlich)
             {

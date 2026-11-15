@@ -5,8 +5,6 @@ const walterFileDeleteMock = vi.fn();
 
 const selectionMock = {
     adressen: vi.fn().mockResolvedValue([]),
-    betriebskostenrechnungen: vi.fn().mockResolvedValue([]),
-    erhaltungsaufwendungen: vi.fn().mockResolvedValue([]),
     kontakte: vi.fn().mockResolvedValue([]),
     mietminderungen: vi.fn().mockResolvedValue([]),
     umlagen: vi.fn().mockResolvedValue([]),
@@ -24,10 +22,6 @@ vi.mock('$walter/services/requests', () => ({
 vi.mock('$walter/services/files', () => ({
     fileURL: {
         adresse: (id: string) => `/api/adressen/${id}/files`,
-        betriebskostenrechnung: (id: string) =>
-            `/api/betriebskostenrechnungen/${id}/files`,
-        erhaltungsaufwendung: (id: string) =>
-            `/api/erhaltungsaufwendungen/${id}/files`,
         kontakt: (id: string) => `/api/kontakte/${id}/files`,
         mietminderung: (id: string) => `/api/mietminderungen/${id}/files`,
         umlage: (id: string) => `/api/umlagen/${id}/files`,
@@ -55,12 +49,6 @@ vi.mock('$walter/lib', () => {
     return {
         WalterToastContent: ToastMock,
         WalterAdresseEntry: { ApiURL: '/api/adressen' },
-        WalterBetriebskostenrechnungEntry: {
-            ApiURL: '/api/betriebskostenrechnungen'
-        },
-        WalterErhaltungsaufwendungEntry: {
-            ApiURL: '/api/erhaltungsaufwendungen'
-        },
         WalterKontaktEntry: { ApiURL: '/api/kontakte' },
         WalterMietminderungEntry: { ApiURL: '/api/mietminderungen' },
         WalterUmlageEntry: { ApiURL: '/api/umlagen' },
@@ -74,8 +62,6 @@ vi.mock('$walter/lib', () => {
 
 vi.mock('..', () => ({
     WalterAdresse: { name: 'WalterAdresse' },
-    WalterBetriebskostenrechnung: { name: 'WalterBetriebskostenrechnung' },
-    WalterErhaltungsaufwendung: { name: 'WalterErhaltungsaufwendung' },
     WalterKontakt: { name: 'WalterKontakt' },
     WalterMietminderung: { name: 'WalterMietminderung' },
     WalterUmlage: { name: 'WalterUmlage' },
@@ -121,7 +107,11 @@ describe('WalterPreviewCopyFile helpers', () => {
         const { copyImpl, tables } = await import('./WalterPreviewCopyFile');
         const stackTable = tables.find((table) => table.key === 'stack')!;
         const adressenTable = tables.find((table) => table.key === 'adressen')!;
-        const file = { fileName: 'demo.pdf', blob: new Blob(['abc']) } as never;
+        const file = {
+            fileName: 'demo.pdf',
+            blob: new Blob(['abc']),
+            year: 2023
+        } as never;
 
         const stackResult = await copyImpl(file, fetch, stackTable, undefined);
         const tableResult = await copyImpl(file, fetch, adressenTable, {
@@ -136,14 +126,37 @@ describe('WalterPreviewCopyFile helpers', () => {
             expect.any(File),
             '/api/user/files',
             fetch,
-            expect.anything()
+            expect.anything(),
+            2023
         );
         expect(walterFilePostMock).toHaveBeenNthCalledWith(
             2,
             expect.any(File),
             '/api/adressen/12/files',
             fetch,
-            expect.anything()
+            expect.anything(),
+            2023
+        );
+    });
+
+    it('copyImpl keeps no year for files without one', async () => {
+        walterFilePostMock.mockResolvedValue(new Response('', { status: 200 }));
+        const { copyImpl, tables } = await import('./WalterPreviewCopyFile');
+        const stackTable = tables.find((table) => table.key === 'stack')!;
+
+        await copyImpl(
+            { fileName: 'demo.pdf', blob: new Blob(['abc']) } as never,
+            fetch,
+            stackTable,
+            undefined
+        );
+
+        expect(walterFilePostMock).toHaveBeenCalledWith(
+            expect.any(File),
+            '/api/user/files',
+            fetch,
+            expect.anything(),
+            undefined
         );
     });
 

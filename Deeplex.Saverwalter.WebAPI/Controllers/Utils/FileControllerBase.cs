@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Runtime.InteropServices;
-using System.Text;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -37,63 +36,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         protected abstract WalterDbServiceBase<T, TId, U> DbService { get; }
 
-        private static ActionResult<string> GetS3Path(string? baseUrl, string? requestPath, string? filename = null)
+        /// <summary>Die Familie des Objekts (siehe <see cref="FileFamilies"/>); ohne Angabe nur seine eigenen Dateien.</summary>
+        protected virtual FileFamily? FileFamilyOf(U entity) => null;
+
+        /// <summary>Das Jahr, in dem Dateien des Objekts voreingestellt liegen, z. B. das Datum eines Zählerstands; sonst <see cref="FileLayout.NoYear"/>.</summary>
+        protected virtual int? FileYearOf(U entity) => null;
+
+        public sealed class FileFamilyResult
         {
-            if (baseUrl.IsValueNullOrEmpty())
-            {
-                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
-            }
-
-            if (string.IsNullOrEmpty(requestPath))
-            {
-                return new BadRequestResult();
-            }
-
-            var splits = requestPath.Split("/");
-
-            if (splits.Length < 4)
-            {
-                return new BadRequestResult();
-            }
-
-            string resourceUrl;
-
-            if (filename is string name)
-            {
-                if (splits.Length > 5 && splits[5] == "trash")
-                {
-                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + "/" + name;
-                }
-                else
-                {
-                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + name;
-                }
-            }
-            else
-            {
-                resourceUrl = baseUrl + "?prefix=" + splits[2] + "/" + splits[3];
-            }
-
-            return resourceUrl;
+            /// <summary>Das Jahr, das ein Upload ohne Angabe erhält (0: ohne Jahr).</summary>
+            public int DefaultYear { get; set; }
+            public List<WalterFile> Files { get; set; } = [];
         }
 
-
-
-        private static async Task<IActionResult> ProcessFileRequest(string? baseUrl, HttpRequest request, HttpClient client, string? filename = null)
+        /// <summary>Dienst und Objekt (<c>/api/{entity}/{id}/files…</c>) dieser Anfrage; sonst die Fehlerantwort.</summary>
+        private IActionResult? TryTarget(out EntityFileService service, out string entity, out string id)
         {
-            var s3Path = GetS3Path(baseUrl, request.Path.Value, filename);
-            if (s3Path.Result is ActionResult s3PathActionResult)
-            {
-                return s3PathActionResult;
-            }
-            else if (s3Path.Value is string fullPath)
-            {
-                return await FileHandling.RedirectToFileServer(request, client, fullPath);
-            }
-            else
-            {
-                return new BadRequestResult();
-            }
+            service = null!;
+            entity = id = "";
+            if (string.IsNullOrEmpty(_baseUrl)) return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
+
+            var splits = (Request.Path.Value ?? "").Split('/');
+            if (splits.Length < 4) return new BadRequestResult();
+
+            service = new EntityFileService(_httpClient, _baseUrl);
+            entity = splits[2];
+            id = splits[3];
+            return null;
         }
 
         private async Task<ActionResult?> Authorize(TId id, OperationAuthorizationRequirement operation)
@@ -109,26 +78,35 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-            var result = await ProcessFileRequest(_baseUrl, Request, _httpClient);
-            if (result is FileContentResult fileContentResult)
+            if (TryTarget(out var service, out var entity, out var objectId) != null)
             {
-                if (
-                    FileHandling.TryParseS3Stream(
-                        Encoding.UTF8.GetString(fileContentResult.FileContents),
-                        HttpContext.Request.Path.Value!,
-                        out var files
-                    )
-                )
-                {
-                    return Ok(files);
-                }
+                return Ok(new List<WalterFile>());
+            }
+            return Ok(await service.ListAsync(entity, objectId, Request.Path.Value!));
+        }
 
-                return Ok(new List<WalterFile>());
-            }
-            else
+        /// <summary>Die Dateien der Familie des Objekts und das voreingestellte Jahr für neue Dateien.</summary>
+        [HttpGet("{id}/files/family")]
+        public async Task<ActionResult<FileFamilyResult>> GetFileFamily(TId id)
+        {
+            var loaded = await DbService.GetEntity(User, id, Operations.Read);
+            if (loaded.Result is ActionResult authResult)
             {
-                return Ok(new List<WalterFile>());
+                return authResult;
             }
+            var entity = loaded.Value!;
+            var defaultYear = FileYearOf(entity) ?? FileLayout.NoYear;
+            if (TryTarget(out var service, out var route, out var objectId) != null)
+            {
+                return Ok(new FileFamilyResult { DefaultYear = defaultYear });
+            }
+
+            var family = FileFamilyOf(entity) ?? new FileFamily([]);
+            return Ok(new FileFamilyResult
+            {
+                DefaultYear = defaultYear,
+                Files = await service.ListFamilyAsync(family, route, objectId)
+            });
         }
 
         [HttpGet("{id}/files/{filename}")]
@@ -138,18 +116,35 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-            return await ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
+            if (TryTarget(out var service, out var entity, out var objectId) is IActionResult error)
+            {
+                return error;
+            }
+            return await service.ReadOrDeleteAsync(Request, entity, objectId, filename);
         }
 
+        /// <param name="year">Beim Hochladen das Jahr der Datei (0: ohne Jahr); ohne Angabe das der vorhandenen Datei, sonst das des Objekts, sonst ohne Jahr.</param>
         [HttpDelete("{id}/files/{filename}")]
         [HttpPut("{id}/files/{filename}")]
-        public async Task<IActionResult> WriteFile(TId id, string filename)
+        public async Task<IActionResult> WriteFile(TId id, string filename, [FromQuery] int? year = null)
         {
-            if (await Authorize(id, Operations.Update) is ActionResult authResult)
+            var loaded = await DbService.GetEntity(User, id, Operations.Update);
+            if (loaded.Result is ActionResult authResult)
             {
                 return authResult;
             }
-            return await ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
+            if (TryTarget(out var service, out var entity, out var objectId) is IActionResult error)
+            {
+                return error;
+            }
+            if (year is not FileLayout.NoYear and (< 1900 or > 2200))
+            {
+                return BadRequest($"Jahr {year} ist nicht möglich.");
+            }
+
+            return Request.Method == HttpMethod.Put.Method
+                ? await service.UploadAsync(Request, entity, objectId, filename, year, FileYearOf(loaded.Value!))
+                : await service.ReadOrDeleteAsync(Request, entity, objectId, filename);
         }
 
         [HttpPut("{id}/files/{old_filename}/{new_filename}")]
@@ -159,24 +154,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-
-            var deletePath = GetS3Path(_baseUrl, Request.Path.Value, old_filename);
-            if (deletePath.Result is ActionResult deletePathResult)
+            if (TryTarget(out var service, out var entity, out var objectId) is IActionResult error)
             {
-                return deletePathResult;
+                return error;
             }
+            return await service.RenameAsync(Request, entity, objectId, old_filename, new_filename);
+        }
 
-            Request.Path = Request.Path.Value!.Replace(old_filename, new_filename);
-            var response = await ProcessFileRequest(_baseUrl, Request, _httpClient, new_filename);
-
-            if (response is FileContentResult)
+        /// <summary>Verschiebt die Datei in den Ordner des Jahres; Jahr 0 nimmt ihr das Jahr.</summary>
+        [HttpPut("{id}/files/{filename}/year/{year:int}")]
+        public async Task<IActionResult> ChangeFileYear(TId id, string filename, int year)
+        {
+            if (await Authorize(id, Operations.Update) is ActionResult authResult)
             {
-                // Put trash before the filename
-                var deleteRequest = new HttpRequestMessage(new HttpMethod(HttpMethod.Delete.Method), deletePath.Value) { Content = null };
-                await _httpClient.SendAsync(deleteRequest, CancellationToken.None);
+                return authResult;
             }
-
-            return response;
+            if (TryTarget(out var service, out var entity, out var objectId) is IActionResult error)
+            {
+                return error;
+            }
+            if (year is not FileLayout.NoYear and (< 1900 or > 2200))
+            {
+                return BadRequest($"Jahr {year} ist nicht möglich.");
+            }
+            return await service.ChangeYearAsync(entity, objectId, filename, year);
         }
     }
 }

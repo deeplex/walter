@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         private static ErhaltungsaufwendungDbService MakeService(SaverwalterContext ctx, IAuthorizationService auth)
-            => new(ctx, auth, new ErhaltungsaufwendungBuchungsService(ctx));
+            => new(ctx, auth, new ErhaltungsaufwendungBuchungsService(ctx), TestServices.Rueckgaengig(ctx));
 
         [Fact]
         public async Task PostErzeugtBuchungssatzUndGibtEintragZurueck()
@@ -145,6 +145,46 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             result.Should().BeOfType<OkResult>();
             // Der EA-Buchungssatz wurde wieder entfernt (Ausgangszustand).
             ctx.Buchungssaetze.Count().Should().Be(satzCountBefore);
+        }
+
+        [Fact]
+        public async Task DeleteEinesBezahltenAufwandsIstGesperrt()
+        {
+            var (ctx, auth, user) = Setup();
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var aussteller = new Kontakt("Handwerker GmbH", Rechtsform.gmbh);
+            ctx.Kontakte.Add(aussteller);
+            await ctx.SaveChangesAsync();
+
+            var service = MakeService(ctx, auth);
+            var posted = await service.Post(user, new ErhaltungsaufwendungEntry
+            {
+                Betrag = 200m,
+                Datum = new DateOnly(2024, 2, 1),
+                Bezeichnung = "Malerarbeiten",
+                Wohnung = new SelectionEntry(vertrag.Wohnung.WohnungId, vertrag.Wohnung.Bezeichnung),
+                Aussteller = new SelectionEntry(aussteller.KontaktId, aussteller.Bezeichnung),
+            });
+            var satz = ctx.Buchungssaetze.Single(s => s.BuchungssatzId == posted.Value!.Id);
+            var habenZeile = satz.Buchungszeilen.Single(z => z.SollHaben == SollHaben.Haben);
+
+            // Bezahlung, mit der Verbindlichkeit ausgeglichen
+            var zahlung = new Buchungssatz(new DateOnly(2024, 2, 10), "Zahlung Malerarbeiten");
+            var zahlSoll = new Buchungszeile(SollHaben.Soll, 200m) { Buchungssatz = zahlung, Buchungskonto = habenZeile.Buchungskonto };
+            zahlung.Buchungszeilen.Add(zahlSoll);
+            zahlung.Buchungszeilen.Add(new Buchungszeile(SollHaben.Haben, 200m)
+            {
+                Buchungssatz = zahlung,
+                Buchungskonto = new Buchungskonto("1200", "Bank", BuchungskontoTyp.Aktiv)
+            });
+            ctx.Buchungssaetze.Add(zahlung);
+            ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich { SollZeile = zahlSoll, HabenZeile = habenZeile });
+            await ctx.SaveChangesAsync();
+
+            var result = await service.Delete(user, satz.BuchungssatzId);
+
+            result.Should().BeOfType<ConflictObjectResult>();
+            ctx.Buchungssaetze.Any(s => s.BuchungssatzId == satz.BuchungssatzId).Should().BeTrue();
         }
     }
 }

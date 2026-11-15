@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
     ///
     /// The Walter file API forwards plain HTTP requests to the configured
     /// S3 provider without signing, so the bucket must accept anonymous
-    /// PUT/GET. The compose file configures MinIO accordingly for development.
+    /// PUT/GET. The compose file configures the S3 server (SeaweedFS) accordingly for development.
     /// </summary>
     internal static class FileStorage
     {

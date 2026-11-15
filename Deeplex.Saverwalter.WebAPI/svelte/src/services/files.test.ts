@@ -12,6 +12,8 @@ class WalterFileMock {
     size: number;
     blob: Blob | null;
     type: string;
+    year?: number;
+    source?: string;
 
     constructor(
         fileName: string,
@@ -19,7 +21,9 @@ class WalterFileMock {
         lastModified: string,
         size: number,
         blob: Blob | null,
-        type: string
+        type: string,
+        year?: number,
+        source?: string
     ) {
         this.fileName = fileName;
         this.key = key;
@@ -27,6 +31,8 @@ class WalterFileMock {
         this.size = size;
         this.blob = blob;
         this.type = type;
+        this.year = year;
+        this.source = source;
     }
 }
 
@@ -43,10 +49,7 @@ vi.mock('./requests', () => ({
 vi.mock('$walter/lib', () => ({
     WalterAbrechnungsresultatEntry: { ApiURL: '/api/abrechnungsresultate' },
     WalterAdresseEntry: { ApiURL: '/api/adressen' },
-    WalterBetriebskostenrechnungEntry: {
-        ApiURL: '/api/betriebskostenrechnungen'
-    },
-    WalterErhaltungsaufwendungEntry: { ApiURL: '/api/erhaltungsaufwendungen' },
+    WalterGarageVertragEntry: { ApiURL: '/api/garage-vertraege' },
     WalterKontaktEntry: { ApiURL: '/api/kontakte' },
     WalterMietminderungEntry: { ApiURL: '/api/mietminderungen' },
     WalterTransaktionEntry: { ApiURL: '/api/transaktionen' },
@@ -86,13 +89,10 @@ describe('files service', () => {
             '/api/abrechnungsresultate/1/files'
         );
         expect(fileURL.wohnung('12')).toBe('/api/wohnungen/12/files');
+        expect(fileURL.garagevertrag('4')).toBe(
+            '/api/garage-vertraege/4/files'
+        );
         expect(fileURL.adresse('5')).toBe('/api/adressen/5/files');
-        expect(fileURL.betriebskostenrechnung('8')).toBe(
-            '/api/betriebskostenrechnungen/8/files'
-        );
-        expect(fileURL.erhaltungsaufwendung('7')).toBe(
-            '/api/erhaltungsaufwendungen/7/files'
-        );
         expect(fileURL.mietminderung('6')).toBe('/api/mietminderungen/6/files');
         expect(fileURL.kontakt('3')).toBe('/api/kontakte/3/files');
         expect(fileURL.transaktion('13')).toBe('/api/transaktionen/13/files');
@@ -141,6 +141,38 @@ describe('files service', () => {
         expect(addToastMock).toHaveBeenCalledWith(toast, true);
     });
 
+    it('sends the chosen year when uploading a file', async () => {
+        walterFetchMock.mockResolvedValue(new Response('', { status: 200 }));
+        const { walter_file_post } = await import('./files');
+        const file = new File(['hello'], 'greeting.txt');
+
+        await walter_file_post(file, '/api/files', fetch, undefined, 2023);
+
+        expect(walterFetchMock).toHaveBeenCalledWith(
+            fetch,
+            '/api/files/greeting.txt?year=2023',
+            expect.objectContaining({ method: 'PUT' })
+        );
+    });
+
+    it('changes the year of a file via the year route', async () => {
+        walterFetchMock.mockResolvedValue(new Response('', { status: 200 }));
+        const { walter_file_change_year } = await import('./files');
+
+        const response = await walter_file_change_year(
+            { key: '/api/vertraege/3/files/a.pdf' } as never,
+            2024,
+            fetch
+        );
+
+        expect(response.status).toBe(200);
+        expect(walterFetchMock).toHaveBeenCalledWith(
+            fetch,
+            '/api/vertraege/3/files/a.pdf/year/2024',
+            expect.objectContaining({ method: 'PUT' })
+        );
+    });
+
     it('downloads file blobs using walter_fetch', async () => {
         const blob = new Blob(['abc'], { type: 'text/plain' });
         walterFetchMock.mockResolvedValue(new Response(blob, { status: 200 }));
@@ -178,6 +210,41 @@ describe('files service', () => {
             '/api/files/demo.txt',
             toast
         );
+    });
+
+    it('loads the family files with their source and the default year', async () => {
+        walterGetMock.mockResolvedValue({
+            defaultYear: 2023,
+            files: [
+                {
+                    fileName: 'typenschild.jpg',
+                    key: '/api/zaehler/1/files/typenschild.jpg',
+                    year: 2024,
+                    source: 'Zähler'
+                },
+                {
+                    fileName: 'stand.jpg',
+                    key: '/api/zaehlerstaende/5/files/stand.jpg',
+                    year: 2023,
+                    source: null
+                }
+            ]
+        });
+        const { walter_get_family } = await import('./files');
+
+        const family = await walter_get_family(
+            '/api/zaehlerstaende/5/files',
+            fetch
+        );
+
+        expect(walterGetMock).toHaveBeenCalledWith(
+            '/api/zaehlerstaende/5/files/family',
+            fetch
+        );
+        expect(family.defaultYear).toBe(2023);
+        expect(family.files).toHaveLength(2);
+        expect(family.files[0]).toMatchObject({ year: 2024, source: 'Zähler' });
+        expect(family.files[1].source).toBeUndefined();
     });
 
     it('finish_file_post reports failed uploads through the toast branch', async () => {

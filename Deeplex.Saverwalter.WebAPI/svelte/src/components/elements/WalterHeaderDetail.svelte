@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
+    import WalterDropUpload from './WalterDropUpload.svelte';
     import { handle_save, handle_delete } from './WalterHeaderDetail';
     import type { WalterFileWrapper } from '$walter/lib';
     import { convertTime } from '$walter/services/utils';
@@ -57,6 +58,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <svelte:window bind:innerWidth={winWidth} />
+
+{#if fileWrapper && (!entry?.permissions || entry.permissions.update)}
+    <WalterDropUpload bind:fileWrapper />
+{/if}
 
 <WalterHeader bind:title>
     <HeaderUtilities>

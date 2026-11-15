@@ -17,8 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
-        WalterBetriebskostenrechnungen,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterHeaderDetail,
         WalterGrid,
         WalterWohnungen,
@@ -28,9 +27,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterZaehlerList,
         WalterLinks,
         WalterLinkTile,
-        WalterZaehler,
-        WalterVertragsNkAnteile
+        WalterVertragsNkAnteile,
+        WalterUmlageRechnungen
     } from '$walter/components';
+    import { invalidateAll } from '$app/navigation';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterFileWrapper,
@@ -43,7 +43,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -109,6 +108,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:commitVersionIfPending
     />
 
+    <WalterUmlageRechnungen
+        fetchImpl={data.fetchImpl}
+        umlageId={data.entry.id}
+        bezeichnung={data.entry.typ.text}
+        neueRechnung={betriebskostenrechungEntry}
+        bearbeitbar={data.entry.permissions?.update !== false}
+        on:geaendert={() => invalidateAll()}
+    />
+
     <WalterLinks>
         <WalterUmlageVersionen
             entry={umlageversionEntry}
@@ -134,18 +142,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
-        <WalterBetriebskostenrechnungen
-            fetchImpl={data.fetchImpl}
-            entry={betriebskostenrechungEntry}
-            title="Rechnungen"
-            rows={data.entry.betriebskostenrechnungen}
-        />
         <WalterVertragsNkAnteile
             fetchImpl={data.fetchImpl}
             umlageId={data.entry.id}
             title="Vertragsanteile"
         />
-        <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if `${data.entry?.schluessel?.id}` === '3'}
             <WalterZaehlerList
@@ -155,8 +156,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         {/if}
         <WalterLinkTile
-            {fileWrapper}
-            fileref={fileURL.umlagetyp(`${data.entry.typ.id}`)}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />
@@ -173,4 +172,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             />
         </Row>
     {/if}
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

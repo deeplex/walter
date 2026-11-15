@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     .AsSplitQuery()
                     .Include(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
                     .Include(s => s.Buchungszeilen).ThenInclude(z => z.AlsHabenZeile).ThenInclude(opa => opa.SollZeile)
-                    .Where(s => s.Buchungszeilen.Any(z =>
+                    .Where(s => s.StornoVon == null && s.Buchungszeilen.Any(z =>
                         z.SollHaben == SollHaben.Haben &&
                         z.Buchungskonto.BuchungskontoId == nkKontoId))
                     .ToListAsync();

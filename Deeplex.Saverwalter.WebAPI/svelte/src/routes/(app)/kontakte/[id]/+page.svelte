@@ -19,14 +19,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         WalterGrid,
         WalterBankkontos,
-        WalterBuchungskonten,
+        WalterBuchhaltungAbschnitt,
         WalterKontaktMitgliedschaft,
         WalterWohnungen,
         WalterVertraege,
         WalterHeaderDetail,
         WalterLinks,
         WalterLinkTile,
-        WalterKontakt
+        WalterKontakt,
+        WalterOffenAlsMieter
     } from '$walter/components';
     import {
         WalterFileWrapper,
@@ -34,8 +35,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterTransaktionEntry,
         validateKontakt
     } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
-    import WalterTransaktion from '$walter/components/details/WalterTransaktionRaw.svelte';
     import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
 
@@ -59,6 +58,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         juristischePerson: { id: data.entry.id, text: data.entry.bezeichnung }
     };
 
+    $: mietvertraege = (data.entry.vertraege ?? [])
+        .filter((v) => data.entry.mietvertragIds.includes(v.id))
+        .map((v) => ({ id: v.id, text: v.wohnung?.text ?? `Vertrag ${v.id}` }));
+
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
@@ -74,6 +77,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterGrid>
     <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
+
+    <WalterOffenAlsMieter
+        vertraege={mietvertraege}
+        fetchImpl={data.fetchImpl}
+    />
 
     <WalterLinks>
         <WalterKontaktMitgliedschaft
@@ -109,24 +117,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.bankkontos}
         />
 
-        {#if data.entry.konten.length > 0}
-            <WalterBuchungskonten title="Konten" rows={data.entry.konten} />
-        {/if}
-
         <WalterTransaktionen
             fetchImpl={data.fetchImpl}
             title="Transaktionen"
             entry={transaktion}
-            rows={data.entry.transaktionen}
+            filter={{ kontaktId: data.entry.id }}
         />
 
         {#if data.entry.adresse}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse.anschrift}`}
                 href={`/adressen/${data.entry.adresse.id}`}
             />
         {/if}
     </WalterLinks>
+
+    <WalterBuchhaltungAbschnitt konten={data.entry.konten} />
 </WalterGrid>

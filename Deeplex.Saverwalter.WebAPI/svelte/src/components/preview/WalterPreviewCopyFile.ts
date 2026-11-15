@@ -17,8 +17,6 @@ import {
     WalterToastContent,
     type WalterSelectionEntry,
     WalterAdresseEntry,
-    WalterBetriebskostenrechnungEntry,
-    WalterErhaltungsaufwendungEntry,
     WalterKontaktEntry,
     WalterMietminderungEntry,
     WalterUmlageEntry,
@@ -37,8 +35,6 @@ import {
 import type { WalterFile } from '$walter/types';
 import {
     WalterAdresse,
-    WalterBetriebskostenrechnung,
-    WalterErhaltungsaufwendung,
     WalterKontakt,
     WalterMietminderung,
     WalterUmlage,
@@ -185,7 +181,8 @@ async function copyFile(
         new File([file.blob], file.fileName),
         fileURL,
         fetchImpl,
-        toast
+        toast,
+        file.year || undefined
     );
 
     return (await success).status === 200;
@@ -213,22 +210,6 @@ export const tables: WalterPreviewCopyTable[] = [
         ApiURL: WalterAdresseEntry.ApiURL,
         fileURL: (id: string) => fileURL.adresse(id),
         newPage: () => WalterAdresse
-    },
-    {
-        value: 'Betriebskostenrechnungen',
-        key: 'betriebskostenrechnungen',
-        fetch: walter_selection.betriebskostenrechnungen,
-        ApiURL: WalterBetriebskostenrechnungEntry.ApiURL,
-        fileURL: (id: string) => fileURL.betriebskostenrechnung(id),
-        newPage: () => WalterBetriebskostenrechnung
-    },
-    {
-        value: 'Erhaltungsaufwendungen',
-        key: 'erhaltungsaufwendungen',
-        fetch: walter_selection.erhaltungsaufwendungen,
-        ApiURL: WalterErhaltungsaufwendungEntry.ApiURL,
-        fileURL: (id: string) => fileURL.erhaltungsaufwendung(id),
-        newPage: () => WalterErhaltungsaufwendung
     },
     {
         value: 'Kontakte',

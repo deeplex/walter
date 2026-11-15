@@ -14,6 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { goto } from '$app/navigation';
+import {
+    formatDate,
+    formatEuro,
+    formatProzent,
+    formatQuadratmeter
+} from './format';
 import { changeTracker, openModal } from '$walter/store';
 
 // Canadian format allegedly is yyyy-mm-dd
@@ -31,15 +37,7 @@ export function convertDateCanadian(
 }
 
 export function convertDateGerman(date: Date | undefined): string | undefined {
-    if (date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-
-        return `${day}.${month}.${year}`;
-    } else {
-        return undefined;
-    }
+    return date ? formatDate(date) : undefined;
 }
 
 export function convertTime(
@@ -52,20 +50,17 @@ export function convertTime(
     }
 }
 
+// Anzeige-Formate: siehe services/format.ts.
 export function convertEuro(value: number | undefined): string | undefined {
-    return `${(value || 0).toFixed(2)} €`;
+    return formatEuro(value);
 }
 
 export function convertPercent(value: number | undefined): string | undefined {
-    return `${((value || 0) * 100).toFixed(2)}%`;
+    return formatProzent(value);
 }
 
 export function convertM2(value: number | undefined): string | undefined {
-    return `${(value || 0).toFixed(2)} m²`;
-}
-
-export function convertFixed2(value: number | undefined): string | undefined {
-    return `${(value || 0).toFixed(2)}`;
+    return formatQuadratmeter(value);
 }
 
 let walter_goto_tracker = 0;

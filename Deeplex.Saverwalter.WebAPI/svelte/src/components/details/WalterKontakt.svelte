@@ -41,7 +41,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         .then((res) => {
             if (juristisch) {
                 // Disable selection of natuerliche Person
-                (res[0] as any).disabled = true;
+                Object.assign(res[0], { disabled: true });
                 if (entry.rechtsform?.id === 0) {
                     entry.rechtsform = res[1];
                 }

@@ -31,7 +31,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         type WalterZaehlerstandEntry,
         validateZaehler
     } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -84,16 +83,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#if data.entry.adresse !== null}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse?.anschrift}`}
                 href={`/adressen/${data.entry.adresse?.id}`}
             />
         {/if}
         {#if data.entry.wohnung !== null}
             <WalterLinkTile
-                bind:fileWrapper
-                fileref={fileURL.wohnung(`${data.entry.wohnung?.id}`)}
                 name={`Wohnung: ${data.entry.wohnung?.text}`}
                 href={`/wohnungen/${data.entry.wohnung?.id}`}
             />

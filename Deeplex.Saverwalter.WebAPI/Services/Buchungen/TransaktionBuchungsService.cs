@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
 using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
@@ -29,10 +31,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   BetriebskostenEingang — legt Rechnung + Forderungs- und Zahlungs-Buchungssatz an
     ///   Erhaltungsaufwendungen — Aufwands-Buchungssatz gegen Zahlungskonto
     ///   Sonstige             — direkter Buchungssatz mit expliziten Soll/Haben-Konten
+    ///   Kautionen            — Eingang oder Rückzahlung auf dem KautionsKonto (gebucht über VertragController.PostKaution)
     /// </summary>
     public class TransaktionBuchungsService
     {
         private readonly SaverwalterContext _ctx;
+
+        /// <summary>Klartext-Positionen des zuletzt gebauten Vorgangs (für die Vorschau).</summary>
+        private readonly List<VorschauPosition> _positionen = [];
 
         public TransaktionBuchungsService(SaverwalterContext ctx) => _ctx = ctx;
 
@@ -58,6 +64,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public decimal Kaltmiete { get; set; }
             public List<GaragenmietInput> Garagen { get; set; } = [];
             public decimal NkVorauszahlung { get; set; }
+            /// <summary>
+            /// Gesamtbetrag statt Aufteilung: der Server füllt Kaltmiete, Garagen und
+            /// NK-Vorauszahlung (siehe <see cref="VerteileGesamtbetragAsync"/>).
+            /// </summary>
+            public decimal? Gesamtbetrag { get; set; }
         }
 
         public class BetriebskostenEingangInput
@@ -104,6 +115,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public decimal Betrag { get; set; }
         }
 
+        /// <summary>
+        /// Kaution des Mieters: Eingang (Soll ZahlungsKonto / Haben KautionsKonto) oder
+        /// Rückzahlung (Soll KautionsKonto / Haben Zahler-Bankkonto bzw. ZahlungsKonto).
+        /// Eine Rückzahlung darf die gehaltene Kaution nicht übersteigen.
+        /// </summary>
+        public class KautionInput
+        {
+            public int VertragId { get; set; }
+            public decimal Betrag { get; set; }
+            public bool Rueckzahlung { get; set; }
+        }
+
         public class TransaktionsInput
         {
             public decimal Betrag { get; set; }
@@ -119,19 +142,132 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             public List<SonstigerBuchungssatzInput> Sonstige { get; set; } = [];
             public List<NkAnteilEingangInput> NkAnteilEingaenge { get; set; } = [];
             public List<AbrechnungsAusgleichInput> AbrechnungsAusgleiche { get; set; } = [];
+            public List<KautionInput> Kautionen { get; set; } = [];
+        }
+
+        // ── Vorschau ─────────────────────────────────────────────────────────────
+
+        public class VorschauZeile
+        {
+            public string Kontonummer { get; init; } = string.Empty;
+            public string Kontobezeichnung { get; init; } = string.Empty;
+            [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+            public SollHaben SollHaben { get; init; }
+            public decimal Betrag { get; init; }
+        }
+
+        public class VorschauSatz
+        {
+            public DateOnly Buchungsdatum { get; init; }
+            public int Buchungsjahr { get; init; }
+            public string Beschreibung { get; init; } = string.Empty;
+            /// <summary>Satz gehört zur Transaktion (Zahlung); sonst entsteht er mit ihr (z. B. Sollstellung, Rechnung).</summary>
+            public bool IstZahlung { get; init; }
+            public List<VorschauZeile> Zeilen { get; init; } = [];
+        }
+
+        /// <summary>Was eine Position bewirkt, in Klartext aus Eingabe, Konten und Bezügen.</summary>
+        public class VorschauPosition
+        {
+            public string Text { get; init; } = string.Empty;
+            public decimal Betrag { get; init; }
+            /// <summary>Offener Rest der Forderung nach dieser Zahlung, falls es eine gibt.</summary>
+            public decimal? DanachOffen { get; init; }
+        }
+
+        public class TransaktionsVorschau
+        {
+            public decimal Betrag { get; init; }
+            public string Verwendungszweck { get; init; } = string.Empty;
+            public string? Zahler { get; init; }
+            public string? Zahlungsempfaenger { get; init; }
+            public List<VorschauPosition> Positionen { get; init; } = [];
+            public List<VorschauSatz> Saetze { get; init; } = [];
+            /// <summary>Anzahl der Ausgleiche (Zahlung ↔ Forderung), die mit der Buchung entstehen.</summary>
+            public int Ausgleiche { get; init; }
+        }
+
+        /// <summary>
+        /// Zeigt, was <see cref="BucheAsync"/> buchen würde, ohne zu speichern: dieselben
+        /// Prüfungen, Konten und Beträge, aber keine Schreibzugriffe (auch keine Buchungsnummer).
+        /// Verwirft danach alle Änderungen des Kontexts — darf daher nur in einem Kontext ohne
+        /// ausstehende Änderungen aufgerufen werden.
+        /// </summary>
+        public async Task<TransaktionsVorschau> VorschauAsync(TransaktionsInput input)
+        {
+            if (_ctx.ChangeTracker.HasChanges())
+                throw new InvalidOperationException("Die Vorschau braucht einen Kontext ohne ausstehende Änderungen.");
+
+            try
+            {
+                var transaktion = await BaueAsync(input);
+                var saetze = _ctx.ChangeTracker.Entries<Buchungssatz>()
+                    .Where(e => e.State == EntityState.Added)
+                    .Select(e => e.Entity)
+                    .OrderBy(s => s.Transaktion == null ? 0 : 1)
+                    .ThenBy(s => s.Buchungsdatum)
+                    .ToList();
+
+                return new TransaktionsVorschau
+                {
+                    Betrag = transaktion.Betrag,
+                    Verwendungszweck = transaktion.Verwendungszweck,
+                    Zahler = KontoInhaber(transaktion.Zahler),
+                    Zahlungsempfaenger = KontoInhaber(transaktion.Zahlungsempfaenger),
+                    Positionen = [.. _positionen],
+                    Ausgleiche = _ctx.ChangeTracker.Entries<OffenerPostenAusgleich>()
+                        .Count(e => e.State == EntityState.Added),
+                    Saetze = saetze.Select(s => new VorschauSatz
+                    {
+                        Buchungsdatum = s.Buchungsdatum,
+                        Buchungsjahr = s.Buchungsjahr,
+                        Beschreibung = s.Beschreibung,
+                        IstZahlung = s.Transaktion != null,
+                        Zeilen = s.Buchungszeilen.Select(z => new VorschauZeile
+                        {
+                            Kontonummer = z.Buchungskonto.Kontonummer,
+                            Kontobezeichnung = z.Buchungskonto.Bezeichnung,
+                            SollHaben = z.SollHaben,
+                            Betrag = z.Betrag,
+                        }).ToList(),
+                    }).ToList(),
+                };
+            }
+            finally
+            {
+                _ctx.ChangeTracker.Clear();
+            }
         }
 
         // ── Hauptmethode ─────────────────────────────────────────────────────────
 
-        public async Task<Transaktion> BucheAsync(TransaktionsInput input)
+        /// <remarks>Mietzahlungen legen fehlende Sollstellungen an, daher unter der Sperre.</remarks>
+        public Task<Transaktion> BucheAsync(TransaktionsInput input) =>
+            Sollstellung.GesperrtAsync(_ctx, async () =>
+            {
+                var transaktion = await BaueAsync(input);
+                await _ctx.SaveChangesAsync();
+                return transaktion;
+            });
+
+        /// <summary>
+        /// Baut Transaktion, Buchungssätze und Ausgleiche im Kontext auf, ohne zu speichern.
+        /// Gemeinsame Grundlage von <see cref="BucheAsync"/> und <see cref="VorschauAsync"/>.
+        /// </summary>
+        private async Task<Transaktion> BaueAsync(TransaktionsInput input)
         {
+            _positionen.Clear();
+            foreach (var miete in input.Mieten.Where(m => m.Gesamtbetrag.HasValue))
+                await VerteileGesamtbetragAsync(miete);
+
             var totalBetrag =
                 input.Mieten.Sum(m => m.Kaltmiete + m.NkVorauszahlung + m.Garagen.Sum(g => g.Betrag)) +
                 input.GaragenEingaenge.Sum(g => g.Betrag) +
                 input.BetriebskostenEingaenge.Sum(b => b.Betrag) +
                 input.Erhaltungsaufwendungen.Sum(e => e.Betrag) +
                 input.Sonstige.Sum(s => s.Betrag) +
-                input.AbrechnungsAusgleiche.Sum(a => a.Betrag);
+                input.AbrechnungsAusgleiche.Sum(a => a.Betrag) +
+                input.Kautionen.Sum(k => k.Betrag);
 
             if (totalBetrag <= 0)
                 throw new ArgumentException("Mindestens eine Position mit Betrag > 0 erforderlich.");
@@ -204,15 +340,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 _ctx.Buchungssaetze.Add(satz);
             }
 
+            foreach (var kaution in input.Kautionen)
+            {
+                var satz = await ErstelleKautionAsync(kaution, input.Zahlungsdatum, transaktion);
+                satz.Notiz = input.Notiz;
+                satz.Transaktion = transaktion;
+                _ctx.Buchungssaetze.Add(satz);
+            }
+
             foreach (var sonstiger in input.Sonstige)
             {
+                Position("Sonstige Buchung", sonstiger.Betrag);
                 var satz = ErstelleSonstigerBuchungssatz(sonstiger, input.Zahlungsdatum, transaktion);
                 satz.Notiz = input.Notiz;
                 satz.Transaktion = transaktion;
                 _ctx.Buchungssaetze.Add(satz);
             }
 
-            await _ctx.SaveChangesAsync();
             return transaktion;
         }
 
@@ -257,6 +401,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 if (miete.Kaltmiete > verbleibend + 0.005m)
                     throw new InvalidOperationException(
                         $"Kaltmiete ({miete.Kaltmiete:C}) übersteigt verbleibende Forderung ({verbleibend:C}).");
+                Position($"Kaltmiete {MonatText(monat)}", miete.Kaltmiete, verbleibend - miete.Kaltmiete);
 
                 var kaltmieteSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung Kaltmiete {monat:MM/yyyy}");
                 AddZeile(kaltmieteSatz, SollHaben.Soll, miete.Kaltmiete, vertrag.ZahlungsKonto);
@@ -265,11 +410,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 _ctx.Buchungssaetze.Add(kaltmieteSatz);
 
                 var habenZeile = kaltmieteSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
-                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = sollZeile,
-                    HabenZeile = habenZeile
-                });
+                habenZeile.Zuordnen(sollZeile);
             }
 
             foreach (var garage in miete.Garagen)
@@ -277,7 +418,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
 
             if (miete.NkVorauszahlung > 0)
             {
-                var nkSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}");
+                // Die NK-VZ zählt zur Abrechnung des Jahres des betreffenden Monats.
+                // Ein bereits abgerechnetes Jahr nimmt keine weiteren Vorauszahlungen an.
+                var abgerechnet = await AbrechnungsschutzService.AbgerechneteJahreVertrag(_ctx, vertrag.VertragId);
+                if (abgerechnet.Contains(monat.Year))
+                    throw new InvalidOperationException(
+                        $"NK-Vorauszahlung für {monat:MM/yyyy} nicht möglich: Das Jahr {monat.Year} ist für diesen Vertrag bereits abgerechnet.");
+
+                Position($"NK-Vorauszahlung {MonatText(monat)} (Abrechnung {monat.Year})", miete.NkVorauszahlung);
+                var nkSatz = new Buchungssatz(transaktion.Zahlungsdatum, $"Mietzahlung NK-VZ {monat:MM/yyyy}")
+                {
+                    Buchungsjahr = monat.Year
+                };
                 AddZeile(nkSatz, SollHaben.Soll, miete.NkVorauszahlung, vertrag.ZahlungsKonto);
                 AddZeile(nkSatz, SollHaben.Haben, miete.NkVorauszahlung, vertrag.NkBuchungskonto);
                 nkSatz.Transaktion = transaktion;
@@ -306,6 +458,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             if (garage.Betrag > verbleibend + 0.005m)
                 throw new InvalidOperationException(
                     $"Garagenmiete ({garage.Betrag:C}) übersteigt verbleibende Forderung ({verbleibend:C}).");
+            Position($"Garagenmiete {gv.Garage.Kennung} {MonatText(monat)}", garage.Betrag, verbleibend - garage.Betrag);
 
             var satz = new Buchungssatz(transaktion.Zahlungsdatum, $"Garagenmietzahlung {monat:MM/yyyy} | {gv.Garage.Kennung}");
             AddZeile(satz, SollHaben.Soll, garage.Betrag, gv.ZahlungsKonto);
@@ -314,11 +467,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             _ctx.Buchungssaetze.Add(satz);
 
             var habenZeile = satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben);
-            _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-            {
-                SollZeile = sollZeile,
-                HabenZeile = habenZeile
-            });
+            habenZeile.Zuordnen(sollZeile);
         }
 
         private Buchungszeile FindeOderErstelleGarageSollstellung(GarageVertrag gv, DateOnly monat, GarageVertragVersion version)
@@ -328,18 +477,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     $"GarageVertrag {gv.GarageVertragId} endete am {gv.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
 
             var vorhandene = gv.MietBuchungskonto.Buchungszeilen
-                .FirstOrDefault(z =>
-                    z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                .FirstOrDefault(z => Sollstellung.IstImMonat(z, monat));
 
             if (vorhandene != null) return vorhandene;
 
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Garagenmietsoll {monat:MM/yyyy} | {gv.Garage.Kennung}");
-            AddZeile(satz, SollHaben.Soll, version.GaragenMiete, gv.MietBuchungskonto);
-            AddZeile(satz, SollHaben.Haben, version.GaragenMiete, gv.Garage.Ertragskonto);
+            var satz = Sollstellung.ErstelleGarage(gv, monat, version.GaragenMiete);
             _ctx.Buchungssaetze.Add(satz);
-            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
+            return Sollstellung.SollZeile(satz);
         }
 
         /// <summary>
@@ -373,17 +517,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                     .FirstOrDefaultAsync(u => u.NkVerrechnungsKonto.BuchungskontoId == nkVk.BuchungskontoId)
                     ?? throw new InvalidOperationException("Umlage für Buchungssatz nicht gefunden.");
 
+                Position($"Betriebskosten {umlageForZahlung.Typ.Bezeichnung} {forderungsSatz.Buchungsjahr}",
+                    bk.Betrag, verbleibend - bk.Betrag);
                 var zahlungsSatz = new Buchungssatz(
                     zahlungsdatum,
                     $"Zahlung Betriebskosten {umlageForZahlung.Typ.Bezeichnung} {forderungsSatz.Buchungsjahr}");
                 AddZeile(zahlungsSatz, SollHaben.Soll, bk.Betrag, nkVk);
                 AddZeile(zahlungsSatz, SollHaben.Haben, bk.Betrag, umlageForZahlung.ZahlungsKonto);
 
-                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
-                    HabenZeile = forderungsHabenZeile
-                });
+                zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(forderungsHabenZeile);
 
                 return zahlungsSatz;
             }
@@ -395,6 +537,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .FirstOrDefaultAsync(u => u.UmlageId == bk.UmlageId)
                 ?? throw new ArgumentException($"Umlage {bk.UmlageId} nicht gefunden.");
 
+            Position($"Betriebskosten {umlage.Typ.Bezeichnung} {bk.BetreffendesJahr} (neue Rechnung)", bk.Betrag);
             var neuerForderungsSatz = new Buchungssatz(
                 bk.RechnungsDatum,
                 $"Betriebskosten {umlage.Typ.Bezeichnung} {bk.BetreffendesJahr}")
@@ -411,11 +554,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(neuerZahlungsSatz, SollHaben.Soll, bk.Betrag, umlage.NkVerrechnungsKonto);
             AddZeile(neuerZahlungsSatz, SollHaben.Haben, bk.Betrag, umlage.ZahlungsKonto);
 
-            _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-            {
-                SollZeile = neuerZahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
-                HabenZeile = neuerForderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
-            });
+            neuerZahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(neuerForderungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben));
 
             return neuerZahlungsSatz;
         }
@@ -469,15 +608,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 if (input.Betrag > verbleibend + 0.005m)
                     throw new InvalidOperationException(
                         $"Zahlungsbetrag ({input.Betrag:C}) übersteigt die verbleibende Nachzahlung ({verbleibend:C}).");
+                Position($"Nachzahlung NK-Abrechnung {jahr}", input.Betrag, verbleibend - input.Betrag);
 
                 var satz = new Buchungssatz(zahlungsdatum, $"Zahlung BK-Abrechnung {jahr}");
                 AddZeile(satz, SollHaben.Soll, input.Betrag, vertrag.ZahlungsKonto);
                 AddZeile(satz, SollHaben.Haben, input.Betrag, vertrag.BkAbrechnungsKonto);
-                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = nachzahlungsZeile,
-                    HabenZeile = satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben)
-                });
+                satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben).Zuordnen(nachzahlungsZeile);
                 return satz;
             }
 
@@ -491,6 +627,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 if (input.Betrag > verbleibend + 0.005m)
                     throw new InvalidOperationException(
                         $"Erstattungsbetrag ({input.Betrag:C}) übersteigt das verbleibende Guthaben ({verbleibend:C}).");
+                Position($"Erstattung NK-Abrechnung {jahr}", input.Betrag, verbleibend - input.Betrag);
 
                 var satz = new Buchungssatz(zahlungsdatum, $"Erstattung BK-Abrechnung {jahr}");
                 var sollZeile = new Buchungszeile(SollHaben.Soll, input.Betrag)
@@ -503,11 +640,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 // Vertrags-ZahlungsKonto (dort mindert die Auszahlung den Bestand).
                 AddZeile(satz, SollHaben.Haben, input.Betrag,
                     transaktion.Zahler?.BuchungsKonto ?? vertrag.ZahlungsKonto);
-                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = sollZeile,
-                    HabenZeile = erstattungsZeile
-                });
+                sollZeile.Zuordnen(erstattungsZeile);
                 return satz;
             }
 
@@ -532,6 +665,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 if (ea.Betrag > verbleibend + 0.005m)
                     throw new InvalidOperationException(
                         $"Zahlungsbetrag ({ea.Betrag:C}) übersteigt verbleibende Verbindlichkeit ({verbleibend:C}).");
+                Position("Erhaltungsaufwand (erfasste Rechnung)", ea.Betrag, verbleibend - ea.Betrag);
 
                 var verbindlichkeitsKonto = habenZeile.Buchungskonto;
                 var zahlungsSatz = new Buchungssatz(zahlungsdatum,
@@ -541,11 +675,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 AddZeile(zahlungsSatz, SollHaben.Soll, ea.Betrag, verbindlichkeitsKonto);
                 AddZeile(zahlungsSatz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
 
-                _ctx.OffenePostenAusgleiche.Add(new OffenerPostenAusgleich
-                {
-                    SollZeile = zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll),
-                    HabenZeile = habenZeile
-                });
+                zahlungsSatz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll).Zuordnen(habenZeile);
 
                 return zahlungsSatz;
             }
@@ -555,6 +685,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 .FirstOrDefaultAsync(w => w.WohnungId == ea.WohnungId)
                 ?? throw new ArgumentException($"Wohnung {ea.WohnungId} nicht gefunden.");
 
+            Position($"Erhaltungsaufwand {wohnung.Bezeichnung}", ea.Betrag);
             var beschreibung = ea.Beschreibung is { Length: > 0 } desc
                 ? $"Erhaltungsaufwendung {desc}"
                 : $"Erhaltungsaufwendung {wohnung.Bezeichnung}";
@@ -563,6 +694,43 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             AddZeile(satz, SollHaben.Soll, ea.Betrag, wohnung.AufwandsKonto);
             AddZeile(satz, SollHaben.Haben, ea.Betrag, transaktion.Zahler!.BuchungsKonto);
             return satz;
+        }
+
+        private async Task<Buchungssatz> ErstelleKautionAsync(
+            KautionInput kaution, DateOnly zahlungsdatum, Transaktion transaktion)
+        {
+            if (kaution.Betrag <= 0)
+                throw new ArgumentException($"Betrag muss größer als 0 sein (aktuell: {kaution.Betrag:C}).");
+
+            var vertrag = await _ctx.Vertraege
+                .Include(v => v.KautionsKonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.ZahlungsKonto)
+                .FirstOrDefaultAsync(v => v.VertragId == kaution.VertragId)
+                ?? throw new ArgumentException($"Vertrag {kaution.VertragId} nicht gefunden.");
+
+            if (!kaution.Rueckzahlung)
+            {
+                Position("Kaution erhalten", kaution.Betrag);
+                var eingang = new Buchungssatz(zahlungsdatum, "Kaution Eingang");
+                AddZeile(eingang, SollHaben.Soll, kaution.Betrag, vertrag.ZahlungsKonto);
+                AddZeile(eingang, SollHaben.Haben, kaution.Betrag, vertrag.KautionsKonto);
+                return eingang;
+            }
+
+            // Gehaltene Kaution: Saldo des KautionsKontos (Haben positiv), einschließlich der
+            // in dieser Transaktion schon erfassten Kautionszeilen.
+            var gehalten = vertrag.KautionsKonto.Buchungszeilen
+                .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+            if (kaution.Betrag > gehalten + 0.005m)
+                throw new InvalidOperationException(
+                    $"Rückzahlung ({kaution.Betrag:C}) übersteigt die gehaltene Kaution ({gehalten:C}).");
+
+            Position("Kaution zurückgezahlt", kaution.Betrag, gehalten - kaution.Betrag);
+            var rueckzahlung = new Buchungssatz(zahlungsdatum, "Kaution Rückzahlung");
+            AddZeile(rueckzahlung, SollHaben.Soll, kaution.Betrag, vertrag.KautionsKonto);
+            AddZeile(rueckzahlung, SollHaben.Haben, kaution.Betrag,
+                transaktion.Zahler?.BuchungsKonto ?? vertrag.ZahlungsKonto);
+            return rueckzahlung;
         }
 
         private static Buchungssatz ErstelleSonstigerBuchungssatz(
@@ -575,6 +743,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
         }
 
         // ── Hilfsfunktionen ───────────────────────────────────────────────────────
+
 
         private async Task<Bankkonto?> ResolveZahlerFromBkAsync(BetriebskostenEingangInput bk)
         {
@@ -612,22 +781,92 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                 throw new InvalidOperationException(
                     $"Vertrag {vertrag.VertragId} endete am {vertrag.Ende.Value:dd.MM.yyyy}. Keine Sollstellung für {monat:MM/yyyy} möglich.");
 
+            // Sollstellung des Monats: Soll auf dem Mietkonto ohne Transaktion, kein Storno-Paar
+            // und keine Miet-Korrektur (die bebucht auch das NK-Konto und trägt ihr Buchungsdatum).
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
             var vorhandene = vertrag.MietBuchungskonto.Buchungszeilen
                 .FirstOrDefault(z =>
-                    z.SollHaben == SollHaben.Soll
-                    && z.Buchungssatz.Buchungsdatum.Year == monat.Year
-                    && z.Buchungssatz.Buchungsdatum.Month == monat.Month);
+                    Sollstellung.IstImMonat(z, monat, nkKontoId));
 
             if (vorhandene != null) return vorhandene;
 
-            var satz = new Buchungssatz(DritterWerktag(monat), $"Mietsoll {monat:MM/yyyy}");
-            AddZeile(satz, SollHaben.Soll, version.Grundmiete, vertrag.MietBuchungskonto);
-            AddZeile(satz, SollHaben.Haben, version.Grundmiete, vertrag.Wohnung.MietErtragskonto);
+            var satz = Sollstellung.ErstelleMiete(vertrag, monat, version.Grundmiete);
             _ctx.Buchungssaetze.Add(satz);
-            return satz.Buchungszeilen.First(z => z.SollHaben == SollHaben.Soll);
+            return Sollstellung.SollZeile(satz);
         }
 
-        private static DateOnly DritterWerktag(DateOnly monat) => DateUtils.DritterWerktag(monat);
+        private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+
+        private static string MonatText(DateOnly monat) => monat.ToString("MMMM yyyy", Deutsch);
+
+        private void Position(string text, decimal betrag, decimal? danachOffen = null) =>
+            _positionen.Add(new VorschauPosition { Text = text, Betrag = betrag, DanachOffen = danachOffen });
+
+        private static string? KontoInhaber(Bankkonto? konto) =>
+            konto is null ? null : konto.Besitzer.FirstOrDefault()?.Bezeichnung ?? konto.Iban;
+
+        /// <summary>
+        /// Teilt den Gesamtbetrag einer Mietzahlung auf: zuerst die offene Kaltmiete des
+        /// Monats, dann die offenen Garagenmieten, der Rest ist NK-Vorauszahlung. Offen ist der
+        /// Rest der Sollstellung, ohne Sollstellung die Miete laut Vertragsversion.
+        /// </summary>
+        private async Task VerteileGesamtbetragAsync(MietzahlungsInput miete)
+        {
+            var gesamt = miete.Gesamtbetrag!.Value;
+            if (gesamt <= 0)
+                throw new ArgumentException($"Betrag muss größer als 0 sein (aktuell: {gesamt:C}).");
+
+            var vertrag = await _ctx.Vertraege
+                .Include(v => v.Versionen)
+                .Include(v => v.NkBuchungskonto)
+                .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.Buchungssatz)
+                    .ThenInclude(s => s.Buchungszeilen).ThenInclude(z => z.Buchungskonto)
+                .Include(v => v.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen).ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
+                .Include(v => v.GarageVertraege).ThenInclude(g => g.Versionen)
+                .Include(v => v.GarageVertraege).ThenInclude(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen)
+                    .ThenInclude(z => z.Buchungssatz)
+                .Include(v => v.GarageVertraege).ThenInclude(g => g.MietBuchungskonto).ThenInclude(k => k.Buchungszeilen)
+                    .ThenInclude(z => z.AlsSollZeile).ThenInclude(a => a.HabenZeile)
+                .FirstOrDefaultAsync(v => v.VertragId == miete.VertragId)
+                ?? throw new ArgumentException($"Vertrag {miete.VertragId} nicht gefunden.");
+
+            var monat = new DateOnly(miete.BetreffenderMonat.Year, miete.BetreffenderMonat.Month, 1);
+            var nkKontoId = vertrag.NkBuchungskonto.BuchungskontoId;
+
+            static decimal Offen(IEnumerable<Buchungszeile> sollstellungen, decimal? erwartet)
+            {
+                var soll = sollstellungen.FirstOrDefault();
+                return soll is null
+                    ? erwartet ?? 0m
+                    : soll.Betrag - soll.AlsSollZeile.Sum(a => a.HabenZeile.Betrag);
+            }
+
+            var rest = gesamt;
+            var kaltmieteOffen = Offen(
+                vertrag.MietBuchungskonto.Buchungszeilen.Where(z =>
+                    Sollstellung.IstImMonat(z, monat, nkKontoId)),
+                vertrag.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn)?.Grundmiete);
+            miete.Kaltmiete = Math.Min(rest, Math.Max(0m, kaltmieteOffen));
+            rest -= miete.Kaltmiete;
+
+            miete.Garagen.Clear();
+            foreach (var gv in vertrag.GarageVertraege.OrderBy(g => g.GarageVertragId))
+            {
+                if (gv.Beginn() > monat.AddMonths(1).AddDays(-1)) continue;
+                if (gv.Ende is DateOnly ende && new DateOnly(ende.Year, ende.Month, 1) < monat) continue;
+                var version = gv.Versionen.Where(v => v.Beginn <= monat).MaxBy(v => v.Beginn);
+                if (version is null) continue;
+
+                var offen = Offen(gv.MietBuchungskonto.Buchungszeilen.Where(z => Sollstellung.IstImMonat(z, monat)), version.GaragenMiete);
+                var betrag = Math.Min(rest, Math.Max(0m, offen));
+                if (betrag <= 0m) continue;
+                miete.Garagen.Add(new GaragenmietInput { GarageVertragId = gv.GarageVertragId, Betrag = betrag });
+                rest -= betrag;
+            }
+
+            miete.NkVorauszahlung = rest;
+            miete.Gesamtbetrag = null;
+        }
 
         private static void AddZeile(Buchungssatz satz, SollHaben sollHaben, decimal betrag, Buchungskonto konto)
         {

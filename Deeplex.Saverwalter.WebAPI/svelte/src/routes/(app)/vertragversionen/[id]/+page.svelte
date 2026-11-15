@@ -23,7 +23,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterFileWrapper, validateVertragVersion } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -56,8 +55,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         fetchImpl={data.fetchImpl}
     />
     <WalterLinkTile
-        bind:fileWrapper
-        fileref={fileURL.vertrag(`${data.entry.vertrag.id}`)}
         name={`Vertrag: ${data.entry.vertrag.text}`}
         href={`/vertraege/${data.entry.vertrag.id}`}
     />

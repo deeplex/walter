@@ -35,8 +35,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let vertragId: number;
     export let nutzungVon: string;
     export let nutzungBis: string;
-    export let nutzungstage: number;
-    export let abrechnungstage: number;
     export let strompauschalen: StrompauschaleInfo[] = [];
 
     const formatDate = (d: string) => {
@@ -44,7 +42,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         return `${day}.${m}.${y}`;
     };
     const nutzungsIntervall = `${formatDate(nutzungVon)} – ${formatDate(nutzungBis)}`;
-    const zeitanteil = nutzungstage / abrechnungstage;
 
     const formatKommazahl = (n: number, digits = 2) =>
         n.toLocaleString('de-DE', {

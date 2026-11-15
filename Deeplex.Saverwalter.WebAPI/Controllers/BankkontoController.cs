@@ -54,7 +54,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public string? Notiz { get; set; }
             public IEnumerable<SelectionEntry> SelectedBesitzer { get; set; } = [];
-            public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 

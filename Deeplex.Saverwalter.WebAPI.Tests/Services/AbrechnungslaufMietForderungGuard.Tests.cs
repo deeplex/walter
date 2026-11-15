@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.Abrechnung;
@@ -38,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 new AbrechnungsresultatBuchungsService(ctx),
                 new AbrechnungsgruppenService(ctx),
                 new StornoBuchungsService(ctx),
-                new MietKorrekturService(ctx));
+                new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx)));
 
         private static async Task ZahleMonatAsync(
             SaverwalterContext ctx, Vertrag vertrag, DateOnly monat, decimal kaltmiete, decimal nk)
@@ -106,9 +107,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var preview = await service.PreviewAsync(wohnungIds, Jahr);
 
             preview.Warnungen.Should().Contain(w =>
-                w.Contains(AbrechnungslaufService.MietForderungAbweichungMarker)
-                && w.Contains($"Vertrag {vertrag.VertragId}")
-                && w.Contains("01/2024"));
+                w.Art == HinweisArt.Miete
+                && w.SperrtBuchung
+                && w.Text.Contains($"Vertrag {vertrag.VertragId}")
+                && w.Text.Contains("2024"));
         }
 
         [Fact]
@@ -127,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             Func<Task> buchen = () => service.BookAsync(wohnungIds, Jahr);
             await buchen.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("*Miet-Forderung*");
+                .WithMessage("*Kaltmiete weicht ab*");
 
             // Nichts wurde gebucht — insbesondere kein Abrechnungsresultat.
             ctx.Abrechnungsresultate.Should().BeEmpty();
@@ -145,15 +147,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             await ctx.SaveChangesAsync();
 
             // Miet-Korrektur wie über die UI durchgeführt (WalterMietKorrektur.svelte).
-            var mietKorrektur = new MietKorrekturService(ctx);
-            await mietKorrektur.AnwendenAsync(
-                vertrag.VertragId, new HashSet<(int, int)> { (Jahr, 1) }, "Testkorrektur");
+            var mietKorrektur = new MietKorrekturService(ctx, new BuchungssatzSchutzService(ctx));
+            await mietKorrektur.BucheDifferenzAsync(vertrag.VertragId, Jahr, "Testkorrektur");
 
             var service = Service(ctx);
             var wohnungIds = new List<int> { vertrag.Wohnung.WohnungId };
 
             var preview = await service.PreviewAsync(wohnungIds, Jahr);
-            preview.Warnungen.Should().NotContain(w => w.Contains(AbrechnungslaufService.MietForderungAbweichungMarker));
+            preview.Warnungen.Should().NotContain(w => w.SperrtBuchung);
 
             Func<Task> buchen = () => service.BookAsync(wohnungIds, Jahr);
             await buchen.Should().NotThrowAsync();

@@ -20,10 +20,9 @@ import type { WalterToastContent } from '../lib/WalterToastContent';
 import {
     WalterAbrechnungsresultatEntry,
     WalterAdresseEntry,
-    WalterBetriebskostenrechnungEntry,
     WalterBuchungssatzEntry,
-    WalterErhaltungsaufwendungEntry,
     WalterGarageEntry,
+    WalterGarageVertragEntry,
     WalterKontaktEntry,
     WalterMietminderungEntry,
     WalterTransaktionEntry,
@@ -42,13 +41,11 @@ export const fileURL = {
     abrechnungsresultat: (id: string) =>
         `${WalterAbrechnungsresultatEntry.ApiURL}/${id}/files`,
     adresse: (id: string) => `${WalterAdresseEntry.ApiURL}/${id}/files`,
-    betriebskostenrechnung: (id: string) =>
-        `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,
     buchungssatz: (id: string) =>
         `${WalterBuchungssatzEntry.ApiURL}/${id}/files`,
-    erhaltungsaufwendung: (id: string) =>
-        `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}/files`,
     garage: (id: string) => `${WalterGarageEntry.ApiURL}/${id}/files`,
+    garagevertrag: (id: string) =>
+        `${WalterGarageVertragEntry.ApiURL}/${id}/files`,
     mietminderung: (id: string) =>
         `${WalterMietminderungEntry.ApiURL}/${id}/files`,
     kontakt: (id: string) => `${WalterKontaktEntry.ApiURL}/${id}/files`,
@@ -69,19 +66,36 @@ export const fileURL = {
     stack: `/api/user/files`
 };
 
+/** `year`: das Jahr, in dem die Datei abgelegt wird; ohne Angabe wählt der Server es. */
 export const walter_file_post = (
     file: File,
     url: string,
     fetchImpl: typeof fetch,
+    toast?: WalterToastContent,
+    year?: number
+) =>
+    walter_fetch(
+        fetchImpl,
+        `${url}/${file.name}${year === undefined ? '' : `?year=${year}`}`,
+        {
+            method: 'PUT',
+            headers: {
+                // Ignored, due to header being replaced in walter_fetch
+                'Content-Type': `${file.type}`
+            },
+            body: file
+        }
+    ).then((e) => finish_file_post(e, toast));
+
+/** Verschiebt die Datei in den Ordner des Jahres. */
+export const walter_file_change_year = (
+    file: WalterFile,
+    year: number,
+    fetchImpl: typeof fetch,
     toast?: WalterToastContent
 ) =>
-    walter_fetch(fetchImpl, `${url}/${file.name}`, {
-        method: 'PUT',
-        headers: {
-            // Ignored, due to header being replaced in walter_fetch
-            'Content-Type': `${file.type}`
-        },
-        body: file
+    walter_fetch(fetchImpl, `${file.key}/year/${year}`, {
+        method: 'PUT'
     }).then((e) => finish_file_post(e, toast));
 
 export async function finish_file_post(
@@ -115,6 +129,36 @@ export function download_file_blob(blob: Blob, fileName: string) {
     setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
+export type WalterFileFamily = { defaultYear: number; files: WalterFile[] };
+
+/** Die Dateien der Familie des Objekts (siehe Backend `FileFamilies`) und das Jahr für neue Dateien. */
+export async function walter_get_family(
+    fileURL: string,
+    fetchImpl: typeof fetch
+): Promise<WalterFileFamily> {
+    const fetched = (await walter_get(
+        `${fileURL}/family`,
+        fetchImpl
+    )) as unknown as { defaultYear: number; files: WalterFile[] };
+
+    return {
+        defaultYear: fetched.defaultYear,
+        files: (fetched.files ?? []).map(
+            (e) =>
+                new WalterFile(
+                    e.fileName,
+                    e.key,
+                    e.lastModified,
+                    e.size,
+                    e.blob,
+                    e.type,
+                    e.year,
+                    e.source ?? undefined
+                )
+        )
+    };
+}
+
 export async function walter_get_files(
     fileURL: string,
     fetchImpl: typeof fetch
@@ -132,7 +176,8 @@ export async function walter_get_files(
                 e.lastModified,
                 e.size,
                 e.blob,
-                e.type
+                e.type,
+                e.year
             )
     );
 

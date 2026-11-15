@@ -136,7 +136,7 @@ Forderungen bei Bedarf glatt.
 
 Unterstützte Positionsarten:
 
-| Position | Wofür | Was Walter bucht |
+| Position | Bedeutung | Was Walter bucht |
 |----------|-------|------------------|
 | **Miete** | Monatliche Mietzahlung des Mieters | Trennt Kaltmiete und NK-Vorauszahlung; legt die Sollstellung an, falls sie fehlte, und gleicht sie aus |
 | **Garagenmiete** | Stellplatz-/Garagenmiete | Buchung auf das Garagenvertrag-Konto |
@@ -152,6 +152,19 @@ Unterstützte Positionsarten:
 
 Die Summe aller Positionen muss dem Transaktionsbetrag entsprechen — sonst wird die
 Transaktion abgelehnt.
+
+### Kaution
+
+Eingang und Rückzahlung der Kaution werden auf der Vertrags-Detailseite gebucht
+(**Kaution erhalten** / **Kaution zurückzahlen**), nicht im Transaktionsdialog. Walter legt
+dafür je eine Transaktion an:
+
+- **Eingang:** Soll `ZahlungsKonto` / Haben `KautionsKonto` des Vertrags.
+- **Rückzahlung:** Soll `KautionsKonto` / Haben `ZahlungsKonto`; sie darf die gehaltene
+  Kaution (Saldo des `KautionsKontos`) nicht übersteigen.
+
+Rückgängig gemacht wird mit **Rückgängig machen** in der Kautionsliste oder auf der Seite der
+Transaktion.
 
 ### Offene Forderungen (Startseite)
 
@@ -195,7 +208,8 @@ Zählerstände sollten mindestens zu folgenden Terminen erfasst werden:
 
 Für jede Umlage wird je Abrechnungsjahr die vom Versorger/Dienstleister ausgestellte
 Jahresrechnung als **Buchung** erfasst — als Position **Betriebskosteneingang** in
-einer Transaktion oder direkt auf der Umlage. Fachlich entsteht dabei ein Buchungssatz
+einer Transaktion oder direkt auf der Umlage (**+ Rechnung** im Abschnitt „Rechnungen“,
+bezahlt wird sie dort über **+ Zahlung**). Fachlich entsteht dabei ein Buchungssatz
 auf dem `NkVerrechnungsKonto` der Umlage (Haben = Kosten, negativer Betrag = Gutschrift).
 
 > Liegt für eine Umlage im Abrechnungsjahr keine Rechnung vor, meldet der
@@ -260,7 +274,8 @@ Nach dem Versand wird das Abrechnungsresultat als **Abgesendet** markiert.
 
 Zahlt der Mieter nach oder erhält er eine Erstattung, wird das als Transaktion mit der
 Position **Abrechnungsausgleich** erfasst (Teilzahlungen sind erlaubt). Damit gilt der
-Abrechnungssaldo als gedeckt.
+Abrechnungssaldo als gedeckt. In der Oberfläche geht das über **+ Zahlung** im Abschnitt
+*Nebenkostenabrechnungen* des Vertrags oder über die Schaltfläche auf der Abrechnung.
 
 ---
 
@@ -273,11 +288,65 @@ Eine gebuchte Abrechnung wird nie überschrieben. Es gibt zwei Wege zurück:
 | **Rückabwicklung** | Solange **nicht** abgesendet | Nimmt Resultate, Verteilungs- und Umbuchungen der Gruppe für das Jahr vollständig zurück |
 | **Storno** | Wenn **bereits abgesendet** | Stornobuchung; ein **Grund ist Pflicht**. Der Originalsatz bleibt erhalten |
 
-Einzelne Buchungssätze lassen sich bearbeiten oder löschen, solange sie **frei** sind —
-also nicht in eine Betriebskostenabrechnung eingeflossen und ohne Offene-Posten-Ausgleich.
-Sobald ein Satz mit einer Zahlung ausgeglichen wurde, ist statt Löschen ein **Storno**
-nötig; abrechnungsrelevante Sätze sind gesperrt und nur über die Rückabwicklung/Storno des
-Abrechnungslaufs veränderbar.
+### Neu abrechnen nach einem Storno
+
+Typischer Anlass: Der Mieter widerspricht einer versendeten Abrechnung, eine Rechnung
+fehlte oder ein Zählerstand war falsch. Der Ablauf:
+
+1. **Storno** der Gruppe im Abrechnungslauf, mit Grund (z. B. „Widerspruch vom 12.03.,
+   Wasserrechnung fehlte“).
+2. **Daten korrigieren** — das Jahr gilt nach dem Storno nicht mehr als abgerechnet;
+   Rechnungen, Zählerstände und Zahlungen des Jahres lassen sich wieder ändern.
+3. **Vorschau und Buchen** im Abrechnungslauf wie beim ersten Mal. Es entsteht ein
+   neues Abrechnungsresultat.
+4. Neue Abrechnung **versenden** und als **Abgesendet** markieren.
+
+Was dabei mit den Büchern passiert:
+
+- Das stornierte Resultat bleibt als **Beleg** erhalten (Status „Storniert“) und ist nicht
+  mehr änderbar. Es zählt nirgends mehr als Abrechnung des Jahres — weder in der
+  Abrechnungsfrist noch in den Sperren für Buchungen des Jahres.
+- Der Abrechnungssatz und die Strompauschale-Umbuchung bekommen je eine **Stornobuchung**,
+  die Verteilung auf die Mieter je Rechnung eine **Gegenbuchung**. Auf den Konten heben
+  sich Original und Storno auf; beides bleibt sichtbar.
+- Eine schon geleistete Nachzahlung oder ausgezahlte Erstattung bleibt gebucht; ihr
+  Ausgleich mit der stornierten Abrechnung wird gelöst. Sie wird dann mit der neuen
+  Abrechnung ausgeglichen.
+- Wird die **neue** Abrechnung vor dem Versand zurückgenommen (Rückabwicklung), betrifft das
+  nur sie — der Storno der früheren Abrechnung bleibt unverändert stehen.
+- Wird nach dem Storno eine Rechnung des Jahres selbst storniert, kehrt der Storno nur die
+  Rechnung um; ihre Verteilung ist durch die Gegenbuchung bereits aufgehoben.
+
+### Rückgängig machen einzelner Buchungen
+
+Für jede Buchung (Transaktion oder einzelner Buchungssatz) gilt dieselbe Regel:
+
+| Lage | Ergebnis |
+|------|----------|
+| Nichts hängt daran | **Löschen** — vollständig, als hätte es die Buchung nie gegeben |
+| Mit einer anderen Buchung ausgeglichen, oder in eine **versendete** Abrechnung eingeflossen | **Storno** mit Pflicht-Grund; Original und Storno bleiben sichtbar |
+| Selbst eine Stornobuchung oder bereits storniert | **Gesperrt** |
+
+Ist die Buchung in Abrechnungen eingeflossen, zeigt „Rückgängig“ die betroffenen
+Abrechnungen vorher an. Nach Bestätigung werden sie als ganze Gruppe mit zurückgenommen —
+nicht versendete per Rückabwicklung, versendete per Storno. Das Jahr ist danach wieder offen
+und wird neu abgerechnet (siehe „Neu abrechnen nach einem Storno“).
+
+Die Expertenansicht der Buchungssätze bietet weiterhin getrennt **Löschen** und
+**Stornieren** an; sie folgen derselben Regel, nehmen aber keine Abrechnungen mit zurück.
+
+**Wann ist eine Buchung endgültig?** Walter kennt keinen eigenen Jahres- oder
+Periodenabschluss. Endgültig wird eine Buchung durch das, was an ihr hängt:
+
+- Buchungen, die in eine **versendete Abrechnung** eingeflossen sind (NK-Vorauszahlungen,
+  BK-Rechnungen samt Verteilung, NK-Anteile, der Abrechnungssatz), lassen sich nur noch
+  stornieren.
+- Zahlungen, die mit einer Forderung ausgeglichen sind (z. B. Miete mit ihrer Sollstellung),
+  ebenso.
+- Buchungen, die in keine Abrechnung eingehen und mit nichts ausgeglichen sind (z. B. ein
+  direkt bezahlter Erhaltungsaufwand, eine Kaution, eine sonstige Buchung), bleiben
+  löschbar — auch in älteren Jahren. Wer sie nach längerer Zeit korrigiert, sollte bewusst
+  stornieren statt löschen; die Expertenansicht bietet das an.
 
 ---
 
@@ -365,8 +434,10 @@ Als **Transaktion** mit einer **Miete**-Position. Den vom Mieter gezahlten Gesam
 die Sollstellung aus.
 
 **Wie buche ich eine Handwerkerrechnung (Erhaltungsaufwand)?**
-Als Transaktion mit einer **Erhaltungsaufwendung**-Position. Sie wird auf das
-`AufwandsKonto` der Wohnung gebucht.
+Auf der Wohnung im Abschnitt „Erhaltungsaufwand“: **+ Rechnung** erfasst sie (Soll
+`AufwandsKonto` der Wohnung / Haben Verbindlichkeitskonto des Ausstellers), **+ Zahlung**
+bezahlt sie später. Gleich bezahlt geht es als Transaktion mit einer
+**Erhaltungsaufwendung**-Position (Soll `AufwandsKonto` / Haben Bankkonto).
 
 **Ein Mieter ist im Laufe des Jahres eingezogen — was ist zu tun?**
 Nichts Besonderes. Walter berechnet automatisch einen **Zeitanteil**; der Mieter zahlt
@@ -378,7 +449,7 @@ wird dann monatsweise aus der jeweils gültigen Version berechnet.
 
 **Ich habe mich bei einer gebuchten Abrechnung vertan.**
 Noch nicht versendet → **Rückabwicklung**. Bereits versendet → **Storno** mit Grund.
-Danach neu buchen.
+Danach korrigieren und neu buchen (siehe „Neu abrechnen nach einem Storno“).
 
 **Ich möchte einen Vertrag für ein Jahr gar nicht abrechnen.**
 Einen **Abrechnungsverzicht** mit Grund hinterlegen — die Jahresabschlusskontrolle wertet

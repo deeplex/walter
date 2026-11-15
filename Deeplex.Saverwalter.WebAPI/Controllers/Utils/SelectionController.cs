@@ -173,12 +173,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     ?.Buchungskonto.BuchungskontoId;
                 var ausstellerName = habenKontoId.HasValue && verbindlichkeitsMap.TryGetValue(habenKontoId.Value, out var n)
                     ? n : null;
-                var bezeichnung = s.Beschreibung.StartsWith("Erhaltungsaufwendung: ")
-                    ? s.Beschreibung["Erhaltungsaufwendung: ".Length..]
-                    : s.Beschreibung;
                 var text = ausstellerName != null
-                    ? $"{bezeichnung} - {ausstellerName}"
-                    : bezeichnung;
+                    ? $"{s.Beschreibung} - {ausstellerName}"
+                    : s.Beschreibung;
                 return new { Id = s.BuchungssatzId, Text = text };
             }).OrderBy(e => e.Text));
         }
@@ -304,7 +301,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private static string GetVertragName(Vertrag vertrag) =>
-            KontoVerknuepfungService.GetVertragName(vertrag);
+            Kontorollen.VertragText(vertrag);
 
         [HttpGet]
         [Route("api/selection/zaehler")]

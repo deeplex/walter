@@ -56,7 +56,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         {#each data.entry.verknuepfungen as verknuepfung}
             <WalterLinkTile
-                fileref=""
                 name={`${verknuepfung.typ}: ${verknuepfung.text} (${verknuepfung.funktion})`}
                 href={kontoVerknuepfungHref(verknuepfung)}
             />

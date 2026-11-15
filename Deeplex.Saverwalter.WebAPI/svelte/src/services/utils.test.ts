@@ -26,7 +26,6 @@ import {
     convertDateCanadian,
     convertDateGerman,
     convertEuro,
-    convertFixed2,
     convertM2,
     convertPercent,
     convertTime,
@@ -69,17 +68,16 @@ describe('convertDateGerman tests', () => {
 });
 
 describe('format helper tests', () => {
-    it('should convert times, euro, percent, m2 and fixed2 values', () => {
+    it('should convert times, euro, percent and m2 values (deutsch)', () => {
         expect(convertTime('2023-05-24T10:11:12Z')).toBeDefined();
         expect(convertTime(undefined)).toBeUndefined();
-        expect(convertEuro(12.3)).toBe('12.30 €');
-        expect(convertEuro(undefined)).toBe('0.00 €');
-        expect(convertPercent(0.1234)).toBe('12.34%');
-        expect(convertPercent(undefined)).toBe('0.00%');
-        expect(convertM2(42)).toBe('42.00 m²');
-        expect(convertM2(undefined)).toBe('0.00 m²');
-        expect(convertFixed2(5)).toBe('5.00');
-        expect(convertFixed2(undefined)).toBe('0.00');
+        const nb = (s: string | undefined) => s?.replace(/\u00a0/g, ' ');
+        expect(nb(convertEuro(1234.3))).toBe('1.234,30 €');
+        expect(nb(convertEuro(undefined))).toBe('0,00 €');
+        expect(nb(convertPercent(0.1234))).toBe('12,34 %');
+        expect(nb(convertPercent(undefined))).toBe('0,00 %');
+        expect(nb(convertM2(42))).toBe('42,00 m²');
+        expect(nb(convertM2(undefined))).toBe('0,00 m²');
     });
 });
 

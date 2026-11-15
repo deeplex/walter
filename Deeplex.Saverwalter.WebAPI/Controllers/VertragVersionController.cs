@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
@@ -73,6 +74,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<VertragVersionController> _logger;
         protected override VertragVersionDbService DbService { get; }
 
+        protected override FileFamily? FileFamilyOf(VertragVersion e) => FileFamilies.Of(e);
+        protected override int? FileYearOf(VertragVersion e) => e.Beginn.Year;
         public VertragVersionController(ILogger<VertragVersionController> logger, VertragVersionDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;

@@ -4,7 +4,6 @@ import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 import { WalterKontaktEntry } from './WalterKontakt';
-import { WalterMiettabelleEntry } from './WalterMiettabelle';
 import { WalterMietminderungEntry } from './WalterMietminderung';
 import { WalterToastContent } from './WalterToastContent';
 import { WalterTransaktionEntry } from './WalterTransaktion';
@@ -55,7 +54,6 @@ describe('lib entity mappers batch', () => {
             vertraege: [],
             selectedMitglieder: [],
             mitglieder: [],
-            transaktionen: [],
             permissions: { read: true, update: false, remove: false }
         } as never);
 
@@ -100,7 +98,6 @@ describe('lib entity mappers batch', () => {
             zaehler: [zaehler],
             vertraege: [],
             betriebskostenrechnungen: [],
-            erhaltungsaufwendungen: [],
             umlagen: [],
             bewohner: '1',
             permissions: { read: true, update: true, remove: false }
@@ -152,35 +149,12 @@ describe('lib entity mappers batch', () => {
             mieter: [],
             mietzahlungen: [],
             mietminderungen: [mietminderung],
-            abrechnungsresultate: [],
             permissions: { read: true, update: true, remove: false }
-        } as never);
-
-        const miettabelle = WalterMiettabelleEntry.fromJson({
-            id: 8,
-            bezeichnung: 'Tabelle',
-            createdAt: new Date('2026-01-01T10:00:00Z'),
-            lastModified: new Date('2026-01-01T11:00:00Z'),
-            mieten: [
-                {
-                    id: 9,
-                    betreffenderMonat: '2026-01-01',
-                    zahlungsdatum: '2026-01-03',
-                    betrag: 700,
-                    notiz: 'Miete',
-                    repeat: 1,
-                    createdAt: new Date('2026-01-01T10:00:00Z'),
-                    lastModified: new Date('2026-01-01T11:00:00Z'),
-                    vertrag: { id: 7, text: 'Vertrag 7' },
-                    permissions: { read: true, update: true, remove: false }
-                }
-            ]
         } as never);
 
         expect(version.grundmiete).toBe(700);
         expect(mietminderung.minderung).toBe(20);
         expect(vertrag.versionen[0].id).toBe(5);
-        expect(miettabelle.mieten[0].betrag).toBe(700);
     });
 
     it('maps utility and accounting entities', () => {

@@ -13,6 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Text.Json.Serialization;
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
+
 namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 {
     /// <summary>Verbrauch eines einzelnen Zählers für eine Partei in einem Abrechnungszeitraum.</summary>
@@ -75,7 +79,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public int UmlageId { get; init; }
         public string Bezeichnung { get; init; } = "";
         public string Beschreibung { get; init; } = "";
+        /// <summary>Anzeigebezeichnung des Schlüssels (z. B. „n. WF“) — nur für Menschen.</summary>
         public string Schluessel { get; init; } = "";
+        /// <summary>Umlageschlüssel als Wert; danach richtet sich die Darstellung.</summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Umlageschluessel SchluesselTyp { get; init; }
         public int UmlagetypId { get; init; }
         public Guid? BuchungssatzId { get; init; }
         public DateOnly? Buchungsdatum { get; init; }
@@ -127,17 +135,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<StrompauschaleInfo> Strompauschalen { get; init; } = [];
     }
 
-    /// <summary>Miet-Buchungszeile (Soll oder Haben) auf dem MietBuchungskonto eines Vertrags.</summary>
-    public class MietZeileInfo
-    {
-        public DateOnly Buchungsdatum { get; init; }
-        /// <summary>Abrechnungs-/Buchungsjahr des Satzes (maßgeblich für die Zuordnung).</summary>
-        public int Buchungsjahr { get; init; }
-        public string Beschreibung { get; init; } = "";
-        public bool IstSoll { get; init; }
-        public decimal Betrag { get; init; }
-    }
-
     /// <summary>Personenzeitanteil-Intervall für die Darstellung im Abrechnungsresultat.</summary>
     public class PersonenZeitanteilInfo
     {
@@ -156,7 +153,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public List<int> WohnungIds { get; init; } = [];
         public List<AbrechnungsresultatInfo> Resultate { get; init; } = [];
         public List<AbrechnungseinheitInfo> Abrechnungseinheiten { get; init; } = [];
-        public List<string> Warnungen { get; init; } = [];
+        public List<Hinweis> Warnungen { get; init; } = [];
     }
 
     /// <summary>
@@ -181,7 +178,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         public decimal Wohnflaeche { get; init; }
         public decimal Nutzflaeche { get; init; }
         public int Nutzeinheiten { get; init; }
-        public List<MietZeileInfo> Mieten { get; init; } = [];
         public List<PersonenZeitanteilInfo> PersonenZeitanteile { get; init; } = [];
         /// <summary>
         /// Bereits gebuchter Abrechnungs-Saldo, oder null wenn noch nicht gebucht.
@@ -197,6 +193,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
     public class AbrechnungslaufResult
     {
         public List<AbrechnungslaufGruppeResult> Gruppen { get; init; } = [];
-        public List<string> Warnungen { get; init; } = [];
+        public List<Hinweis> Warnungen { get; init; } = [];
     }
 }

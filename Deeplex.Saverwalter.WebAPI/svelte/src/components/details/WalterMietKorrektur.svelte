@@ -15,78 +15,98 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro, formatDate } from '$walter/services/format';
     import {
         Row,
         Column,
-        Checkbox,
         TextInput,
         Button,
         Tag,
         InlineLoading,
-        InlineNotification
+        InlineNotification,
+        Modal
     } from 'carbon-components-svelte';
     import { WalterToastContent } from '$walter/lib';
-    import { walter_fetch, walter_post } from '$walter/services/requests';
+    import {
+        walter_delete,
+        walter_fetch,
+        walter_post
+    } from '$walter/services/requests';
     import { addToast } from '$walter/store';
+    import { createEventDispatcher } from 'svelte';
+
+    /** `geaendert`: eine Korrektur wurde gebucht, gelöscht oder storniert. */
+    const dispatch = createEventDispatcher<{ geaendert: void }>();
 
     export let vertragId: number;
     export let fetchImpl: typeof fetch;
 
+    type Status = 'Stimmt' | 'Anwendbar' | 'Abgerechnet' | 'NkReichtNichtAus';
+
     type MietKorrekturMonat = {
-        jahr: number;
         monat: number;
         istKaltmiete: number;
         sollKaltmiete: number;
         delta: number;
-        status:
-            | 'Anwendbar'
-            | 'Abgerechnet'
-            | 'NkReichtNichtAus'
-            | 'BereitsKorrigiert';
     };
 
-    const statusLabel: Record<MietKorrekturMonat['status'], string> = {
-        Anwendbar: 'Anwendbar',
+    type MietKorrekturBuchung = {
+        id: string;
+        datum: string;
+        betrag: number;
+        beschreibung: string;
+        notiz: string | null;
+        kannLoeschen: boolean;
+        kannStornieren: boolean;
+        sperrgrund: string | null;
+    };
+
+    type MietKorrekturJahr = {
+        jahr: number;
+        monate: MietKorrekturMonat[];
+        korrekturen: MietKorrekturBuchung[];
+        abweichung: number;
+        korrigiert: number;
+        differenz: number;
+        nkVorauszahlung: number;
+        status: Status;
+    };
+
+    const statusLabel: Record<Status, string> = {
+        Stimmt: 'Stimmt mit dem Vertrag überein',
+        Anwendbar: 'Differenz offen',
         Abgerechnet: 'Jahr bereits abgerechnet',
-        NkReichtNichtAus: 'NK-Vorauszahlung reicht nicht aus',
-        BereitsKorrigiert: 'Bereits korrigiert'
+        NkReichtNichtAus: 'NK-Vorauszahlung reicht nicht aus'
     };
 
-    const statusTag: Record<
-        MietKorrekturMonat['status'],
-        'green' | 'gray' | 'red' | 'teal'
-    > = {
+    const statusTag: Record<Status, 'green' | 'gray' | 'red' | 'teal'> = {
+        Stimmt: 'teal',
         Anwendbar: 'green',
         Abgerechnet: 'gray',
-        NkReichtNichtAus: 'red',
-        BereitsKorrigiert: 'teal'
+        NkReichtNichtAus: 'red'
     };
 
-    let monate: MietKorrekturMonat[] = [];
-    let selected = new Set<string>();
+    let jahre: MietKorrekturJahr[] = [];
     let grund = '';
     let loading = false;
-    let anwendenLoading = false;
+    let busy = false;
+    let fehler: string | null = null;
+    let stornoBuchung: MietKorrekturBuchung | null = null;
+    let stornoGrund = '';
 
-    const eur = (v: number) =>
-        v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-    const monatText = (m: MietKorrekturMonat) =>
-        `${String(m.monat).padStart(2, '0')}/${m.jahr}`;
-    const key = (m: MietKorrekturMonat) => `${m.jahr}-${m.monat}`;
+    const monatText = (jahr: number, m: MietKorrekturMonat) =>
+        `${String(m.monat).padStart(2, '0')}/${jahr}`;
 
     export async function refresh() {
         if (!vertragId) return;
         loading = true;
         try {
-            monate = (await (
+            jahre = (await (
                 await walter_fetch(
                     fetchImpl,
                     `/api/vertraege/${vertragId}/miet-korrektur`
                 )
-            ).json()) as MietKorrekturMonat[];
-            selected = new Set(
-                [...selected].filter((k) => monate.some((m) => key(m) === k))
-            );
+            ).json()) as MietKorrekturJahr[];
         } finally {
             loading = false;
         }
@@ -94,115 +114,215 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: (vertragId, refresh());
 
-    function toggle(m: MietKorrekturMonat) {
-        const k = key(m);
-        if (selected.has(k)) selected.delete(k);
-        else selected.add(k);
-        selected = selected;
-    }
+    $: offeneJahre = jahre.filter(
+        (j) => j.status === 'Anwendbar' || j.status === 'NkReichtNichtAus'
+    );
+    $: buchbar = jahre.some((j) => j.status === 'Anwendbar');
 
-    $: anwendbareMonate = monate.filter((m) => m.status === 'Anwendbar');
-    $: kannAnwenden = selected.size > 0 && grund.trim().length > 0;
-
-    async function anwenden() {
-        anwendenLoading = true;
+    async function differenzBuchen(j: MietKorrekturJahr) {
+        busy = true;
+        fehler = null;
         const toast = new WalterToastContent(
             'Miet-Korrektur gebucht',
             'Fehler bei der Miet-Korrektur',
-            (...args: unknown[]) =>
-                `${(args[0] as { korrigiert: unknown[] }).korrigiert.length} Monat(e) korrigiert.`,
+            () =>
+                `Kaltmiete ${j.jahr} um ${formatEuro(j.differenz)} korrigiert.`,
             (e: unknown) => `Konnte Miet-Korrektur nicht buchen: ${e}`
         );
         try {
             const response = await walter_post(
                 `/api/vertraege/${vertragId}/miet-korrektur`,
-                {
-                    monate: monate
-                        .filter((m) => selected.has(key(m)))
-                        .map((m) => ({ jahr: m.jahr, monat: m.monat })),
-                    grund
-                }
+                { jahr: j.jahr, grund }
             );
-            const parsed = await response.json();
-            addToast(toast, response.status === 200, parsed);
-            if (response.status === 200) {
-                selected = new Set();
+            if (response.ok) {
+                addToast(toast, true, await response.json());
                 grund = '';
                 await refresh();
+                dispatch('geaendert');
+            } else {
+                fehler = await response.text();
             }
         } finally {
-            anwendenLoading = false;
+            busy = false;
         }
+    }
+
+    async function loeschen(k: MietKorrekturBuchung) {
+        busy = true;
+        fehler = null;
+        try {
+            const resp = await walter_delete(`/api/buchungssaetze/${k.id}`);
+            if (resp.ok) {
+                await refresh();
+                dispatch('geaendert');
+            } else fehler = await resp.text();
+        } finally {
+            busy = false;
+        }
+    }
+
+    async function stornieren() {
+        if (!stornoBuchung) return;
+        busy = true;
+        fehler = null;
+        try {
+            const resp = await walter_post(
+                `/api/buchungssaetze/${stornoBuchung.id}/storno`,
+                { grund: stornoGrund }
+            );
+            if (resp.ok) {
+                await refresh();
+                dispatch('geaendert');
+            } else fehler = await resp.text();
+        } finally {
+            stornoBuchung = null;
+            stornoGrund = '';
+            busy = false;
+        }
+    }
+
+    function rueckgaengigTitel(k: MietKorrekturBuchung) {
+        if (k.kannLoeschen) return 'Korrektur vollständig entfernen';
+        if (k.kannStornieren)
+            return 'Korrektur stornieren — Korrektur und Storno bleiben sichtbar';
+        return k.sperrgrund ?? '';
     }
 </script>
 
 {#if loading}
-    <InlineLoading description="Prüfe Miet-Korrektur…" />
-{:else if monate.length > 0}
-    <InlineNotification
-        kind="warning"
-        title={`${anwendbareMonate.length || monate.length} Monat(e) mit abweichender Miete gefunden`}
-        subtitle="Vermutlich wurde eine Mieterhöhung/-senkung rückwirkend nachgetragen — bereits gebuchte Kaltmiete/NK-Vorauszahlung stimmen dann nicht mehr mit der aktuellen Vertragsversion überein."
-        hideCloseButton
-    />
+    <InlineLoading description="Prüfe Kaltmiete…" />
+{:else if jahre.length > 0}
+    {#if offeneJahre.length > 0}
+        <InlineNotification
+            kind="warning"
+            title={`Kaltmiete weicht in ${offeneJahre.length} Jahr(en) vom Vertrag ab`}
+            subtitle="Vermutlich wurde eine Mieterhöhung/-senkung rückwirkend nachgetragen. „Differenz buchen“ gleicht die gebuchte Kaltmiete an; der Rest der Zahlungen gilt als NK-Vorauszahlung."
+            hideCloseButton
+        />
+    {/if}
+    {#if fehler}
+        <InlineNotification
+            kind="error"
+            title="Aktion nicht möglich"
+            subtitle={fehler}
+            on:close={() => (fehler = null)}
+        />
+    {/if}
     <div style="overflow-x: auto; margin-top: 1rem;">
         <table class="bx--data-table" style="min-width: 40rem;">
             <thead>
                 <tr>
-                    <th />
-                    <th>Monat</th>
-                    <th>Gebuchte Kaltmiete</th>
-                    <th>Soll-Kaltmiete</th>
+                    <th>Jahr / Monat</th>
+                    <th>Gebucht</th>
+                    <th>Laut Vertrag</th>
                     <th>Differenz</th>
                     <th>Status</th>
+                    <th />
                 </tr>
             </thead>
             <tbody>
-                {#each monate as m (key(m))}
+                {#each jahre as j (j.jahr)}
                     <tr>
+                        <td><strong>{j.jahr}</strong></td>
+                        <td />
+                        <td />
+                        <td><strong>{formatEuro(j.differenz)}</strong></td>
                         <td>
-                            <Checkbox
-                                hideLabel
-                                labelText={`Monat ${monatText(m)} auswählen`}
-                                disabled={m.status !== 'Anwendbar'}
-                                checked={selected.has(key(m))}
-                                on:change={() => toggle(m)}
-                            />
-                        </td>
-                        <td>{monatText(m)}</td>
-                        <td>{eur(m.istKaltmiete)}</td>
-                        <td>{eur(m.sollKaltmiete)}</td>
-                        <td>{eur(m.delta)}</td>
-                        <td>
-                            <Tag type={statusTag[m.status]}
-                                >{statusLabel[m.status]}</Tag
+                            <Tag type={statusTag[j.status]}
+                                >{statusLabel[j.status]}</Tag
                             >
                         </td>
+                        <td>
+                            {#if j.status === 'Anwendbar'}
+                                <Button
+                                    size="small"
+                                    disabled={busy || grund.trim().length === 0}
+                                    title={grund.trim().length === 0
+                                        ? 'Bitte zuerst einen Grund angeben'
+                                        : `Kaltmiete ${j.jahr} um ${formatEuro(j.differenz)} korrigieren`}
+                                    on:click={() => differenzBuchen(j)}
+                                >
+                                    Differenz buchen
+                                </Button>
+                            {/if}
+                        </td>
                     </tr>
+                    {#each j.monate as m (m.monat)}
+                        <tr>
+                            <td style="padding-left: 2rem;"
+                                >{monatText(j.jahr, m)}</td
+                            >
+                            <td>{formatEuro(m.istKaltmiete)}</td>
+                            <td>{formatEuro(m.sollKaltmiete)}</td>
+                            <td>{formatEuro(m.delta)}</td>
+                            <td />
+                            <td />
+                        </tr>
+                    {/each}
+                    {#each j.korrekturen as k (k.id)}
+                        <tr>
+                            <td style="padding-left: 2rem;">
+                                <a href={`/buchungssaetze/${k.id}`}
+                                    >Korrektur vom {formatDate(k.datum)}</a
+                                >
+                                {#if k.notiz}<br /><small>{k.notiz}</small>{/if}
+                            </td>
+                            <td>{formatEuro(k.betrag)}</td>
+                            <td />
+                            <td />
+                            <td />
+                            <td>
+                                <Button
+                                    kind="ghost"
+                                    size="small"
+                                    disabled={busy ||
+                                        (!k.kannLoeschen && !k.kannStornieren)}
+                                    title={rueckgaengigTitel(k)}
+                                    on:click={() =>
+                                        k.kannLoeschen
+                                            ? loeschen(k)
+                                            : (stornoBuchung = k)}
+                                >
+                                    Rückgängig
+                                </Button>
+                            </td>
+                        </tr>
+                    {/each}
                 {/each}
             </tbody>
         </table>
     </div>
-    {#if anwendbareMonate.length > 0}
+    {#if buchbar}
         <Row style="margin-top: 1rem; align-items: flex-end;">
             <Column>
                 <TextInput
                     required
-                    labelText="Grund"
+                    labelText="Grund der Korrektur"
                     placeholder="z.B. rückwirkende Mieterhöhung ab 11/2025"
                     bind:value={grund}
                 />
             </Column>
-            <Column>
-                <Button
-                    disabled={!kannAnwenden || anwendenLoading}
-                    on:click={anwenden}
-                >
-                    {anwendenLoading
-                        ? 'Wird gebucht…'
-                        : `${selected.size || ''} Monat(e) korrigieren`}
-                </Button>
-            </Column>
         </Row>
     {/if}
 {/if}
+
+<Modal
+    open={stornoBuchung !== null}
+    modalHeading="Korrektur stornieren"
+    primaryButtonText="Stornieren"
+    secondaryButtonText="Abbrechen"
+    primaryButtonDisabled={busy || stornoGrund.trim().length === 0}
+    on:click:button--secondary={() => (stornoBuchung = null)}
+    on:close={() => (stornoBuchung = null)}
+    on:submit={stornieren}
+>
+    <p>
+        Die Korrektur kann nicht mehr gelöscht werden. Ein Storno bucht sie
+        zurück; beide Buchungen bleiben sichtbar.
+    </p>
+    <TextInput
+        required
+        labelText="Grund des Stornos"
+        bind:value={stornoGrund}
+    />
+</Modal>

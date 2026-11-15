@@ -32,11 +32,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // Konten-Referenzen einer Entität tragen ihre Funktion ("Mietforderungen",
     // "Zahlungseingänge", ...) — die erklärt das Konto besser als der Kontotyp.
     $: hasFunktion = rows.some((row) => row.funktion);
+    /** Übersicht aller Konten: Kontonummer und Besitzer zeigen. */
+    export let uebersicht = false;
     $: headers = [
+        ...(uebersicht ? [{ key: 'kontonummer', value: 'Konto' }] : []),
         ...(hasFunktion
             ? [{ key: 'funktion', value: 'Funktion' }]
             : [{ key: 'kontotyp', value: 'Typ' }]),
         { key: 'bezeichnung', value: 'Bezeichnung' },
+        ...(uebersicht ? [{ key: 'besitzer', value: 'Gehört zu' }] : []),
         { key: 'saldo', value: 'Saldo' },
         { key: 'status', value: 'Status', sort: false as const }
     ];

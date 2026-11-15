@@ -15,26 +15,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { formatEuro } from '$walter/services/format';
     import {
+        WalterBuchhaltungAbschnitt,
         WalterBuchungssaetze,
         WalterHeaderDetail,
         WalterGrid,
-        WalterLinks,
         WalterLinkTile,
         WalterTransaktionRaw
     } from '$walter/components';
+    import WalterRueckgaengig from '$walter/components/details/WalterRueckgaengig.svelte';
     import type { PageData } from './$types';
-    import { WalterFileWrapper } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
-    import { walter_delete, walter_post } from '$walter/services/requests';
-    import { walter_goto } from '$walter/services/utils';
     import {
-        Button,
-        InlineNotification,
-        Modal,
-        TextArea
-    } from 'carbon-components-svelte';
-    import { TrashCan, Undo } from 'carbon-icons-svelte';
+        WalterFileWrapper,
+        entityRefHref,
+        zuordnungText,
+        type RueckgaengigPlan
+    } from '$walter/lib';
+    import { Tag, Tile } from 'carbon-components-svelte';
+    import { walter_goto } from '$walter/services/utils';
 
     export let data: PageData;
 
@@ -44,47 +43,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
 
-    let stornoOpen = false;
-    let stornoGrund = '';
-    let loeschenOpen = false;
-    let busy = false;
-    let aktionsFehler: string | null = null;
-
-    async function stornieren() {
-        busy = true;
-        aktionsFehler = null;
-        try {
-            const resp = await walter_post(
-                `/api/transaktionen/${data.entry.id}/storno`,
-                { grund: stornoGrund }
-            );
-            stornoOpen = false;
-            if (resp.ok) {
-                location.reload();
-            } else {
-                aktionsFehler = await resp.text();
-            }
-        } finally {
-            busy = false;
-        }
-    }
-
-    async function loeschen() {
-        busy = true;
-        aktionsFehler = null;
-        try {
-            const resp = await walter_delete(
-                `/api/transaktionen/${data.entry.id}`
-            );
-            loeschenOpen = false;
-            if (resp.ok) {
-                await walter_goto('/transaktionen');
-            } else {
-                aktionsFehler = await resp.text();
-            }
-        } finally {
-            busy = false;
-        }
+    async function erledigt(e: CustomEvent<RueckgaengigPlan>) {
+        if (e.detail.art === 'Loeschen') await walter_goto('/transaktionen');
+        else location.reload();
     }
 </script>
 
@@ -96,116 +57,75 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 />
 
 <WalterGrid>
+    <Tile id="zuordnung" style="margin-bottom: 1rem">
+        <h4 style="margin-bottom: 0.5rem">Zuordnung</h4>
+        {#if data.entry.zuordnung.length === 0}
+            <Tag type="warm-gray">Nicht zugeordnet</Tag>
+        {:else}
+            <ul class="zuordnung">
+                {#each data.entry.zuordnung as w}
+                    <li>
+                        {#if w.ref}
+                            <a href={entityRefHref(w.ref)}>{zuordnungText(w)}</a
+                            >
+                        {:else}
+                            {zuordnungText(w)}
+                        {/if}
+                        <span class="betrag">{formatEuro(w.betrag)}</span>
+                    </li>
+                {/each}
+            </ul>
+        {/if}
+    </Tile>
+
     <WalterTransaktionRaw fetchImpl={data.fetchImpl} entry={data.entry} />
 
-    {#if aktionsFehler}
-        <InlineNotification
-            kind="error"
-            title="Korrektur nicht möglich:"
-            subtitle={aktionsFehler}
-            lowContrast
-        />
-    {/if}
-
-    <div class="korrektur-aktionen">
-        {#if data.entry.kannStornieren}
-            <Button
+    {#if data.entry.permissions?.remove !== false}
+        <div class="korrektur-aktionen">
+            <WalterRueckgaengig
+                fetchImpl={data.fetchImpl}
+                transaktionId={data.entry.id}
                 kind="danger-tertiary"
-                icon={Undo}
-                disabled={busy}
-                on:click={() => (stornoOpen = true)}
-            >
-                Stornieren
-            </Button>
-        {/if}
-        {#if data.entry.kannLoeschen}
-            <Button
-                kind="danger-tertiary"
-                icon={TrashCan}
-                disabled={busy}
-                on:click={() => (loeschenOpen = true)}
-            >
-                Löschen
-            </Button>
-        {/if}
-        {#if data.entry.sperrgrund}
-            <InlineNotification
-                kind="info"
-                hideCloseButton
-                title="Korrektur eingeschränkt:"
-                subtitle={data.entry.sperrgrund}
-                lowContrast
+                size="default"
+                on:erledigt={erledigt}
             />
-        {/if}
-    </div>
-
-    <WalterLinks>
-        <WalterBuchungssaetze
-            fetchImpl={data.fetchImpl}
-            title="Buchungssätze"
-            rows={data.entry.buchungssaetze}
-        />
-    </WalterLinks>
+        </div>
+    {/if}
 
     {#if data.entry.zahler}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.zahler.id}`)}
             name={`Zahler: ${data.entry.zahler.text}`}
-            href={`/kontakte/${data.entry.zahler.id}`}
+            href={`/bankkontos/${data.entry.zahler.id}`}
         />
     {/if}
 
     {#if data.entry.zahlungsempfaenger}
         <WalterLinkTile
-            bind:fileWrapper
-            fileref={fileURL.kontakt(`${data.entry.zahlungsempfaenger.id}`)}
             name={`Zahlungsempfänger: ${data.entry.zahlungsempfaenger.text}`}
-            href={`/kontakte/${data.entry.zahlungsempfaenger.id}`}
+            href={`/bankkontos/${data.entry.zahlungsempfaenger.id}`}
         />
     {/if}
+
+    <WalterBuchhaltungAbschnitt>
+        <WalterBuchungssaetze
+            fetchImpl={data.fetchImpl}
+            rows={data.entry.buchungssaetze}
+        />
+    </WalterBuchhaltungAbschnitt>
 </WalterGrid>
 
-<Modal
-    bind:open={stornoOpen}
-    danger
-    modalHeading="Transaktion stornieren"
-    primaryButtonText="Stornieren"
-    secondaryButtonText="Abbrechen"
-    primaryButtonDisabled={busy || stornoGrund.trim().length === 0}
-    on:click:button--secondary={() => (stornoOpen = false)}
-    on:submit={stornieren}
->
-    <p style="margin-bottom: 1rem;">
-        Zu jedem Buchungssatz dieser Transaktion wird eine Gegenbuchung mit
-        umgekehrten Soll/Haben-Seiten erstellt. Die Transaktion selbst bleibt
-        als Beleg erhalten.
-    </p>
-    <TextArea
-        labelText="Grund (Pflicht)"
-        placeholder="Warum wird diese Transaktion storniert?"
-        bind:value={stornoGrund}
-    />
-</Modal>
-
-<Modal
-    bind:open={loeschenOpen}
-    danger
-    modalHeading="Transaktion löschen"
-    primaryButtonText="Endgültig löschen"
-    secondaryButtonText="Abbrechen"
-    primaryButtonDisabled={busy}
-    on:click:button--secondary={() => (loeschenOpen = false)}
-    on:submit={loeschen}
->
-    <p>
-        Die Transaktion und alle zugehörigen Buchungssätze werden endgültig
-        entfernt. Das ist nur für frische Fehleingaben gedacht — im Zweifel
-        lieber stornieren, damit die Korrektur nachvollziehbar bleibt.
-    </p>
-</Modal>
-
 <style>
+    .zuordnung li {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        max-width: 40rem;
+    }
+    .zuordnung {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
     .korrektur-aktionen {
         align-items: center;
         display: flex;

@@ -29,16 +29,11 @@ export {
 export { WalterHKVOEntry } from './WalterHKVO';
 export { validateHKVO } from './WalterValidation';
 export {
-    WalterMietzahlungListEntry,
-    WalterMietzahlungDetailEntry,
-    WalterMietzahlungApiURL,
-    type WalterMietzahlungInput,
     type WalterForderungsstatusEntry,
     type WalterGarageForderungsstatusEntry,
     type WalterOffenerPostenStatus
 } from './WalterMietzahlung';
 export { WalterMietminderungEntry } from './WalterMietminderung';
-export { WalterMiettabelleEntry } from './WalterMiettabelle';
 export { WalterBankkontoEntry } from './WalterBankkonto';
 export {
     WalterBuchungskontoEntry,
@@ -77,12 +72,22 @@ export {
 export { WalterKontaktMitgliedschaftEntry } from './WalterKontaktMitgliedschaft';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';
+export {
+    groupFilesByYear,
+    selectableYears,
+    noYear,
+    yearLabel,
+    type WalterFileYearGroup
+} from './WalterFileYear';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlageVersionEntry } from './WalterUmlageVersion';
 export { WalterUmlagetypEntry, BETRK_V_NUMMERN } from './WalterUmlagetyp';
-export { WalterVertragEntry } from './WalterVertrag';
+export {
+    WalterVertragEntry,
+    type WalterKautionsBuchung
+} from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterVerwalterEntry } from './WalterVerwalter';
 export {
@@ -92,7 +97,10 @@ export {
 export { WalterWohnungEigentuemerEntry } from './WalterWohnungEigentuemer';
 export { WalterWohnungVersionEntry } from './WalterWohnungVersion';
 export { WalterZaehlerEntry } from './WalterZaehler';
-export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
+export {
+    WalterZaehlerstandEntry,
+    zaehlerstandItems
+} from './WalterZaehlerstand';
 export {
     type GaragenmietInput,
     type StandaloneGaragenmietInput,
@@ -103,7 +111,22 @@ export {
     type NkAnteilEingangInput,
     type AbrechnungsAusgleichInput,
     type TransaktionsInput,
+    type TransaktionsVorschau,
+    type VorschauPosition,
+    type VorschauSatz,
+    type VorschauZeile,
+    type RueckgaengigPlan,
+    type WalterZuordnungEintrag,
+    zuordnungText,
+    zuordnungZelle,
+    type BetroffeneAbrechnung,
     emptyMietzahlungsInput,
     emptyTransaktionsInput
 } from './WalterTransaktion';
 export * from './WalterValidation';
+export * from './WalterZahlungsStatus';
+export * from './WalterMietkonto';
+export * from './WalterListItem';
+export * from './WalterEntityRef';
+export * from './WalterNebenkostenabrechnungen';
+export * from './WalterRechnungen';

@@ -15,17 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import type {
         AbrechnungslaufGruppeResult,
         NkAnteilInfo
     } from './AbrechnungslaufTypes';
-    import {
-        Accordion,
-        AccordionItem,
-        DataTable,
-        Toolbar,
-        ToolbarContent
-    } from 'carbon-components-svelte';
+    import { Accordion, AccordionItem } from 'carbon-components-svelte';
 
     export let gruppe: AbrechnungslaufGruppeResult;
 
@@ -225,7 +220,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             >
                 {typGruppe.title}
             </span>
-            <DataTable
+            <WalterDataTable
                 headers={[
                     { key: 'wohnungNamen', value: 'Wohnung' },
                     { key: 'empfaengerName', value: 'Mieter / Eigenanteil' },
@@ -234,9 +229,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 ]}
                 rows={typGruppe.rows}
                 size="short"
-                style="margin-bottom: 0.5rem;"
+                search={false}
+                customCells={[
+                    'wohnungNamen',
+                    'empfaengerName',
+                    'anteilBetrag',
+                    'status'
+                ]}
             >
-                <Toolbar><ToolbarContent /></Toolbar>
                 <svelte:fragment slot="cell" let:cell let:row>
                     {#if cell.key === 'wohnungNamen'}
                         {#if row.wohnungId != null}
@@ -284,11 +284,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         >
                             {cell.value}
                         </span>
-                    {:else}
-                        {cell.value}
                     {/if}
                 </svelte:fragment>
-            </DataTable>
+            </WalterDataTable>
         </AccordionItem>
     {/each}
 </Accordion>

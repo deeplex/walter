@@ -13,16 +13,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
 import type { WalterBuchungskontoEntry } from './WalterBuchungskonto';
 import { WalterGarageVertragEntry } from './WalterGarageVertrag';
 import { WalterKontaktEntry } from './WalterKontakt';
-import { WalterMietzahlungListEntry } from './WalterMietzahlung';
 import { WalterMietminderungEntry } from './WalterMietminderung';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragVersionEntry } from './WalterVertragVersion';
+
+/** Eingang (positiv) oder Rückzahlung (negativ) auf dem KautionsKonto. */
+export interface WalterKautionsBuchung {
+    datum: string;
+    betrag: number;
+    beschreibung: string;
+    /** Notiz des Buchungssatzes. */
+    notiz?: string;
+    transaktionId?: string;
+}
 
 export class WalterVertragEntry extends WalterApiHandler {
     public static ApiURL = `/api/vertraege`;
@@ -40,16 +48,14 @@ export class WalterVertragEntry extends WalterApiHandler {
         public selectedMieter: WalterSelectionEntry[],
         public versionen: WalterVertragVersionEntry[],
         public mieter: WalterKontaktEntry[],
-        public mietzahlungen: WalterMietzahlungListEntry[],
         public mietminderungen: WalterMietminderungEntry[],
-        public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public garageVertraege: WalterGarageVertragEntry[],
         public permissions: WalterPermissions,
-        public kautionBetrag: number | undefined,
-        public kautionEingangsdatum: string | undefined,
-        public kautionRueckgabedatum: string | undefined,
-        public kautionArt: string | undefined,
-        public konten: Partial<WalterBuchungskontoEntry>[]
+        public konten: Partial<WalterBuchungskontoEntry>[],
+        /** Gehaltene Kaution: Saldo des KautionsKontos. */
+        public kaution: number = 0,
+        public kautionsKontoId?: number,
+        public kautionsBuchungen: WalterKautionsBuchung[] = []
     ) {
         super();
     }
@@ -67,16 +73,12 @@ export class WalterVertragEntry extends WalterApiHandler {
             WalterVertragVersionEntry.fromJson
         );
         const mieter = json.mieter?.map(WalterKontaktEntry.fromJson);
-        const mietzahlungen = (json.mietzahlungen ?? []).map(
-            WalterMietzahlungListEntry.fromJson
-        );
         const mietminderungen = json.mietminderungen?.map(
             WalterMietminderungEntry.fromJson
         );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
-        const abrechnungsresultate = json.abrechnungsresultate;
         const garageVertraege = json.garageVertraege?.map(
             WalterGarageVertragEntry.fromJson
         );
@@ -94,16 +96,13 @@ export class WalterVertragEntry extends WalterApiHandler {
             selectedMieter,
             versionen,
             mieter,
-            mietzahlungen,
             mietminderungen,
-            abrechnungsresultate,
             garageVertraege,
             permissions,
-            json.kautionBetrag,
-            json.kautionEingangsdatum,
-            json.kautionRueckgabedatum,
-            json.kautionArt,
-            json.konten ?? []
+            json.konten ?? [],
+            json.kaution ?? 0,
+            json.kautionsKontoId ?? undefined,
+            json.kautionsBuchungen ?? []
         );
     }
 }

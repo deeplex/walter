@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterAccountEntry } from './WalterAccount';
 import { WalterHKVOEntry } from './WalterHKVO';
-import { WalterMieteEntry } from './WalterMiete';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVerwalterEntry } from './WalterVerwalter';
@@ -59,25 +58,6 @@ describe('model mapper helpers', () => {
         expect(result.vertrag).toBeInstanceOf(WalterSelectionEntry);
         expect(result.permissions).toBeInstanceOf(WalterPermissions);
         expect(result.abgesendet).toBe(true);
-    });
-
-    it('maps miete JSON with nested vertrag and permissions', () => {
-        const result = WalterMieteEntry.fromJson({
-            id: 22,
-            betreffenderMonat: '2026-04',
-            zahlungsdatum: '2026-04-02',
-            betrag: 750,
-            notiz: 'paid',
-            repeat: 1,
-            createdAt: new Date('2026-04-01T10:00:00Z'),
-            lastModified: new Date('2026-04-02T10:00:00Z'),
-            vertrag: { id: 4, text: 'Vertrag 4' },
-            permissions: { read: true, update: true, remove: false }
-        } as never);
-
-        expect(result.vertrag).toBeInstanceOf(WalterSelectionEntry);
-        expect(result.permissions).toBeInstanceOf(WalterPermissions);
-        expect(result.repeat).toBe(1);
     });
 
     it('maps hkvo JSON including optional selections and permissions', () => {

@@ -28,8 +28,8 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {
@@ -105,16 +105,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                     .Where(b => myBankkontoIds.Contains(b.BankkontoId))
                     .AsEnumerable()
                     .Select(b => new BankkontoEntryBase(b, new Permissions { Read = true, Update = true, Remove = true }))
-                    .ToList();
-
-                entry.Transaktionen = myBankkontoIds.Count == 0 ? [] : Ctx.Transaktionen
-                    .Where(t =>
-                        (t.Zahler != null && myBankkontoIds.Contains(t.Zahler.BankkontoId)) ||
-                        (t.Zahlungsempfaenger != null && myBankkontoIds.Contains(t.Zahlungsempfaenger.BankkontoId)))
-                    .Include(t => t.Zahler).ThenInclude(b => b!.Besitzer)
-                    .Include(t => t.Zahlungsempfaenger).ThenInclude(b => b!.Besitzer)
-                    .AsEnumerable()
-                    .Select(e => new TransaktionEntryBase(e, new(true)))
                     .ToList();
 
                 return entry;

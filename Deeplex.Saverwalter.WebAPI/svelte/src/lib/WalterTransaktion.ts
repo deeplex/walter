@@ -17,6 +17,30 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBuchungssatzEntry } from './WalterBuchungssatz';
 import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
+import type { WalterEntityRef } from './WalterEntityRef';
+
+/** Zuordnung einer Zahlung: wofür sie war (aus den Buchungen, nie aus Freitext). */
+export interface WalterZuordnungEintrag {
+    text: string;
+    ref?: WalterEntityRef | null;
+    betrag: number;
+    /** Der Satz dieser Zahlung wurde storniert. */
+    storniert: boolean;
+}
+
+/** Klartext eines Eintrags der Zuordnung; stornierte Zahlungen als rückgängig gemacht. */
+export function zuordnungText(w: WalterZuordnungEintrag): string {
+    return w.storniert ? `${w.text} (rückgängig gemacht)` : w.text;
+}
+
+/** Zelle „Zuordnung“ einer Transaktionsliste: Klartext oder der Tag „Nicht zugeordnet“. */
+export function zuordnungZelle(
+    zuordnung: WalterZuordnungEintrag[] | undefined
+): string | { text: string; tag: 'warm-gray' } {
+    if (!zuordnung || zuordnung.length === 0)
+        return { text: 'Nicht zugeordnet', tag: 'warm-gray' };
+    return zuordnung.map(zuordnungText).join('; ');
+}
 
 export class WalterTransaktionEntry extends WalterApiHandler {
     public static ApiURL = `/api/transaktionen`;
@@ -35,7 +59,9 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         public buchungssaetze: WalterBuchungssatzEntry[],
         public kannLoeschen: boolean = false,
         public kannStornieren: boolean = false,
-        public sperrgrund: string | null = null
+        public sperrgrund: string | null = null,
+        /** Leer: nicht zugeordnet. */
+        public zuordnung: WalterZuordnungEintrag[] = []
     ) {
         super();
     }
@@ -65,7 +91,8 @@ export class WalterTransaktionEntry extends WalterApiHandler {
             buchungssaetze,
             json.kannLoeschen ?? false,
             json.kannStornieren ?? false,
-            json.sperrgrund ?? null
+            json.sperrgrund ?? null,
+            json.zuordnung ?? []
         );
     }
 }
@@ -89,6 +116,8 @@ export interface MietzahlungsInput {
     kaltmiete: number;
     garagen: GaragenmietInput[];
     nkVorauszahlung: number;
+    /** Gesamtbetrag statt Aufteilung: der Server teilt in Kaltmiete, Garagen und NK-VZ. */
+    gesamtbetrag?: number;
 }
 
 export interface BetriebskostenEingangInput {
@@ -163,4 +192,52 @@ export function emptyTransaktionsInput(): TransaktionsInput {
         nkAnteilEingaenge: [],
         abrechnungsAusgleiche: []
     };
+}
+
+// ── Vorschau (POST /api/transaktionen/buchen/vorschau) ──────────────────────
+
+export interface VorschauPosition {
+    text: string;
+    betrag: number;
+    danachOffen?: number | null;
+}
+
+export interface VorschauZeile {
+    kontonummer: string;
+    kontobezeichnung: string;
+    sollHaben: 'Soll' | 'Haben';
+    betrag: number;
+}
+
+export interface VorschauSatz {
+    buchungsdatum: string;
+    buchungsjahr: number;
+    beschreibung: string;
+    istZahlung: boolean;
+    zeilen: VorschauZeile[];
+}
+
+export interface TransaktionsVorschau {
+    betrag: number;
+    verwendungszweck: string;
+    zahler?: string | null;
+    zahlungsempfaenger?: string | null;
+    positionen: VorschauPosition[];
+    saetze: VorschauSatz[];
+    ausgleiche: number;
+}
+
+// ── Rückgängig machen (GET/POST …/rueckgaengig) ─────────────────────────────
+
+export interface BetroffeneAbrechnung {
+    jahr: number;
+    wohnungIds: number[];
+    bezeichnung: string;
+    versendet: boolean;
+}
+
+export interface RueckgaengigPlan {
+    art: 'Loeschen' | 'Storno' | 'Gesperrt';
+    sperrgrund?: string | null;
+    abrechnungen: BetroffeneAbrechnung[];
 }

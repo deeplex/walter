@@ -14,19 +14,29 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
+<!--
+    Zähler als aufklappbare Tabelle: aufgeklappt die Zählerstände (beim ersten Aufklappen
+    nachgeladen), neuester zuerst, mit Verbrauch seit dem vorigen Stand.
+-->
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+    import {
+        InlineLoading,
+        InlineNotification
+    } from 'carbon-components-svelte';
 
     import { WalterDataTable, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
+    import WalterItemList from '../elements/WalterItemList.svelte';
+    import { fileURL } from '$walter/services/files';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         WalterZaehlerEntry,
         WalterZaehlerstandEntry,
-        validateZaehler
+        validateZaehler,
+        zaehlerstandItems
     } from '$walter/lib';
-    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
@@ -37,7 +47,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'lastZaehlerstand.stand', value: 'Letzter Stand' },
         { key: 'lastZaehlerstand.einheit', value: 'Einheit' },
         { key: 'ende', value: 'Ende' },
-        { key: 'button', value: 'Stand hinzufügen' }
+        { key: 'button', value: '' }
     ];
 
     export let rows: WalterZaehlerEntry[] | undefined = undefined;
@@ -49,7 +59,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let ablesedatum: Date = new Date();
     let quickAddEntry: Partial<WalterZaehlerstandEntry> = {};
 
-    function add(e: CustomEvent, zaehler: WalterZaehlerEntry) {
+    function add(e: Event, zaehler: WalterZaehlerEntry) {
         e.stopPropagation();
         quickAddEntry = {
             datum: convertDateCanadian(ablesedatum),
@@ -69,7 +79,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 zaehler.lastZaehlerstand?.datum ===
                 convertDateCanadian(ablesedatum)
                     ? 'disabled'
-                    : (e: CustomEvent) => add(e, zaehler)
+                    : {
+                          onClick: (e: MouseEvent) => add(e, zaehler),
+                          iconDescription: 'Zählerstand hinzufügen'
+                      }
         };
     };
 
@@ -83,9 +96,37 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                   WalterZaehlerEntry.GetPaged<WalterZaehlerEntry>(fetchImpl, p)
             : undefined;
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) =>
-        navigation.zaehler(e.detail.id);
-    const rowHref = (row: DataTableRow) => `/zaehler/${row.id}`;
+    // Der ganze Zähler (Stände, Notiz) je Zeile, beim ersten Aufklappen geladen.
+    let expandedRowIds: (string | number)[] = [];
+    type Geladen = WalterZaehlerEntry | 'laedt' | { fehler: string };
+    let geladen: Record<string, Geladen> = {};
+    const setze = (id: string | number, wert: Geladen) =>
+        (geladen = { ...geladen, [id]: wert });
+
+    async function ladeZaehler(id: string | number) {
+        setze(id, 'laedt');
+        try {
+            const zaehler = await WalterZaehlerEntry.GetOne<WalterZaehlerEntry>(
+                `${id}`,
+                fetchImpl
+            );
+            setze(id, zaehler);
+        } catch (e) {
+            setze(id, { fehler: e instanceof Error ? e.message : `${e}` });
+        }
+    }
+
+    $: for (const id of expandedRowIds) {
+        if (!(id in geladen)) void ladeZaehler(id);
+    }
+
+    /** Nach einem neuen Stand: neu laden, falls aufgeklappt, sonst beim nächsten Aufklappen. */
+    function standHinzugefuegt() {
+        const id = quickAddEntry.zaehler?.id;
+        if (id === undefined) return;
+        const { [id]: _alt, ...rest } = geladen;
+        geladen = rest;
+    }
 
     $: submitDisabled = !validateZaehler(entry);
 </script>
@@ -95,6 +136,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={quickAddEntry}
     addUrl={WalterZaehlerstandEntry.ApiURL}
     bind:addModalOpen={open}
+    onSubmit={standHinzugefuegt}
 >
     <WalterZaehlerstand {fetchImpl} entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
@@ -106,8 +148,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     layout={title !== undefined ? 'accordion' : 'inline'}
     accordionTitle={title}
     quickAddTitle={title}
-    {on_click_row}
-    {rowHref}
+    expandable
+    bind:expandedRowIds
     rows={rowsAdd}
     {fetchData}
     {transformRow}
@@ -117,4 +159,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if entry}
         <WalterZaehler {fetchImpl} bind:entry />
     {/if}
+    <svelte:fragment slot="expanded-row" let:row>
+        {@const zaehler = geladen[row.id]}
+        {#if zaehler === undefined || zaehler === 'laedt'}
+            <InlineLoading description="Lade Zählerstände…" />
+        {:else if 'fehler' in zaehler}
+            <InlineNotification
+                kind="error"
+                lowContrast
+                hideCloseButton
+                title="Zählerstände nicht verfügbar"
+                subtitle={zaehler.fehler}
+            />
+        {:else}
+            <WalterItemList
+                items={zaehlerstandItems(zaehler.staende ?? [])}
+                leerText="Noch kein Zählerstand."
+                moreHref={`/zaehler/${row.id}`}
+                moreText="Zähler öffnen →"
+                notiz={zaehler.notiz}
+                attachmentsUrl={fileURL.zaehler(`${row.id}`)}
+                {fetchImpl}
+            />
+        {/if}
+    </svelte:fragment>
 </WalterDataTable>

@@ -15,20 +15,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { entityRefHref } from '$walter/lib/WalterEntityRef';
     import {
         WalterUmlageEntry,
         WalterZaehlerstandEntry,
         type WalterUmlageEntry as WalterUmlageEntryType,
-        type TransaktionsInput
+        type WalterZahlungsZiel
     } from '$walter/lib';
-    import { emptyTransaktionsInput } from '$walter/lib';
     import { NumberInput, SkeletonText, Tile } from 'carbon-components-svelte';
-    import { WalterDataTable, WalterTransaktion } from '$walter/components';
+    import { WalterDataTable } from '$walter/components';
+    import WalterZahlungErfassen from './WalterZahlungErfassen.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
     import { walter_get } from '$walter/services/requests';
     import WalterZaehlerstand from './WalterZaehlerstand.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import { invalidateAll } from '$app/navigation';
     import { onMount } from 'svelte';
 
     interface OffeneBkForderungEntry {
@@ -182,17 +182,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             ladeGuthaben(selectedYear),
             ladeZaehlerFaellig(selectedYear)
         ]);
-        try {
-            const paged =
-                await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
-                    fetchImpl,
-                    { take: 10000 }
-                );
-            umlagen = paged.items;
-        } catch (e) {
-            console.error('Konnte Umlagen nicht laden:', e);
-        }
-        umlagenReady = true;
+        await ladeUmlagen();
     });
 
     // ── Year selector with URL persistence ────────────────────────────────
@@ -219,103 +209,113 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         ladeZaehlerFaellig(selectedYear);
     }
 
-    // ── Rent payment QuickAdd ───────────────────────────────────────────────
-    let addRentOpen = false;
-    let rentModalTitle = 'Mietzahlung';
-    let rentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
-    let rentBuchungsInputValid = false;
+    // ── Zahlung erfassen (für alle Forderungen) ─────────────────────────────
+    let zahlungOffen = false;
+    let zahlungZiel: WalterZahlungsZiel | undefined;
+    let zahlungTitel = '';
+    let zahlungVorschlag = 0;
+    let zahlungEmpfaenger: number | undefined;
 
-    function openRentQuickAdd(forderung: OffeneMietForderungEntry) {
-        rentModalTitle = forderung.vertragBezeichnung;
-        rentBuchungsInput = {
-            ...emptyTransaktionsInput(),
-            betrag: forderung.offen,
-            zahlungsempfaengerId: forderung.zahlungsempfaengerId,
-            mieten: [
-                {
-                    vertragId: forderung.vertragId,
-                    betreffenderMonat: forderung.monat,
-                    kaltmiete: forderung.kaltmieteOffen,
-                    garagen: forderung.garagen.map((g) => ({
-                        garageVertragId: g.garageVertragId,
-                        garageKennung: g.garageKennung,
-                        betrag: g.offen
-                    })),
-                    nkVorauszahlung: 0
-                }
-            ]
-        };
-        addRentOpen = true;
+    function zahlungErfassen(
+        ziel: WalterZahlungsZiel,
+        titel: string,
+        vorschlag: number,
+        empfaenger?: number
+    ) {
+        zahlungZiel = ziel;
+        zahlungTitel = titel;
+        zahlungVorschlag = vorschlag;
+        zahlungEmpfaenger = empfaenger;
+        zahlungOffen = true;
     }
 
-    async function onSubmitRent() {
-        await invalidateAll();
-        await Promise.all([
-            ladeOffeneMietForderungen(selectedYear),
-            ladeOffeneGarageForderungen(selectedYear)
-        ]);
+    async function nachZahlung() {
+        switch (zahlungZiel?.art) {
+            case 'miete':
+                await Promise.all([
+                    ladeOffeneMietForderungen(selectedYear),
+                    ladeGuthaben(selectedYear)
+                ]);
+                break;
+            case 'garage':
+                await ladeOffeneGarageForderungen(selectedYear);
+                break;
+            case 'bkRechnung':
+                await ladeOffeneBkForderungen(selectedYear);
+                break;
+            case 'bkNeu':
+                await ladeUmlagen();
+                break;
+        }
     }
 
-    // ── Standalone Garage QuickAdd ──────────────────────────────────────────
-    let addGarageOpen = false;
-    let garageModalTitle = 'Garagenmiete';
-    let garageBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
-    let garageBuchungsInputValid = false;
+    const monatText = (monat: string) =>
+        new Date(monat + 'T00:00:00').toLocaleDateString('de-DE', {
+            month: 'long',
+            year: 'numeric'
+        });
 
-    function openGarageQuickAdd(forderung: OffeneGarageForderungEntry) {
-        garageModalTitle = forderung.bezeichnung;
-        garageBuchungsInput = {
-            ...emptyTransaktionsInput(),
-            betrag: forderung.offen,
-            zahlungsempfaengerId: forderung.zahlungsempfaengerId,
-            garagenEingaenge: [
-                {
-                    garageVertragId: forderung.garageVertragId,
-                    garageKennung: forderung.bezeichnung,
-                    betreffenderMonat: forderung.monat,
-                    betrag: forderung.offen
-                }
-            ]
-        };
-        addGarageOpen = true;
-    }
-
-    async function onSubmitGarage() {
-        await ladeOffeneGarageForderungen(selectedYear);
-    }
+    const zahlungsButton = (onClick: () => void) => ({
+        onClick: (e: MouseEvent) => {
+            e.stopPropagation();
+            onClick();
+        },
+        iconDescription: 'Zahlung erfassen'
+    });
 
     const forderungHeaders = [
         { key: 'monat', value: 'Monat' },
         { key: 'vertrag', value: 'Vertrag' },
-        { key: 'offen', value: 'Offen (€)' }
+        { key: 'offen', value: 'Offen (€)' },
+        { key: 'button', value: '' }
     ];
 
     const garageForderungHeaders = [
         { key: 'monat', value: 'Monat' },
         { key: 'bezeichnung', value: 'Garage' },
-        { key: 'offen', value: 'Offen (€)' }
+        { key: 'offen', value: 'Offen (€)' },
+        { key: 'button', value: '' }
     ];
 
     $: garageForderungTableRows = offeneGarageForderungen.map((f) => ({
         id: `garage-${f.garageVertragId}-${f.monat}`,
-        monat: new Date(f.monat + 'T00:00:00').toLocaleDateString('de-DE', {
-            month: 'long',
-            year: 'numeric'
-        }),
+        href: `/garage-vertraege/${f.garageVertragId}`,
+        monat: monatText(f.monat),
         bezeichnung: f.bezeichnung,
         offen: f.offen.toFixed(2),
-        button: () => openGarageQuickAdd(f)
+        button: zahlungsButton(() =>
+            zahlungErfassen(
+                {
+                    art: 'garage',
+                    garageVertragId: f.garageVertragId,
+                    monat: f.monat,
+                    kennung: f.bezeichnung
+                },
+                `${f.bezeichnung} – ${monatText(f.monat)}`,
+                f.offen,
+                f.zahlungsempfaengerId
+            )
+        )
     }));
 
     $: forderungTableRows = offeneMietForderungen.map((f) => ({
         id: `forderung-${f.vertragId}-${f.monat}`,
-        monat: new Date(f.monat + 'T00:00:00').toLocaleDateString('de-DE', {
-            month: 'long',
-            year: 'numeric'
+        href: entityRefHref({
+            type: 'Vertrag',
+            id: f.vertragId,
+            section: 'mietkonto'
         }),
+        monat: monatText(f.monat),
         vertrag: f.vertragBezeichnung,
         offen: f.offen.toFixed(2),
-        button: () => openRentQuickAdd(f)
+        button: zahlungsButton(() =>
+            zahlungErfassen(
+                { art: 'miete', vertragId: f.vertragId, monat: f.monat },
+                `${f.vertragBezeichnung} – ${monatText(f.monat)}`,
+                f.offen,
+                f.zahlungsempfaengerId
+            )
+        )
     }));
 
     // ── Meter reading tasks ─────────────────────────────────────────────────
@@ -356,31 +356,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     // ── Missing billing tasks ───────────────────────────────────────────────
     const billingHeaders = [
         { key: 'typ', value: 'Kostenart' },
-        { key: 'wohnungen', value: 'Wohnungen' }
+        { key: 'wohnungen', value: 'Wohnungen' },
+        { key: 'button', value: '' }
     ];
 
-    let addBillingOpen = false;
-    let billingModalTitle = 'Betriebskostenrechnung';
-    let buchungsInput: TransaktionsInput = emptyTransaktionsInput();
-    let buchungsInputValid = false;
-
-    function openBillingQuickAdd(umlage: WalterUmlageEntryType) {
-        billingModalTitle = umlage.typ?.text || 'Betriebskostenrechnung';
-        buchungsInput = {
-            ...emptyTransaktionsInput(),
-            betriebskostenEingaenge: [
-                {
-                    betrag: 0,
-                    umlageId: umlage.id,
-                    betreffendesJahr: selectedYear
-                }
-            ]
-        };
-        addBillingOpen = true;
-    }
-
-    async function onSubmitBilling() {
-        await invalidateAll();
+    async function ladeUmlagen() {
         try {
             const paged =
                 await WalterUmlageEntry.GetPaged<WalterUmlageEntryType>(
@@ -389,45 +369,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 );
             umlagen = paged.items;
         } catch (e) {
-            console.error(e);
+            console.error('Konnte Umlagen nicht laden:', e);
         }
+        umlagenReady = true;
     }
 
-    // ── BK payment QuickAdd ─────────────────────────────────────────────────
-    let addBkPaymentOpen = false;
-    let bkPaymentModalTitle = 'Betriebskostenrechnung bezahlen';
-    let bkPaymentBuchungsInput: TransaktionsInput = emptyTransaktionsInput();
-    let bkPaymentBuchungsInputValid = false;
-
-    function openBkPaymentQuickAdd(forderung: OffeneBkForderungEntry) {
-        bkPaymentModalTitle = forderung.bezeichnung;
-        bkPaymentBuchungsInput = {
-            ...emptyTransaktionsInput(),
-            betrag: forderung.verbleibend,
-            betriebskostenEingaenge: [
-                {
-                    betrag: forderung.verbleibend,
-                    existingBuchungssatzId: forderung.buchungssatzId
-                }
-            ]
-        };
-        addBkPaymentOpen = true;
-    }
-
-    async function onSubmitBkPayment() {
-        await ladeOffeneBkForderungen(selectedYear);
-    }
-
+    // ── Offene Betriebskostenrechnungen ─────────────────────────────────────
     const bkForderungHeaders = [
         { key: 'bezeichnung', value: 'Betriebskostenrechnung' },
-        { key: 'verbleibend', value: 'Offen (€)' }
+        { key: 'verbleibend', value: 'Offen (€)' },
+        { key: 'button', value: '' }
     ];
 
     $: bkForderungTableRows = offeneBkForderungen.map((f) => ({
         id: `bk-${f.buchungssatzId}`,
         bezeichnung: f.bezeichnung,
         verbleibend: f.verbleibend.toFixed(2),
-        button: () => openBkPaymentQuickAdd(f)
+        button: zahlungsButton(() =>
+            zahlungErfassen(
+                { art: 'bkRechnung', buchungssatzId: f.buchungssatzId },
+                f.bezeichnung,
+                f.verbleibend
+            )
+        )
     }));
 
     $: billingTasks = umlagen.filter(
@@ -441,10 +405,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         id: `billing-${u.id}`,
         typ: u.typ?.text || '—',
         wohnungen: (u.selectedWohnungen || []).map((w) => w.text).join(', '),
-        button: () => openBillingQuickAdd(u)
+        button: zahlungsButton(() =>
+            zahlungErfassen(
+                { art: 'bkNeu', umlageId: u.id, jahr: selectedYear },
+                `${u.typ?.text || 'Betriebskostenrechnung'} ${selectedYear}`,
+                0
+            )
+        )
     }));
 
-    // ── Guthaben (Überzahlungen) ────────────────────────────────────────────
+    // ── Guthaben ────────────────────────────────────────────────────────────
     const guthabenHeaders = [
         { key: 'monat', value: 'Monat' },
         { key: 'vertrag', value: 'Vertrag' },
@@ -453,29 +423,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: guthabenTableRows = guthaben.map((g) => ({
         id: `guthaben-${g.vertragId}-${g.monat}`,
-        monat: new Date(g.monat + 'T00:00:00').toLocaleDateString('de-DE', {
-            month: 'long',
-            year: 'numeric'
+        href: entityRefHref({
+            type: 'Vertrag',
+            id: g.vertragId,
+            section: 'mietkonto'
         }),
+        monat: monatText(g.monat),
         vertrag: g.vertragBezeichnung,
         guthaben: g.guthaben.toFixed(2)
     }));
 </script>
-
-<WalterDataWrapperQuickAdd
-    title={rentModalTitle}
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={rentBuchungsInput}
-    bind:addModalOpen={addRentOpen}
-    onSubmit={onSubmitRent}
-    submitDisabled={!rentBuchungsInputValid}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={rentBuchungsInput}
-        bind:isValid={rentBuchungsInputValid}
-    />
-</WalterDataWrapperQuickAdd>
 
 <WalterDataWrapperQuickAdd
     title={addZaehlerstandEntry.zaehler?.text || 'Zählerstand'}
@@ -487,50 +444,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterZaehlerstand {fetchImpl} entry={addZaehlerstandEntry} />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataWrapperQuickAdd
-    title={billingModalTitle}
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={buchungsInput}
-    bind:addModalOpen={addBillingOpen}
-    onSubmit={onSubmitBilling}
-    submitDisabled={!buchungsInputValid}
->
-    <WalterTransaktion
+{#if zahlungZiel}
+    <WalterZahlungErfassen
         {fetchImpl}
-        bind:buchung={buchungsInput}
-        bind:isValid={buchungsInputValid}
+        ziel={zahlungZiel}
+        titel={zahlungTitel}
+        vorschlag={zahlungVorschlag}
+        vermieterBankkontoId={zahlungEmpfaenger}
+        bind:open={zahlungOffen}
+        on:gebucht={nachZahlung}
     />
-</WalterDataWrapperQuickAdd>
-
-<WalterDataWrapperQuickAdd
-    title={bkPaymentModalTitle}
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={bkPaymentBuchungsInput}
-    bind:addModalOpen={addBkPaymentOpen}
-    onSubmit={onSubmitBkPayment}
-    submitDisabled={!bkPaymentBuchungsInputValid}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={bkPaymentBuchungsInput}
-        bind:isValid={bkPaymentBuchungsInputValid}
-    />
-</WalterDataWrapperQuickAdd>
-
-<WalterDataWrapperQuickAdd
-    title={garageModalTitle}
-    addUrl="/api/transaktionen/buchen"
-    bind:addEntry={garageBuchungsInput}
-    bind:addModalOpen={addGarageOpen}
-    onSubmit={onSubmitGarage}
-    submitDisabled={!garageBuchungsInputValid}
->
-    <WalterTransaktion
-        {fetchImpl}
-        bind:buchung={garageBuchungsInput}
-        bind:isValid={garageBuchungsInputValid}
-    />
-</WalterDataWrapperQuickAdd>
+{/if}
 
 <Tile light>
     <div class="year-selector">
@@ -546,16 +470,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if mietForderungenReady}
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Offene Mietforderungen"
+            accordionTitle="Offene Mieten"
             initialOpen={forderungTableRows.length > 0}
             rows={forderungTableRows}
             headers={forderungHeaders}
-            on_click_row={(e) => {
-                const row = forderungTableRows.find(
-                    (r) => r.id === e.detail.id
-                );
-                if (row?.button) row.button();
-            }}
+            rowHref={(row) => row.href}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -565,16 +484,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if garageForderungenReady}
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Offene Garagenforderungen"
+            accordionTitle="Offene Garagenmieten"
             initialOpen={garageForderungTableRows.length > 0}
             rows={garageForderungTableRows}
             headers={garageForderungHeaders}
-            on_click_row={(e) => {
-                const row = garageForderungTableRows.find(
-                    (r) => r.id === e.detail.id
-                );
-                if (row?.button) row.button();
-            }}
+            rowHref={(row) => row.href}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />
@@ -590,7 +504,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             headers={billingHeaders}
             on_click_row={(e) => {
                 const row = billingTableRows.find((r) => r.id === e.detail.id);
-                if (row?.button) row.button();
+                row?.button.onClick(new MouseEvent('click'));
             }}
         />
     {:else}
@@ -601,7 +515,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if bkForderungenReady}
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Offene BK-Forderungen"
+            accordionTitle="Offene Betriebskostenrechnungen"
             initialOpen={bkForderungTableRows.length > 0}
             rows={bkForderungTableRows}
             headers={bkForderungHeaders}
@@ -609,7 +523,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 const row = bkForderungTableRows.find(
                     (r) => r.id === e.detail.id
                 );
-                if (row?.button) row.button();
+                row?.button.onClick(new MouseEvent('click'));
             }}
         />
     {:else}
@@ -620,10 +534,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {#if guthabenReady}
         <WalterDataTable
             layout="accordion"
-            accordionTitle="Miet-Guthaben (Überzahlungen)"
+            accordionTitle="Guthaben"
             initialOpen={guthabenTableRows.length > 0}
             rows={guthabenTableRows}
             headers={guthabenHeaders}
+            rowHref={(row) => row.href}
         />
     {:else}
         <SkeletonText style="margin: 0; height: 42px;" />

@@ -48,13 +48,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
     /// </summary>
     public class AbrechnungslaufService
     {
-        /// <summary>
-        /// Markiert Warnungen, die eine mit der aktuellen <see cref="VertragVersion"/>
-        /// nicht übereinstimmende Miet-Forderung melden (siehe <see cref="MietKorrekturService"/>).
-        /// Wie <c>ZaehlerstandFehltMarker</c> blockiert dieser Marker <see cref="BookAsync"/>.
-        /// </summary>
-        public const string MietForderungAbweichungMarker = "Fehler: Miet-Forderung weicht ab — ";
-
         private readonly SaverwalterContext _ctx;
         private readonly NkAnteilBuchungsService _nkAnteilBuchungsService;
         private readonly AbrechnungsresultatBuchungsService _buchungsService;
@@ -120,7 +113,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var umlageIds = laufUmlagen.Select(u => u.UmlageId).ToList();
             var prevYearBetragByUmlage = await LadePrevYearBetraege(umlageIds, jahr);
 
-            var warnungen = new List<string>();
+            var warnungen = new List<Hinweis>();
             var einheitenInfos = BuildAbrechnungseinheitenInfos(einheiten, warnungen, prevYearBetragByUmlage, jahr);
 
             var verzichtVertragIds = (await _ctx.Abrechnungsverzichte
@@ -146,15 +139,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         }
 
         /// <summary>
-        /// Prüft für jeden an der Abrechnung beteiligten Vertrag, ob die gebuchte Miet-Forderung
-        /// noch zur aktuellen <see cref="VertragVersion"/> passt (siehe <see cref="MietKorrekturService"/>).
-        /// Weicht ein Monat des Abrechnungsjahres ab und ist die Abweichung nicht bereits korrigiert,
-        /// wird eine mit <see cref="MietForderungAbweichungMarker"/> markierte Warnung ergänzt — das
-        /// verhindert <see cref="BookAsync"/>, bis die Miet-Korrektur (oder ein manueller Eingriff bei
-        /// <c>NkReichtNichtAus</c>) durchgeführt wurde.
+        /// Prüft für jeden an der Abrechnung beteiligten Vertrag, ob die gebuchte Kaltmiete des
+        /// Jahres zu den <see cref="VertragVersion"/>en passt (siehe <see cref="MietKorrekturService"/>).
+        /// Bleibt eine Differenz, wird ein sperrender Hinweis ergänzt — das verhindert
+        /// <see cref="BookAsync"/>, bis die Differenz gebucht ist (oder bei
+        /// <c>NkReichtNichtAus</c> manuell eingegriffen wurde).
         /// </summary>
         private async Task PruefeMietForderungenAsync(
-            List<NkEinheit> einheiten, int jahr, List<string> warnungen, HashSet<int> verzichtVertragIds)
+            List<NkEinheit> einheiten, int jahr, List<Hinweis> warnungen, HashSet<int> verzichtVertragIds)
         {
             var vertragIds = einheiten
                 .SelectMany(e => e.Parteien)
@@ -164,16 +156,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
 
             foreach (var vertragId in vertragIds)
             {
-                var monate = await _mietKorrekturService.ErmittleAsync(vertragId);
-                foreach (var monat in monate.Where(m => m.Jahr == jahr
-                    && (m.Status == MietKorrekturService.MietKorrekturStatus.Anwendbar
-                        || m.Status == MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus)))
+                var eintrag = (await _mietKorrekturService.ErmittleAsync(vertragId))
+                    .FirstOrDefault(j => j.Jahr == jahr);
+                if (eintrag is null || eintrag.Status is not
+                    (MietKorrekturService.MietKorrekturStatus.Anwendbar or MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus))
                 {
-                    warnungen.Add(
-                        $"{MietForderungAbweichungMarker}Vertrag {vertragId}: {monat.Monat:00}/{monat.Jahr} " +
-                        $"gebuchte Kaltmiete {monat.IstKaltmiete:C} ≠ Soll-Kaltmiete {monat.SollKaltmiete:C} " +
-                        "— bitte zuerst Miet-Korrektur durchführen.");
+                    continue;
                 }
+
+                var hinweis = eintrag.Status == MietKorrekturService.MietKorrekturStatus.NkReichtNichtAus
+                    ? "die NK-Vorauszahlungen decken die Erhöhung nicht — bitte manuell prüfen."
+                    : "bitte zuerst die Differenz über die Miet-Korrektur am Vertrag buchen.";
+                warnungen.Add(new Hinweis(
+                    HinweisArt.Miete,
+                    $"Kaltmiete weicht ab: Vertrag {vertragId}, {jahr}: Differenz zum Vertrag {eintrag.Differenz:C} — {hinweis}",
+                    SperrtBuchung: true));
             }
         }
 
@@ -203,8 +200,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             // erst den Zählerstand ergänzen bzw. die Miet-Korrektur durchführen. Andere
             // Hinweise blockieren nicht.
             var fehler = preview.Warnungen
-                .Where(w => w.Contains(ZaehlerstandFehltMarker, StringComparison.Ordinal)
-                         || w.Contains(MietForderungAbweichungMarker, StringComparison.Ordinal))
+                .Where(w => w.SperrtBuchung)
+                .Select(w => w.Text)
                 .Distinct()
                 .ToList();
             if (fehler.Count > 0)
@@ -249,8 +246,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 var bezeichnung = partei.Vertrag!.Mieter.Any()
                     ? string.Join(", ", partei.Vertrag.Mieter.Select(m => m.Bezeichnung))
                     : $"Vertrag {partei.Vertrag.VertragId}";
-                preview.Warnungen.Add(
-                    $"Vertrag {partei.Vertrag.VertragId} ({bezeichnung}): Abrechnung wurde bereits versendet und wird übersprungen.");
+                preview.Warnungen.Add(new Hinweis(
+                    HinweisArt.Sonstiges,
+                    $"Vertrag {partei.Vertrag.VertragId} ({bezeichnung}): Abrechnung wurde bereits versendet und wird übersprungen."));
             }
 
             // Verträge ohne bestehendes Resultat: Abrechnungsresultat buchen.
@@ -267,8 +265,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             {
                 if (verzichtVertragIds.Contains(resultat.VertragId!.Value))
                 {
-                    preview.Warnungen.Add(
-                        $"Vertrag {resultat.VertragId}: Abrechnungsverzicht für {jahr} hinterlegt — wird nicht gebucht.");
+                    preview.Warnungen.Add(new Hinweis(
+                        HinweisArt.Sonstiges,
+                        $"Vertrag {resultat.VertragId}: Abrechnungsverzicht für {jahr} hinterlegt — wird nicht gebucht."));
                     continue;
                 }
 
@@ -282,8 +281,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 }
                 catch (Exception ex)
                 {
-                    preview.Warnungen.Add(
-                        $"Abrechnung Vertrag {resultat.VertragId}: {ex.GetBaseException().Message}");
+                    preview.Warnungen.Add(new Hinweis(
+                        HinweisArt.Sonstiges,
+                        $"Abrechnung Vertrag {resultat.VertragId}: {ex.GetBaseException().Message}"));
                 }
             }
 
@@ -304,12 +304,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     if (satz is null) continue;
 
                     var nkResult = await _nkAnteilBuchungsService.BucheAnteileAsync(satz, plan.Anteile);
-                    preview.Warnungen.AddRange(nkResult.Warnungen);
+                    preview.Warnungen.AddRange(nkResult.Warnungen.Select(w => new Hinweis(HinweisArt.Sonstiges, w)));
                 }
                 catch (Exception ex)
                 {
-                    preview.Warnungen.Add(
-                        $"NK-Anteile BS {plan.Buchungssatz.BuchungssatzId}: {ex.GetBaseException().Message}");
+                    preview.Warnungen.Add(new Hinweis(
+                        HinweisArt.Sonstiges,
+                        $"NK-Anteile BS {plan.Buchungssatz.BuchungssatzId}: {ex.GetBaseException().Message}"));
                 }
             }
 
@@ -322,7 +323,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// prüft auf abweichenden Betrag (Konflikt → null) oder legt sie sonst neu an.
         /// </summary>
         private async Task<Buchungssatz?> EnsureStrompauschaleUmbuchungAsync(
-            NkGruppenAbrechnungsService.NkRechnungsplan plan, int jahr, List<string> warnungen)
+            NkGruppenAbrechnungsService.NkRechnungsplan plan, int jahr, List<Hinweis> warnungen)
         {
             var transient = plan.Buchungssatz;
             var habenKontoId = transient.Buchungszeilen.First(z => z.SollHaben == SollHaben.Haben).Buchungskonto.BuchungskontoId;
@@ -345,8 +346,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .First(z => z.SollHaben == SollHaben.Haben && z.Buchungskonto.BuchungskontoId == habenKontoId).Betrag;
                 if (Math.Abs(gebucht - plan.Betrag) > 0.005m)
                 {
-                    warnungen.Add(
-                        $"Strompauschale-Umbuchung weicht vom gebuchten Betrag ab (gebucht {gebucht:N2} €, berechnet {plan.Betrag:N2} €). Bitte erst stornieren.");
+                    warnungen.Add(new Hinweis(
+                        HinweisArt.Sonstiges,
+                        $"Strompauschale-Umbuchung weicht vom gebuchten Betrag ab (gebucht {gebucht:N2} €, berechnet {plan.Betrag:N2} €). Bitte erst stornieren."));
                     return null;
                 }
                 return vorhanden;
@@ -366,15 +368,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         }
 
         /// <summary>
-        /// Nimmt die gebuchte Abrechnung einer Gruppe für ein Jahr vollständig zurück:
-        /// löscht die Abrechnungsresultate samt Buchungssätzen, entfernt die vom Lauf
-        /// gebuchten Verteil-Zeilen von den Rechnungssätzen und löscht die
+        /// Nimmt die gebuchte, noch nicht versendete Abrechnung einer Gruppe für ein Jahr
+        /// vollständig zurück: löscht die Abrechnungsresultate samt Buchungssätzen, entfernt
+        /// die vom Lauf gebuchten Verteil-Zeilen von den Rechnungssätzen und löscht die
         /// Strompauschale-Umbuchungen. Manuelle NK-Anteil-Sätze bleiben erhalten.
-        /// Gesperrt, sobald ein Resultat als abgesendet markiert ist.
+        ///
+        /// Betroffen ist nur der aktuelle Stand. Eine früher stornierte Abrechnung desselben
+        /// Jahres (Resultat, Storno-Sätze, stornierte Verteil-Zeilen samt Gegenbuchung)
+        /// bleibt als Beleg unverändert. Gesperrt, sobald ein aktuelles Resultat als
+        /// abgesendet markiert ist — dann bleibt nur der Storno.
         /// </summary>
         public async Task<RueckabwicklungResult> DeleteAsync(List<int> wohnungIds, int jahr)
         {
-            var resultate = await LadeResultate(wohnungIds, jahr);
+            var resultate = (await LadeResultate(wohnungIds, jahr))
+                .Where(r => r.Buchungssatz.StornoNach == null)
+                .ToList();
             if (resultate.Any(r => r.Abgesendet))
                 throw new InvalidOperationException(
                     "Mindestens eine Abrechnung wurde bereits versendet — die Gruppe kann nur noch storniert werden.");
@@ -383,33 +391,26 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
             var verteilSaetze = await LadeVerteilSaetze(umlageNkVkIds, jahr);
             var nkVkSet = umlageNkVkIds.ToHashSet();
 
-            var zuLoeschen = new List<Buchungssatz>();
-            foreach (var resultat in resultate)
-            {
-                zuLoeschen.Add(resultat.Buchungssatz);
-                if (resultat.Buchungssatz.StornoNach is Buchungssatz storno)
-                    zuLoeschen.Add(storno);
-            }
+            var zuLoeschen = resultate.Select(r => r.Buchungssatz).ToList();
 
             var umbuchungen = 0;
             var bereinigt = 0;
             var anteilZeilen = new List<Buchungszeile>();
-            foreach (var satz in verteilSaetze)
+            foreach (var satz in verteilSaetze.Where(s => s.StornoNach == null && s.StornoVon == null))
             {
                 if (NkGruppenAbrechnungsService.IstStrompauschaleUmbuchung(satz, nkVkSet))
                 {
-                    // Vom Lauf erzeugte Umbuchung — komplett entfernen (inkl. Storno-Paar)
+                    // Vom Lauf erzeugte Umbuchung — komplett entfernen
                     zuLoeschen.Add(satz);
-                    if (satz.StornoNach is Buchungssatz storno)
-                        zuLoeschen.Add(storno);
                     umbuchungen++;
                     continue;
                 }
 
-                // Rechnungssatz: nur die vom Lauf angefügten Verteil-Zeilen
+                // Rechnungssatz: nur die aktiven, vom Lauf angefügten Verteil-Zeilen
                 // (Vertrags-NK- und Eigenanteil-/AufwandsKonten) entfernen, die Rechnung bleibt.
                 var zeilen = satz.Buchungszeilen
-                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
+                             && NkVerteilung.IstAktiv(z))
                     .ToList();
                 if (zeilen.Count == 0) continue;
                 anteilZeilen.AddRange(zeilen);
@@ -462,15 +463,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     continue;
                 }
 
-                // Nur noch NICHT stornierte Verteil-Zeilen: eine bereits per Gegenbuchung
-                // ausgeglichene Zeile trägt einen OffenerPostenAusgleich (Soll/Haben je nach
-                // Seite). So ist die Rückabwicklung idempotent — ohne Beschreibungs-Marker —
-                // und ein erneut gebuchter Anteil (frisch, ohne OPOS) wird korrekt storniert.
+                // Nur noch nicht stornierte Verteil-Zeilen (siehe NkVerteilung) — so ist der
+                // Storno idempotent und ein erneut gebuchter Anteil wird korrekt storniert.
                 var zeilen = satz.Buchungszeilen
                     .Where(z => verteilKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
-                             && (z.SollHaben == SollHaben.Soll
-                                    ? z.AlsSollZeile.Count == 0
-                                    : z.AlsHabenZeile.Count == 0))
+                             && NkVerteilung.IstAktiv(z))
                     .ToList();
                 if (zeilen.Count == 0) continue;
 
@@ -626,12 +623,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.Mieter)
-                // Vertraege – NK-Buchungskonto, jahresgefiltert (Soll UND Haben — Soll
-                // wird für die Erkennung von MietKorrekturService-Umbuchungen gebraucht,
-                // siehe NkGruppenAbrechnungsService.IstMietKorrekturUmbuchung).
-                // Inkl. Geschwisterzeilen des Satzes (mit Konto), um echte Vorauszahlungen
-                // von NK-Anteil-Gutschriften (Satz berührt ein NkVerrechnungskonto) zu
-                // unterscheiden.
+                // Vertraege – NK-Buchungskonto, jahresgefiltert, mit allem, was
+                // NkVorauszahlung zur Einordnung braucht (Transaktion, Storno-Verweise,
+                // Geschwisterzeilen mit Konto).
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
                         .ThenInclude(v => v.NkBuchungskonto)
@@ -640,6 +634,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                             .ThenInclude(z => z.Buchungssatz)
                                 .ThenInclude(s => s.Buchungszeilen)
                                     .ThenInclude(zz => zz.Buchungskonto)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.NkBuchungskonto)
+                            .ThenInclude(k => k.Buchungszeilen
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
+                            .ThenInclude(z => z.Buchungssatz)
+                                .ThenInclude(s => s.Transaktion)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.NkBuchungskonto)
+                            .ThenInclude(k => k.Buchungszeilen
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
+                            .ThenInclude(z => z.Buchungssatz)
+                                .ThenInclude(s => s.StornoVon)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.NkBuchungskonto)
+                            .ThenInclude(k => k.Buchungszeilen
+                                .Where(z => z.Buchungssatz.Buchungsjahr == jahr))
+                            .ThenInclude(z => z.Buchungssatz)
+                                .ThenInclude(s => s.StornoNach)
+                // Vertraege – ZahlungsKonto zur Erkennung von Mieterzahlungen (NkVorauszahlung)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.ZahlungsKonto)
                 // Vertraege – Miet-Buchungskonto für MietSaldo
                 .Include(u => u.Wohnungen)
                     .ThenInclude(w => w.Vertraege)
@@ -659,6 +678,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ThenInclude(r => r.Buchungssatz)
                             .ThenInclude(s => s.Buchungszeilen)
                                 .ThenInclude(z => z.Buchungskonto)
+                .Include(u => u.Wohnungen)
+                    .ThenInclude(w => w.Vertraege)
+                        .ThenInclude(v => v.Abrechnungsresultate
+                            .Where(r => r.Buchungssatz.Buchungsjahr == jahr))
+                        .ThenInclude(r => r.Buchungssatz)
+                            .ThenInclude(s => s.StornoNach)
                 // Versionen für Schluessel-Lookup
                 .Include(u => u.Versionen)
                 // HKVO-Verlauf für warme Betriebskosten
@@ -728,18 +753,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     var rechnungsbetrag = gruppe.Sum(a => a.Betrag);
                     var info = partei.VertragInfo;
 
-                    var mietZeilen = partei.Vertrag?.MietBuchungskonto.Buchungszeilen
-                        .OrderBy(z => z.Buchungssatz.Buchungsdatum)
-                        .Select(z => new MietZeileInfo
-                        {
-                            Buchungsdatum = z.Buchungssatz.Buchungsdatum,
-                            Buchungsjahr = z.Buchungssatz.Buchungsjahr,
-                            Beschreibung = z.Buchungssatz.Beschreibung,
-                            IstSoll = z.SollHaben == SollHaben.Soll,
-                            Betrag = z.Betrag,
-                        })
-                        .ToList() ?? [];
-
                     var kaltmieteSoll = partei.Vertrag?.MietBuchungskonto.Buchungszeilen
                         .Where(z => z.SollHaben == SollHaben.Soll && z.Buchungssatz.Buchungszeilen.Any(g =>
                             g.SollHaben == SollHaben.Haben && g.Buchungskonto.Kontotyp == BuchungskontoTyp.Ertrag))
@@ -780,7 +793,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Wohnflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Wohnflaeche,
                         Nutzflaeche = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzflaeche,
                         Nutzeinheiten = partei.Wohnung.VersionAt(new DateOnly(jahr, 12, 31)).Nutzeinheit,
-                        Mieten = mietZeilen,
                         PersonenZeitanteile = personenZeitanteile,
                         GebuchterSaldo = info?.GebuchterSaldo,
                         Abgesendet = info?.ExistingResultat?.Abgesendet,
@@ -796,7 +808,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
         /// </summary>
         private static List<AbrechnungseinheitInfo> BuildAbrechnungseinheitenInfos(
             List<NkEinheit> einheiten,
-            List<string> warnungen,
+            List<Hinweis> warnungen,
             Dictionary<int, decimal> prevYearBetragByUmlage,
             int jahr)
         {
@@ -834,7 +846,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         BetriebsstromUmlageId = sp.BetriebsstromUmlageId,
                         BetriebsstromBezeichnung = sp.BetriebsstromBezeichnung,
                         Delta = sp.Delta,
-                        Warnungen = [.. sp.Warnungen]
+                        Warnungen = [.. sp.Warnungen.Select(w => w.Text)]
                     }));
 
                 // KontoId → Partei-Lookup für Merge (planned vs booked); nur Vertrags-Parteien.
@@ -869,11 +881,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         .ToDictionary(g => g.Key, g => g.ToList());
 
                     // Bereits gebuchte Anteil-Zeilen (Transfer-/Umbuchungszeilen auf
-                    // Verrechnungskonten ausgeschlossen – das sind keine Anteile).
+                    // Verrechnungskonten ausgeschlossen – das sind keine Anteile; stornierte
+                    // Verteil-Zeilen zählen nicht, siehe NkVerteilung).
                     // Soll positiv, Haben negativ — Gutschrift-Anteile werden als
                     // Haben-Zeilen gebucht und müssen negativ gegen den Plan stehen.
                     var bookedByKonto = buchungssatz.Buchungszeilen
-                        .Where(z => !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId))
+                        .Where(z => !verrechnungsKontoIds.Contains(z.Buchungskonto.BuchungskontoId)
+                                 && NkVerteilung.IstAktiv(z))
                         .GroupBy(z => z.Buchungskonto.BuchungskontoId)
                         .ToDictionary(
                             g => g.Key,
@@ -993,6 +1007,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                         Bezeichnung = plan.Umlage.Typ.Bezeichnung,
                         Beschreibung = plan.Umlage.Beschreibung ?? "",
                         Schluessel = plan.Umlage.VersionAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31)).Schluessel.ToDescriptionString(),
+                        SchluesselTyp = plan.Umlage.VersionAt(new DateOnly(plan.Buchungssatz.Buchungsjahr, 12, 31)).Schluessel,
                         UmlagetypId = plan.Umlage.Typ.UmlagetypId,
                         BuchungssatzId = buchungssatz.BuchungssatzId,
                         Buchungsdatum = buchungssatz.Buchungsdatum,
@@ -1034,13 +1049,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Abrechnung
                     .ToHashSet();
                 foreach (var umlage in einheit.Umlagen.Where(u => !coveredUmlageIds.Contains(u.UmlageId)))
                 {
-                    warnungen.Add($"Keine Buchungen für '{umlage.Typ.Bezeichnung}' im Jahr {jahr}.");
+                    warnungen.Add(new Hinweis(HinweisArt.Sonstiges, $"Keine Buchungen für '{umlage.Typ.Bezeichnung}' im Jahr {jahr}."));
                     einheitenByKey[einheitKey].Zeilen.Add(new NkZeileInfo
                     {
                         UmlageId = umlage.UmlageId,
                         Bezeichnung = umlage.Typ.Bezeichnung,
                         Beschreibung = umlage.Beschreibung ?? "",
                         Schluessel = umlage.VersionAt(endeJahr).Schluessel.ToDescriptionString(),
+                        SchluesselTyp = umlage.VersionAt(endeJahr).Schluessel,
                         UmlagetypId = umlage.Typ.UmlagetypId,
                         BuchungssatzId = null,
                         Betrag = 0,

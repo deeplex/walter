@@ -52,16 +52,16 @@ echo "[3/6] Installing frontend dependencies"
 echo "[4/6] Seeding realistic development databases"
 echo "Using DB connection: ${DB_HOST}:${DB_PORT} (user: ${DB_USER})"
 
-# Probe MinIO; if it's reachable, hand the URL to the seeder so it can also
+# Probe the S3 server; if it's reachable, hand the URL to the seeder so it can also
 # upload realistic placeholder files. If not reachable (e.g. the user runs
 # bootstrap outside the devcontainer), the seeder logs and skips.
 seed_s3_provider=""
 if [[ "$WALTER_DEV_SKIP_FILE_SEED" != "1" ]]; then
   if (echo >"/dev/tcp/${S3_HOST}/${S3_PORT}") >/dev/null 2>&1; then
     seed_s3_provider="$S3_PROVIDER"
-    echo "MinIO reachable at ${S3_HOST}:${S3_PORT}; sample files will be uploaded to ${seed_s3_provider}"
+    echo "S3 reachable at ${S3_HOST}:${S3_PORT}; sample files will be uploaded to ${seed_s3_provider}"
   else
-    echo "MinIO not reachable at ${S3_HOST}:${S3_PORT}; skipping file seeding."
+    echo "S3 not reachable at ${S3_HOST}:${S3_PORT}; skipping file seeding."
     echo "Start the devcontainer s3 service or run 'docker compose up -d s3 s3-init' to enable file storage."
   fi
 else
@@ -102,9 +102,8 @@ echo "- manager.dev"
 echo "- viewer.dev"
 echo "- limited.dev"
 echo "------------------------------------------------------------"
-echo "FILE STORAGE (S3 / MinIO)"
+echo "FILE STORAGE (S3 / SeaweedFS)"
 echo "  S3_PROVIDER: ${S3_PROVIDER}"
-echo "  MinIO console: http://localhost:9001 (login minioadmin / minioadmin)"
 echo "============================================================"
 echo "Suggested next steps:"
 echo "  ./scripts/dev-watch-stack.sh    # backend + frontend in watch mode"

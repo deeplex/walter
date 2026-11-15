@@ -15,6 +15,7 @@
 
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterPermissions } from './WalterPermissions';
+import { entityRefHref } from './WalterEntityRef';
 
 /** Verknüpfung eines Buchungskontos zu seiner Besitzer-Entität. */
 export type WalterKontoVerknuepfung = {
@@ -24,7 +25,8 @@ export type WalterKontoVerknuepfung = {
         | 'Umlage'
         | 'Kontakt'
         | 'Garage'
-        | 'GarageVertrag';
+        | 'GarageVertrag'
+        | 'Bankkonto';
     id: string;
     text: string;
     funktion: string;
@@ -40,7 +42,7 @@ export type WalterKontoMonatsSumme = {
 
 export type WalterKontoStatusTag = {
     text: string;
-    tag: 'green' | 'red' | 'teal';
+    tag: 'green' | 'red' | 'blue';
 };
 
 /**
@@ -77,24 +79,11 @@ export function kontoStatusTag(
     if (saldo > 0) {
         return { text: 'Offen', tag: 'red' };
     }
-    return { text: 'Guthaben', tag: 'teal' };
+    return { text: 'Guthaben', tag: 'blue' };
 }
 
 export function kontoVerknuepfungHref(v: WalterKontoVerknuepfung): string {
-    switch (v.typ) {
-        case 'Vertrag':
-            return `/vertraege/${v.id}`;
-        case 'Wohnung':
-            return `/wohnungen/${v.id}`;
-        case 'Umlage':
-            return `/umlagen/${v.id}`;
-        case 'Kontakt':
-            return `/kontakte/${v.id}`;
-        case 'Garage':
-            return `/garagen/${v.id}`;
-        case 'GarageVertrag':
-            return `/garage-vertraege/${v.id}`;
-    }
+    return entityRefHref({ type: v.typ, id: v.id })!;
 }
 
 export class WalterBuchungskontoEntry extends WalterApiHandler {
@@ -121,7 +110,9 @@ export class WalterBuchungskontoEntry extends WalterApiHandler {
         public monatsSummen: WalterKontoMonatsSumme[],
         public createdAt: Date,
         public lastModified: Date,
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
+        /** Wem das Konto gehört (z. B. Vertrag mit Anschrift und Mietern). */
+        public besitzer: string | undefined = undefined
     ) {
         super();
     }
@@ -148,7 +139,8 @@ export class WalterBuchungskontoEntry extends WalterApiHandler {
             json.monatsSummen ?? [],
             new Date(json.createdAt),
             new Date(json.lastModified),
-            permissions
+            permissions,
+            json.besitzer ?? undefined
         );
     }
 }

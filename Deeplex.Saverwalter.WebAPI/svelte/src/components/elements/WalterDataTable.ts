@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { formatDate } from '$walter/services/format';
+
 export function dates(key: string) {
     switch (key) {
         case 'beginn':
@@ -38,6 +40,17 @@ export function time(key: string) {
     }
 }
 
+/** Mengen wie Zählerstände: deutsch, bis zu drei Nachkommastellen. */
+export function zahlen(key: string) {
+    switch (key) {
+        case 'stand':
+        case 'lastZaehlerstand.stand':
+            return true;
+        default:
+            return false;
+    }
+}
+
 export function euro(key: string) {
     switch (key) {
         case 'betrag':
@@ -55,9 +68,5 @@ export function euro(key: string) {
 }
 
 export function formatToTableDate(date: string) {
-    return new Date(date).toLocaleDateString('de-DE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
+    return formatDate(date);
 }

@@ -26,22 +26,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
     ///   Rückabwicklung des Abrechnungslaufs (ganze Gruppe) veränderbar.
     /// - Sätze, die in eine existierende Abrechnung eingeflossen sind
     ///   (NK-Vorauszahlungen/NK-Anteile des abgerechneten Jahres, Rechnungen
-    ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert.
+    ///   der beteiligten Umlagen), sind gesperrt, solange die Abrechnung existiert
+    ///   und nicht storniert ist.
     /// - Löschen ist nur für "freie" Sätze erlaubt: zusätzlich keine
-    ///   OPOS-Verknüpfung und kein Storno(-Partner) — sonst stornieren.
+    ///   OPOS-Verknüpfung mit einem anderen Satz, keine ihm zugeordnete Zahlung (auch
+    ///   keine stornierte, siehe <see cref="Buchungszeile.ZugeordnetZu"/>) und kein
+    ///   Storno(-Partner) — sonst stornieren. Ausgleiche zwischen Zeilen desselben
+    ///   Satzes zählen nicht.
     /// </summary>
     public class BuchungssatzSchutz
     {
         public bool IstAbrechnungssatz { get; init; }
         public bool AbrechnungBetroffen { get; init; }
         public bool HatOposVerknuepfung { get; init; }
+        public bool HatZugeordneteZahlungen { get; init; }
         public bool IstStorno { get; init; }
         public bool IstStorniert { get; init; }
 
         public bool KannStornieren =>
             !IstAbrechnungssatz && !AbrechnungBetroffen && !IstStorno && !IstStorniert;
 
-        public bool KannLoeschen => KannStornieren && !HatOposVerknuepfung;
+        public bool KannLoeschen => KannStornieren && !HatOposVerknuepfung && !HatZugeordneteZahlungen;
 
         public string? Sperrgrund =>
             IstAbrechnungssatz
@@ -54,13 +59,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
                             ? "Stornobuchung — kann nicht selbst storniert oder gelöscht werden."
                             : HatOposVerknuepfung
                                 ? "Mit anderen Buchungssätzen ausgeglichen — bitte stornieren statt löschen."
-                                : null;
+                                : HatZugeordneteZahlungen
+                                    ? "Zahlungen sind diesem Buchungssatz zugeordnet — bitte stornieren statt löschen."
+                                    : null;
     }
 
     public class BuchungssatzSchutzService(SaverwalterContext ctx)
     {
-        public async Task<BuchungssatzSchutz> PruefeAsync(Buchungssatz satz)
+        /// <param name="jahr">
+        /// Buchungsjahr, für das geprüft wird — Standard ist das des Satzes. Wer das
+        /// Buchungsjahr ändert, prüft zusätzlich das Zieljahr.
+        /// </param>
+        public async Task<BuchungssatzSchutz> PruefeAsync(Buchungssatz satz, int? jahr = null)
         {
+            var pruefJahr = jahr ?? satz.Buchungsjahr;
             var zeileIds = satz.Buchungszeilen.Select(z => z.BuchungszeileId).ToList();
             var kontoIds = satz.Buchungszeilen
                 .Select(z => z.Buchungskonto.BuchungskontoId)
@@ -74,30 +86,61 @@ namespace Deeplex.Saverwalter.WebAPI.Services.Buchungen
             // NK-Anteile des abgerechneten Jahres) ...
             var vertragBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
-                    r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr &&
+                    r.Buchungssatz.Buchungsjahr == pruefJahr &&
+                    r.Buchungssatz.StornoNach == null &&
                     kontoIds.Contains(r.Vertrag.NkBuchungskonto.BuchungskontoId));
 
             // ... oder über das NK-Verrechnungskonto einer Umlage, deren Wohnungen
             // für das Jahr abgerechnet wurden (BK-Rechnungen, Umbuchungen).
             var umlageBetroffen = await ctx.Abrechnungsresultate
                 .AnyAsync(r =>
-                    r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr &&
+                    r.Buchungssatz.Buchungsjahr == pruefJahr &&
+                    r.Buchungssatz.StornoNach == null &&
                     r.Vertrag.Wohnung.Umlagen.Any(u =>
                         kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)));
 
             var hatOpos = await ctx.OffenePostenAusgleiche
                 .AnyAsync(a =>
-                    zeileIds.Contains(a.SollZeile.BuchungszeileId) ||
+                    zeileIds.Contains(a.SollZeile.BuchungszeileId) !=
                     zeileIds.Contains(a.HabenZeile.BuchungszeileId));
+
+            var hatZugeordnete = await ctx.Buchungszeilen
+                .AnyAsync(z => z.ZugeordnetZu != null
+                    && zeileIds.Contains(z.ZugeordnetZu.BuchungszeileId)
+                    && !zeileIds.Contains(z.BuchungszeileId));
 
             return new BuchungssatzSchutz
             {
+                HatZugeordneteZahlungen = hatZugeordnete,
                 IstAbrechnungssatz = istAbrechnungssatz,
                 AbrechnungBetroffen = !istAbrechnungssatz && (vertragBetroffen || umlageBetroffen),
                 HatOposVerknuepfung = hatOpos,
                 IstStorno = satz.StornoVon != null,
                 IstStorniert = satz.StornoNach != null
             };
+        }
+
+        /// <summary>
+        /// Nicht stornierte Abrechnungsresultate, in die der Satz eingeflossen ist
+        /// (dieselbe Regel wie <see cref="BuchungssatzSchutz.AbrechnungBetroffen"/>) oder
+        /// deren Abrechnungssatz er selbst ist.
+        /// </summary>
+        public async Task<List<Abrechnungsresultat>> BetroffeneResultateAsync(Buchungssatz satz)
+        {
+            var kontoIds = satz.Buchungszeilen
+                .Select(z => z.Buchungskonto.BuchungskontoId)
+                .Distinct()
+                .ToList();
+            return await ctx.Abrechnungsresultate
+                .Include(r => r.Vertrag).ThenInclude(v => v.Wohnung)
+                .Include(r => r.Buchungssatz)
+                .Where(r => r.Buchungssatz.StornoNach == null)
+                .Where(r => r.Buchungssatz.BuchungssatzId == satz.BuchungssatzId
+                    || (r.Buchungssatz.Buchungsjahr == satz.Buchungsjahr
+                        && (kontoIds.Contains(r.Vertrag.NkBuchungskonto.BuchungskontoId)
+                            || r.Vertrag.Wohnung.Umlagen.Any(u =>
+                                kontoIds.Contains(u.NkVerrechnungsKonto.BuchungskontoId)))))
+                .ToListAsync();
         }
     }
 }

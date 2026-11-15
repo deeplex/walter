@@ -30,7 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
     public class BetriebskostenrechnungDbService(
         SaverwalterContext ctx,
         IAuthorizationService auth,
-        BetriebskostenrechnungBuchungsService buchungsService)
+        BetriebskostenrechnungBuchungsService buchungsService,
+        BuchungssatzSchutzService schutzService,
+        RueckgaengigService rueckgaengigService)
     {
         private async Task<Dictionary<int, Umlage>> GetNkKontoUmlageMapAsync()
             => await ctx.Umlagen
@@ -206,8 +208,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             var authRx = await auth.AuthorizeAsync(user, umlage, [Operations.Delete]);
             if (!authRx.Succeeded) return new ForbidResult();
 
-            ctx.Buchungssaetze.Remove(satz);
-            await ctx.SaveChangesAsync();
+            try
+            {
+                await rueckgaengigService.LoeschenAsync([satz]);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ConflictObjectResult(ex.Message);
+            }
             return new OkResult();
         }
 
@@ -268,6 +276,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
                 ? await ctx.Umlagen.Include(u => u.Typ).Include(u => u.NkVerrechnungsKonto)
                     .FirstOrDefaultAsync(u => u.UmlageId == entry.Umlage.Id) ?? umlage
                 : umlage;
+
+            // Betrag, Jahr und Umlage wirken auf die Abrechnung: nur änderbar, solange der
+            // Satz löschbar wäre — im bisherigen wie im neuen Jahr. Sonst stornieren.
+            var betragAlt = satz.Buchungszeilen
+                .Where(z => z.Buchungskonto.BuchungskontoId == umlage.NkVerrechnungsKonto.BuchungskontoId)
+                .Sum(z => z.SollHaben == SollHaben.Haben ? z.Betrag : -z.Betrag);
+            var aendertBuchung = entry.Betrag != betragAlt
+                || entry.BetreffendesJahr != satz.Buchungsjahr
+                || neueUmlage.UmlageId != umlage.UmlageId;
+            if (aendertBuchung)
+            {
+                var schutz = await schutzService.PruefeAsync(satz);
+                var schutzZiel = await schutzService.PruefeAsync(satz, entry.BetreffendesJahr);
+                if (!schutz.KannLoeschen || !schutzZiel.KannLoeschen)
+                {
+                    return new ConflictObjectResult(schutz.Sperrgrund ?? schutzZiel.Sperrgrund);
+                }
+            }
 
             await buchungsService.AktualisiereBuchungssatzAsync(
                 satz, neueUmlage, entry.Betrag, entry.Datum, entry.BetreffendesJahr, entry.Notiz);

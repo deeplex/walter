@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
     /// Jahresabschlusskontrolle: Prüft pro Abrechnungszeitraum (Buchungsjahr), ob
     /// alle ausgleichbaren Konten ausgeglichen sind und alle Betriebskosten-
     /// abrechnungen erstellt und abgesendet wurden. Strikt lesend — anders als
-    /// der OffeneForderungenController werden keine Sollstellungen erzeugt.
+    /// der SollstellungService werden keine Sollstellungen erzeugt.
     /// </summary>
     public static class JahresabschlussService
     {
@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .ToListAsync();
 
             var kontoIds = konten.Select(k => k.BuchungskontoId).ToList();
-            var verknuepfungen = await KontoVerknuepfungService.ForKontenAsync(ctx, kontoIds);
+            var verknuepfungen = await Kontorollen.VerknuepfungenAsync(ctx, kontoIds);
 
             // OPOS-Ausgleiche für beide Richtungen: eine Soll-Forderung (z.B. Miete,
             // Nachzahlung) wird von einer Haben-Zeile gedeckt, eine Haben-Forderung
@@ -225,7 +225,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                     v.NkBuchungskonto.BuchungskontoId,
                     v.BkAbrechnungsKonto.BuchungskontoId,
                     v.ZahlungsKonto.BuchungskontoId,
-                    v.MietminderungsKonto.BuchungskontoId
+                    v.MietminderungsKonto.BuchungskontoId,
+                    v.KautionsKonto.BuchungskontoId
                 })
                 .ToHashSet();
 
@@ -382,7 +383,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                     return new AbrechnungsstatusEntry
                     {
                         VertragId = v.VertragId,
-                        Bezeichnung = KontoVerknuepfungService.GetVertragName(v),
+                        Bezeichnung = Kontorollen.VertragText(v),
                         ResultatVorhanden = resultat != null,
                         Abgesendet = resultat?.Abgesendet ?? false,
                         Ausgeglichen = resultat != null && SaldoAusgeglichen(resultat, v),

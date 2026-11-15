@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.PrintService
             var rows = 3;
 
             left.Add(d.Vermieter.Bezeichnung);
-            if (d.Vermieter.Bezeichnung != d.Ansprechpartner.Bezeichnung)
+            if (d.Vermieter.KontaktId != d.Ansprechpartner.KontaktId)
             {
                 left.Add("℅ " + d.Ansprechpartner.Bezeichnung);
                 rows++;

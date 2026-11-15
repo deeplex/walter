@@ -13,7 +13,7 @@ Walter (Saverwalter) ist eine Webanwendung zur Verwaltung von Wohnungen, Mietver
 | Datenbank     | PostgreSQL                               |
 | DI-Container  | Simple Injector                          |
 | Frontend      | SvelteKit, Carbon Design System, D3.js   |
-| Dateiablage   | S3-kompatibel (MinIO im Entwicklungs-Stack) |
+| Dateiablage   | S3-kompatibel (SeaweedFS im Entwicklungs-Stack) |
 | Observability | OpenTelemetry (optional, via `OTEL_ENDPOINT`) |
 | Tests         | xUnit (Backend), Vitest + Playwright (Frontend) |
 | CI            | GitHub Actions                           |
@@ -88,7 +88,7 @@ Erhaltungsaufwand ist etwa ein Buchungssatz auf dem `AufwandsKonto` der Wohnung
 Alle Geldbewegungen laufen über vier Modell-Typen (Details siehe [Datenmodell](datenmodell.md)):
 
 - **Buchungskonto** — ein Konto im Kontenrahmen (Aktiv / Passiv / Aufwand / Ertrag). Z. B. das `AufwandsKonto` einer Wohnung, das `NkBuchungskonto`/`MietBuchungskonto` eines Vertrags oder das `VerbindlichkeitsKonto` eines Kontakts.
-- **Buchungssatz** — ein vollständiger Buchungssatz mit Buchungsjahr, optionalem Belegpfad und einer fortlaufenden Nummer aus einer globalen DB-Sequence. Ein **freier** Satz ist löschbar/bearbeitbar; sobald er über einen Offenen-Posten-Ausgleich verknüpft ist, erfolgt die Korrektur per **Stornobuchung** (`StornoVon`); abrechnungsrelevante Sätze sind gesperrt (`BuchungssatzSchutz`).
+- **Buchungssatz** — ein vollständiger Buchungssatz mit Buchungsjahr, optionalem Belegpfad und einer fortlaufenden Nummer aus einer globalen DB-Sequence. Ein **freier** Satz ist löschbar/bearbeitbar; sobald er über einen Offenen-Posten-Ausgleich verknüpft ist, erfolgt die Korrektur per **Stornobuchung** (`StornoVon`); abrechnungsrelevante Sätze sind gesperrt (`BuchungssatzSchutz`). Das fachliche „Rückgängig“ (`RueckgaengigService`, `GET/POST /api/transaktionen/{id}/rueckgaengig` und `/api/buchungssaetze/{id}/rueckgaengig`) entscheidet zwischen Löschen, Storno und gesperrt und nimmt betroffene Abrechnungen nach Bestätigung als Gruppe mit zurück. Gelöscht oder storniert werden Sätze nur im `RueckgaengigService` (automatisch, oder ausdrücklich über `LoeschenAsync`/`StornierenAsync` für die Expertenansicht) — einzige Ausnahme ist die Rückabwicklung bzw. das Storno einer ganzen Abrechnungsgruppe im Abrechnungslauf; ein Architekturtest prüft das. `TransaktionBuchungsService` trennt Aufbau und Speichern; `POST /api/transaktionen/buchen/vorschau` zeigt mit demselben Code, was gebucht würde, ohne zu speichern.
 - **Buchungszeile** — eine Soll- oder Haben-Zeile eines Buchungssatzes auf genau einem Buchungskonto.
 - **OffenerPostenAusgleich** — verbindet eine offene Forderung (Soll-Zeile) mit ihrer ausgleichenden Zahlung (Haben-Zeile) auf demselben Konto (OPOS-Prinzip).
 
@@ -105,7 +105,7 @@ Eine importierte oder erfasste **Transaktion** (Kontoauszugseintrag) wird über 
 | `DATABASE_USER`     | Datenbankbenutzer                               |
 | `DATABASE_PASS`     | Datenbankpasswort                               |
 | `DATABASE_NAME`     | Datenbankname                                   |
-| `S3_*`              | S3/MinIO-Verbindungsparameter (Endpoint, Bucket, Keys) |
+| `S3_*`              | S3-Verbindungsparameter (Endpoint, Bucket, Keys) |
 | `OTEL_ENDPOINT`     | OpenTelemetry Collector Endpoint (optional)     |
 
 ---

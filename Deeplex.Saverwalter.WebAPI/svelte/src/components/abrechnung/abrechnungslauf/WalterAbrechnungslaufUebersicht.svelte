@@ -15,15 +15,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import type {
         AbrechnungsresultatInfo,
         AbrechnungslaufGruppeResult
     } from './AbrechnungslaufTypes';
-    import {
-        DataTable,
-        Toolbar,
-        ToolbarContent
-    } from 'carbon-components-svelte';
+    import {} from 'carbon-components-svelte';
 
     export let gruppe: AbrechnungslaufGruppeResult;
     export let jahr: number;
@@ -130,7 +127,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </h4>
 
 {#each groupResultateByAdresse(vertragResultate) as adressGruppe, adressIndex}
-    <DataTable
+    <WalterDataTable
         title={`Verträge - ${adressGruppe.adresse}`}
         description="NK-Abrechnung für {jahr}"
         headers={[
@@ -159,9 +156,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 Math.abs(r.gebuchterSaldo - r.saldo) > 0.005
         }))}
         size="short"
-        style="margin-bottom: 1rem;"
+        search={false}
+        customCells={[
+            'wohnungBezeichnung',
+            'mieterBezeichnung',
+            'saldo',
+            'status',
+            'nutzung'
+        ]}
     >
-        <Toolbar><ToolbarContent /></Toolbar>
         <svelte:fragment slot="cell" let:cell let:row>
             {#if cell.key === 'wohnungBezeichnung'}
                 <a href="/wohnungen/{row.wohnungId}">{cell.value}</a>
@@ -187,15 +190,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <span title={cell.value.gesamtZeitraum}
                     >{cell.value.zeitraumImJahr}</span
                 >
-            {:else}
-                {cell.value}
             {/if}
         </svelte:fragment>
-    </DataTable>
+    </WalterDataTable>
 {/each}
 
 {#each groupResultateByAdresse(leerstandResultate) as adressGruppe, adressIndex}
-    <DataTable
+    <WalterDataTable
         title={`Wohnungen - ${adressGruppe.adresse}`}
         description="Leerstand / Eigenanteile für {jahr}"
         headers={[
@@ -210,16 +211,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             wohnungBezeichnung: splitWohnungBezeichnung(r.wohnungBezeichnung)
                 .wohnung,
             leerstand: getAbrechnungszeitraum(r.nutzungVon, r.nutzungBis, jahr),
-            kosten: euro(r.rechnungsbetrag),
+            kosten: r.rechnungsbetrag,
             status: resultatStatus(r),
             statusVeraltet:
                 r.gebuchterSaldo !== null &&
                 Math.abs(r.gebuchterSaldo - r.saldo) > 0.005
         }))}
         size="short"
-        style="margin-bottom: 0.5rem;"
+        search={false}
+        customCells={['wohnungBezeichnung', 'status', 'leerstand']}
     >
-        <Toolbar><ToolbarContent /></Toolbar>
         <svelte:fragment slot="cell" let:cell let:row>
             {#if cell.key === 'wohnungBezeichnung'}
                 <a href="/wohnungen/{row.wohnungId}">{cell.value}</a>
@@ -235,9 +236,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <span title={cell.value.gesamtZeitraum}
                     >{cell.value.zeitraumImJahr}</span
                 >
-            {:else}
-                {cell.value}
             {/if}
         </svelte:fragment>
-    </DataTable>
+    </WalterDataTable>
 {/each}

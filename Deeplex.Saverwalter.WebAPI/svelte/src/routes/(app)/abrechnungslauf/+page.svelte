@@ -36,10 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { download_file_blob } from '$walter/services/files';
     import { walter_fetch, walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
-    import type {
-        AbrechnungsresultatInfo,
-        AbrechnungslaufGruppeResult
-    } from '$walter/components/abrechnung/abrechnungslauf/AbrechnungslaufTypes';
+    import type { AbrechnungslaufGruppeResult } from '$walter/components/abrechnung/abrechnungslauf/AbrechnungslaufTypes';
 
     export let data: PageData;
 
@@ -49,9 +46,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bezeichnung: string;
     };
 
+    type Hinweis = {
+        art: 'Verbrauch' | 'Miete' | 'Sonstiges';
+        text: string;
+        sperrtBuchung: boolean;
+    };
+
     type AbrechnungslaufResult = {
         gruppen: AbrechnungslaufGruppeResult[];
-        warnungen: string[];
+        warnungen: Hinweis[];
     };
 
     const ensureBatchResult = (value: unknown): AbrechnungslaufResult[] => {
@@ -322,16 +325,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: abweichendeMieten = vertragResultate.filter(
         (r) => Math.abs(r.mietSaldo) > 0.005
     ).length;
-    $: warnungen = [...new Set(result?.warnungen ?? [])];
-    $: warnungenZaehlerstaende = warnungen.filter((w) =>
-        /z(a|ä)hler|zaehlerstand/i.test(w)
-    );
-    $: warnungenMieten = warnungen.filter((w) => /miet|kaltmiete/i.test(w));
-    $: warnungenSonstige = warnungen.filter(
-        (w) => !/z(a|ä)hler|zaehlerstand/i.test(w) && !/miet|kaltmiete/i.test(w)
-    );
-    // Harte Fehler (fehlender Zählerstand → nicht zuordenbarer Verbrauch) sperren das Buchen.
-    $: fehler = warnungen.filter((w) => w.includes('Zählerstand fehlt —'));
+    // Doppelte Hinweise (gleiche Art, gleiche Sperrwirkung, gleicher Text) nur einmal zeigen.
+    $: warnungen = [
+        ...new Map(
+            (result?.warnungen ?? []).map((w) => [JSON.stringify(w), w])
+        ).values()
+    ];
+    const texteDerArt = (hinweise: Hinweis[], art: Hinweis['art']) =>
+        hinweise.filter((w) => w.art === art).map((w) => w.text);
+    $: warnungenZaehlerstaende = texteDerArt(warnungen, 'Verbrauch');
+    $: warnungenMieten = texteDerArt(warnungen, 'Miete');
+    $: warnungenSonstige = texteDerArt(warnungen, 'Sonstiges');
+    // Sperrende Hinweise verhindern das Buchen.
+    $: fehler = warnungen.filter((w) => w.sperrtBuchung).map((w) => w.text);
     $: hatHinweise =
         fehlendeBuchungen > 0 ||
         inkonsistenteBuchungen > 0 ||

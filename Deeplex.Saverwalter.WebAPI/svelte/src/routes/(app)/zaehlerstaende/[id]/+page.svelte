@@ -24,7 +24,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateGerman } from '$walter/services/utils';
     import type { PageData } from './$types';
     import { WalterFileWrapper, validateZaehlerstand } from '$walter/lib';
-    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -55,8 +54,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterGrid>
     <WalterZaehlerstand fetchImpl={data.fetchImpl} entry={data.entry} />
     <WalterLinkTile
-        bind:fileWrapper
-        fileref={fileURL.zaehler(`${data.entry.zaehler.id}`)}
         name={`Zähler: ${data.entry.zaehler.text}`}
         href={`/zaehler/${data.entry.zaehler.id}`}
     />

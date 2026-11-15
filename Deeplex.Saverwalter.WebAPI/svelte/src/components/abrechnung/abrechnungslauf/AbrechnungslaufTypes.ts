@@ -47,11 +47,21 @@ export type P9DetailsInfo = {
     wwZaehler: ZaehlerVerbrauchInfo[];
 };
 
+/** Umlageschlüssel als Wert (Enum-Name); `schluessel` ist nur die Anzeigebezeichnung. */
+export type SchluesselTyp =
+    | 'NachWohnflaeche'
+    | 'NachNutzeinheit'
+    | 'NachPersonenzahl'
+    | 'NachVerbrauch'
+    | 'NachNutzflaeche'
+    | 'NachMiteigentumsanteil';
+
 export type NkZeileInfo = {
     umlageId: number;
     bezeichnung: string;
     beschreibung: string;
     schluessel: string;
+    schluesselTyp: SchluesselTyp;
     umlagetypId: number;
     buchungssatzId: string | null;
     buchungsdatum: string | null;
@@ -89,14 +99,6 @@ export type AbrechnungseinheitInfo = {
     strompauschalen: StrompauschaleInfo[];
 };
 
-export type MietZeileInfo = {
-    buchungsdatum: string;
-    buchungsjahr: number;
-    beschreibung: string;
-    istSoll: boolean;
-    betrag: number;
-};
-
 export type PersonenZeitanteilInfo = {
     beginn: string;
     ende: string;
@@ -121,7 +123,6 @@ export type AbrechnungsresultatInfo = {
     mietSaldo: number;
     kaltmieteSoll: number;
     wohnflaeche: number;
-    mieten: MietZeileInfo[];
     personenZeitanteile: PersonenZeitanteilInfo[];
     gebuchterSaldo: number | null;
     abgesendet: boolean | null;

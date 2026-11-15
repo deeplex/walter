@@ -26,12 +26,18 @@ export class WalterFileWrapper {
     }
 
     // Always register for the next to last position; the last is always the stack.
-    register(name: string, fileURL: string) {
-        const handle = new WalterFileHandle(name, fileURL, this.fetchImpl);
+    // `family`: die Dateien der ganzen Familie des Objekts zeigen; der Ablagestapel hat keine.
+    register(name: string, fileURL: string, family = true) {
+        const handle = new WalterFileHandle(
+            name,
+            fileURL,
+            this.fetchImpl,
+            family
+        );
         this.handles.splice(this.handles.length - 1, 0, handle);
     }
 
     registerStack() {
-        this.register('Ablagestapel', fileURL.stack);
+        this.register('Ablagestapel', fileURL.stack, false);
     }
 }

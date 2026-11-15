@@ -150,8 +150,29 @@ jobs:
 
   test-dotnet:
     runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      # Verbindung ohne Datenbanknamen: die PostgreSQL-Tests legen eigene Datenbanken an.
+      WALTER_TEST_POSTGRES: Host=localhost;Port=5432;Username=postgres;Password=postgres
+      # Adresse des Buckets (wie S3_PROVIDER): die Tests der Dateiablage laufen gegen den echten Speicher.
+      WALTER_TEST_S3: http://127.0.0.1:9000/saverwalter
     steps:
       - uses: actions/checkout@v4
+
+      - name: Start S3 server
+        uses: ./.github/actions/start-s3
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -181,6 +202,12 @@ jobs:
           --collect:"XPlat Code Coverage"
           --logger trx
           --results-directory artifacts/test-results/dotnet
+
+      - name: S3 server log
+        if: ${{ failure() && env.ACT != 'true' }}
+        run: |
+          docker ps -a
+          docker logs s3 2>&1 | tail -n 200 || true
 
       - name: Upload .NET test results
         if: ${{ !cancelled() && env.ACT != 'true' }}
@@ -254,19 +281,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start MinIO
-        # GitHub Actions' `services:` block has no way to pass a command/args
-        # to the container, but the MinIO image needs "server /data" to
-        # actually start its server (without it, health checks never
-        # succeed) — so it's run as a plain docker step instead, matching
-        # the command already used in .devcontainer/compose.yaml.
-        run: >-
-          docker run -d --name minio
-          -p 9000:9000 -p 9001:9001
-          -e MINIO_ROOT_USER=minioadmin
-          -e MINIO_ROOT_PASSWORD=minioadmin
-          minio/minio:RELEASE.2023-02-17T17-52-43Z
-          server /data --console-address ":9001"
+      - name: Start S3 server
+        uses: ./.github/actions/start-s3
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -298,33 +314,6 @@ jobs:
       - name: Install Playwright browsers
         working-directory: ${{ env.FRONTEND_DIR }}
         run: yarn playwright install --with-deps chromium
-
-      - name: Initialize MinIO bucket for file tests
-        run: |
-          # "localhost" can resolve to ::1 first on the runner while the MinIO
-          # service container's published port is only reachable over IPv4 —
-          # use 127.0.0.1 explicitly to avoid a spurious connection refused.
-          ready=false
-          for _ in $(seq 1 60); do
-            if curl --silent --fail http://127.0.0.1:9000/minio/health/ready >/dev/null; then
-              ready=true
-              break
-            fi
-            sleep 1
-          done
-          if [ "$ready" != "true" ]; then
-            echo "MinIO did not become healthy at 127.0.0.1:9000 within 60s."
-            exit 1
-          fi
-
-          curl --fail --silent --show-error --location \
-            https://dl.min.io/client/mc/release/linux-amd64/mc \
-            --output /tmp/mc
-          chmod +x /tmp/mc
-
-          /tmp/mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
-          /tmp/mc mb --ignore-existing local/saverwalter
-          /tmp/mc anonymous set public local/saverwalter
 
       - name: Download published WebAPI
         if: ${{ env.ACT != 'true' }}
@@ -358,6 +347,12 @@ jobs:
           WALTER_PRESERVE_LOGS_ON_FAILURE: 1
           WALTER_APP_BINARY: ${{ github.workspace }}/artifacts/publish/webapi/Deeplex.Saverwalter.WebAPI
         run: bash ./scripts/test-full-stack.sh
+
+      - name: S3 server log
+        if: ${{ failure() && env.ACT != 'true' }}
+        run: |
+          docker ps -a
+          docker logs s3 2>&1 | tail -n 200 || true
 
       - name: Upload Playwright artifacts
         if: ${{ !cancelled() && env.ACT != 'true' }}

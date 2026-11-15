@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
@@ -201,10 +202,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<UmlageController> _logger;
         protected override UmlageDbService DbService { get; }
 
-        public UmlageController(ILogger<UmlageController> logger, UmlageDbService dbService, HttpClient httpClient) : base(logger, httpClient)
+        protected override FileFamily? FileFamilyOf(Umlage e) => FileFamilies.Of(e);
+        private readonly UmlageRechnungenService _rechnungenService;
+
+        public UmlageController(
+            ILogger<UmlageController> logger,
+            UmlageDbService dbService,
+            HttpClient httpClient,
+            UmlageRechnungenService rechnungenService) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;
+            _rechnungenService = rechnungenService;
         }
 
 
@@ -220,5 +229,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<ActionResult<UmlageEntry>> Put(int id, UmlageEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
+
+        /// <summary>
+        /// Betriebskostenrechnungen der Umlage: Betrag, bezahlt, offen, verteilt und die
+        /// Zahlungen — siehe <see cref="UmlageRechnungenService"/>.
+        /// </summary>
+        [HttpGet("{id}/rechnungen")]
+        public async Task<ActionResult<UmlageRechnungenService.UmlageRechnungen>> GetRechnungen(int id)
+        {
+            var umlage = await DbService.GetEntity(User!, id, Operations.Read);
+            if (umlage.Result is not null) return umlage.Result;
+
+            return Ok(await _rechnungenService.ErmittleAsync(id));
+        }
     }
 }

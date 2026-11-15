@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterHeader,
         WalterTransaktion
     } from '$walter/components';
+    import WalterBuchungsvorschau from '$walter/components/details/WalterBuchungsvorschau.svelte';
     import {
         HeaderGlobalAction,
         HeaderUtilities
@@ -39,6 +40,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let buchung: TransaktionsInput = emptyTransaktionsInput();
     let buchungValid = false;
+    let vorschauGueltig = false;
+    // Die Vorschau zeigt die Zahlung; reine NK-Anteile (ohne Betrag) haben keine.
+    $: mitZahlung = buchung.betrag > 0;
+    $: speicherbar = buchungValid && (!mitZahlung || vorschauGueltig);
 
     const SaveToast = new WalterToastContent(
         'Buchung gespeichert',
@@ -61,7 +66,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     );
 
     async function save() {
-        if (!buchungValid) {
+        if (!speicherbar) {
             addToast(InvalidToast, false, null);
             return;
         }
@@ -83,7 +88,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <HeaderGlobalAction
             on:click={save}
             icon={Save}
-            disabled={!buchungValid}
+            disabled={!speicherbar}
         />
     </HeaderUtilities>
 </WalterHeader>
@@ -94,4 +99,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:buchung
         bind:isValid={buchungValid}
     />
+    {#if mitZahlung}
+        <WalterBuchungsvorschau
+            input={buchungValid ? buchung : undefined}
+            bind:gueltig={vorschauGueltig}
+        />
+    {/if}
 </WalterGrid>

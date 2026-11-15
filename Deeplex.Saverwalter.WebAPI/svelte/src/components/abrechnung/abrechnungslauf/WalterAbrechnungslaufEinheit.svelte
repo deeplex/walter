@@ -15,9 +15,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import WalterDataTable from '$walter/components/elements/WalterDataTable.svelte';
     import type {
         AbrechnungseinheitInfo,
-        PersonenZeitanteilInfo
+        PersonenZeitanteilInfo,
+        SchluesselTyp
     } from './AbrechnungslaufTypes';
     import WalterAbrechnungslaufHeizkosten from './WalterAbrechnungslaufHeizkosten.svelte';
     import WalterDataWrapperQuickAdd from '../../elements/WalterDataWrapperQuickAdd.svelte';
@@ -30,15 +32,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertPercent
     } from '$walter/services/utils';
     import {
-        DataTable,
         Row,
         StructuredList,
         StructuredListBody,
         StructuredListCell,
         StructuredListHead,
-        StructuredListRow,
-        Toolbar,
-        ToolbarContent
+        StructuredListRow
     } from 'carbon-components-svelte';
 
     export let einheit: AbrechnungseinheitInfo;
@@ -86,10 +85,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     // Erste Zeile mit einem Anteil DIESES Vertrags nehmen — die erste Zeile des
     // Schlüssels kann eine fehlende Umlage ohne Anteile sein (→ fälschlich 0).
-    $: anteilFaktorFuerSchluessel = (schluessel: string): number => {
+    $: anteilFaktorFuerSchluessel = (schluessel: SchluesselTyp): number => {
         const zeile = einheit.nkZeilen.find(
             (z) =>
-                z.schluessel === schluessel &&
+                z.schluesselTyp === schluessel &&
                 z.anteile.some((a) => a.vertragId === vertragId)
         );
         return (
@@ -102,10 +101,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const formatAnzahl = (n: number) =>
         Number(n.toFixed(2)) % 1 === 0 ? String(Math.round(n)) : n.toFixed(2);
 
-    $: wfZeitanteil = anteilFaktorFuerSchluessel('n. WF');
-    $: nfZeitanteil = anteilFaktorFuerSchluessel('n. NF');
-    $: meaZeitanteil = anteilFaktorFuerSchluessel('n. MEA');
-    $: neZeitanteil = anteilFaktorFuerSchluessel('n. NE');
+    $: wfZeitanteil = anteilFaktorFuerSchluessel('NachWohnflaeche');
+    $: nfZeitanteil = anteilFaktorFuerSchluessel('NachNutzflaeche');
+    $: meaZeitanteil = anteilFaktorFuerSchluessel('NachMiteigentumsanteil');
+    $: neZeitanteil = anteilFaktorFuerSchluessel('NachNutzeinheit');
 
     $: alleZeilen = einheit.nkZeilen;
     $: kalteZeilen = alleZeilen.filter((z) => z.para9_2 == null);
@@ -118,6 +117,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         typ: string;
         typId: number;
         schluessel: string;
+        schluesselTyp: SchluesselTyp;
         gesamtBetrag: number;
         betragLetztesJahr: number;
         anteil: number;
@@ -137,6 +137,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     typ: z.bezeichnung,
                     typId: z.umlagetypId,
                     schluessel: z.schluessel,
+                    schluesselTyp: z.schluesselTyp,
                     gesamtBetrag: z.betrag,
                     betragLetztesJahr: z.betragLetztesJahr,
                     anteil: faktor,
@@ -159,14 +160,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: betragKalt = meineZeilen.reduce((s, r) => s + r.betrag, 0);
 
-    $: hasWF = meineZeilen.some((r) => r.schluessel === 'n. WF');
-    $: hasNF = meineZeilen.some((r) => r.schluessel === 'n. NF');
-    $: hasNE = meineZeilen.some((r) => r.schluessel === 'n. NE');
-    $: hasMEA = meineZeilen.some((r) => r.schluessel === 'n. MEA');
-    $: hasPs = meineZeilen.some((r) => r.schluessel === 'n. Pers.');
+    $: hasWF = meineZeilen.some((r) => r.schluesselTyp === 'NachWohnflaeche');
+    $: hasNF = meineZeilen.some((r) => r.schluesselTyp === 'NachNutzflaeche');
+    $: hasNE = meineZeilen.some((r) => r.schluesselTyp === 'NachNutzeinheit');
+    $: hasMEA = meineZeilen.some(
+        (r) => r.schluesselTyp === 'NachMiteigentumsanteil'
+    );
+    $: hasPs = meineZeilen.some((r) => r.schluesselTyp === 'NachPersonenzahl');
 
     $: verbrauchZeilen = kalteZeilen
-        .filter((z) => z.schluessel === 'n. Verb.')
+        .filter((z) => z.schluesselTyp === 'NachVerbrauch')
         .map((z) => {
             const anteil = z.anteile.find((a) => a.vertragId === vertragId);
             return {
@@ -179,13 +182,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             };
         });
 
-    const schluesselLabel: Record<string, string> = {
-        'n. WF': 'Wohnfläche',
-        'n. NF': 'Nutzfläche',
-        'n. NE': 'Nutzeinheiten',
-        'n. MEA': 'Miteigentumsanteile',
-        'n. Pers.': 'Personenzahl',
-        'n. Verb.': 'Verbrauch'
+    const schluesselTitel = (typ: SchluesselTyp) => schluesselLabel[typ];
+    const schluesselLabel: Record<SchluesselTyp, string> = {
+        NachWohnflaeche: 'Wohnfläche',
+        NachNutzflaeche: 'Nutzfläche',
+        NachNutzeinheit: 'Nutzeinheiten',
+        NachMiteigentumsanteil: 'Miteigentumsanteile',
+        NachPersonenzahl: 'Personenzahl',
+        NachVerbrauch: 'Verbrauch'
     };
 </script>
 
@@ -454,7 +458,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 {/if}
 
 <!-- Kostentabelle -->
-<DataTable
+<WalterDataTable
     headers={[
         { key: 'typ', value: 'Kostenanteil' },
         { key: 'schluessel', value: 'Schlüssel' },
@@ -463,16 +467,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'anteil', value: 'Anteil' },
         { key: 'betrag', value: 'Kosten' }
     ]}
-    rows={meineZeilen.map((r) => ({
-        ...r,
-        gesamtBetrag: convertEuro(r.gesamtBetrag),
-        betragLetztesJahr: convertEuro(r.betragLetztesJahr),
-        anteil: convertPercent(r.anteil),
-        betrag: convertEuro(r.betrag)
-    }))}
+    rows={meineZeilen}
     size="short"
+    search={false}
+    customCells={['typ', 'schluessel']}
 >
-    <Toolbar><ToolbarContent /></Toolbar>
     <svelte:fragment slot="cell" let:cell let:row>
         {#if cell.key === 'typ'}
             {#if row.rechnungId}
@@ -480,13 +479,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {:else if row.istFehlend}
                 <button
                     title="Keine Buchungen für diese Umlage – klicken um Betriebskostenrechnung einzutragen"
-                    style="color: var(--cds-support-warning); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    style="color: var(--cds-support-warning); background: none; border: none; cursor: pointer; padding: 0; font: inherit; font-weight: 600;"
                     on:click={() => openBKModal(row.umlageId)}
                     >⚠ {cell.value}</button
                 >
             {:else}
                 <button
-                    style="color: var(--cds-support-error); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+                    style="color: var(--cds-support-error); background: none; border: none; cursor: pointer; padding: 0; font: inherit; font-weight: 600;"
                     on:click={() => openBKModal(row.umlageId)}
                     >{cell.value}</button
                 >
@@ -499,14 +498,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 </div>
             {/each}
         {:else if cell.key === 'schluessel'}
-            <span title={schluesselLabel[cell.value] ?? cell.value}
-                >{cell.value}</span
-            >
-        {:else}
-            {cell.value}
+            <span title={schluesselTitel(row.schluesselTyp)}>{cell.value}</span>
         {/if}
     </svelte:fragment>
-</DataTable>
+</WalterDataTable>
 
 <p style="text-align: center; font-weight: 600; padding: 0.75rem 1rem;">
     Kalte Nebenkosten: {convertEuro(betragKalt)}
@@ -527,8 +522,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         {vertragId}
         nutzungVon={vonInJahr}
         nutzungBis={bisInJahr}
-        {nutzungstage}
-        {abrechnungstage}
         strompauschalen={einheit.strompauschalen}
     />
 {/if}

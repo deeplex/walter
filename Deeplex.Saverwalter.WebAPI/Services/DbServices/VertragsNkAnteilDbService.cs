@@ -28,7 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
     public class VertragsNkAnteilDbService(
         SaverwalterContext ctx,
         IAuthorizationService auth,
-        NkAnteilBuchungsService buchungsService)
+        NkAnteilBuchungsService buchungsService,
+        RueckgaengigService rueckgaengigService)
     {
         private async Task<(Dictionary<int, Vertrag> NkMap, Dictionary<int, Umlage> UmlageMap)> BuildMapsAsync()
         {
@@ -200,8 +201,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
             var authRx = await auth.AuthorizeAsync(user, vertrag, [Operations.Delete]);
             if (!authRx.Succeeded) return new ForbidResult();
 
-            ctx.Buchungssaetze.Remove(satz);
-            await ctx.SaveChangesAsync();
+            try
+            {
+                await rueckgaengigService.LoeschenAsync([satz]);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ConflictObjectResult(ex.Message);
+            }
             return new OkResult();
         }
 

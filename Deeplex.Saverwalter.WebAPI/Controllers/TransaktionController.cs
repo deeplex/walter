@@ -14,10 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.Buchungen;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +42,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Verwendungszweck { get; set; } = string.Empty;
             public string? Notiz { get; set; }
             public Permissions Permissions { get; set; } = new Permissions();
+            /// <summary>Zuordnung der Zahlung (<see cref="Services.Zuordnung"/>); leer: nicht zugeordnet.</summary>
+            public List<ZuordnungEintrag> Zuordnung { get; set; } = [];
 
             public TransaktionEntryBase() { }
             public TransaktionEntryBase(Transaktion entity, Permissions permissions)
@@ -93,6 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly IAuthorizationService _auth;
         protected override TransaktionDbService DbService { get; }
 
+        protected override int? FileYearOf(Transaktion e) => e.Zahlungsdatum.Year;
         public TransaktionController(
             ILogger<TransaktionController> logger,
             TransaktionDbService dbService,
@@ -110,9 +113,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _logger = logger;
         }
 
+        /// <param name="bankkontoId">Nur Transaktionen von oder an dieses Bankkonto.</param>
+        /// <param name="kontaktId">Nur Transaktionen von oder an ein Bankkonto dieses Kontakts.</param>
         [HttpGet]
-        public Task<PagedResult<TransaktionEntryBase>> Get([FromQuery] PagedQuery query)
-            => DbService.GetList(User!, query);
+        public Task<PagedResult<TransaktionEntryBase>> Get(
+            [FromQuery] PagedQuery query, [FromQuery] int? bankkontoId = null, [FromQuery] int? kontaktId = null)
+            => DbService.GetList(User!, query, bankkontoId, kontaktId);
 
         [HttpPost]
         public Task<ActionResult<TransaktionEntry>> Post([FromBody] TransaktionEntry entry) => DbService.Post(User!, entry);
@@ -134,6 +140,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             => DbService.Storno(User!, id, request.Grund);
 
         /// <summary>
+        /// Was „Rückgängig“ bewirken würde: löschen, stornieren oder gesperrt (mit Grund),
+        /// dazu die Abrechnungen, die mit zurückgenommen würden.
+        /// </summary>
+        [HttpGet("{id}/rueckgaengig")]
+        public Task<ActionResult> RueckgaengigPruefen(Guid id)
+            => DbService.RueckgaengigPruefen(User!, id);
+
+        /// <summary>Macht die Transaktion rückgängig — siehe <see cref="RueckgaengigService"/>.</summary>
+        [HttpPost("{id}/rueckgaengig")]
+        public Task<ActionResult> Rueckgaengig(
+            Guid id, [FromBody] RueckgaengigService.RueckgaengigRequest request)
+            => DbService.Rueckgaengig(User!, id, request);
+
+        /// <summary>
         /// Erstellt eine Transaktion mit Buchungssätzen aus typisierten Positionen.
         /// Die Konten werden anhand des Positionstyps und der referenzierten Entitäten
         /// (z.B. Vertrag) automatisch aufgelöst.
@@ -142,40 +162,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public async Task<ActionResult<TransaktionEntry>> Buchen(
             [FromBody] TransaktionBuchungsService.TransaktionsInput input)
         {
-            foreach (var miete in input.Mieten)
-            {
-                var vertrag = await _ctx.Vertraege.FindAsync(miete.VertragId);
-                if (vertrag is null) return NotFound($"Vertrag {miete.VertragId} nicht gefunden.");
-                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
-                if (!authRx.Succeeded) return Forbid();
-            }
-
-            foreach (var bk in input.BetriebskostenEingaenge)
-            {
-                var umlage = await _ctx.Umlagen.FindAsync(bk.UmlageId);
-                if (umlage is null) return NotFound($"Umlage {bk.UmlageId} nicht gefunden.");
-                var authRx = await _auth.AuthorizeAsync(User!, umlage, [Operations.SubCreate]);
-                if (!authRx.Succeeded) return Forbid();
-            }
-
-            foreach (var nk in input.NkAnteilEingaenge)
-            {
-                var vertrag = await _ctx.Vertraege.FindAsync(nk.VertragId);
-                if (vertrag is null) return NotFound($"Vertrag {nk.VertragId} nicht gefunden.");
-                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
-                if (!authRx.Succeeded) return Forbid();
-            }
-
-            foreach (var ausgleich in input.AbrechnungsAusgleiche)
-            {
-                var resultat = await _ctx.Abrechnungsresultate
-                    .Include(r => r.Vertrag)
-                    .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == ausgleich.AbrechnungsresultatId);
-                if (resultat is null)
-                    return NotFound($"Abrechnungsresultat {ausgleich.AbrechnungsresultatId} nicht gefunden.");
-                var authRx = await _auth.AuthorizeAsync(User!, resultat.Vertrag, [Operations.SubCreate]);
-                if (!authRx.Succeeded) return Forbid();
-            }
+            if (await PruefeBerechtigungAsync(input) is ActionResult verboten) return verboten;
 
             var nkAnteile = input.NkAnteilEingaenge.ToList();
             input.NkAnteilEingaenge.Clear();
@@ -204,6 +191,106 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
             catch (ArgumentException ex) { return BadRequest(ex.Message); }
             catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
+
+        /// <summary>
+        /// Zeigt, was <see cref="Buchen"/> für die Zahlung buchen würde, ohne etwas zu speichern
+        /// (gleiche Prüfungen, Konten und Beträge). NK-Anteile ohne Zahlung sind nicht enthalten.
+        /// </summary>
+        [HttpPost("buchen/vorschau")]
+        public async Task<ActionResult<TransaktionBuchungsService.TransaktionsVorschau>> BuchenVorschau(
+            [FromBody] TransaktionBuchungsService.TransaktionsInput input)
+        {
+            if (await PruefeBerechtigungAsync(input) is ActionResult verboten) return verboten;
+
+            try
+            {
+                return Ok(await _buchungsService.VorschauAsync(input));
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        }
+
+        /// <summary>Darf der Nutzer alle Positionen der Eingabe buchen?</summary>
+        private async Task<ActionResult?> PruefeBerechtigungAsync(TransaktionBuchungsService.TransaktionsInput input)
+        {
+            foreach (var miete in input.Mieten)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(miete.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {miete.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            var garageVertragIds = input.GaragenEingaenge.Select(g => g.GarageVertragId)
+                .Concat(input.Mieten.SelectMany(m => m.Garagen).Select(g => g.GarageVertragId))
+                .Distinct();
+            foreach (var garageVertragId in garageVertragIds)
+            {
+                var garageVertrag = await _ctx.GarageVertraege.FindAsync(garageVertragId);
+                if (garageVertrag is null) return NotFound($"Garagenvertrag {garageVertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, garageVertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var bk in input.BetriebskostenEingaenge)
+            {
+                // Zahlung einer erfassten Rechnung: die Umlage ist die des Verrechnungskontos.
+                var umlage = bk.ExistingBuchungssatzId is Guid rechnungId
+                    ? await _ctx.Umlagen.FirstOrDefaultAsync(u => u.NkVerrechnungsKonto.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Haben && z.Buchungssatz.BuchungssatzId == rechnungId))
+                    : await _ctx.Umlagen.FindAsync(bk.UmlageId);
+                if (umlage is null)
+                    return NotFound(bk.ExistingBuchungssatzId is Guid id
+                        ? $"Betriebskostenrechnung {id} nicht gefunden."
+                        : $"Umlage {bk.UmlageId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, umlage, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var ea in input.Erhaltungsaufwendungen)
+            {
+                // Zahlung einer erfassten Rechnung: die Wohnung ist die des Aufwandskontos.
+                var wohnung = ea.ExistingBuchungssatzId is Guid rechnungId
+                    ? await _ctx.Wohnungen.FirstOrDefaultAsync(w => w.AufwandsKonto.Buchungszeilen.Any(z =>
+                        z.SollHaben == SollHaben.Soll && z.Buchungssatz.BuchungssatzId == rechnungId))
+                    : await _ctx.Wohnungen.FindAsync(ea.WohnungId);
+                if (wohnung is null)
+                    return NotFound(ea.ExistingBuchungssatzId is Guid id
+                        ? $"Rechnung {id} nicht gefunden."
+                        : $"Wohnung {ea.WohnungId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var nk in input.NkAnteilEingaenge)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(nk.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {nk.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var kaution in input.Kautionen)
+            {
+                var vertrag = await _ctx.Vertraege.FindAsync(kaution.VertragId);
+                if (vertrag is null) return NotFound($"Vertrag {kaution.VertragId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            foreach (var ausgleich in input.AbrechnungsAusgleiche)
+            {
+                var resultat = await _ctx.Abrechnungsresultate
+                    .Include(r => r.Vertrag)
+                    .FirstOrDefaultAsync(r => r.AbrechnungsresultatId == ausgleich.AbrechnungsresultatId);
+                if (resultat is null)
+                    return NotFound($"Abrechnungsresultat {ausgleich.AbrechnungsresultatId} nicht gefunden.");
+                var authRx = await _auth.AuthorizeAsync(User!, resultat.Vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded) return Forbid();
+            }
+
+            return null;
         }
     }
 }
