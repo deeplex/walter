@@ -16,13 +16,13 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
+using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.DbServices;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using Deeplex.Saverwalter.WebAPI.Controllers;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests

@@ -92,38 +92,56 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 .Where(e => e.Value.Rolle == KontoRolle.Geld)
                 .Select(e => e.Key)
                 .ToList();
-            var zeilen = await ctx.Buchungszeilen
+            // Erst nur die Kandidaten (Zeilen ohne Zuordnung) als schmale Projektion, dann
+            // gesondert, welche ihrer Buchungssätze eine Geldkonto-Zeile haben.
+            var kandidaten = await ctx.Buchungszeilen
                 .Where(z => postenKonten.Contains(z.Buchungskonto.BuchungskontoId)
                     && z.ZugeordnetZu == null
                     && z.Buchungssatz.Transaktion != null
-                    && z.Buchungssatz.StornoVon == null
-                    && z.Buchungssatz.Buchungszeilen.Any(g => geldKonten.Contains(g.Buchungskonto.BuchungskontoId)))
-                .Include(z => z.Buchungskonto)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.Transaktion)
-                .Include(z => z.Buchungssatz).ThenInclude(s => s.StornoNach)
+                    && z.Buchungssatz.StornoVon == null)
+                .Select(z => new
+                {
+                    KontoId = z.Buchungskonto.BuchungskontoId,
+                    z.SollHaben,
+                    z.Betrag,
+                    SatzId = z.Buchungssatz.BuchungssatzId,
+                    TransaktionId = z.Buchungssatz.Transaktion!.TransaktionId,
+                    Datum = z.Buchungssatz.Transaktion!.Zahlungsdatum,
+                    Storniert = z.Buchungssatz.StornoNach != null,
+                })
                 .ToListAsync();
 
-            var ohneZuordnung = zeilen
-                .Select(z =>
+            var satzIds = kandidaten.Select(k => k.SatzId).Distinct().ToList();
+            var mitGeld = satzIds.Count == 0
+                ? []
+                : (await ctx.Buchungszeilen
+                    .Where(z => satzIds.Contains(z.Buchungssatz.BuchungssatzId)
+                        && geldKonten.Contains(z.Buchungskonto.BuchungskontoId))
+                    .Select(z => z.Buchungssatz.BuchungssatzId)
+                    .Distinct()
+                    .ToListAsync()).ToHashSet();
+
+            var ohneZuordnung = kandidaten
+                .Where(k => mitGeld.Contains(k.SatzId))
+                .Select(k =>
                 {
-                    var besitz = rollen.Eindeutig[z.Buchungskonto.BuchungskontoId];
+                    var besitz = rollen.Eindeutig[k.KontoId];
                     var art = besitz.Rolle switch
                     {
                         KontoRolle.Kaltmiete => "Kaltmiete",
                         KontoRolle.Garagenmiete => "Garagenmiete",
-                        KontoRolle.BkAbrechnung => z.SollHaben == SollHaben.Haben ? "Nachzahlung NK-Abrechnung" : "Erstattung NK-Abrechnung",
+                        KontoRolle.BkAbrechnung => k.SollHaben == SollHaben.Haben ? "Nachzahlung NK-Abrechnung" : "Erstattung NK-Abrechnung",
                         KontoRolle.Verbindlichkeit => "Rechnung",
                         _ => "Betriebskosten",
                     };
-                    var t = z.Buchungssatz.Transaktion!;
                     return new ZahlungOhneZuordnung
                     {
-                        TransaktionId = t.TransaktionId,
-                        Datum = t.Zahlungsdatum,
-                        Betrag = z.Betrag,
+                        TransaktionId = k.TransaktionId,
+                        Datum = k.Datum,
+                        Betrag = k.Betrag,
                         Text = $"{art} – {besitz.Kontext}",
                         Ref = besitz.Ref,
-                        Storniert = z.Buchungssatz.StornoNach != null,
+                        Storniert = k.Storniert,
                     };
                 })
                 .OrderBy(z => z.Storniert)

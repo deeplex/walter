@@ -21,8 +21,8 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.GarageController;
-using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
+using static Deeplex.Saverwalter.WebAPI.Utils.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.DbServices
 {

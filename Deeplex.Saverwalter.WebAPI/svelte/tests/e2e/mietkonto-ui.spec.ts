@@ -179,55 +179,61 @@ test('Miete im Mietkonto erfassen und rückgängig machen', async ({ page }) => 
     await expect(page.getByText('Rückgängig gemachte Zahlungen')).toBeVisible();
 });
 
-type OffeneMiete = {
+type MietMatrixZeile = {
     vertragId: number;
     vertragBezeichnung: string;
-    monat: string;
-    offen: number;
-    garagen: unknown[];
+    monate: { monat: string; soll: number; gezahlt: number; offen: number }[];
 };
 
-async function offeneMieten(jahr: number): Promise<OffeneMiete[]> {
+async function mietMatrix(jahr: number): Promise<MietMatrixZeile[]> {
     return withFreshApiContext(async (api) => {
         const login = await signInApi(api, 'admin.dev');
-        const r = await api.get(`/api/offene-forderungen/${jahr}`, {
+        const r = await api.get(`/api/offene-forderungen/matrix/${jahr}`, {
             headers: authHeader(login.token)
         });
         expect(r.ok()).toBeTruthy();
-        return (await r.json()) as OffeneMiete[];
+        return (await r.json()) as MietMatrixZeile[];
     });
 }
 
+const istOffen = (offen: number) => offen > 0.005;
+
 test('Miete von der Startseite aus erfassen', async ({ page }) => {
     const jahr = new Date().getFullYear();
-    const forderung = (await offeneMieten(jahr)).find(
-        (f) => f.garagen.length === 0
+    const zeileDaten = (await mietMatrix(jahr)).find((z) =>
+        z.monate.some((m) => istOffen(m.offen))
     );
     expect(
-        forderung,
-        'erwartet eine offene Miete ohne Garage im Dev-Seed'
+        zeileDaten,
+        'erwartet einen Vertrag mit offener Miete im Dev-Seed'
     ).toBeDefined();
-    const { vertragId, vertragBezeichnung, monat } = forderung!;
+    const { vertragId, vertragBezeichnung } = zeileDaten!;
+    const monat = zeileDaten!.monate.find((m) => istOffen(m.offen))!.monat;
     const [j, m] = monat.split('-').map(Number);
     const monatLang = `${LANG[m - 1]} ${j}`;
 
     await authenticatePage(page, 'admin.dev');
     await page.goto(`/?jahr=${jahr}`);
 
+    // Matrix Vertrag × Monat: die Spalten sind die Monate Januar bis Dezember.
     const zeile = page
         .getByRole('row')
-        .filter({ hasText: monatLang })
-        .filter({ hasText: vertragBezeichnung })
+        .filter({
+            has: page.locator('th[scope="row"]', {
+                hasText: vertragBezeichnung
+            })
+        })
         .first();
-    // Die Zeile verlinkt auf das Mietkonto des Vertrags.
-    await expect(zeile.getByRole('link').first()).toHaveAttribute(
-        'href',
-        `/vertraege/${vertragId}#mietkonto`
-    );
-    await zeile.getByRole('button', { name: 'Zahlung erfassen' }).click();
+    await zeile
+        .locator('td.zelle')
+        .nth(m - 1)
+        .getByRole('button')
+        .click();
 
     const dialog = page.locator('.bx--modal.is-visible');
-    await expect(dialog.getByText(`Kaltmiete ${monatLang}`)).toBeVisible();
+    await expect(
+        dialog.getByText(`${vertragBezeichnung} – ${monatLang}`).first()
+    ).toBeVisible();
     const buchen = dialog.getByRole('button', { name: 'Buchen' });
     await expect(buchen).toBeEnabled();
     await buchen.click();
@@ -235,8 +241,10 @@ test('Miete von der Startseite aus erfassen', async ({ page }) => {
 
     await expect
         .poll(async () =>
-            (await offeneMieten(jahr)).some(
-                (f) => f.vertragId === vertragId && f.monat === monat
+            (await mietMatrix(jahr)).some(
+                (z) =>
+                    z.vertragId === vertragId &&
+                    z.monate.some((x) => x.monat === monat && istOffen(x.offen))
             )
         )
         .toBe(false);
