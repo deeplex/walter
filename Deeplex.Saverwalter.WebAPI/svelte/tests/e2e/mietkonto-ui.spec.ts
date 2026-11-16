@@ -219,9 +219,8 @@ test('Miete von der Startseite aus erfassen', async ({ page }) => {
     const zeile = page
         .getByRole('row')
         .filter({
-            has: page.locator('th[scope="row"]', {
-                hasText: vertragBezeichnung
-            })
+            // Der volle Vertragstext steht nur als title an der Zeilenbeschriftung.
+            has: page.getByTitle(vertragBezeichnung, { exact: true })
         })
         .first();
     await zeile

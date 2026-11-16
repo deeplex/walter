@@ -95,16 +95,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             // Erst nur die Kandidaten (Zeilen ohne Zuordnung) als schmale Projektion, dann
             // gesondert, welche ihrer Buchungssätze eine Geldkonto-Zeile haben.
             var kandidaten = await ctx.Buchungszeilen
-                .Where(z => postenKonten.Contains(z.Buchungskonto.BuchungskontoId)
+                .Where(z => postenKonten.Contains(EF.Property<int>(z, "BuchungskontoId"))
                     && z.ZugeordnetZu == null
                     && z.Buchungssatz.Transaktion != null
                     && z.Buchungssatz.StornoVon == null)
                 .Select(z => new
                 {
-                    KontoId = z.Buchungskonto.BuchungskontoId,
+                    KontoId = EF.Property<int>(z, "BuchungskontoId"),
                     z.SollHaben,
                     z.Betrag,
-                    SatzId = z.Buchungssatz.BuchungssatzId,
+                    SatzId = EF.Property<Guid>(z, "BuchungssatzId"),
                     TransaktionId = z.Buchungssatz.Transaktion!.TransaktionId,
                     Datum = z.Buchungssatz.Transaktion!.Zahlungsdatum,
                     Storniert = z.Buchungssatz.StornoNach != null,
@@ -115,9 +115,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var mitGeld = satzIds.Count == 0
                 ? []
                 : (await ctx.Buchungszeilen
-                    .Where(z => satzIds.Contains(z.Buchungssatz.BuchungssatzId)
-                        && geldKonten.Contains(z.Buchungskonto.BuchungskontoId))
-                    .Select(z => z.Buchungssatz.BuchungssatzId)
+                    .Where(z => satzIds.Contains(EF.Property<Guid>(z, "BuchungssatzId"))
+                        && geldKonten.Contains(EF.Property<int>(z, "BuchungskontoId")))
+                    .Select(z => EF.Property<Guid>(z, "BuchungssatzId"))
                     .Distinct()
                     .ToListAsync()).ToHashSet();
 
